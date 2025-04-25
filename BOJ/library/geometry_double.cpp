@@ -431,7 +431,6 @@ Circle minimum_enclose_circle(std::vector<Pos> P) {
 	}
 	return mec;
 }
-
 Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos s = l.s, e = l.e;
@@ -513,8 +512,7 @@ ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
 }
 
 struct Arc {
-	ld lo, hi;// [lo, hi] - radian range of arc
-	Circle c;// c.r - radius of arc
+	ld lo, hi;
 	Arc(ld l_ = 0, ld h_ = 0) : lo(l_), hi(h_) {}
 	bool operator < (const Arc& a) const { return zero(lo - a.lo) ? hi < a.hi : lo < a.lo; }
 	inline friend std::istream& operator >> (std::istream& is, Arc& a) { is >> a.lo >> a.hi; return is; }

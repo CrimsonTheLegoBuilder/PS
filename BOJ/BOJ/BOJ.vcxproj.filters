@@ -22,6 +22,9 @@
     <Filter Include="소스 파일\geometry">
       <UniqueIdentifier>{2cf2d2f3-2a78-455d-bf2a-dabd9e07bb55}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\splay_tree">
+      <UniqueIdentifier>{3bf7b5e9-7b1d-4ccd-9805-284dfa123671}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\library\geometry_int.cpp">
@@ -32,6 +35,54 @@
     </ClCompile>
     <ClCompile Include="..\main\now_solving.cpp">
       <Filter>소스 파일\_Now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\voronoi_delaunay_n_log_n_heavy.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\voronoi_delaunay_n_log_n_light.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\dynamic_convexhull.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\convexhull_for_disks.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\green_circle_and_triangle.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\green_circle_sector.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\green_circle.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\power_diagram_n_log_n.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\convexhull_dnc.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\lower_convexhull_search.cpp">
+      <Filter>소스 파일\segment_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\segment_tree.cpp">
+      <Filter>소스 파일\segment_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\fenwick_tree.cpp">
+      <Filter>소스 파일\segment_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\upper_convexhull_query.cpp">
+      <Filter>소스 파일\segment_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\splay_tree_segment_search.cpp">
+      <Filter>소스 파일\splay_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\power_diagram.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\spherical_dijkstra.cpp">
+      <Filter>소스 파일\geometry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

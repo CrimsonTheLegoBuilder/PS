@@ -27,9 +27,6 @@
     <ClCompile Include="..\library\geometry_int.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\geometry_long_long.cpp">
-      <Filter>소스 파일\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\library\geometry_double.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>

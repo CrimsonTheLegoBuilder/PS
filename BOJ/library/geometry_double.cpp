@@ -58,6 +58,7 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 //Euler characteristic : v - e + f == 1
 //Pick`s Theorem : A = i + b/2 - 1
+
 //2D============================================================================//
 
 int N, M, K, T, Q;

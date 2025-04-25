@@ -16,14 +16,14 @@
     <Filter Include="소스 파일\segment_tree">
       <UniqueIdentifier>{fcb073fb-9087-43b7-9e4d-058e543d2382}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\_Now_solving">
-      <UniqueIdentifier>{8affb627-3c0d-4ee8-808d-a7e4648b0c50}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\geometry">
       <UniqueIdentifier>{2cf2d2f3-2a78-455d-bf2a-dabd9e07bb55}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\splay_tree">
       <UniqueIdentifier>{3bf7b5e9-7b1d-4ccd-9805-284dfa123671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\_now_solving">
+      <UniqueIdentifier>{8affb627-3c0d-4ee8-808d-a7e4648b0c50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,7 +34,7 @@
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\main\now_solving.cpp">
-      <Filter>소스 파일\_Now_solving</Filter>
+      <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
     <ClCompile Include="..\library\voronoi_delaunay_n_log_n_heavy.cpp">
       <Filter>소스 파일\geometry</Filter>
@@ -83,6 +83,12 @@
     </ClCompile>
     <ClCompile Include="..\library\spherical_dijkstra.cpp">
       <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\rotating_calipers_rectangle.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\goldmine_segment_tree.cpp">
+      <Filter>소스 파일\segment_tree</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

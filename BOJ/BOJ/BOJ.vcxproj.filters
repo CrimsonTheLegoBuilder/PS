@@ -13,5 +13,28 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\segment_tree">
+      <UniqueIdentifier>{fcb073fb-9087-43b7-9e4d-058e543d2382}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\_Now_solving">
+      <UniqueIdentifier>{8affb627-3c0d-4ee8-808d-a7e4648b0c50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\geometry">
+      <UniqueIdentifier>{2cf2d2f3-2a78-455d-bf2a-dabd9e07bb55}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\library\geometry_int.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\geometry_long_long.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\geometry_double.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\now_solving.cpp">
+      <Filter>소스 파일\_Now_solving</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

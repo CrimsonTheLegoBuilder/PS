@@ -15,46 +15,44 @@ const ld TOL = 1e-7;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 
-#define __FUCK__ ;
-
 int N, xs, ys;
 int MAXX, MAXY, MINX, MINY;
 short int board[LEN][LEN];
 struct Pii {
 	int x, y;
-	inline Pii(int X = 0, int Y = 0) : x(X), y(Y) {}
-	inline bool operator == (const Pii& p) const { return x == p.x && y == p.y; }
-	inline bool operator < (const Pii& p) const { return x == p.x ? y < p.y : x < p.x; }
-	inline Pii operator + (const Pii& p) const { return { x + p.x, y + p.y }; }
-	inline Pii operator - (const Pii& p) const { return { x - p.x, y - p.y }; }
-	inline Pii operator * (const int& n) const { return { x * n, y * n }; }
-	inline Pii operator / (const int& n) const { return { x / n, y / n }; }
-	inline ll operator * (const Pii& p) const { return (ll)x * p.x + (ll)y * p.y; }
-	inline ll operator / (const Pii& p) const { return (ll)x * p.y - (ll)y * p.x; }
-	inline Pii& operator += (const Pii& p) { x += p.x; y += p.y; return *this; }
-	inline Pii& operator -= (const Pii& p) { x -= p.x; y -= p.y; return *this; }
-	inline ll Euc() const { return (ll)x * x + (ll)y * y; }
-	inline friend std::istream& operator >> (std::istream& is, Pii& p) { is >> p.x >> p.y; return is; }
-	inline friend std::ostream& operator << (std::ostream& os, const Pii& p) { os << p.x << " " << p.y; return os; }
+	Pii(int X = 0, int Y = 0) : x(X), y(Y) {}
+	bool operator == (const Pii& p) const { return x == p.x && y == p.y; }
+	bool operator < (const Pii& p) const { return x == p.x ? y < p.y : x < p.x; }
+	Pii operator + (const Pii& p) const { return { x + p.x, y + p.y }; }
+	Pii operator - (const Pii& p) const { return { x - p.x, y - p.y }; }
+	Pii operator * (const int& n) const { return { x * n, y * n }; }
+	Pii operator / (const int& n) const { return { x / n, y / n }; }
+	ll operator * (const Pii& p) const { return (ll)x * p.x + (ll)y * p.y; }
+	ll operator / (const Pii& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	Pii& operator += (const Pii& p) { x += p.x; y += p.y; return *this; }
+	Pii& operator -= (const Pii& p) { x -= p.x; y -= p.y; return *this; }
+	ll Euc() const { return (ll)x * x + (ll)y * y; }
+	friend std::istream& operator >> (std::istream& is, Pii& p) { is >> p.x >> p.y; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Pii& p) { os << p.x << " " << p.y; return os; }
 }; const Pii Oii = Pii(0, 0);
 typedef std::vector<Pii> Polygon;
-inline ll cross(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) / (d3 - d2); }
-inline ll cross(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) / (d4 - d3); }
-inline int ccw(const Pii& d1, const Pii& d2, const Pii& d3) { ll ret = cross(d1, d2, d3); return ret < 0 ? -1 : !!ret; }
-inline ll area(const Polygon& H) {
+ll cross(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) / (d3 - d2); }
+ll cross(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) / (d4 - d3); }
+int ccw(const Pii& d1, const Pii& d2, const Pii& d3) { ll ret = cross(d1, d2, d3); return ret < 0 ? -1 : !!ret; }
+ll area(const Polygon& H) {
 	ll ret = 0;
 	int sz = H.size();
 	for (int i = 0; i < sz; i++) ret += H[i] / H[(i + 1) % sz];
 	return ret;
 }
-inline void norm(Polygon& H) {
+void norm(Polygon& H) {
 	ll A = area(H); assert(A);
 	if (A < 0) std::reverse(H.begin(), H.end());
 	auto s = std::min_element(H.begin(), H.end());
 	std::rotate(H.begin(), s, H.end());
 	return;
 }
-inline Polygon graham_scan(Polygon& C) {
+Polygon graham_scan(Polygon& C) {
 	Polygon H;
 	if (C.size() < 3) {
 		std::sort(C.begin(), C.end());
@@ -76,12 +74,12 @@ inline Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
-inline bool inner_check(const Polygon& H, const Pii& p) {
+bool inner_check(const Polygon& H, const Pii& p) {
 	int sz = H.size();
 	for (int i = 0; i < sz; i++) if (ccw(H[i], H[(i + 1) % sz], p) < 0) return 0;
 	return 1;
 }
-inline int bfs(const int& x, const int& y, const int& val) {//flood fill
+int bfs(const int& x, const int& y, const int& val) {//flood fill
 	Pii DRC[4] = { Pii(1, 0), Pii(0, 1), Pii(-1, 0), Pii(0, -1) };
 	std::queue<Pii> Q;
 	Q.push(Pii(x, y));
@@ -102,25 +100,25 @@ inline int bfs(const int& x, const int& y, const int& val) {//flood fill
 }
 struct Pos {
 	ld x, y;
-	inline Pos(ld X = 0, ld Y = 0) : x(X), y(Y) {}
-	inline bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
-	inline bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
-	inline Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
-	inline Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	inline Pos operator * (const ld& scalar) const { return { x * scalar, y * scalar }; }
-	inline Pos operator / (const ld& scalar) const { return { x / scalar, y / scalar }; }
-	inline ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
-	inline ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
-	inline Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
-	inline Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
+	Pos(ld X = 0, ld Y = 0) : x(X), y(Y) {}
+	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator * (const ld& scalar) const { return { x * scalar, y * scalar }; }
+	Pos operator / (const ld& scalar) const { return { x / scalar, y / scalar }; }
+	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
+	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
+	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
+	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
 }; const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygonf;
-inline ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
-inline ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
-inline int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = cross(d1, d2, d3); return sign(ret); }
-inline bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = dot(d1, d3, d2); return !ccw(d1, d2, d3) && sign(ret) >= 0; }
-inline Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
-inline bool inner_check(const Polygonf& H, const Pos& p) {//concave
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = cross(d1, d2, d3); return sign(ret); }
+bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = dot(d1, d3, d2); return !ccw(d1, d2, d3) && sign(ret) >= 0; }
+Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
+bool inner_check(const Polygonf& H, const Pos& p) {//concave
 	int sz = H.size(), cnt = 0;
 	for (int i = 0; i < sz; i++) {
 		Pos cur = H[i], nxt = H[(i + 1) % sz];
@@ -132,22 +130,22 @@ inline bool inner_check(const Polygonf& H, const Pos& p) {//concave
 	}
 	return cnt & 1;
 }
-inline Pos P(const Pii& p) { return Pos((ld)p.x, (ld)p.y); }
-inline Pii P(const Pos& p) { return Pii(p.x + TOL, p.y + TOL); }
-inline Pos cen(const int& i, const int& j, const int& xs, const int& ys) { return Pos(xs * (j + .5), ys * (i + .5)); }
-inline Pos norm(Pos& p, const int& x, const int& y) {//fit in tile (0, 0), (xs, ys)
+Pos P(const Pii& p) { return Pos((ld)p.x, (ld)p.y); }
+Pii P(const Pos& p) { return Pii(p.x + TOL, p.y + TOL); }
+Pos cen(const int& i, const int& j, const int& xs, const int& ys) { return Pos(xs * (j + .5), ys * (i + .5)); }
+Pos norm(Pos& p, const int& x, const int& y) {//fit in tile (0, 0), (xs, ys)
 	while (sign(p.x) < 0) p.x += x;
 	while (sign(p.x - x) >= 0) p.x -= x;
 	while (sign(p.y) < 0) p.y += y;
 	while (sign(p.y - y) >= 0) p.y -= y;
 	return p;
 }
-inline void norm(int& x, const int& vx, const int& xs) {
+void norm(int& x, const int& vx, const int& xs) {
 	while (x <= (vx - xs)) x += xs;
 	while (x > vx) x -= xs;
 	return;
 }
-inline void norm(int& x, const ld& vx, const int& xs) {
+void norm(int& x, const ld& vx, const int& xs) {
 	while (sign(x - (vx - xs)) <= 0) x += xs;
 	while (sign(x - vx) > 0) x -= xs;
 	return;

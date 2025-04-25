@@ -25,6 +25,9 @@
     <Filter Include="소스 파일\_now_solving">
       <UniqueIdentifier>{8affb627-3c0d-4ee8-808d-a7e4648b0c50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\graph">
+      <UniqueIdentifier>{2fd60fc0-95c6-4c60-943a-23c257c5cffd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\library\geometry_int.cpp">
@@ -89,6 +92,12 @@
     </ClCompile>
     <ClCompile Include="..\library\goldmine_segment_tree.cpp">
       <Filter>소스 파일\segment_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\dijkstra.cpp">
+      <Filter>소스 파일\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\concave_flood_fill.cpp">
+      <Filter>소스 파일\geometry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

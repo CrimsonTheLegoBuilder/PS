@@ -44,10 +44,11 @@ ld flip(ld lat) {
 #define STRONG 0
 #define WEAK 1
 
+
 //freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
-int N, M, K, T, Q;
+int N, M, K, Q;
 struct Pos {
 	ld x, y;
 	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
@@ -83,7 +84,19 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
-Polygon T[7];
+Polygon T[7] = {
+	{ Pos(0, 0), Pos(100, 0), Pos(50, 50) },
+	{ Pos(0, 0), Pos(100, 0), Pos(50, 50) },
+	{ Pos(0, 0), Pos(50, 0), Pos(0, 50) },
+	{ Pos(25, 0), Pos(50, 25), Pos(25, 50), Pos(0, 25) },
+	{ Pos(0, 0), Pos(50, 0), Pos(75, 25), Pos(25, 25) },
+	{ Pos(0, 0), Pos(50, 0), Pos(25, 25) },
+	{ Pos(0, 0), Pos(50, 0), Pos(25, 25) }
+};
+// TR0 | TR0 | TR1 | SQ | TZ | TR2 | TR2
+#define SQ 3
+#define TZ 4
+ld A[7];
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 //bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
@@ -330,10 +343,34 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 	
 	return 1;
 }
-std::vector<Polygon> move_polygon(const Polygon& C, const Polygon& H, const int& i) {
-	ld a = area(C);
+Polygon rotate_and_move(const Polygon& P, const int& i, const ld& t, const Pos& pv) {
+	Polygon C = P;
+	Pos vec = P[i];
+	for (Pos& p : C) p -= vec, p.rot(t), p += vec;
+	vec = P[i] - pv;
+	for (Pos& p : C) p -= vec;
+	return C;
+}
+std::vector<Polygon> make_polygons(const int& t, const Polygon& H, const int& i) {
+	Polygon& C = T[t];
+	ld a = A[t];
 	std::vector<Polygon> RET;
+	int sz = H.size();
+	int i0 = (i - 1 + sz) % sz, i1 = i, i2 = (i + 1) % sz;
+	int tq = ccw(H[i0], H[i1], H[i2]);
+	int fc = sign(dot(H[i0], H[i1], H[i2]));
+	if (tq <= 0) return {};
+	if (t == SQ) {
+		if (!fc) return {};
+	}
+	else if (t == TZ) {
 
+	}
+	else {
+
+	}
+	assert(0);
+	return {};
 }
 int dfs(int d) {
 	if (d == 7) return 1;

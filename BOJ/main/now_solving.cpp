@@ -286,25 +286,32 @@ ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
 bool seg_overlap(const Seg& p, const Seg& q) {
 	bool f0 = collinear(p.s, p.e, q.s, q.e);
 	bool f1 = sign(dot(p.s, p.e, q.s, q.e)) > 0;
-	bool f2 = on_seg_strong(p.s, p.e, q.s) || on_seg_strong(p.s, p.e, q.e);
-	return f0 && f1 && f2;
+	//bool f2 = on_seg_strong(p.s, p.e, q.s) || on_seg_strong(p.s, p.e, q.e);
+	return f0 && f1;
 }
-bool cut_seg(const Seg& se, const Polygon& C, Seg& ret) {
+bool cut_seg(const Seg& se, const Polygon& C, Segs& ret) {
 	int szc = C.size();
 	ld s = 0, e = 1;
-	int cnt = 0;
+	Polygon V = { Pos(0, 0) };
 	for (int i = 0; i < szc; i++) {
 		int i0 = i, i1 = (i + 1) % szc;
 		Seg q = Seg(C[i0], C[i1]);
 		if (seg_overlap(se, q)) {
-			cnt++;
 			s = fit(projection(se.s, se.e, se.s, C[i0]), 0, 1);
 			e = fit(projection(se.s, se.e, se.s, C[i1]), 0, 1);
+			V.push_back(Pos(s, e));
 		}
 	}
-	if (cnt > 1) return 0;
-	if (cnt == 1) ret = Seg(se.p(s), se.p(e));
-	else ret = se;
+	std::sort(V.begin(), V.end());
+	V.push_back(Pos(1, 1));
+	ld hi = 0;
+	for (Pos& p : V) {
+		if (hi < p.LO) {
+			ret.push_back(Seg(se.p(hi), se.p(p.LO)));
+			hi = p.HI;
+		}
+		else hi = std::max(hi, p.HI);
+	}
 	return 1;
 }
 bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
@@ -313,19 +320,25 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 	Segs VP, VC;
 	for (int i = 0; i < szp; i++) {
 		int i0 = i, i1 = (i + 1) % szp;
-		Seg se = Seg(P[i0], P[i1]), se_;
-		bool f = cut_seg(se, C, se_);
+		Seg se = Seg(P[i0], P[i1]);
+		Segs vse;
+		bool f = cut_seg(se, C, vse);
 		if (!f) return 0;
-		if (se_.s == se_.e) continue;
-		VP.push_back(se_);
+		for (const Seg& v : vse) {
+			if (v.s == v.e) continue;
+			VP.push_back(v);
+		}
 	}
 	for (int i = 0; i < szc; i++) {
 		int i0 = i, i1 = (i + 1) % szc;
-		Seg se = Seg(C[i0], C[i1]), se_;
-		bool f = cut_seg(se, P, se_);
+		Seg se = Seg(C[i0], C[i1]);
+		Segs vse;
+		bool f = cut_seg(se, P, vse);
 		if (!f) return 0;
-		if (se_.s == se_.e) continue;
-		VC.push_back(se_);
+		for (const Seg& v : vse) {
+			if (v.s == v.e) continue;
+			VP.push_back(v);
+		}
 	}
 	int p = 0, c = 0;
 	for (int i = 0; i < szp; i++) {

@@ -361,7 +361,13 @@ std::vector<Polygon> make_polygons(const int& t, const Polygon& H, const int& i)
 	int fc = sign(dot(H[i0], H[i1], H[i2]));
 	if (tq <= 0) return {};
 	if (t == SQ) {
-		if (!fc) return {};
+		if (fc < 0) return {};
+		if (!fc) {
+
+		}
+		else {
+
+		}
 	}
 	else if (t == TZ) {
 

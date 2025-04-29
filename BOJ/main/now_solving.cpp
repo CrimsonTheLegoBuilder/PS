@@ -11,12 +11,14 @@
 #include <array>
 #include <tuple>
 #include <complex>
+#include <set>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
+typedef std::vector<bool> Vbool;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
@@ -84,7 +86,7 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
-Polygon T[7] = {
+const Polygon T[7] = {
 	{ Pos(0, 0), Pos(100, 0), Pos(50, 50) },
 	{ Pos(0, 0), Pos(100, 0), Pos(50, 50) },
 	{ Pos(0, 0), Pos(50, 0), Pos(0, 50) },
@@ -97,9 +99,16 @@ Polygon T[7] = {
 #define SQ 3
 #define TZ 4
 ld A[7];
+const Polygon TZ2 = { Pos(25, 0), Pos(75, 0), Pos(50, 25), Pos(0, 25) };
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 //bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
+bool operator == (const Polygon& P, const Polygon& Q) {
+	if (P.size() != Q.size()) return 0;
+	int sz = P.size();
+	for (int i = 0; i < sz; i++) if (P[i] != Q[i]) return 0;
+	return 1;
+}
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
@@ -119,6 +128,7 @@ ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
 bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);return (p1 * a2 + p2 * a1) / (a1 + a2); }
 ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+ld rad(const Pos& p1, const Pos& p2, const Pos& p3) { return rad(p3 - p2, p1 - p2); }
 bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
 	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
 	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
@@ -247,32 +257,32 @@ ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
 }
-Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return {};
-	std::vector<Seg> HPI;
-	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
-	return HPI;
-}
-Segs half_plane_intersection(const Segs& P, const Segs& Q) {
-	Segs HP(P.size() + Q.size());
-	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
-	return half_plane_intersection(HP, 0);
-}
+//Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
+//	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
+//		return w.inner(intersection_(u, v));
+//		};
+//	if (srt) std::sort(HP.begin(), HP.end());
+//	std::deque<Seg> dq;
+//	int sz = HP.size();
+//	for (int i = 0; i < sz; ++i) {
+//		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
+//		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
+//		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
+//		dq.push_back(HP[i]);
+//	}
+//	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
+//	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
+//	sz = dq.size();
+//	if (sz < 3) return {};
+//	std::vector<Seg> HPI;
+//	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
+//	return HPI;
+//}
+//Segs half_plane_intersection(const Segs& P, const Segs& Q) {
+//	Segs HP(P.size() + Q.size());
+//	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
+//	return half_plane_intersection(HP, 0);
+//}
 bool seg_overlap(const Seg& p, const Seg& q) {
 	bool f0 = collinear(p.s, p.e, q.s, q.e);
 	bool f1 = sign(dot(p.s, p.e, q.s, q.e)) > 0;
@@ -337,10 +347,16 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 	for (const Seg& se : VP) ret.push_back(se.s);
 	for (const Seg& se : VC) ret.push_back(se.s);
 	Polygon tmp = ret;
-	std::sort(tmp.begin(), tmp.end());
+	std::sort(ret.begin(), ret.end());
 	int sz = szp + szc;
-	for (int i = 0; i < sz - 1; i++) if (tmp[i] != tmp[i + 1]) return 0;
-	
+	for (int i = 0; i < sz - 1; i++) if (ret[i] != ret[i + 1]) return 0;
+	Vbool F(0, sz);
+	for (int i = 0; i < sz; i++) {
+		int i0 = (i - 1 + sz) % sz, i1 = i, i2 = (i + 1) % sz;
+		if (!ccw(tmp[i0], tmp[i1], tmp[i2])) F[i1] = 1;
+	}
+	ret.clear();
+	for (int i = 0; i < sz; i++) if (!F[i]) ret.push_back(tmp[i]);
 	return 1;
 }
 Polygon rotate_and_move(const Polygon& P, const int& i, const ld& t, const Pos& pv) {
@@ -351,37 +367,178 @@ Polygon rotate_and_move(const Polygon& P, const int& i, const ld& t, const Pos& 
 	for (Pos& p : C) p -= vec;
 	return C;
 }
-std::vector<Polygon> make_polygons(const int& t, const Polygon& H, const int& i) {
-	Polygon& C = T[t];
-	ld a = A[t];
+bool two_polygon_cmp(const Polygon& P, const int& s) {
+	int sz = P.size();
+	const Polygon& Q = T[s];
+	if (Q.size() != sz) return 0;
+	if (s == SQ) {//sqaure check
+		assert(sz == 4);
+		ld lq = (Q[0] - Q[1]).mag();
+		bool fp = 1;
+		for (int i = 0; i < 4; i++) {
+			if (sign(dot(P[i], P[(i + 1) % sz], P[(i + 2) % sz]))) {
+				fp = 0; break;
+			}
+			ld lp = (P[i] - P[(i + 1) % sz]).mag();
+			if (!eq(lp, lq)) return 0;
+		}
+		return 1;
+	}
+	if (s == TZ) {//parallelogram check
+		assert(sz == 4);
+		const Pos& p0 = P[0], & p1 = P[1];
+		const Pos& p2 = P[2], & p3 = P[3];
+		ld d0 = (Q[0] - Q[1]).mag();
+		ld d1 = (Q[1] - Q[2]).mag();
+		if (d1 < d0) std::swap(d0, d1);
+		if (ccw(p0, p1, p3, p2)) return 0;
+		if (ccw(p1, p2, p0, p3)) return 0;
+		ld t = norm(rad(p0, p1, p2));
+		if (!eq(t, PI * .25) && !eq(t, PI * .75)) return 0;
+		ld l0 = (p0 - p1).mag();
+		ld l1 = (p1 - p2).mag();
+		if (l1 < l0) std::swap(l0, l1);
+		if (eq(l0, d0) && eq(l1, d1)) return 1;
+		return 0;
+	}
+	assert(sz == 3);
+	Vld vp, vq;
+	for (int i = 0; i < 3; i++) {
+		ld lp = (P[i] - P[(i + 1) % sz]).mag();
+		vp.push_back(lp);
+		ld lq = (Q[i] - Q[(i + 1) % sz]).mag();
+		vq.push_back(lq);
+	}
+	std::sort(vp.begin(), vp.end());
+	std::sort(vq.begin(), vq.end());
+	for (int i = 0; i < 3; i++) if (!eq(vp[i], vq[i])) return 0;
+	return 1;
+}
+std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
+	const Polygon& C = T[x];
 	std::vector<Polygon> RET;
-	int sz = H.size();
+	int sz = P.size();
 	int i0 = (i - 1 + sz) % sz, i1 = i, i2 = (i + 1) % sz;
-	int tq = ccw(H[i0], H[i1], H[i2]);
-	int fc = sign(dot(H[i0], H[i1], H[i2]));
+	int tq = ccw(P[i0], P[i1], P[i2]);
+	int fc = sign(dot(P[i0], P[i1], P[i2]));
 	if (tq <= 0) return {};
-	if (t == SQ) {
+	Pos u, v;
+	ld t, a;
+	Polygon R;
+	if (x == SQ) {
 		if (fc < 0) return {};
 		if (!fc) {
-
+			u = C[1] - C[0];
+			v = P[i0] - P[i1];
+			t = rad(u, v);
+			R = rotate_and_move(C, 0, t, P[i1]);
+			a = area(sutherland_hodgman(P, C));
+			if (eq(a, A[x])) RET.push_back(R);
 		}
 		else {
-
+			u = C[1] - C[0];
+			v = P[i0] - P[i1];
+			t = rad(u, v);
+			R = rotate_and_move(C, 0, t, P[i1]);
+			a = area(sutherland_hodgman(P, R));
+			if (eq(a, A[x])) RET.push_back(R);
+			v = P[i2] - P[i1];
+			t = rad(u, v);
+			R = rotate_and_move(C, 0, t, P[i1]);
+			a = area(sutherland_hodgman(P, R));
+			if (eq(a, A[x])) RET.push_back(R);
 		}
 	}
-	else if (t == TZ) {
-
+	else if (x == TZ) {
+		for (int j = 0; j < 2; j++) {
+			for (const Polygon& Z : { C, TZ2 }) {
+				u = Z[j + 1] - Z[j];
+				v = P[i0] - P[i1];
+				t = rad(u, v);
+				R = rotate_and_move(Z, j, t, P[i1]);
+				a = area(sutherland_hodgman(P, R));
+				if (eq(a, A[x])) RET.push_back(R);
+				v = P[i2] - P[i1];
+				t = rad(u, v);
+				R = rotate_and_move(Z, 0, t, P[i1]);
+				a = area(sutherland_hodgman(P, R));
+				if (eq(a, A[x])) RET.push_back(R);
+			}
+		}
 	}
 	else {
-
+		for (int j = 0; j < 3; j++) {
+			u = C[(j + 1) % 3] - C[j];
+			v = P[i0] - P[i1];
+			t = rad(u, v);
+			R = rotate_and_move(C, j, t, P[i1]);
+			a = area(sutherland_hodgman(P, R));
+			if (eq(a, A[x])) RET.push_back(R);
+			v = P[i2] - P[i1];
+			t = rad(u, v);
+			R = rotate_and_move(C, 0, t, P[i1]);
+			a = area(sutherland_hodgman(P, R));
+			if (eq(a, A[x])) RET.push_back(R);
+		}
 	}
-	assert(0);
-	return {};
+	int sz = RET.size();
+	Vbool F(0, sz);
+	for (int j = 0; j < sz; j++) 
+		for (int k = j + 1; k < sz; k++) 
+			if (RET[j] == RET[K]) F[k] = 1;
+	std::vector<Polygon> TMP;
+	for (int j = 0; j < sz; j++) if (!F[j]) TMP.push_back(RET[j]);
+	return TMP;
 }
-int dfs(int d) {
-	if (d == 7) return 1;
-
+std::set<int> I;
+#define POLYGON_DEBUG
+#ifdef POLYGON_DEBUG
+Polygon S[7];
+#endif
+bool dfs(int d, const Polygon& P) {
+	if (d == 6) {
+		assert(I.size() == 6);
+		for (int i = 0; i < 7; i++) {
+			if (I.count(i)) continue;
+			if (two_polygon_cmp(P, i)) {
+#ifdef POLYGON_DEBUG
+				S[d] = P;
+				for (int s = 0; s < 7; s++) {
+					std::cout << "S" << s << " = [\n";
+					for (Pos& p : S[s]) {
+						std::cout << "  (" << p.x << ", " << p.y << "),\n";
+					}
+					std::cout << "]\n";
+				}
+#endif
+				return 1;
+			}
+			break;
+		}
+		return 0;
+	}
+	for (int i = 0; i < 7; i++) {
+		if (I.count(i)) continue;
+		I.insert(i);
+		int sz = P.size();
+		for (int j = 0; j < sz; j++) {
+			std::vector<Polygon> CC = candidates(i, P, j);
+			for (const Polygon& C : CC) {
+				Polygon R;
+				bool f = substract(P, C, R);
+				if (!f) continue;
+#ifdef POLYGON_DEBUG
+				S[d] = C;
+#endif
+				f = dfs(d + 1, R);
+				if (f) return 1;
+			}
+		}
+		I.erase(i);
+	}
+	return 0;
 }
+bool tangram_solver(const Polygon& P) { return dfs(0, P); }//badk tracking
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -395,7 +552,10 @@ void solve() {
 		p.x = a + b * sqrt(2);
 		p.y = c + d * sqrt(2);
 	}
-
+	ld A = area(P);
+	if (A < 0) std::reverse(P.begin(), P.end());
+	bool f = tangram_solver(P);
+	std::cout << (f ? "YES\n" : "NO\n");
 	return;
 }
 int main() { solve(); return 0; }//boj22654 Tangram

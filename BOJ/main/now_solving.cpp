@@ -98,7 +98,8 @@ const Polygon T[7] = {
 // TR0 | TR0 | TR1 | SQ | TZ | TR2 | TR2
 #define SQ 3
 #define TZ 4
-ld A[7];
+ld a_ = 625;
+const ld A[7] = { a_ * 4, a_ * 4, a_ * 2, a_ * 2, a_ * 2, a_, a_ };
 const Polygon TZ2 = { Pos(25, 0), Pos(75, 0), Pos(50, 25), Pos(0, 25) };
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
@@ -445,7 +446,7 @@ std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
 			v = P[i0] - P[i1];
 			t = rad(u, v);
 			R = rotate_and_move(C, 0, t, P[i1]);
-			a = area(sutherland_hodgman(P, C));
+			a = area(sutherland_hodgman(P, R));
 			if (eq(a, A[x])) RET.push_back(R);
 		}
 		else {
@@ -473,7 +474,7 @@ std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
 				if (eq(a, A[x])) RET.push_back(R);
 				v = P[i2] - P[i1];
 				t = rad(u, v);
-				R = rotate_and_move(Z, 0, t, P[i1]);
+				R = rotate_and_move(Z, j, t, P[i1]);
 				a = area(sutherland_hodgman(P, R));
 				if (eq(a, A[x])) RET.push_back(R);
 			}
@@ -489,7 +490,7 @@ std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
 			if (eq(a, A[x])) RET.push_back(R);
 			v = P[i2] - P[i1];
 			t = rad(u, v);
-			R = rotate_and_move(C, 0, t, P[i1]);
+			R = rotate_and_move(C, j, t, P[i1]);
 			a = area(sutherland_hodgman(P, R));
 			if (eq(a, A[x])) RET.push_back(R);
 		}

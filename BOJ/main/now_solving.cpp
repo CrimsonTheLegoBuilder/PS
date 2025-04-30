@@ -357,6 +357,8 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 		}
 	}
 	for (int i = 0; i < szc - 1; i++) if (VC[i].e != VC[i + 1].s) return 0;
+	assert(VP[0].s == VC.back().e);
+	assert(VC[0].s == VP.back().e);
 	for (const Seg& se : VP) ret.push_back(se.s);
 	for (const Seg& se : VC) ret.push_back(se.s);
 	Polygon tmp = ret;
@@ -389,9 +391,7 @@ bool two_polygon_cmp(const Polygon& P, const int& s) {
 		ld lq = (Q[0] - Q[1]).mag();
 		bool fp = 1;
 		for (int i = 0; i < 4; i++) {
-			if (sign(dot(P[i], P[(i + 1) % sz], P[(i + 2) % sz]))) {
-				fp = 0; break;
-			}
+			if (sign(dot(P[i], P[(i + 1) % sz], P[(i + 2) % sz]))) return 0;
 			ld lp = (P[i] - P[(i + 1) % sz]).mag();
 			if (!eq(lp, lq)) return 0;
 		}

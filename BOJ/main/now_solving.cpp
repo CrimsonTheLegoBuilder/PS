@@ -46,10 +46,6 @@ ld flip(ld lat) {
 #define STRONG 0
 #define WEAK 1
 
-
-//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
-//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
-
 int N, M, K, Q;
 struct Pos {
 	ld x, y;
@@ -558,6 +554,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
+	//freopen("..//", "r", stdin);
+	//freopen("..//", "w", stdout);
 	std::cin >> N;
 	Polygon P(N);
 	for (Pos& p : P) {

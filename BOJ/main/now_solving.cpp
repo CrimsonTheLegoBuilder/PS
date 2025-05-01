@@ -303,22 +303,30 @@ bool cut_seg(const Seg& se, const Polygon& C, Segs& ret) {
 			e = fit(projection(se.s, se.e, se.s, C[i1]), 0, 1);
 			V.push_back(Pos(s, e));
 		}
-		if (ccw(se.s, se.e, C[i0], C[i1])) {
-//#ifdef DEBUG
-//			std::cout << "se.s:: " << se.s << " ";
-//			std::cout << "se.e:: " << se.e << " ";
-//			std::cout << "C[i0]:: " << C[i0] << " ";
-//			std::cout << "C[i1]:: " << C[i1] << "\n";
-//#endif
-			if (on_seg_weak(se.s, se.e, C[i0]) ||
-				on_seg_weak(se.s, se.e, C[i1])) {
-				return 0;
-			}
-			if (on_seg_weak(C[i0], C[i1], se.s) ||
-				on_seg_weak(C[i0], C[i1], se.e)) {
-				return 0;
-			}
-		}
+//		if (ccw(se.s, se.e, C[i0], C[i1])) {
+////#ifdef DEBUG
+////			std::cout << "se.s:: " << se.s << " ";
+////			std::cout << "se.e:: " << se.e << " ";
+////			std::cout << "C[i0]:: " << C[i0] << " ";
+////			std::cout << "C[i1]:: " << C[i1] << "\n";
+////#endif
+//			if (on_seg_weak(se.s, se.e, C[i0]) ||
+//				on_seg_weak(se.s, se.e, C[i1])) {
+//				std::cout << "se.s:: " << se.s << "\n";
+//				std::cout << "se.e:: " << se.e << "\n";
+//				std::cout << "C[i0]:: " << C[i0] << "\n";
+//				std::cout << "C[i1]:: " << C[i1] << "\n";
+//				return 0;
+//			}
+//			if (on_seg_weak(C[i0], C[i1], se.s) ||
+//				on_seg_weak(C[i0], C[i1], se.e)) {
+//				std::cout << "se.s:: " << se.s << "\n";
+//				std::cout << "se.e:: " << se.e << "\n";
+//				std::cout << "C[i0]:: " << C[i0] << "\n";
+//				std::cout << "C[i1]:: " << C[i1] << "\n";
+//				return 0;
+//			}
+//		}
 	}
 	std::sort(V.begin(), V.end());
 	V.push_back(Pos(1, 1));
@@ -341,9 +349,9 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 		Seg se = Seg(P[i0], P[i1]);
 		Segs vse;
 		bool f = cut_seg(se, C, vse);
-//#ifdef DEBUG
-//		std::cout << "f0:: " << f <<"\n";
-//#endif
+#ifdef DEBUG
+		std::cout << "f0:: " << f <<"\n";
+#endif
 		if (!f) return 0;
 		for (const Seg& v : vse) {
 			if (v.s == v.e) continue;
@@ -355,9 +363,9 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 		Seg se = Seg(C[i0], C[i1]);
 		Segs vse;
 		bool f = cut_seg(se, P, vse);
-//#ifdef DEBUG
-//		std::cout << "f1:: " << f << "\n";
-//#endif
+#ifdef DEBUG
+		std::cout << "f1:: " << f << "\n";
+#endif
 		if (!f) return 0;
 		for (const Seg& v : vse) {
 			if (v.s == v.e) continue;
@@ -647,11 +655,12 @@ bool dfs(int d, const Polygon& P) {
 		}
 		return 0;
 	}
+	//std::cout << "\nd:: " << d << "\n";
 #ifdef DEBUG
-	std::cout << "\nd:: " << d << "\n";
 #endif
 	for (int i = 0; i < 7; i++) {
 		if (I.count(i)) continue;
+		//std::cout << "i:: " << i << "\n";
 		I.insert(i);
 		int sz = P.size();
 #ifdef DEBUG
@@ -675,6 +684,26 @@ bool dfs(int d, const Polygon& P) {
 #ifdef DEBUG
 				std::cout << "f:: " << f << "\n";
 #endif
+//#ifdef POLYGON_DEBUG
+//				S[d] = C;
+//#endif
+//#ifdef POLYGON_DEBUG
+//				if (!f) {
+//					S[d] = C;
+//					for (int s = 0; s <= d; s++) {
+//						std::cout << "S" << s << " = [\n";
+//						for (Pos& p : S[s]) {
+//							std::cout << "  (" << p.x << ", " << p.y << "),\n";
+//						}
+//						std::cout << "]\n";
+//					}
+//					std::cout << "P = [\n";
+//					for (const Pos& p : P) {
+//						std::cout << "  (" << p.x << ", " << p.y << "),\n";
+//					}
+//					std::cout << "]\n\n";
+//				}
+//#endif
 				if (!f) continue;
 #ifdef POLYGON_DEBUG
 				S[d] = C;
@@ -714,7 +743,7 @@ void solve() {
 	std::cout << std::fixed;
 	std::cout.precision(15);
 	//freopen("..//", "r", stdin);
-	freopen("../../tests/tangram_out.txt", "w", stdout);
+	//freopen("../../tests/tangram_out.txt", "w", stdout);
 	std::cin >> N;
 	Polygon P(N);
 	for (Pos& p : P) {

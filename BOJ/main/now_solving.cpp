@@ -46,6 +46,10 @@ ld flip(ld lat) {
 #define STRONG 0
 #define WEAK 1
 
+//#define DEBUG
+#ifdef DEBUG
+#endif
+
 int N, M, K, Q;
 struct Pos {
 	ld x, y;
@@ -112,8 +116,8 @@ int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2,
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
 ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
 ld dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
-bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d2, d3)) >= 0; }
-bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d2, d3)) > 0; }
+bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
+bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
 //ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
 //	if (!f) return cross(d1, d2, t) / (d1 - d2).mag();
@@ -124,7 +128,7 @@ ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { retu
 //}
 bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);return (p1 * a2 + p2 * a1) / (a1 + a2); }
-ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+//ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 ld rad(const Pos& p1, const Pos& p2, const Pos& p3) { return rad(p3 - p2, p1 - p2); }
 bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
 	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
@@ -300,6 +304,12 @@ bool cut_seg(const Seg& se, const Polygon& C, Segs& ret) {
 			V.push_back(Pos(s, e));
 		}
 		if (ccw(se.s, se.e, C[i0], C[i1])) {
+//#ifdef DEBUG
+//			std::cout << "se.s:: " << se.s << " ";
+//			std::cout << "se.e:: " << se.e << " ";
+//			std::cout << "C[i0]:: " << C[i0] << " ";
+//			std::cout << "C[i1]:: " << C[i1] << "\n";
+//#endif
 			if (on_seg_weak(se.s, se.e, C[i0]) ||
 				on_seg_weak(se.s, se.e, C[i1])) {
 				return 0;
@@ -323,11 +333,17 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 	int szp = P.size();
 	int szc = C.size();
 	Segs VP, VC;
+#ifdef DEBUG
+	std::cout << "sub start::\n";
+#endif
 	for (int i = 0; i < szp; i++) {
 		int i0 = i, i1 = (i + 1) % szp;
 		Seg se = Seg(P[i0], P[i1]);
 		Segs vse;
 		bool f = cut_seg(se, C, vse);
+//#ifdef DEBUG
+//		std::cout << "f0:: " << f <<"\n";
+//#endif
 		if (!f) return 0;
 		for (const Seg& v : vse) {
 			if (v.s == v.e) continue;
@@ -339,29 +355,55 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 		Seg se = Seg(C[i0], C[i1]);
 		Segs vse;
 		bool f = cut_seg(se, P, vse);
+//#ifdef DEBUG
+//		std::cout << "f1:: " << f << "\n";
+//#endif
 		if (!f) return 0;
 		for (const Seg& v : vse) {
 			if (v.s == v.e) continue;
 			VC.push_back(v);
 		}
 	}
-	int p = 0, c = 0;
-	for (int i = 0; i < szp; i++) {
-		if (VP[(i - 1 + szp) % szp].e != VP[i].s) {
+#ifdef DEBUG
+	std::cout << "seg done::\n";
+#endif
+	int p = VP.size(), c = VC.size();
+	for (int i = 0; i < p; i++) {
+		if (VP[(i - 1 + p) % p].e != VP[i].s) {
 			std::rotate(VP.begin(), VP.begin() + i, VP.end());
 			break;
 		}
 	}
-	for (int i = 0; i < szp - 1; i++) if (VP[i].e != VP[i + 1].s) return 0;
+#ifdef DEBUG
+	std::cout << "VP::\n";
+	for (const Seg& se : VP) {
+		std::cout << "  [(" << se.s.x << ", " << se.s.y << "), ";
+		std::cout << "(" << se.e.x << ", " << se.e.y << ")]\n";
+	}
+#endif
+	for (int i = 0; i < p - 1; i++) if (VP[i].e != VP[i + 1].s) return 0;
+#ifdef DEBUG
+	std::cout << "P done::\n";
+#endif
 	std::reverse(VC.begin(), VC.end());
 	for (Seg& se : VC) std::swap(se.s, se.e);
-	for (int i = 0; i < szc; i++) {
-		if (VC[(i - 1 + szc) % szc].e != VC[i].s) {
+	for (int i = 0; i < c; i++) {
+		if (VC[(i - 1 + c) % c].e != VC[i].s) {
 			std::rotate(VC.begin(), VC.begin() + i, VC.end());
 			break;
 		}
 	}
-	for (int i = 0; i < szc - 1; i++) if (VC[i].e != VC[i + 1].s) return 0;
+#ifdef DEBUG
+	std::cout << "VC::\n";
+	for (const Seg& se : VC) {
+		std::cout << "  [(" << se.s.x << ", " << se.s.y << "), ";
+		std::cout << "(" << se.e.x << ", " << se.e.y << ")]\n";
+	}
+#endif
+	for (int i = 0; i < c - 1; i++) if (VC[i].e != VC[i + 1].s) return 0;
+#ifdef DEBUG
+	std::cout << "C done::\n";
+#endif
 	assert(VP[0].s == VC.back().e);
 	assert(VC[0].s == VP.back().e);
 	for (const Seg& se : VP) ret.push_back(se.s);
@@ -370,20 +412,26 @@ bool substract(const Polygon& P, const Polygon& C, Polygon& ret) {
 	std::sort(ret.begin(), ret.end());
 	int sz = ret.size();
 	for (int i = 0; i < sz - 1; i++) if (ret[i] == ret[i + 1]) return 0;
-	Vbool F(0, sz);
+#ifdef DEBUG
+	std::cout << "dup done::\n";
+#endif
+	Vbool F(sz, 0);
 	for (int i = 0; i < sz; i++) {
 		int i0 = (i - 1 + sz) % sz, i1 = i, i2 = (i + 1) % sz;
 		if (!ccw(tmp[i0], tmp[i1], tmp[i2])) F[i1] = 1;
 	}
 	ret.clear();
 	for (int i = 0; i < sz; i++) if (!F[i]) ret.push_back(tmp[i]);
+#ifdef DEBUG
+	std::cout << "prune done::\n";
+#endif
 	return 1;
 }
 Polygon rotate_and_move(const Polygon& P, const int& i, const ld& t, const Pos& pv) {
 	Polygon C = P;
-	Pos vec = P[i];
-	for (Pos& p : C) p -= vec, p.rot(t), p += vec;
-	vec = P[i] - pv;
+	//Pos vec = P[i];
+	for (Pos& p : C) p = p.rot(t);
+	Pos vec = C[i] - pv;
 	for (Pos& p : C) p -= vec;
 	return C;
 }
@@ -443,11 +491,24 @@ std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
 	Pos u, v;
 	ld t, a;
 	Polygon R;
+#ifdef DEBUG
+	//std::cout << "candidates::\n";
+	//std::cout << "x:: " << x << "\n";
+	//std::cout << "i:: " << i << "\n";
+	//std::cout << "P::\n";
+	//for (const Pos& p : P) {
+	//	std::cout << "  (" << p.x << ", " << p.y << "),\n";
+	//}
+	//std::cout << "C::\n";
+	//for (const Pos& p : C) {
+	//	std::cout << "  (" << p.x << ", " << p.y << "),\n";
+	//}
+#endif
 	if (x == SQ) {
 		if (fc < 0) return {};
 		if (!fc) {
 			u = C[1] - C[0];
-			v = P[i0] - P[i1];
+			v = P[i2] - P[i1];
 			t = rad(u, v);
 			R = rotate_and_move(C, 0, t, P[i1]);
 			a = area(sutherland_hodgman(P, R));
@@ -455,13 +516,13 @@ std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
 		}
 		else {
 			u = C[1] - C[0];
-			v = P[i0] - P[i1];
+			v = P[i2] - P[i1];
 			t = rad(u, v);
 			R = rotate_and_move(C, 0, t, P[i1]);
 			a = area(sutherland_hodgman(P, R));
 			if (eq(a, A[x])) RET.push_back(R);
 			u = C[3] - C[0];
-			v = P[i2] - P[i1];
+			v = P[i0] - P[i1];
 			t = rad(u, v);
 			R = rotate_and_move(C, 0, t, P[i1]);
 			a = area(sutherland_hodgman(P, R));
@@ -486,27 +547,71 @@ std::vector<Polygon> candidates(const int& x, const Polygon& P, const int& i) {
 			}
 		}
 	}
-	else {
+	else {//TR
+//#ifdef DEBUG
+//		std::cout << "triangle::\n";
+//#endif
 		for (int j = 0; j < 3; j++) {
 			u = C[(j + 1) % 3] - C[j];
-			v = P[i0] - P[i1];
-			t = rad(u, v);
-			R = rotate_and_move(C, j, t, P[i1]);
-			a = area(sutherland_hodgman(P, R));
-			if (eq(a, A[x])) RET.push_back(R);
-			u = C[(j + 2) % 3] - C[j];
 			v = P[i2] - P[i1];
 			t = rad(u, v);
 			R = rotate_and_move(C, j, t, P[i1]);
+//#ifdef DEBUG
+//			std::cout << "t:: " << t << "\n";
+//			std::cout << "C[j]:: " << C[j] << "\n";
+//			std::cout << "C[j + 1]:: " << C[(j + 1) % 3] << "\n";
+//			std::cout << "P[i1]:: " << P[i1] << "\n";
+//			std::cout << "P[i2]:: " << P[i2] << "\n";
+//			std::cout << "R::\n";
+//			for (const Pos& p : R) {
+//				std::cout << "  (" << p.x << ", " << p.y << "),\n";
+//			}
+//#endif
+			a = area(sutherland_hodgman(P, R));
+			if (eq(a, A[x])) RET.push_back(R);
+			u = C[(j + 2) % 3] - C[j];
+			v = P[i0] - P[i1];
+			t = rad(u, v);
+			R = rotate_and_move(C, j, t, P[i1]);
+//#ifdef DEBUG
+//			std::cout << "t:: " << t << "\n";
+//			std::cout << "C[j]:: " << C[j] << "\n";
+//			std::cout << "C[j + 2]:: " << C[(j + 2) % 3] << "\n";
+//			std::cout << "P[i1]:: " << P[i1] << "\n";
+//			std::cout << "P[i0]:: " << P[i0] << "\n";
+//			std::cout << "R::\n";
+//			for (const Pos& p : R) {
+//				std::cout << "  (" << p.x << ", " << p.y << "),\n";
+//			}
+//#endif
 			a = area(sutherland_hodgman(P, R));
 			if (eq(a, A[x])) RET.push_back(R);
 		}
+//#ifdef DEBUG
+//		std::cout << "triangle done::\n";
+//		for (const Polygon& C : RET) {
+//			std::cout << "C::\n";
+//			for (const Pos& p : C) {
+//				std::cout << "  (" << p.x << ", " << p.y << "),\n";
+//			}
+//		}
+//#endif
 	}
-	int sz = RET.size();
-	Vbool F(0, sz);
-	for (int j = 0; j < sz; j++) 
-		for (int k = j + 1; k < sz; k++) 
-			if (RET[j] == RET[K]) F[k] = 1;
+	sz = RET.size();
+//#ifdef DEBUG
+//	std::cout << "sz::" << sz << "\n";
+//#endif
+	Vbool F(sz, 0);
+	for (int j = 0; j < sz; j++) {
+		for (int k = j + 1; k < sz; k++) {
+			if (RET[j] == RET[k]) {
+				F[k] = 1;
+			}
+		}
+	}
+//#ifdef DEBUG
+//	std::cout << "compare done\n";
+//#endif
 	std::vector<Polygon> TMP;
 	for (int j = 0; j < sz; j++) if (!F[j]) TMP.push_back(RET[j]);
 	return TMP;
@@ -522,6 +627,10 @@ bool dfs(int d, const Polygon& P) {
 		for (int i = 0; i < 7; i++) {
 			if (I.count(i)) continue;
 			if (two_polygon_cmp(P, i)) {
+#ifdef DEBUG
+				std::cout << "d:: " << d << "\n";
+				std::cout << "final floor\n";
+#endif
 #ifdef POLYGON_DEBUG
 				S[d] = P;
 				for (int s = 0; s < 7; s++) {
@@ -538,18 +647,53 @@ bool dfs(int d, const Polygon& P) {
 		}
 		return 0;
 	}
+#ifdef DEBUG
+	std::cout << "\nd:: " << d << "\n";
+#endif
 	for (int i = 0; i < 7; i++) {
 		if (I.count(i)) continue;
 		I.insert(i);
 		int sz = P.size();
+#ifdef DEBUG
+		std::cout << "sz:: " << sz << "\n";
+#endif
 		for (int j = 0; j < sz; j++) {
 			std::vector<Polygon> CC = candidates(i, P, j);
+#ifdef DEBUG
+			std::cout << "CC.sz:: " << CC.size() << "\n";
+#endif
 			for (const Polygon& C : CC) {
+#ifdef DEBUG
+				std::cout << "C:: \n";
+				std::cout << "C.sz:: " << C.size() << "\n";
+				for (const Pos& p : C) {
+					std::cout << "  (" << p.x << ", " << p.y << "),\n";
+				}
+#endif
 				Polygon R;
 				bool f = substract(P, C, R);
+#ifdef DEBUG
+				std::cout << "f:: " << f << "\n";
+#endif
 				if (!f) continue;
 #ifdef POLYGON_DEBUG
 				S[d] = C;
+				std::cout << "S" << d << " = [\n";
+				for (Pos& p : S[d]) {
+					std::cout << "  (" << p.x << ", " << p.y << "),\n";
+				}
+				std::cout << "]\n";
+				std::cout << "R = [\n";
+				for (Pos& p : R) {
+					std::cout << "  (" << p.x << ", " << p.y << "),\n";
+				}
+				std::cout << "]\n\n";
+#endif
+#ifdef DEBUG
+				std::cout << "d:: " << d << " go next floor\n";
+				for (Pos& p : S[d]) {
+					std::cout << "  (" << p.x << ", " << p.y << "),\n";
+				}
 #endif
 				f = dfs(d + 1, R);
 				if (f) return 1;
@@ -559,14 +703,18 @@ bool dfs(int d, const Polygon& P) {
 	}
 	return 0;
 }
-bool tangram_solver(const Polygon& P) { return dfs(0, P); }//badk tracking
+bool tangram_solver(const Polygon& P) {
+	ld A = area(P); if (!eq(A, 1e4)) return 0;
+	int sz = P.size(); if (sz > 23) return 0;
+	return dfs(0, P);
+}//badk tracking
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(13);
+	std::cout.precision(15);
 	//freopen("..//", "r", stdin);
-	//freopen("..//", "w", stdout);
+	freopen("../../tests/tangram_out.txt", "w", stdout);
 	std::cin >> N;
 	Polygon P(N);
 	for (Pos& p : P) {

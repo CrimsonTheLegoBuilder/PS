@@ -48,7 +48,8 @@ int N, M, T, Q;
 struct Pos {
 	int x, y;
 	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	int i;
+	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -95,6 +96,10 @@ ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { retu
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
 int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
+bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
+	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
+	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
+}
 bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
 	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
 	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
@@ -149,7 +154,7 @@ ld dijkstra(const int& v, const int& g) {
 	}
 	return C[g];
 }
-bool connectable(const int& i, const int& j) {
+bool connectable(const int& i, const int& j, const int& pi, const int& qi) {
 	const Pos& s = V[i], & g = V[j];
 	for (int n = 0; n < N; n++) {
 		const Polygon& H = P[n];
@@ -161,6 +166,16 @@ bool connectable(const int& i, const int& j) {
 			if (on_seg_weak(s, g, k1)) return 0;
 		}
 	}
+	if (pi == qi) {
+		assert(pi > -1);
+		int sz = P[pi].size();
+		if (i == (j + 1) % sz || j == (i + 1) % sz) return 1;
+		const Polygon& H = P[pi];
+		const Pos& p0 = H[(i - 1 + sz) % sz], & p1 = H[i], & p2 = H[(i + 1) % sz];
+		const Pos& q0 = H[(j - 1 + sz) % sz], & q1 = H[j], & q2 = H[(j + 1) % sz];
+		if (inside(p0, p1, p2, q1)) return 0;
+		if (inside(q0, q1, q2, p1)) return 0;
+	}
 	return 1;
 }
 ll query(const Pos& s, const Pos& g) {
@@ -168,11 +183,11 @@ ll query(const Pos& s, const Pos& g) {
 	G[0].clear();
 	for (int i = 2; i < vp; i++) if (G[i].back().i == 1) G[i].pop_back();
 	for (int i = 2; i < vp; i++) {
-		if (connectable(0, i)) {
+		if (connectable(0, i, V[0].i, V[i].i)) {
 			int d = V[i].y - V[0].y;
 			G[0].push_back(Info(i, std::min(d, 0)));
 		}
-		if (connectable(1, i)) {
+		if (connectable(1, i, V[1].i, V[i].i)) {
 			int d = V[1].y - V[i].y;
 			G[i].push_back(Info(1, std::min(d, 0)));
 		}
@@ -190,22 +205,21 @@ bool query() {
 		P[i].resize(v);
 		for (Pos& p : P[i]) {
 			std::cin >> p;
+			p.i = i;
 			V[vp++] = p;
 		}
 		norm(P[i]);
 	}
-	//graph connect
 	for (int i = 2; i < vp; i++) {
 		for (int j = i + 1; j < vp; j++) {
-			if (connectable(i, j)) {
+			if (connectable(i, j, V[i].i, V[j].i)) {
 				int d = V[j].y - V[i].y;
 				G[i].push_back(Info(j, std::min(d, 0)));
-				d * +-1;
+				d *= -1;
 				G[j].push_back(Info(i, std::min(d, 0)));
 			}
 		}
 	}
-	//graph connect
 	while (Q--) {
 		Pos s, g; std::cin >> s >> g;
 		std::cout << query(s, g) << "\n";

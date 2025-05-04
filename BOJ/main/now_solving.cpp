@@ -123,11 +123,11 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 	}
 	return (cnt & 1) * 2;
 }
-ld C[LEN]; int vp;
+ll C[LEN]; int vp;
 struct Info {
 	int i;
 	ld c;
-	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
+	Info(int i_ = 0, ll c_ = 0) : i(i_), c(c_) {}
 	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
 };
 std::vector<Info> G[LEN];
@@ -163,15 +163,27 @@ bool connectable(const int& i, const int& j) {
 	}
 	return 1;
 }
-ld query(const Pos& s, const Pos& g) {
+ll query(const Pos& s, const Pos& g) {
 	V[0] = s; V[1] = g;
-
-	ld d = 0;
+	G[0].clear();
+	for (int i = 2; i < vp; i++) if (G[i].back().i == 1) G[i].pop_back();
+	for (int i = 2; i < vp; i++) {
+		if (connectable(0, i)) {
+			int d = V[i].y - V[0].y;
+			G[0].push_back(Info(i, std::min(d, 0)));
+		}
+		if (connectable(1, i)) {
+			int d = V[1].y - V[i].y;
+			G[i].push_back(Info(1, std::min(d, 0)));
+		}
+	}
+	ll d = dijkstra(0, 1);
 	return d;
 }
 bool query() {
 	std::cin >> N >> Q;
 	if (!N && !Q) return 0;
+	for (int i = 0; i < vp; i++) G[i].clear();
 	vp = 2;
 	for (int i = 0; i < N; i++) {
 		int v; std::cin >> v;
@@ -186,7 +198,10 @@ bool query() {
 	for (int i = 2; i < vp; i++) {
 		for (int j = i + 1; j < vp; j++) {
 			if (connectable(i, j)) {
-
+				int d = V[j].y - V[i].y;
+				G[i].push_back(Info(j, std::min(d, 0)));
+				d * +-1;
+				G[j].push_back(Info(i, std::min(d, 0)));
 			}
 		}
 	}

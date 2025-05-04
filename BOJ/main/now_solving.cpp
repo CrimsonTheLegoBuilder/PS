@@ -32,7 +32,7 @@ ld flip(ld lat) {
 	if (lat < 0) return -(PI * .5) - lat;
 	return INF;
 }
-ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
+//ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define LO x
@@ -131,9 +131,9 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 ll C[LEN]; int vp;
 struct Info {
 	int i;
-	ld c;
+	ll c;
 	Info(int i_ = 0, ll c_ = 0) : i(i_), c(c_) {}
-	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
+	bool operator < (const Info& x) const { return c > x.c; }
 };
 std::vector<Info> G[LEN];
 std::priority_queue<Info> PQ;
@@ -141,7 +141,9 @@ ld dijkstra(const int& v, const int& g) {
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	PQ.push(Info(v, 0));
 	C[v] = 0;
+	std::cout << "fuck:: fuck::\n";
 	while (PQ.size()) {
+		std::cout << "fuck::\n";
 		Info p = PQ.top(); PQ.pop();
 		if (p.c > C[p.i]) continue;
 		for (Info& w : G[p.i]) {
@@ -178,20 +180,25 @@ bool connectable(const int& i, const int& j, const int& pi, const int& qi) {
 	}
 	return 1;
 }
-ll query(const Pos& s, const Pos& g) {
+ld query(const Pos& s, const Pos& g) {
 	V[0] = s; V[1] = g;
 	G[0].clear();
+	if (connectable(0, 1, -1, -2)) {
+		int d = std::max(V[1].y - V[0].y, 0);
+		return d;
+	}
 	for (int i = 2; i < vp; i++) if (G[i].back().i == 1) G[i].pop_back();
 	for (int i = 2; i < vp; i++) {
 		if (connectable(0, i, V[0].i, V[i].i)) {
 			int d = V[i].y - V[0].y;
-			G[0].push_back(Info(i, std::min(d, 0)));
+			G[0].push_back(Info(i, std::max(d, 0)));
 		}
 		if (connectable(1, i, V[1].i, V[i].i)) {
 			int d = V[1].y - V[i].y;
-			G[i].push_back(Info(1, std::min(d, 0)));
+			G[i].push_back(Info(1, std::max(d, 0)));
 		}
 	}
+	std::cout << "fuck::\n";
 	ll d = dijkstra(0, 1);
 	return d;
 }
@@ -214,9 +221,9 @@ bool query() {
 		for (int j = i + 1; j < vp; j++) {
 			if (connectable(i, j, V[i].i, V[j].i)) {
 				int d = V[j].y - V[i].y;
-				G[i].push_back(Info(j, std::min(d, 0)));
+				G[i].push_back(Info(j, std::max(d, 0)));
 				d *= -1;
-				G[j].push_back(Info(i, std::min(d, 0)));
+				G[j].push_back(Info(i, std::max(d, 0)));
 			}
 		}
 	}

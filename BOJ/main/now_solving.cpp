@@ -141,9 +141,9 @@ ld dijkstra(const int& v, const int& g) {
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	PQ.push(Info(v, 0));
 	C[v] = 0;
-	std::cout << "fuck:: fuck::\n";
+	//std::cout << "fuck:: fuck::\n";
 	while (PQ.size()) {
-		std::cout << "fuck::\n";
+		//std::cout << "fuck::\n";
 		Info p = PQ.top(); PQ.pop();
 		if (p.c > C[p.i]) continue;
 		for (Info& w : G[p.i]) {
@@ -187,16 +187,20 @@ ld query(const Pos& s, const Pos& g) {
 		int d = std::max(V[1].y - V[0].y, 0);
 		return d;
 	}
+	std::cout << "fuck::\n";
 	for (int i = 2; i < vp; i++) if (G[i].back().i == 1) G[i].pop_back();
+	std::cout << "fuck::\n";
 	for (int i = 2; i < vp; i++) {
 		if (connectable(0, i, V[0].i, V[i].i)) {
 			int d = V[i].y - V[0].y;
 			G[0].push_back(Info(i, std::max(d, 0)));
 		}
+		std::cout << "fuckfuck::\n";
 		if (connectable(1, i, V[1].i, V[i].i)) {
 			int d = V[1].y - V[i].y;
 			G[i].push_back(Info(1, std::max(d, 0)));
 		}
+		std::cout << "fuckfuck::\n";
 	}
 	std::cout << "fuck::\n";
 	ll d = dijkstra(0, 1);
@@ -221,6 +225,7 @@ bool query() {
 		for (int j = i + 1; j < vp; j++) {
 			if (connectable(i, j, V[i].i, V[j].i)) {
 				int d = V[j].y - V[i].y;
+				std::cout << "d:: " << d << "\n";
 				G[i].push_back(Info(j, std::max(d, 0)));
 				d *= -1;
 				G[j].push_back(Info(i, std::max(d, 0)));

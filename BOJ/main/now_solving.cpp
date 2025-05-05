@@ -12,7 +12,7 @@ typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
-const ll INF = 1e17;
+const ld INF = 1e17;
 const int LEN = 1 << 10;
 const ld TOL = 1e-7;
 const ll MOD = 1e9 + 7;
@@ -48,8 +48,8 @@ int N, M, T, Q;
 struct Pos {
 	int x, y;
 	//ll x, y;
-	int i;
-	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
+	int i, j;
+	Pos(int x_ = 0, int y_ = 0, int i_ = -1, int j_ = -1) : x(x_), y(y_), i(i_), j(j_) {}
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -141,9 +141,7 @@ ld dijkstra(const int& v, const int& g) {
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	PQ.push(Info(v, 0));
 	C[v] = 0;
-	//std::cout << "fuck:: fuck::\n";
 	while (PQ.size()) {
-		//std::cout << "fuck::\n";
 		Info p = PQ.top(); PQ.pop();
 		if (p.c > C[p.i]) continue;
 		for (Info& w : G[p.i]) {
@@ -156,7 +154,7 @@ ld dijkstra(const int& v, const int& g) {
 	}
 	return C[g];
 }
-bool connectable(const int& i, const int& j, const int& pi, const int& qi) {
+bool connectable(const int& i, const int& j) {
 	const Pos& s = V[i], & g = V[j];
 	for (int n = 0; n < N; n++) {
 		const Polygon& H = P[n];
@@ -168,13 +166,15 @@ bool connectable(const int& i, const int& j, const int& pi, const int& qi) {
 			if (on_seg_weak(s, g, k1)) return 0;
 		}
 	}
-	if (pi == qi) {
-		assert(pi > -1);
-		int sz = P[pi].size();
-		if (i == (j + 1) % sz || j == (i + 1) % sz) return 1;
-		const Polygon& H = P[pi];
-		const Pos& p0 = H[(i - 1 + sz) % sz], & p1 = H[i], & p2 = H[(i + 1) % sz];
-		const Pos& q0 = H[(j - 1 + sz) % sz], & q1 = H[j], & q2 = H[(j + 1) % sz];
+	if (V[i].i == V[j].i) {
+		assert(V[i].i > -1);
+		const Polygon& H = P[V[i].i];
+		int sz = H.size();
+		int u = V[i].j;
+		int v = V[j].j;
+		if (u == (v + 1) % sz || v == (u + 1) % sz) return 1;
+		const Pos& p0 = H[(u - 1 + sz) % sz], & p1 = H[u], & p2 = H[(u + 1) % sz];
+		const Pos& q0 = H[(v - 1 + sz) % sz], & q1 = H[v], & q2 = H[(v + 1) % sz];
 		if (inside(p0, p1, p2, q1)) return 0;
 		if (inside(q0, q1, q2, p1)) return 0;
 	}
@@ -183,26 +183,23 @@ bool connectable(const int& i, const int& j, const int& pi, const int& qi) {
 ld query(const Pos& s, const Pos& g) {
 	V[0] = s; V[1] = g;
 	G[0].clear();
-	if (connectable(0, 1, -1, -2)) {
+	if (connectable(0, 1)) {
 		int d = std::max(V[1].y - V[0].y, 0);
 		return d;
 	}
-	std::cout << "fuck::\n";
-	for (int i = 2; i < vp; i++) if (G[i].back().i == 1) G[i].pop_back();
-	std::cout << "fuck::\n";
+	for (int i = 2; i < vp; i++)
+		if (G[i].size() && G[i].back().i == 1)
+			G[i].pop_back();
 	for (int i = 2; i < vp; i++) {
-		if (connectable(0, i, V[0].i, V[i].i)) {
+		if (connectable(0, i)) {
 			int d = V[i].y - V[0].y;
 			G[0].push_back(Info(i, std::max(d, 0)));
 		}
-		std::cout << "fuckfuck::\n";
-		if (connectable(1, i, V[1].i, V[i].i)) {
+		if (connectable(1, i)) {
 			int d = V[1].y - V[i].y;
 			G[i].push_back(Info(1, std::max(d, 0)));
 		}
-		std::cout << "fuckfuck::\n";
 	}
-	std::cout << "fuck::\n";
 	ll d = dijkstra(0, 1);
 	return d;
 }
@@ -214,18 +211,15 @@ bool query() {
 	for (int i = 0; i < N; i++) {
 		int v; std::cin >> v;
 		P[i].resize(v);
-		for (Pos& p : P[i]) {
-			std::cin >> p;
-			p.i = i;
-			V[vp++] = p;
-		}
+		for (Pos& p : P[i]) { std::cin >> p; p.i = i; }
 		norm(P[i]);
+		int j = 0;
+		for (Pos& p : P[i]) { p.j = j++; V[vp++] = p; }
 	}
 	for (int i = 2; i < vp; i++) {
 		for (int j = i + 1; j < vp; j++) {
-			if (connectable(i, j, V[i].i, V[j].i)) {
+			if (connectable(i, j)) {
 				int d = V[j].y - V[i].y;
-				std::cout << "d:: " << d << "\n";
 				G[i].push_back(Info(j, std::max(d, 0)));
 				d *= -1;
 				G[j].push_back(Info(i, std::max(d, 0)));
@@ -234,6 +228,7 @@ bool query() {
 	}
 	while (Q--) {
 		Pos s, g; std::cin >> s >> g;
+		s.i = -1; g.i = -2;
 		std::cout << query(s, g) << "\n";
 	}
 	return 1;

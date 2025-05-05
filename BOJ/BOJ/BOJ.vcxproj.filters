@@ -102,13 +102,13 @@
     <ClCompile Include="..\library\voronoi_diagram_mst_prim.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boj_bronze.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\boj22654_TLE.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
     <ClCompile Include="..\main\now_solving.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\boj_bronze.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>

@@ -136,14 +136,15 @@ struct Info {
 	bool operator < (const Info& x) const { return c > x.c; }
 };
 std::vector<Info> G[LEN];
-std::priority_queue<Info> PQ;
 ld dijkstra(const int& v, const int& g) {
+	std::priority_queue<Info> PQ;
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	PQ.push(Info(v, 0));
 	C[v] = 0;
 	while (PQ.size()) {
 		Info p = PQ.top(); PQ.pop();
 		if (p.c > C[p.i]) continue;
+		if (p.i == g) return C[g];
 		for (Info& w : G[p.i]) {
 			ld cost = p.c + w.c;
 			if (C[w.i] > cost) {

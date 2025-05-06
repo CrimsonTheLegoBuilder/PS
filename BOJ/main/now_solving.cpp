@@ -160,7 +160,26 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-
+Polygon convex_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
+	Polygon qs;
+	int n = ps.size();
+	for (int i = 0; i < n; i++) {
+		Pos p1 = ps[i], p2 = ps[(i + 1) % n];
+		int d1 = ccw(b1, b2, p1), d2 = ccw(b1, b2, p2);
+		if (d1 >= 0) qs.push_back(p1);
+		if (d1 * d2 < 0) qs.push_back(intersection(p1, p2, b1, b2));
+	}
+	return qs;
+}
+Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
+	int sz = clip.size();
+	std::vector<Pos> ret = C;
+	for (int i = 0; i < sz; i++) {
+		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
+		ret = convex_cut(ret, b1, b2);
+	}
+	return ret;
+}
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -364,8 +383,6 @@ struct Arc {
 	inline friend std::istream& operator >> (std::istream& is, Arc& a) { is >> a.lo >> a.hi; return is; }
 	inline friend std::ostream& operator << (std::ostream& os, const Arc& a) { os << a.lo << " " << a.hi; return os; }
 };
-
-
 ld C[LEN]; int vp;
 struct Info {
 	int i;
@@ -404,87 +421,106 @@ bool close(const Pos& d1, const Pos& d2, const Pos& target, const ld& r) {
 	if (between(d1, d2, target)) return dist(d1, d2, target) < r - TOL;
 	else return close(d1, target, r) || close(d2, target, r);
 }
-void connect_node(const int& n1, const int& n2, const ld& r) {
+Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
+	Pos v = p - pv;
+	ld ratio = cos(t);
+	ld x = v.x * cos(t) - v.y * sin(t);
+	ld y = v.x * sin(t) + v.y * cos(t);
+	return Pos(x, y, i) * ratio + pv;
+}
+bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
+	Pos v = ~(e - s).unit() * r;
+	Polygon B = { s + v, s - v, e - v, e + v };
+	ld a = area(sutherland_hodgman(P, B));
+	return zero(a);
+}
+void connect_node(const int& n1, const int& n2, const ld& r, const Polygon& P) {
 	Pos d1 = V[n1], d2 = V[n2];
+	Pos m = mid(d1, d2);
 	if (!d1.i || d1.i != d2.i) {
-		for (int i = 1; i < N + 1; i++) {
-
+		if (connectable(d1, d2, r, P)) {
+			G[n1].push_back({ n2, dist(d1, d2, r) });
+			G[n2].push_back({ n1, dist(d1, d2, r) });
 		}
-		G[n1].push_back({ n2, dist(d1, d2, r) });
-		G[n2].push_back({ n1, dist(d1, d2, r) });
 	}
 	return;
 }
-void connect_seg(const ld& r) {
+void connect_seg(const Polygon& P, const ld& r) {
 	for (int i = 0; i < vp; i++)
 		for (int j = i + 1; j < vp; j++)
-			connect_node(i, j, r);
+			connect_node(i, j, r, P);
 	return;
 }
-//void connect_arc() {
-//	for (int i = 1; i <= N; i++) {
-//		int sz = rev[i].size();
-//		for (int j = 0; j < sz; j++) rev[i][j] = rev[i][j] - poles[i];
-//		std::sort(rev[i].begin(), rev[i].end());
-//		for (int j = 0; j < sz; j++) rev[i][j] = rev[i][j] + poles[i];
-//		for (int j = 0; j < sz; j++) {
-//			Pos cur = rev[i][j], nxt = rev[i][(j + 1) % sz];
-//			bool f0 = 1;
-//			for (int k = 1; k <= N; k++) {
-//				if (i == k) continue;
-//				bool f1 = ccw(poles[i], cur, poles[k]) > -1;
-//				bool f2 = ccw(poles[i], nxt, poles[k]) < 1;
-//				bool f3 = dist(poles[i], poles[k]) < D;
-//				bool f4 = dist(cur, poles[k]) < R || dist(nxt, poles[k]) < R;
-//				if ((f1 && f2 && f3) || f4) { f0 = 0; break; }
-//			}
-//			if (f0) {
-//				Pos p = poles[i];
-//				ld theta1 = norm(atan2(cur.y - p.y, cur.x - p.x));
-//				ld theta2 = norm(atan2(nxt.y - p.y, nxt.x - p.x));
-//				ld theta = norm(theta2 - theta1);
-//				ld arc = R * theta;
-//				G[cur.node_i].push_back({ nxt.node_i, arc });
-//				G[nxt.node_i].push_back({ cur.node_i, arc });
-//			}
-//		}
-//	}
-//	return;
-//}
-void pos_init(const Pos& s, const Pos& e, const Polygon& P) {
-	V[vp++] = s;
-	V[vp++] = e;
-	for (int i = 1; i <= N; i++) {//tangent from S || E
-		ld theta1 = get_theta(S, poles[i]);
-		ld theta2 = get_theta(E, poles[i]);
-		nodes[n++] = rotate(S, poles[i], theta1, i);
-		nodes[n++] = rotate(S, poles[i], -theta1, i);
-		nodes[n++] = rotate(E, poles[i], theta2, i);
-		nodes[n++] = rotate(E, poles[i], -theta2, i);
-	}
+void connect_arc(const Polygon& P, const ld& r) {
 	for (int i = 1; i <= N; i++) {
-		for (int j = i + 1; j <= N; j++) {
-			if (i == j) continue;
-			ld distance = dist(poles[j], poles[i]);
-			Pos v = ~(poles[j] - poles[i]);
-			ld scale = R / distance;
-			nodes[n++] = poles[i] + v * scale;
-			nodes[n++] = poles[j] + v * scale;
-			nodes[n++] = poles[i] - v * scale;
-			nodes[n++] = poles[j] - v * scale;
-			if (distance > D) {//tangent from m
-				Pos m = mid(poles[i], poles[j]);
-				ld theta = get_theta(m, poles[i]);
-				nodes[n++] = rotate(m, poles[i], theta, i);
-				nodes[n++] = rotate(m, poles[j], theta + PI, j);
-				nodes[n++] = rotate(m, poles[i], -theta, i);
-				nodes[n++] = rotate(m, poles[j], -theta - PI, j);
+		int sz = RV[i].size();
+		for (int j = 0; j < sz; j++) RV[i][j] = RV[i][j] - P[i];
+		std::sort(RV[i].begin(), RV[i].end());
+		for (int j = 0; j < sz; j++) RV[i][j] = RV[i][j] + P[i];
+		for (int j = 0; j < sz; j++) {
+			Pos cur = RV[i][j], nxt = RV[i][(j + 1) % sz];
+			bool f0 = 1;
+			for (int k = 0; k < N; k++) {
+				if (i != k) {
+					bool f1 = ccw(P[i], cur, P[k]) > -1;
+					bool f2 = ccw(P[i], nxt, P[k]) < 1;
+					bool f3 = (P[i] - P[k]).mag() < r * 2;
+					bool f4 = (P[i] - P[k]).mag() < r || (P[i] - P[k]).mag() < r;
+					if ((f1 && f2 && f3) || f4) { f0 = 0; break; }
+				}
+				const Pos& p0 = P[(k - + N) % sz], & p1 = P[k], & p2 = P[(k + 1) % N];
+				if (!inside(p0, p1, p2, P[i])) { f0 = 0; break;}
+				ld d = dist(p0, p1, P[i]);
+				if (d < r) { f0 = 0; break; }
+
+			}
+			if (f0) {
+				Pos p = P[i];
+				ld theta1 = norm(atan2(cur.y - p.y, cur.x - p.x));
+				ld theta2 = norm(atan2(nxt.y - p.y, nxt.x - p.x));
+				ld theta = norm(theta2 - theta1);
+				ld arc = r * theta;
+				G[cur.j].push_back({ nxt.j, arc });
+				G[nxt.j].push_back({ cur.j, arc });
 			}
 		}
 	}
-	for (int i = 0; i < n; i++) {
-		nodes[i].node_i = i;
-		rev[nodes[i].pole_i].push_back(nodes[i]);
+	return;
+}
+void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
+	V[vp++] = s;
+	V[vp++] = e;
+	for (int i = 0; i < N; i++) {//tangent from S || E
+		ld theta1 = get_theta(s, P[i], r);
+		ld theta2 = get_theta(e, P[i], r);
+		V[vp++] = rotate(P[i], s, theta1, i);
+		V[vp++] = rotate(P[i], s, -theta1, i);
+		V[vp++] = rotate(P[i], e, theta2, i);
+		V[vp++] = rotate(P[i], e, -theta2, i);
+	}
+	for (int i = 0; i < N; i++) {
+		for (int j = i + 1; j < N; j++) {
+			if (i == j) continue;
+			ld d = (V[j] - V[i]).mag();
+			Pos v = ~(V[j] - V[i]);
+			ld w = r / d;
+			V[vp++] = P[i] + v * w;
+			V[vp++] = P[j] + v * w;
+			V[vp++] = P[i] - v * w;
+			V[vp++] = P[j] - v * w;
+			if (d > r * 2) {//tangent from m
+				Pos m = mid(P[i], P[j]);
+				ld theta = get_theta(m, P[i], r);
+				V[vp++] = rotate(P[i], m, theta, i);
+				V[vp++] = rotate(P[j], m, theta + PI, j);
+				V[vp++] = rotate(P[i], m, -theta, i);
+				V[vp++] = rotate(P[j], m, -theta - PI, j);
+			}
+		}
+	}
+	for (int i = 1; i <= vp; i++) {
+		V[i].j = i;
+		RV[V[i].i].push_back(V[i]);
 	}
 	return;
 }
@@ -493,7 +529,16 @@ bool query() {
 	if (!N) return 0;
 	Polygon P(N);
 	for (Pos& p : P) std::cin >> p;
+	Pos s; std::cin >> s;
+	Pos e; std::cin >> e;
 	norm(P);
+	pos_init(s, e, P, 1);
+	connect_seg(P, 1);
+	connect_arc(P, 1);
+	ld d = dijkstra(0, 1);
+	assert(d < INF);
+	std::cout << d << "\n";
+	return 1;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -503,3 +548,4 @@ void solve() {
 	while (query());
 	return;
 }
+int main() { solve(); return 0; }//boj22801

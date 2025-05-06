@@ -10,16 +10,27 @@ typedef long long ll;
 typedef double ld;
 
 int N, M, K;
-ll a, b, C, T;
+ll c, s, i, a;
 std::vector<ll> V;
+char t;
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	V.resize(4);
-	for (int i = 0; i < 4; i++) std::cin >> V[i];
-	std::sort(V.begin(), V.end());
-	std::cout << (V[1] + V[2] + V[3] + 1) << "\n";
+	std::cin >> N;
+	while (N--) {
+		std::cin >> t;
+		if (t == 'C') c++;
+		if (t == 'S') s++;
+		if (t == 'I') i++;
+		if (t == 'A') a++;
+	}
+	std::cin >> t;
+	if (t == 'C') K = c;
+	if (t == 'S') K = s;
+	if (t == 'I') K = i;
+	if (t == 'A') K = a;
+	std::cout << K << "\n";
 	return 0;
 }

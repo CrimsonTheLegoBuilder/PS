@@ -559,10 +559,11 @@ bool query() {
 	for (Pos& p : P) std::cin >> p;
 	Pos s; std::cin >> s;
 	Pos e; std::cin >> e;
+	ld r = 1;
 	norm(P);
-	pos_init(s, e, P, 1);
-	connect_seg(P, 1);
-	connect_arc(P, 1);
+	pos_init(s, e, P, r);
+	connect_seg(P, r);
+	connect_arc(P, r);
 	ld d = dijkstra(0, 1);
 	assert(d < INF);
 	std::cout << d << "\n";

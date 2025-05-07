@@ -45,7 +45,7 @@ ld flip(ld lat) {
 #define WEAK 1
 
 #define ABS 0
-#define REL 0
+#define REL 1
 
 //freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);

@@ -47,10 +47,8 @@ ld flip(ld lat) {
 #define ABS 0
 #define REL 1
 
-//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
-//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
-
-//2D============================================================================//
+//freopen("../../tests/", "r", stdin);
+//freopen("../../tests/", "w", stdout);
 
 int N, M, K, T, Q;
 struct Pos {
@@ -122,17 +120,13 @@ bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int
 	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
 }
 ld area(const Polygon& H) {
-	ld a = 0;
-	int sz = H.size();
+	ld a = 0; int sz = H.size();
 	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
 	return a;
 }
 bool norm(Polygon& H) {
 	ld a = area(H);
-	if (a < 0) {
-		std::reverse(H.begin(), H.end());
-		return 1;
-	}
+	if (a < 0) { std::reverse(H.begin(), H.end()); return 1; }
 	return 0;
 }
 //int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
@@ -418,17 +412,12 @@ ld dijkstra(const int& v, const int& g) {
 	}
 	return C[g];
 }
+Polygon RV[LEN];//revolve
 ld get_theta(const Pos& d1, const Pos& d2, const ld& r) { return asin(r / (d1 - d2).mag()); }
 Pos mid(const Pos& d1, const Pos& d2) { return (d1 + d2) * .5; }
-Polygon RV[LEN];//revolve
-bool between(const Pos& d1, const Pos& d2, const Pos& target) { return sign(dot(d1, d2, target)) <= 0 || sign(dot(d2, d1, target)) <= 0; }
-bool close(const Pos& d, const Pos& target, const ld& r) {
-	return (d - target).mag() < r - TOL;
-}
-bool close(const Pos& d1, const Pos& d2, const Pos& target, const ld& r) {
-	if (between(d1, d2, target)) return dist(d1, d2, target, ABS) < r - TOL;
-	else return close(d1, target, r) || close(d2, target, r);
-}
+bool between(const Pos& d1, const Pos& d2, const Pos& q) { return sign(dot(d1, d2, q)) <= 0 && sign(dot(d2, d1, q)) <= 0; }
+bool close(const Pos& d, const Pos& q, const ld& r) { return (d - q).mag() < r; }
+bool close(const Pos& d1, const Pos& d2, const Pos& q, const ld& r) { dist(d1, d2, q, ABS) < r; }
 Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 	Pos v = p - pv;
 	Pos q = v.rot(t); q += pv; q.i = i;
@@ -436,10 +425,8 @@ Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 }
 bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
 	int sz = P.size();
-	for (int i = 0; i < sz; i++) {
-		ld d = dist(P[i], P[(i + 1) % sz], c, ABS);
-		if (d < r) return 0;
-	}
+	for (int i = 0; i < sz; i++)
+		if (dist(P[i], P[(i + 1) % sz], c, ABS) < r) return 0;
 	if (inner_check(P, c)) return 0;
 	return 1;
 }
@@ -452,12 +439,9 @@ bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
 }
 void connect_node(const int& n1, const int& n2, const ld& r, const Polygon& P) {
 	Pos d1 = V[n1], d2 = V[n2];
-	Pos m = mid(d1, d2);
-	if (d1.i != d2.i) {
-		if (connectable(d1, d2, r, P)) {
-			G[n1].push_back({ n2, (d1 - d2).mag() });
-			G[n2].push_back({ n1, (d1 - d2).mag() });
-		}
+	if (d1.i != d2.i && connectable(d1, d2, r, P)) {
+		G[n1].push_back({ n2, (d1 - d2).mag() });
+		G[n2].push_back({ n1, (d1 - d2).mag() });
 	}
 	return;
 }
@@ -476,6 +460,11 @@ void connect_arc(const Polygon& P, const ld& r) {
 		for (int j = 0; j < sz; j++) RV[i][j] += P[i];
 		for (int j = 0; j < sz; j++) {
 			Pos cur = RV[i][j], nxt = RV[i][(j + 1) % sz];
+			if (cur == nxt) {
+				G[cur.j].push_back({ nxt.j, 0 });
+				G[nxt.j].push_back({ cur.j, 0 });
+				continue;
+			}
 			bool f0 = 1;
 			for (int k = 0; k < psz; k++) {
 				if (i != k) {
@@ -546,20 +535,15 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 	assert(vp < 2500);
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < 20; i++) RV[i].clear();
-	for (int i = 2; i < vp; i++) {
-		V[i].j = i;
-		RV[V[i].i].push_back(V[i]);
-	}
+	for (int i = 2; i < vp; i++) { V[i].j = i; RV[V[i].i].push_back(V[i]); }
 	return;
 }
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
 	//Polygon P(N); for (Pos& p : P) std::cin >> p; norm(P);
-	Polygon P(N); std::cin >> P; norm(P);
-	for (int i = 0; i < N; i++) P[i].i = i;
-	Pos s, e; std::cin >> s >> e;
-	s.i = -1; e.i = -2;
+	Polygon P(N); std::cin >> P; norm(P); for (int i = 0; i < N; i++) P[i].i = i;
+	Pos s, e; std::cin >> s >> e; s.i = -1; e.i = -2;
 	ld r = 1;
 	pos_init(s, e, P, r);
 	connect_seg(P, r);

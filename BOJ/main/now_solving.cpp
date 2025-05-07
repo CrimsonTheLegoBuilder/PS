@@ -85,7 +85,7 @@ struct Pos {
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrt(Euc()); }
 	Pos unit() const { return *this / mag(); }
-	ld rad() const { return atan2(y, x); }
+	ld rad() const { return atan2l(y, x); }
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }

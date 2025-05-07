@@ -248,7 +248,6 @@ Segs half_plane_intersection(const Segs& P, const Segs& Q) {
 	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
 	return half_plane_intersection(HP, 0);
 }
-
 struct Circle {
 	Pos c;
 	int r;
@@ -428,6 +427,15 @@ Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 	ld y = v.x * sin(t) + v.y * cos(t);
 	return Pos(x, y, i) * ratio + pv;
 }
+bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
+	int sz = P.size();
+	for (int i = 0; i < sz; i++) {
+		ld d = dist(P[i], P[(i + 1) % sz], c);
+		if (d <= r) return 0;
+	}
+	if (inner_check(P, c)) return 0;
+	return 1;
+}
 bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
 	Pos v = ~(e - s).unit() * r;
 	Polygon B = { s + v, s - v, e - v, e + v };
@@ -439,8 +447,8 @@ void connect_node(const int& n1, const int& n2, const ld& r, const Polygon& P) {
 	Pos m = mid(d1, d2);
 	if (!d1.i || d1.i != d2.i) {
 		if (connectable(d1, d2, r, P)) {
-			G[n1].push_back({ n2, dist(d1, d2, r) });
-			G[n2].push_back({ n1, dist(d1, d2, r) });
+			G[n1].push_back({ n2, (d1 - d2).mag() });
+			G[n2].push_back({ n1, (d1 - d2).mag() });
 		}
 	}
 	return;
@@ -465,23 +473,22 @@ void connect_arc(const Polygon& P, const ld& r) {
 					bool f1 = ccw(P[i], cur, P[k]) > -1;
 					bool f2 = ccw(P[i], nxt, P[k]) < 1;
 					bool f3 = (P[i] - P[k]).mag() < r * 2;
-					bool f4 = (P[i] - P[k]).mag() < r || (P[i] - P[k]).mag() < r;
+					bool f4 = (cur - P[k]).mag() < r || (nxt - P[k]).mag() < r;
 					if ((f1 && f2 && f3) || f4) { f0 = 0; break; }
 				}
 				const Pos& p0 = P[(k - + N) % sz], & p1 = P[k], & p2 = P[(k + 1) % N];
 				if (!inside(p0, p1, p2, P[i])) { f0 = 0; break;}
 				ld d = dist(p0, p1, P[i]);
 				if (d < r) { f0 = 0; break; }
-
 			}
 			if (f0) {
 				Pos p = P[i];
-				ld theta1 = norm(atan2(cur.y - p.y, cur.x - p.x));
-				ld theta2 = norm(atan2(nxt.y - p.y, nxt.x - p.x));
-				ld theta = norm(theta2 - theta1);
-				ld arc = r * theta;
-				G[cur.j].push_back({ nxt.j, arc });
-				G[nxt.j].push_back({ cur.j, arc });
+				ld t1 = norm(atan2(cur.y - p.y, cur.x - p.x));
+				ld t2 = norm(atan2(nxt.y - p.y, nxt.x - p.x));
+				ld t = norm(t2 - t1);
+				ld rd = r * t;
+				G[cur.j].push_back({ nxt.j, rd });
+				G[nxt.j].push_back({ cur.j, rd });
 			}
 		}
 	}
@@ -494,9 +501,13 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 		ld theta1 = get_theta(s, P[i], r);
 		ld theta2 = get_theta(e, P[i], r);
 		V[vp++] = rotate(P[i], s, theta1, i);
+		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 		V[vp++] = rotate(P[i], s, -theta1, i);
+		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 		V[vp++] = rotate(P[i], e, theta2, i);
+		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 		V[vp++] = rotate(P[i], e, -theta2, i);
+		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 	}
 	for (int i = 0; i < N; i++) {
 		for (int j = i + 1; j < N; j++) {
@@ -512,13 +523,19 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 				Pos m = mid(P[i], P[j]);
 				ld theta = get_theta(m, P[i], r);
 				V[vp++] = rotate(P[i], m, theta, i);
+				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 				V[vp++] = rotate(P[j], m, theta + PI, j);
+				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 				V[vp++] = rotate(P[i], m, -theta, i);
+				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 				V[vp++] = rotate(P[j], m, -theta - PI, j);
+				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			}
 		}
 	}
-	for (int i = 1; i <= vp; i++) {
+	for (int i = 0; i < vp; i++) G[i].clear();
+	for (int i = 0; i < 10; i++) RV[i].clear();
+	for (int i = 0; i < vp; i++) {
 		V[i].j = i;
 		RV[V[i].i].push_back(V[i]);
 	}

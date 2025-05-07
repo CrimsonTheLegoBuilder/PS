@@ -97,6 +97,7 @@ struct Pos {
 } V[LEN * LEN * 4]; const Pos O = { 0, 0 };
 int vp;
 typedef std::vector<Pos> Polygon;
+std::istream& operator >> (std::istream& is, Polygon& P) { for (Pos& p : P) is >> p.x >> p.y; return is; }
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 //bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
@@ -555,8 +556,8 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
-	Polygon P(N);
-	for (Pos& p : P) std::cin >> p;
+	//Polygon P(N); for (Pos& p : P) std::cin >> p;
+	Polygon P(N); std::cin >> P;
 	Pos s; std::cin >> s;
 	Pos e; std::cin >> e;
 	ld r = 1;

@@ -56,7 +56,14 @@ struct Pos {
 	Pos(ld x_ = 0, ld y_ = 0, int i_ = -1, int j_ = -1) : x(x_), y(y_), i(i_), j(j_) {  }
 	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
-	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	//bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	bool operator < (const Pos& p) const {//sort ccw
+		bool f1 = zero(x) ? 0 < y : 0 < x;
+		bool f2 = zero(p.x) ? 0 < p.y : 0 < p.x;
+		if (f1 != f2) return f1;
+		ld tq = *this / p;
+		return tq > 0;
+	}
 	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }

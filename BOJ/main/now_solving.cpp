@@ -110,11 +110,11 @@ ld dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
-ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = REL) {
-	if (f == REL) return cross(d1, d2, t) / (d1 - d2).mag();
-	if (sign(dot(d1, d2, t)) <= 0 && sign(dot(d2, d1, t)) <= 0)
-		return std::abs(cross(d1, d2, t)) / (d1 - d2).mag();
-	return std::min((d1 - t).mag(), (d2 - t).mag());
+ld dist(const Pos& d1, const Pos& d2, const Pos& q, bool f = REL) {
+	if (f == REL) return cross(d1, d2, q) / (d1 - d2).mag();
+	if (sign(dot(d1, d2, q)) <= 0 && sign(dot(d2, d1, q)) <= 0)
+		return std::abs(cross(d1, d2, q)) / (d1 - d2).mag();
+	return std::min((d1 - q).mag(), (d2 - q).mag());
 }
 bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);return (p1 * a2 + p2 * a1) / (a1 + a2); }

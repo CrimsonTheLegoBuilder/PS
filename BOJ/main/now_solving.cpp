@@ -556,12 +556,10 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
-	//Polygon P(N); for (Pos& p : P) std::cin >> p;
-	Polygon P(N); std::cin >> P;
-	Pos s; std::cin >> s;
-	Pos e; std::cin >> e;
+	//Polygon P(N); for (Pos& p : P) std::cin >> p; norm(P);
+	Polygon P(N); std::cin >> P; norm(P);
+	Pos s, e; std::cin >> s >> e;
 	ld r = 1;
-	norm(P);
 	pos_init(s, e, P, r);
 	connect_seg(P, r);
 	connect_arc(P, r);

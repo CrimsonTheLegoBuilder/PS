@@ -37,9 +37,6 @@ inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std
 #define ABS 0
 #define REL 1
 
-//freopen("../../tests/", "r", stdin);
-//freopen("../../tests/", "w", stdout);
-
 int N, M, K, T, Q;
 struct Pos {
 	ld x, y;
@@ -627,6 +624,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(4);
+	//freopen("../../tests/", "r", stdin);
+	//freopen("../../tests/moves.txt", "w", stdout);
 	while (query());
 	return;
 }

@@ -11,6 +11,7 @@
 #include <array>
 #include <tuple>
 #include <complex>
+#include <set>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -46,14 +47,7 @@ struct Pos {
 	Pos(ld x_ = 0, ld y_ = 0, int i_ = -1, int j_ = -1) : x(x_), y(y_), i(i_), j(j_) {  }
 	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
-	//bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
-	bool operator < (const Pos& p) const {//sort ccw
-		bool f1 = zero(x) ? 0 < y : 0 < x;
-		bool f2 = zero(p.x) ? 0 < p.y : 0 < p.x;
-		if (f1 != f2) return f1;
-		ld tq = *this / p;
-		return tq > 0;
-	}
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
 	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y, i }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y, i }; }
@@ -80,10 +74,20 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 } V[LEN * LEN * 4]; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
+typedef std::set<Pos> MapPos;
+MapPos S;
 std::istream& operator >> (std::istream& is, Polygon& P) { for (Pos& p : P) is >> p.x >> p.y; return is; }
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 //bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
+bool cmpr(const Pos& p, const Pos& q) {
+	bool f1 = O < p;
+	bool f2 = O < q;
+	if (f1 != f2) return f1;
+	ld tq = p / q;
+	//return zero(tq) ? p.Euc() < q.Euc() : tq > 0;
+	return tq > 0;
+}
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
@@ -402,13 +406,13 @@ struct Info {
 std::vector<Info> G[LEN * LEN * 4];
 ld dijkstra(const int& v, const int& g) {
 	std::priority_queue<Info> PQ;
-	for (int i = 0; i < LEN; i++) C[i] = INF;
+	for (int i = 0; i < vp; i++) C[i] = INF;
 	PQ.push(Info(v, 0));
 	C[v] = 0;
 	while (PQ.size()) {
 		Info p = PQ.top(); PQ.pop();
 		if (p.c > C[p.i]) continue;
-		if (p.i == g) return C[g];
+		//if (p.i == g) return C[g];
 		for (Info& w : G[p.i]) {
 			ld cost = p.c + w.c;
 			if (C[w.i] > cost) {
@@ -445,21 +449,23 @@ bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
 	return 1;
 }
 bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
+	//std::cout << "s:: " << s << " e:: " << e << " ";
 	if (s == e) return 1;
 	Pos v = ~(e - s).unit() * r;
 	Polygon B = { s + v, s - v, e - v, e + v };
 	ld a = area(sutherland_hodgman(P, B));
 	//std::cout << "s:: " << s << " e:: " << e << "\n";
-	//std::cout << "A:: " << a << "\n";
+	//std::cout << "A:: " << zero(a) << "\n";
 	return zero(a);
 }
 void connect_node(const int& n1, const int& n2, const Polygon& P, const ld& r) {
 	Pos d1 = V[n1], d2 = V[n2];
-	//std::cout << "d1:: " << d1 << " d2:: " << d2 << "\n";
-	//std::cout << "d1.i:: " << d1.i << " d2.i:: " << d2.i << "\n";
+	//std::cout << "d1:: " << d1 << " d2:: " << d2 << " ";
+	//std::cout << "d1.i:: " << n1 << " d2.i:: " << n2 << " ";
 	if (d1.i != d2.i && connectable(d1, d2, r, P)) {
 		G[n1].push_back({ n2, (d1 - d2).mag() });
 		G[n2].push_back({ n1, (d1 - d2).mag() });
+		//std::cout << (d1 - d2).mag() << " ";
 		//std::cout << "connect::\n";
 	}
 	//else std::cout << "fuck::\n";
@@ -474,15 +480,19 @@ void connect_seg(const Polygon& P, const ld& r) {
 void connect_arc(const Polygon& P, const ld& r) {
 	int psz = P.size();
 	for (int i = 0; i < psz; i++) {
+		//std::cout << "P[" << i << "]:: " << P[i] << "\n";
 		int sz = RV[i].size();
 		for (int j = 0; j < sz; j++) RV[i][j] -= P[i];
-		std::sort(RV[i].begin(), RV[i].end());
+		std::sort(RV[i].begin(), RV[i].end(), cmpr);
 		for (int j = 0; j < sz; j++) RV[i][j] += P[i];
 		for (int j = 0; j < sz; j++) {
 			Pos lo = RV[i][j], hi = RV[i][(j + 1) % sz];
+			//std::cout << "lo:: " << lo << " hi:: " << hi << " ";
+			//std::cout << "lo.j:: " << lo.j << " hi.j:: " << hi.j << " ";
 			if (lo == hi) {
 				G[lo.j].push_back({ hi.j, 0 });
 				G[hi.j].push_back({ lo.j, 0 });
+				//std::cout << " rd:: 0 good::\n";
 				continue;
 			}
 			bool f0 = 1;
@@ -492,14 +502,22 @@ void connect_arc(const Polygon& P, const ld& r) {
 					bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
 					bool f3 = sign((lo - P[k]).mag() - r) < 0 
 						|| sign((hi - P[k]).mag() - r) < 0;
-					if ((f1 && f2) || f3) { f0 = 0; break; }
+					if ((f1 && f2) || f3) {
+						f0 = 0;
+						//std::cout << "r1:: ";
+						break;
+					}
 				}
 				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
 				Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
 				for (const Pos& p : inx) {
-					if (inside(hi, P[i], lo, p)) {
+					if (inside(hi, P[i], lo, p, WEAK)) {
 						ld d = dist(p0, p1, P[i]);
-						if (d < r * 2) { f0 = 0; break; }
+						if (d < r * 2) {
+							f0 = 0;
+							//std::cout << "r2:: ";
+							break;
+						}
 					}
 				}
 				if (!f0) break;
@@ -511,54 +529,62 @@ void connect_arc(const Polygon& P, const ld& r) {
 				//ld t = norm(t2 - t1);
 				ld t = norm(rad(lo, P[i], hi));
 				ld rd = r * t;
+				//std::cout << "rd:: " << rd << " ";
 				G[lo.j].push_back({ hi.j, rd });
 				G[hi.j].push_back({ lo.j, rd });
+				//std::cout << "good::\n";
 			}
+			//else std::cout << "fuck::\n";
 		}
 	}
 	return;
 }
 void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
+	S.clear();
 	vp = 0;
 	V[vp++] = s;
 	V[vp++] = e;
 	int sz = P.size();
+	Pos p0, p1, p2, p3;
 	for (int i = 0; i < sz; i++) {//tangent from S || E
 		ld t1 = get_theta(s, P[i], r);
 		ld t2 = get_theta(e, P[i], r);
-		V[vp++] = rotate(P[i], s, t1, i);
-		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-		V[vp++] = rotate(P[i], s, -t1, i);
-		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-		V[vp++] = rotate(P[i], e, t2, i);
-		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-		V[vp++] = rotate(P[i], e, -t2, i);
-		if (!circle_is_ok(V[vp - 1], r, P)) vp--;
+		p0 = rotate(P[i], s, t1, i);
+		p1 = rotate(P[i], s, -t1, i);
+		p2 = rotate(P[i], e, t2, i);
+		p3 = rotate(P[i], e, -t2, i);
+		for (const Pos& p : { p0, p1, p2, p3 }) {
+			if (!S.count(p) && circle_is_ok(p, r, P)) { 
+				V[vp++] = p; S.insert(p);
+			}
+		}
 	}
 	for (int i = 0; i < sz; i++) {
 		for (int j = i + 1; j < sz; j++) {
 			if (i == j) continue;
 			Pos v = ~(P[j] - P[i]).unit();
-			V[vp++] = P[i] + v * r;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			V[vp++] = P[j] + v * r;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			V[vp++] = P[i] - v * r;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			V[vp++] = P[j] - v * r;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
+			p0 = P[i] + v * r;
+			p1 = P[j] + v * r;
+			p2 = P[i] - v * r;
+			p3 = P[j] - v * r;
+			for (const Pos& p : { p0, p1, p2, p3 }) {
+				if (!S.count(p) && circle_is_ok(p, r, P)) { 
+					V[vp++] = p; S.insert(p);
+				}
+			}
 			ld d = (P[j] - P[i]).mag();
 			if (d > r * 2) {//tangent from m
 				Pos m = mid(P[i], P[j]);
 				ld t = get_theta(m, P[i], r);
-				V[vp++] = rotate(P[i], m, t, i);
-				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-				V[vp++] = rotate(P[j], m, t + PI, j);
-				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-				V[vp++] = rotate(P[i], m, -t, i);
-				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-				V[vp++] = rotate(P[j], m, -t - PI, j);
-				if (!circle_is_ok(V[vp - 1], r, P)) vp--;
+				p0 = rotate(P[i], m, t, i);
+				p1 = rotate(P[j], m, t + PI, j);
+				p2 = rotate(P[i], m, -t, i);
+				p3 = rotate(P[j], m, -t - PI, j);
+				for (const Pos& p : { p0, p1, p2, p3 }) {
+					if (!S.count(p) && circle_is_ok(p, r, P)) { 
+						V[vp++] = p; S.insert(p);
+					}
+				}
 			}
 		}
 	}
@@ -566,7 +592,13 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 	assert(vp < 2500);
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < 20; i++) RV[i].clear();
-	for (int i = 2; i < vp; i++) { V[i].j = i; RV[V[i].i].push_back(V[i]); }
+	for (int j = 2; j < vp; j++) {
+		V[j].j = j;
+		for (int i = 0; i < sz; i++) {
+			ld d = (P[i] - V[j]).mag();
+			if (zero(d - r)) RV[i].push_back(V[j]);
+		}
+	}
 	//std::cout << "DEBUG::\n";
 	//for (int i = 0; i < vp; i++) {
 	//	std::cout << "V[" << i << "] = (";
@@ -585,6 +617,9 @@ bool query() {
 	connect_seg(P, r);
 	connect_arc(P, r);
 	ld d = dijkstra(0, 1); assert(d < INF); std::cout << d << "\n";
+	//std::cout << "DEBUG:: C::\n";
+	//for (int i = 0; i < vp; i++) std::cout << C[i] << "\n";
+	//std::cout << "DEBUG:: C::\n";
 	return 1;
 }
 void solve() {
@@ -599,6 +634,29 @@ int main() { solve(); return 0; }//boj22801
 
 /*
 
+4
+-5 -5
+5 -5
+5 5
+-5 5
+0 -10 0 10
+8
+10 20
+-10 20
+-20 10
+-20 -10
+-10 -20
+10 -20
+20 -10
+20 10
+-21 0 21 0
+5
+0 10
+-5 5
+-5 0
+0 5
+5 0
+10 0 16 8
 12
 1 1
 1 0
@@ -612,8 +670,63 @@ int main() { solve(); return 0; }//boj22801
 -2 3
 2 3
 2 1
-0 3 0 -3
+0 3 0 -1
+12
+1 1
+1 0
+3 0
+3 4
+-3 4
+-3 0
+-1 0
+-1 1
+-2 1
+-2 3
+2 3
+2 1
+0 3 1 -4
+12
+-10 10
+-10 0
+10 0
+10 10
+9 10
+9 1
+7 1
+7 10
+-7 10
+-7 1
+-9 1
+-9 10
+8 2 -8 2
+12
+-10 10
+-10 0
+10 0
+10 10
+9 10
+9 1
+7 1
+7 10
+-7 10
+-7 1
+-9 1
+-9 10
+8 2 9 12
+12
+10 10
+10 0
+30 0
+30 40
+-30 40
+-30 0
+-10 0
+-10 10
+-20 10
+-20 30
+20 30
+20 10
+0 30 0 -30
 0
-
 
 */

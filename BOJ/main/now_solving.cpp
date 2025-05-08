@@ -145,7 +145,8 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 		if (on_seg_strong(cur, nxt, p)) return 1;
 		if (zero(cur.y - nxt.y)) continue;
 		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
+		if (nxt.y <= p.y || cur.y > p.y) continue;
+		//if (nxt.y - TOL < p.y || cur.y > p.y) continue;
 		cnt += ccw(cur, nxt, p) > 0;
 	}
 	return (cnt & 1) * 2;
@@ -438,8 +439,13 @@ Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 }
 bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
 	int sz = P.size();
-	for (int i = 0; i < sz; i++)
-		if (dist(P[i], P[(i + 1) % sz], c, ABS) < r) return 0;
+	//std::cout << "c:: " << c << "\n";
+	//std::cout << "r:: " << r << "\n";
+	for (int i = 0; i < sz; i++) {
+		//std::cout << "P[" << i << "]:: " << P[i] << ", P[" << i + 1 << "]:: " << P[(i + 1) % sz] << "\n";
+		//std::cout << "dist:: " << dist(P[i], P[(i + 1) % sz], c, ABS) << "\n";
+		if (sign(dist(P[i], P[(i + 1) % sz], c, ABS) - r + TOL) < 0) return 0;
+	}
 	if (inner_check(P, c)) return 0;
 	return 1;
 }
@@ -482,8 +488,9 @@ void connect_arc(const Polygon& P, const ld& r) {
 			for (int k = 0; k < psz; k++) {
 				if (i != k) {
 					bool f1 = inside(nxt, P[i], cur, P[k]);
-					bool f2 = (P[i] - P[k]).mag() < r * 2;
-					bool f3 = (cur - P[k]).mag() < r || (nxt - P[k]).mag() < r;
+					bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
+					bool f3 = sign((cur - P[k]).mag() - r) < 0 
+						|| sign((nxt - P[k]).mag() - r) < 0;
 					if ((f1 && f2) || f3) { f0 = 0; break; }
 				}
 				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
@@ -584,7 +591,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(4);
+	std::cout.precision(15);
 	while (query());
 	return;
 }

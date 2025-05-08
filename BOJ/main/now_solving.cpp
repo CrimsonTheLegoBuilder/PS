@@ -104,7 +104,7 @@ ld dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
-ld dist(const Pos& d1, const Pos& d2, const Pos& q, bool f = REL) {
+ld dist(const Pos& d1, const Pos& d2, const Pos& q, const bool& f = REL) {
 	if (f == REL) return cross(d1, d2, q) / (d1 - d2).mag();
 	if (sign(dot(d1, d2, q)) <= 0 && sign(dot(d2, d1, q)) <= 0)
 		return std::abs(cross(d1, d2, q)) / (d1 - d2).mag();
@@ -449,7 +449,7 @@ bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
 	ld a = area(sutherland_hodgman(P, B));
 	return zero(a);
 }
-void connect_node(const int& n1, const int& n2, const ld& r, const Polygon& P) {
+void connect_node(const int& n1, const int& n2, const Polygon& P, const ld& r) {
 	Pos d1 = V[n1], d2 = V[n2];
 	if (d1.i != d2.i && connectable(d1, d2, r, P)) {
 		G[n1].push_back({ n2, (d1 - d2).mag() });
@@ -460,7 +460,7 @@ void connect_node(const int& n1, const int& n2, const ld& r, const Polygon& P) {
 void connect_seg(const Polygon& P, const ld& r) {
 	for (int i = 0; i < vp; i++)
 		for (int j = i + 1; j < vp; j++)
-			connect_node(i, j, r, P);
+			connect_node(i, j, P, r);
 	return;
 }
 void connect_arc(const Polygon& P, const ld& r) {
@@ -485,7 +485,7 @@ void connect_arc(const Polygon& P, const ld& r) {
 					bool f3 = (cur - P[k]).mag() < r || (nxt - P[k]).mag() < r;
 					if ((f1 && f2) || f3) { f0 = 0; break; }
 				}
-				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k], & p2 = P[(k + 1) % psz];
+				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
 				Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
 				for (const Pos& p : inx) {
 					if (inside(nxt, P[i], cur, p)) {
@@ -531,9 +531,13 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 			Pos v = ~(V[j] - V[i]);
 			ld w = r / d;
 			V[vp++] = P[i] + v * w;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			V[vp++] = P[j] + v * w;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			V[vp++] = P[i] - v * w;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			V[vp++] = P[j] - v * w;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			if (d > r * 2) {//tangent from m
 				Pos m = mid(P[i], P[j]);
 				ld t = get_theta(m, P[i], r);
@@ -548,6 +552,7 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 			}
 		}
 	}
+	std::cout << "vp:: " << vp << "\n";
 	assert(vp < 2500);
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < 20; i++) RV[i].clear();

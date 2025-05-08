@@ -233,7 +233,7 @@ Polygon monotone_chain(Polygon& C) {
 	}
 	return H;
 }
-Polygon convex_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
+Polygon polygon_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
 	Polygon qs;
 	int n = ps.size();
 	for (int i = 0; i < n; i++) {
@@ -249,7 +249,7 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 	std::vector<Pos> ret = C;
 	for (int i = 0; i < sz; i++) {
 		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
-		ret = convex_cut(ret, b1, b2);
+		ret = polygon_cut(ret, b1, b2);
 	}
 	return ret;
 }

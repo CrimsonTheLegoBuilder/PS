@@ -27,23 +27,12 @@ inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ld sq(const ld& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
 inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
-ld flip(ld lat) {
-	if (zero(lat - PI * .5) || zero(lat + PI * .5)) return 0;
-	if (zero(lat)) return PI * .5;
-	if (lat > 0) return PI * .5 - lat;
-	if (lat < 0) return -(PI * .5) - lat;
-	return INF;
-}
-
 #define LO x
 #define HI y
-
 #define LINE 1
 #define CIRCLE 2
-
 #define STRONG 0
 #define WEAK 1
-
 #define ABS 0
 #define REL 1
 
@@ -67,13 +56,9 @@ struct Pos {
 	}
 	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y, i }; }
-	//Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y, i }; }
-	//Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
 	Pos operator * (const ld& n) const { return { x * n, y * n, i }; }
-	//Pos operator * (const ld& n) const { return { x * n, y * n }; }
 	Pos operator / (const ld& n) const { return { x / n, y / n, i }; }
-	//Pos operator / (const ld& n) const { return { x / n, y / n }; }
 	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
 	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
 	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
@@ -81,9 +66,9 @@ struct Pos {
 	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
 	Pos& operator *= (const ld& n) { x *= n; y *= n; return *this; }
 	Pos& operator /= (const ld& n) { x /= n; y /= n; return *this; }
-	Pos operator - () const { return { -x, -y }; }
-	Pos operator ~ () const { return { -y, x }; }
-	Pos operator ! () const { return { y, x }; }
+	Pos operator - () const { return { -x, -y, i }; }
+	Pos operator ~ () const { return { -y, x, i }; }
+	Pos operator ! () const { return { y, x, i }; }
 	ld xy() const { return x * y; }
 	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
 	ld Euc() const { return x * x + y * y; }
@@ -149,8 +134,7 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 		if (on_seg_strong(cur, nxt, p)) return 1;
 		if (zero(cur.y - nxt.y)) continue;
 		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y <= p.y || cur.y > p.y) continue;
-		//if (nxt.y - TOL < p.y || cur.y > p.y) continue;
+		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
 		cnt += ccw(cur, nxt, p) > 0;
 	}
 	return (cnt & 1) * 2;
@@ -165,7 +149,7 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-Polygon convex_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
+Polygon polygon_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
 	Polygon qs;
 	int n = ps.size();
 	for (int i = 0; i < n; i++) {
@@ -181,7 +165,7 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 	std::vector<Pos> ret = C;
 	for (int i = 0; i < sz; i++) {
 		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
-		ret = convex_cut(ret, b1, b2);
+		ret = polygon_cut(ret, b1, b2);
 	}
 	return ret;
 }
@@ -354,18 +338,18 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 //	}
 //	return ret;
 //}
-Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
-	ld d = dist(p1, p2, o);
-	if (std::abs(d) > r) return {};
-	Pos vec = p2 - p1;
-	Pos m = intersection(p1, p2, o, o + ~vec);
-	ld distance = vec.mag();
-	ld ratio = sqrt(r * r - d * d);
-	Pos m1 = m - vec * ratio / distance;
-	Pos m2 = m + vec * ratio / distance;
-	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
-	return { m1, m2 };//p1->p2
-}
+//Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
+//	ld d = dist(p1, p2, o);
+//	if (std::abs(d) > r) return {};
+//	Pos vec = p2 - p1;
+//	Pos m = intersection(p1, p2, o, o + ~vec);
+//	ld distance = vec.mag();
+//	ld ratio = sqrt(r * r - d * d);
+//	Pos m1 = m - vec * ratio / distance;
+//	Pos m2 = m + vec * ratio / distance;
+//	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
+//	return { m1, m2 };//p1->p2
+//}
 Polygon circle_seg_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
 	ld d = dist(p1, p2, o);
 	if (std::abs(d) > r) return {};
@@ -465,8 +449,8 @@ bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
 }
 void connect_node(const int& n1, const int& n2, const Polygon& P, const ld& r) {
 	Pos d1 = V[n1], d2 = V[n2];
-	std::cout << "d1:: " << d1 << " d2:: " << d2 << "\n";
-	std::cout << "d1.i:: " << d1.i << " d2.i:: " << d2.i << "\n";
+	//std::cout << "d1:: " << d1 << " d2:: " << d2 << "\n";
+	//std::cout << "d1.i:: " << d1.i << " d2.i:: " << d2.i << "\n";
 	if (d1.i != d2.i && connectable(d1, d2, r, P)) {
 		G[n1].push_back({ n2, (d1 - d2).mag() });
 		G[n2].push_back({ n1, (d1 - d2).mag() });
@@ -570,32 +554,29 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 			}
 		}
 	}
-	std::cout << "vp:: " << vp << "\n";
+	//std::cout << "vp:: " << vp << "\n";
 	assert(vp < 2500);
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < 20; i++) RV[i].clear();
 	for (int i = 2; i < vp; i++) { V[i].j = i; RV[V[i].i].push_back(V[i]); }
-	std::cout << "DEBUG::\n";
-	for (int i = 0; i < vp; i++) {
-		std::cout << "V[" << i << "] = (";
-		std::cout << V[i].x << ", " << V[i].y << ")\n";
-	}
-	std::cout << "DEBUG::\n";
+	//std::cout << "DEBUG::\n";
+	//for (int i = 0; i < vp; i++) {
+	//	std::cout << "V[" << i << "] = (";
+	//	std::cout << V[i].x << ", " << V[i].y << ")\n";
+	//}
+	//std::cout << "DEBUG::\n";
 	return;
 }
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
-	//Polygon P(N); for (Pos& p : P) std::cin >> p; norm(P);
 	Polygon P(N); std::cin >> P; norm(P); for (int i = 0; i < N; i++) P[i].i = i;
 	Pos s, e; std::cin >> s >> e; s.i = -1; e.i = -2;
 	ld r = 1;
 	pos_init(s, e, P, r);
 	connect_seg(P, r);
 	connect_arc(P, r);
-	ld d = dijkstra(0, 1);
-	assert(d < INF);
-	std::cout << d << "\n";
+	ld d = dijkstra(0, 1); assert(d < INF); std::cout << d << "\n";
 	return 1;
 }
 void solve() {

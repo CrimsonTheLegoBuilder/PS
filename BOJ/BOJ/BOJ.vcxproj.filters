@@ -111,5 +111,8 @@
     <ClCompile Include="..\main\boj_bronze.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
+    <ClCompile Include="..\library\circle_outer_dijkstra.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

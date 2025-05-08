@@ -115,6 +115,7 @@ bool norm(Polygon& H) {
 	if (a < 0) { std::reverse(H.begin(), H.end()); return 1; }
 	return 0;
 }
+ld rad(const Pos& d1, const Pos& d2, const Pos& d3) { return rad(d1 - d2, d3 - d2); }
 //int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
 //	int cnt = 0;
 //	for (int i = 0; i < sz; i++) {
@@ -167,6 +168,11 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
 		ret = polygon_cut(ret, b1, b2);
 	}
+	//if (zero(area(ret))) {
+	//	std::cout << "DEBUG::\n";
+	//	for (Pos& p : ret) std::cout << p << "\n";
+	//	std::cout << "DEBUG::\n";
+	//}
 	return ret;
 }
 //struct Seg {
@@ -473,38 +479,40 @@ void connect_arc(const Polygon& P, const ld& r) {
 		std::sort(RV[i].begin(), RV[i].end());
 		for (int j = 0; j < sz; j++) RV[i][j] += P[i];
 		for (int j = 0; j < sz; j++) {
-			Pos cur = RV[i][j], nxt = RV[i][(j + 1) % sz];
-			if (cur == nxt) {
-				G[cur.j].push_back({ nxt.j, 0 });
-				G[nxt.j].push_back({ cur.j, 0 });
+			Pos lo = RV[i][j], hi = RV[i][(j + 1) % sz];
+			if (lo == hi) {
+				G[lo.j].push_back({ hi.j, 0 });
+				G[hi.j].push_back({ lo.j, 0 });
 				continue;
 			}
 			bool f0 = 1;
 			for (int k = 0; k < psz; k++) {
 				if (i != k) {
-					bool f1 = inside(nxt, P[i], cur, P[k]);
+					bool f1 = inside(hi, P[i], lo, P[k]);
 					bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
-					bool f3 = sign((cur - P[k]).mag() - r) < 0 
-						|| sign((nxt - P[k]).mag() - r) < 0;
+					bool f3 = sign((lo - P[k]).mag() - r) < 0 
+						|| sign((hi - P[k]).mag() - r) < 0;
 					if ((f1 && f2) || f3) { f0 = 0; break; }
 				}
 				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
 				Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
 				for (const Pos& p : inx) {
-					if (inside(nxt, P[i], cur, p)) {
+					if (inside(hi, P[i], lo, p)) {
 						ld d = dist(p0, p1, P[i]);
 						if (d < r * 2) { f0 = 0; break; }
 					}
 				}
+				if (!f0) break;
 			}
 			if (f0) {
-				Pos p = P[i];
-				ld t1 = norm((cur - p).rad());
-				ld t2 = norm((nxt - p).rad());
-				ld t = norm(t2 - t1);
+				//Pos p = P[i];
+				//ld t1 = norm((cur - p).rad());
+				//ld t2 = norm((nxt - p).rad());
+				//ld t = norm(t2 - t1);
+				ld t = norm(rad(lo, P[i], hi));
 				ld rd = r * t;
-				G[cur.j].push_back({ nxt.j, rd });
-				G[nxt.j].push_back({ cur.j, rd });
+				G[lo.j].push_back({ hi.j, rd });
+				G[hi.j].push_back({ lo.j, rd });
 			}
 		}
 	}
@@ -583,8 +591,29 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(15);
+	std::cout.precision(4);
 	while (query());
 	return;
 }
 int main() { solve(); return 0; }//boj22801
+
+/*
+
+12
+1 1
+1 0
+3 0
+3 4
+-3 4
+-3 0
+-1 0
+-1 1
+-2 1
+-2 3
+2 3
+2 1
+0 3 0 -3
+0
+
+
+*/

@@ -472,8 +472,8 @@ void connect_arc(const Polygon& P, const ld& r) {
 				}
 				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k], & p2 = P[(k + 1) % psz];
 				if (inside(p0, p1, p2, P[i])) { f0 = 0; break; }
-				ld d = dist(p0, p1, P[i], ABS);
-				if (d < r) { f0 = 0; break; }
+				//ld d = dist(p0, p1, P[i], ABS);
+				//if (d < r * 2) { f0 = 0; break; }
 			}
 			if (f0) {
 				Pos p = P[i];
@@ -554,7 +554,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(9);
+	std::cout.precision(4);
 	while (query());
 	return;
 }

@@ -66,10 +66,14 @@ struct Pos {
 		return tq > 0;
 	}
 	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
-	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
-	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	Pos operator * (const ld& n) const { return { x * n, y * n }; }
-	Pos operator / (const ld& n) const { return { x / n, y / n }; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y, i }; }
+	//Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y, i }; }
+	//Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator * (const ld& n) const { return { x * n, y * n, i }; }
+	//Pos operator * (const ld& n) const { return { x * n, y * n }; }
+	Pos operator / (const ld& n) const { return { x / n, y / n, i }; }
+	//Pos operator / (const ld& n) const { return { x / n, y / n }; }
 	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
 	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
 	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
@@ -447,6 +451,7 @@ bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
 		if (sign(dist(P[i], P[(i + 1) % sz], c, ABS) - r + TOL) < 0) return 0;
 	}
 	if (inner_check(P, c)) return 0;
+	//std::cout << "good::\n";
 	return 1;
 }
 bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
@@ -454,14 +459,20 @@ bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
 	Pos v = ~(e - s).unit() * r;
 	Polygon B = { s + v, s - v, e - v, e + v };
 	ld a = area(sutherland_hodgman(P, B));
+	//std::cout << "s:: " << s << " e:: " << e << "\n";
+	//std::cout << "A:: " << a << "\n";
 	return zero(a);
 }
 void connect_node(const int& n1, const int& n2, const Polygon& P, const ld& r) {
 	Pos d1 = V[n1], d2 = V[n2];
+	std::cout << "d1:: " << d1 << " d2:: " << d2 << "\n";
+	std::cout << "d1.i:: " << d1.i << " d2.i:: " << d2.i << "\n";
 	if (d1.i != d2.i && connectable(d1, d2, r, P)) {
 		G[n1].push_back({ n2, (d1 - d2).mag() });
 		G[n2].push_back({ n1, (d1 - d2).mag() });
+		//std::cout << "connect::\n";
 	}
+	//else std::cout << "fuck::\n";
 	return;
 }
 void connect_seg(const Polygon& P, const ld& r) {
@@ -535,7 +546,7 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 	for (int i = 0; i < sz; i++) {
 		for (int j = i + 1; j < sz; j++) {
 			if (i == j) continue;
-			Pos v = ~(V[j] - V[i]).unit();
+			Pos v = ~(P[j] - P[i]).unit();
 			V[vp++] = P[i] + v * r;
 			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			V[vp++] = P[j] + v * r;
@@ -544,7 +555,7 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			V[vp++] = P[j] - v * r;
 			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			ld d = (V[j] - V[i]).mag();
+			ld d = (P[j] - P[i]).mag();
 			if (d > r * 2) {//tangent from m
 				Pos m = mid(P[i], P[j]);
 				ld t = get_theta(m, P[i], r);

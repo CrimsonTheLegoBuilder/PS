@@ -111,7 +111,10 @@
     <ClCompile Include="..\main\boj_bronze.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\circle_outer_dijkstra.cpp">
+    <ClCompile Include="..\library\concave_outer_circle_dijkstra.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\concave_inner_circle_bfs_green.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
   </ItemGroup>

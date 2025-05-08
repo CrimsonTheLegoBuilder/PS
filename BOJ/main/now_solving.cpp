@@ -349,18 +349,33 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 //	}
 //	return ret;
 //}
-//Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
-//	ld d = dist(p1, p2, o);
-//	if (std::abs(d) > r) return {};
-//	Pos vec = p2 - p1;
-//	Pos m = intersection(p1, p2, o, o + ~vec);
-//	ld distance = vec.mag();
-//	ld ratio = sqrt(r * r - d * d);
-//	Pos m1 = m - vec * ratio / distance;
-//	Pos m2 = m + vec * ratio / distance;
-//	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
-//	return { m1, m2 };//p1->p2
-//}
+Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
+	ld d = dist(p1, p2, o);
+	if (std::abs(d) > r) return {};
+	Pos vec = p2 - p1;
+	Pos m = intersection(p1, p2, o, o + ~vec);
+	ld distance = vec.mag();
+	ld ratio = sqrt(r * r - d * d);
+	Pos m1 = m - vec * ratio / distance;
+	Pos m2 = m + vec * ratio / distance;
+	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
+	return { m1, m2 };//p1->p2
+}
+Polygon circle_seg_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
+	ld d = dist(p1, p2, o);
+	if (std::abs(d) > r) return {};
+	Pos vec = p2 - p1;
+	Pos m = intersection(p1, p2, o, o + ~vec);
+	ld distance = vec.mag();
+	ld ratio = sqrt(r * r - d * d);
+	Pos m1 = m - vec * ratio / distance;
+	Pos m2 = m + vec * ratio / distance;
+	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
+	Polygon ret;
+	if (on_seg_strong(p1, p2, m1)) ret.push_back(m1);
+	if (on_seg_strong(p1, p2, m2)) ret.push_back(m2);
+	return ret;//p1->p2
+}
 //ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
 //	Pos v1 = p1 - c.c, v2 = p2 - c.c;
 //	ld r = c.r;
@@ -471,9 +486,13 @@ void connect_arc(const Polygon& P, const ld& r) {
 					if ((f1 && f2) || f3) { f0 = 0; break; }
 				}
 				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k], & p2 = P[(k + 1) % psz];
-				if (inside(p0, p1, p2, P[i])) { f0 = 0; break; }
-				//ld d = dist(p0, p1, P[i], ABS);
-				//if (d < r * 2) { f0 = 0; break; }
+				Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
+				for (const Pos& p : inx) {
+					if (inside(nxt, P[i], cur, p)) {
+						ld d = dist(p0, p1, P[i]);
+						if (d < r * 2) { f0 = 0; break; }
+					}
+				}
 			}
 			if (f0) {
 				Pos p = P[i];

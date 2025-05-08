@@ -432,7 +432,8 @@ bool close(const Pos& d, const Pos& q, const ld& r) { return (d - q).mag() < r; 
 bool close(const Pos& d1, const Pos& d2, const Pos& q, const ld& r) { dist(d1, d2, q, ABS) < r; }
 Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 	Pos v = p - pv;
-	Pos q = v.rot(t); q += pv; q.i = i;
+	ld rat = cos(t);
+	Pos q = v.rot(t) * rat; q += pv; q.i = i;
 	return q;
 }
 bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
@@ -527,17 +528,16 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 	for (int i = 0; i < sz; i++) {
 		for (int j = i + 1; j < sz; j++) {
 			if (i == j) continue;
+			Pos v = ~(V[j] - V[i]).unit();
+			V[vp++] = P[i] + v * r;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
+			V[vp++] = P[j] + v * r;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
+			V[vp++] = P[i] - v * r;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
+			V[vp++] = P[j] - v * r;
+			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			ld d = (V[j] - V[i]).mag();
-			Pos v = ~(V[j] - V[i]);
-			ld w = r / d;
-			V[vp++] = P[i] + v * w;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			V[vp++] = P[j] + v * w;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			V[vp++] = P[i] - v * w;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
-			V[vp++] = P[j] - v * w;
-			if (!circle_is_ok(V[vp - 1], r, P)) vp--;
 			if (d > r * 2) {//tangent from m
 				Pos m = mid(P[i], P[j]);
 				ld t = get_theta(m, P[i], r);
@@ -557,6 +557,12 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < 20; i++) RV[i].clear();
 	for (int i = 2; i < vp; i++) { V[i].j = i; RV[V[i].i].push_back(V[i]); }
+	std::cout << "DEBUG::\n";
+	for (int i = 0; i < vp; i++) {
+		std::cout << "V[" << i << "] = (";
+		std::cout << V[i].x << ", " << V[i].y << ")\n";
+	}
+	std::cout << "DEBUG::\n";
 	return;
 }
 bool query() {

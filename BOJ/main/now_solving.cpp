@@ -22,11 +22,17 @@ const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
 const int LEN = 25;
-inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
+inline int sign(const ld& x) { return x <= -TOL ? -1 : x >= TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
+inline ll sq(const ll& x) { return x * x; }
 inline ld sq(const ld& x) { return x * x; }
+inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
+
+#define INSIDE 0
+#define MEET 1
+#define OUTSIDE 2
 #define LO x
 #define HI y
 #define LINE 1
@@ -36,7 +42,10 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 #define ABS 0
 #define REL 1
 
-int N, M, K, T, Q;
+int T, N, M;
+bool F[3];
+Vld Q;
+Vint sts;
 struct Pos {
 	ld x, y;
 	int i, j;
@@ -69,7 +78,6 @@ struct Pos {
 } V[LEN * LEN * 4]; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 typedef std::set<Pos> MapPos;
-MapPos S;
 std::istream& operator >> (std::istream& is, Polygon& P) { for (Pos& p : P) is >> p.x >> p.y; return is; }
 bool cmpr(const Pos& p, const Pos& q) {
 	bool f1 = O < p;
@@ -152,213 +160,396 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 	}
 	return ret;
 }
-Polygon circle_seg_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
-	ld d = dist(p1, p2, o);
-	if (std::abs(d) > r) return {};
-	Pos vec = p2 - p1;
-	Pos m = intersection(p1, p2, o, o + ~vec);
-	ld distance = vec.mag();
-	ld ratio = sqrt(r * r - d * d);
-	Pos m1 = m - vec * ratio / distance;
-	Pos m2 = m + vec * ratio / distance;
-	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
-	Polygon ret;
-	if (on_seg_strong(p1, p2, m1)) ret.push_back(m1);
-	if (on_seg_strong(p1, p2, m2)) ret.push_back(m2);
-	return ret;//p1->p2
-}
-ld C[LEN * LEN * 4]; int vp;
-struct Info {
-	int i;
-	ld c;
-	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
-	bool operator < (const Info& x) const { return c > x.c; }
+struct Seg {
+	Pos s, e;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
+	Pos p(const ld& rt) const { return s + (e - s) * rt; }
+	ld green(const ld& lo = 0, const ld& hi = 1) const {
+		ld d = hi - lo;
+		ld ratio = (lo + hi) * .5;
+		Pos m = p(ratio);
+		return m.y * d * (s.x - e.x);
+	}
 };
-std::vector<Info> G[LEN * LEN * 4];
-ld dijkstra(const int& v, const int& g) {
-	std::priority_queue<Info> PQ;
-	for (int i = 0; i < vp; i++) C[i] = INF;
-	PQ.push(Info(v, 0));
-	C[v] = 0;
-	while (PQ.size()) {
-		Info p = PQ.top(); PQ.pop();
-		if (p.c > C[p.i]) continue;
-		for (Info& w : G[p.i]) {
-			ld cost = p.c + w.c;
-			if (C[w.i] > cost) {
-				C[w.i] = cost;
-				PQ.push(Info(w.i, cost));
-			}
-		}
+ld intersection(const Seg& s1, const Seg& s2, const bool& f = STRONG) {
+	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	if (f == WEAK) return fit(a1, 0, 1);
+	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	return -1;
+}
+struct Circle {
+	Pos c;
+	ll r;
+	Circle(Pos c_ = Pos(), ll r_ = 0) : c(c_), r(r_) {}
+	bool operator > (const Pos& p) const { return sign(r - (c - p).mag()) > 0; }
+	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
+	ld rad(const Pos& p) const { return (p - c).rad(); }
+	ld area(const ld& lo, const ld& hi) const { return (hi - lo) * r * r * .5; }
+	ld green(const ld& lo, const ld& hi) const {
+		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
+		ld fan = area(lo, hi);
+		Pos m = c + (s + e) * r * (ld).5;
+		ld tz = (cos(lo) - cos(hi)) * m.y * r;
+		return fan + tz - (s / e) * r * r * (ld).5;
 	}
-	return C[g];
+	friend std::istream& operator >> (std::istream& is, Circle& p) { is >> p.c.x >> p.c.y >> p.r; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Circle& p) { os << p.c.x << " " << p.c.y << " " << p.r; return os; }
+} C[3];
+Vld intersections(const Circle& a, const Circle& b) {
+	Pos ca = a.c, cb = b.c;
+	Pos vec = cb - ca;
+	ld ra = a.r, rb = b.r;
+	ld distance = vec.mag();
+	ld rd = vec.rad();
+	if (vec.Euc() > sq(ra + rb) + TOL) return {};
+	if (vec.Euc() < sq(ra - rb) - TOL) return {};
+	ld X = (ra * ra - rb * rb + vec.Euc()) / (2 * distance * ra);
+	if (X < -1) X = -1;
+	if (X > 1) X = 1;
+	ld h = acos(X);
+	Vld ret = {};
+	ret.push_back(norm(rd - h));
+	if (zero(h)) return ret;
+	ret.push_back(norm(rd + h));
+	return ret;
 }
-Polygon RV[LEN];//revolve
-ld get_theta(const Pos& d1, const Pos& d2, const ld& r) { return asin(r / (d1 - d2).mag()); }
-Pos mid(const Pos& d1, const Pos& d2) { return (d1 + d2) * .5; }
-Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
-	Pos v = p - pv;
-	ld rat = cos(t);
-	Pos q = v.rot(t) * rat; q += pv; q.i = i;
-	return q;
+struct Sphere {
+	ll x, y, z, r;
+	Sphere(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
+	bool operator < (const Sphere& q) const { return r > q.r; }
+	Sphere operator - (const Sphere& q) const { return { x - q.x, y - q.y, z - q.z, 0 }; }
+	ll operator * (const Sphere& q) const { return x * q.x + y * q.y + z * q.z; }
+	ld vol() const { return (4. / 3) * PI * r * r * r; }
+	ld vol(const ld& h) const { return PI * h * h * (3 * r - h) / 3; }
+	ld surf() const { return PI * 4 * r * r; }
+	ld surf(const ld& h) const { return PI * 2 * r * h; }
+} S[3], SP[LEN * 3];
+ll Euc(const Sphere& p, const Sphere& q) { return sq(p.x - q.x) + sq(p.y - q.y) + sq(p.z - q.z); }
+ld mag(const Sphere& p, const Sphere& q) { return sqrtl(Euc(p, q)); }
+ld rad(const Sphere& a, const Sphere& b, const Sphere& c) {
+	ld dab = mag(a, b);
+	ld dac = mag(a, c);
+	ll det = (b - a) * (c - a);
+	ld proj = det / dab;
+	ld ret = fit(proj / dac, -1, 1);
+	return acos(ret);
 }
-bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
-	int sz = P.size();
-	for (int i = 0; i < sz; i++) {
-		if (sign(dist(P[i], P[(i + 1) % sz], c, ABS) - r + TOL) < 0) return 0;
-	}
-	if (inner_check(P, c)) return 0;
-	return 1;
+int meet(const Sphere& p, const Sphere& q) {
+	ll dist = Euc(p, q);
+	ll rout = sq(p.r + q.r);
+	if (dist >= rout) return OUTSIDE;
+	ll rin = sq(p.r - q.r);
+	if (dist <= rin) return INSIDE;
+	return MEET;
 }
-bool connectable(const Pos& s, const Pos& e, const ld& r, const Polygon& P) {
-	if (s == e) return 1;
-	Pos v = ~(e - s).unit() * r;
-	Polygon B = { s + v, s - v, e - v, e + v };
-	ld a = area(sutherland_hodgman(P, B));
-	return zero(a);
+ld cos_2nd(const ld& a, const ld& b, const ld& c) {
+	ld num = sq(a) + sq(b) - sq(c);
+	ld den = 2 * a * b;
+	ld t = num / den;
+	return std::abs(acosl(std::min(std::max(t, -(ld)1.0), (ld)1.0)));
 }
-void connect_node(const int& n1, const int& n2, const Polygon& P, const ld& r) {
-	Pos d1 = V[n1], d2 = V[n2];
-	if (d1.i != d2.i && connectable(d1, d2, r, P)) {
-		G[n1].push_back({ n2, (d1 - d2).mag() });
-		G[n2].push_back({ n1, (d1 - d2).mag() });
-	}
+void spherical_triangle_angles(const ld& a, const ld& b, const ld& c, ld& A_, ld& B_, ld& C_) {
+	A_ = acos(fit((cos(a) - cos(b) * cos(c)) / (sin(b) * sin(c)), -1, 1));
+	B_ = acos(fit((cos(b) - cos(a) * cos(c)) / (sin(a) * sin(c)), -1, 1));
+	C_ = acos(fit((cos(c) - cos(a) * cos(b)) / (sin(a) * sin(b)), -1, 1));
 	return;
 }
-void connect_seg(const Polygon& P, const ld& r) {
-	for (int i = 0; i < vp; i++)
-		for (int j = i + 1; j < vp; j++)
-			connect_node(i, j, P, r);
-	return;
+ld area(const ld& a, const ld& b, const ld& c, const ll& r, const ld& t) {
+	ld A_, B_, C_;
+	if (a >= PI) {
+		spherical_triangle_angles(a * .5, t, c, A_, B_, C_);
+		return r * r * (A_ + B_ + C_ - PI) * 2;
+	}
+	spherical_triangle_angles(a, b, c, A_, B_, C_);
+	return r * r * (A_ + B_ + C_ - PI);
 }
-void connect_arc(const Polygon& P, const ld& r) {
-	int psz = P.size();
-	for (int i = 0; i < psz; i++) {
-		int sz = RV[i].size();
-		for (int j = 0; j < sz; j++) RV[i][j] -= P[i];
-		std::sort(RV[i].begin(), RV[i].end(), cmpr);
-		for (int j = 0; j < sz; j++) RV[i][j] += P[i];
-		for (int j = 0; j < sz; j++) {
-			Pos lo = RV[i][j], hi = RV[i][(j + 1) % sz];
-			if (lo == hi) {
-				G[lo.j].push_back({ hi.j, 0 });
-				G[hi.j].push_back({ lo.j, 0 });
-				continue;
-			}
-			bool f0 = 1;
-			for (int k = 0; k < psz; k++) {
-				if (i != k) {
-					bool f1 = inside(hi, P[i], lo, P[k]);
-					bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
-					bool f3 = sign((lo - P[k]).mag() - r) < 0
-						|| sign((hi - P[k]).mag() - r) < 0;
-					if ((f1 && f2) || f3) {
-						f0 = 0;
-						break;
-					}
-				}
-				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
-				Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
-				for (const Pos& p : inx) {
-					if (inside(hi, P[i], lo, p, WEAK)) {
-						ld d = dist(p0, p1, P[i]);
-						if (d < r * 2) {
-							f0 = 0;
-							break;
-						}
-					}
-				}
-				if (!f0) break;
-			}
-			if (f0) {
-				ld t = norm(rad(lo, P[i], hi));
-				ld rd = r * t;
-				G[lo.j].push_back({ hi.j, rd });
-				G[hi.j].push_back({ lo.j, rd });
+ld two_union(const Sphere& a, const Sphere& b) {
+	int f = meet(a, b);
+	if (f == OUTSIDE) return a.vol() + b.vol();
+	if (f == INSIDE) { return a.r >= b.r ? a.vol() : b.vol(); }
+	ld d = mag(a, b);
+	Pos ca = Pos(0, 0);
+	Pos cb = Pos(d, 0);
+	Circle aa = Circle(ca, a.r);
+	Circle bb = Circle(cb, b.r);
+	Vld inxs = intersections(aa, bb);
+	assert(inxs.size());
+	Pos p = aa.p(inxs[0]);
+	ld ha = a.r - p.x;
+	ld hb = p.x - d + b.r;
+	return a.vol(a.r + a.r - ha) + b.vol(b.r + b.r - hb);
+}
+ld volume(const ll& r, const Polygon& hp) {
+	int sz = hp.size();
+	assert(sz);
+	if (sz == 1) {
+		ld t = norm(hp[0].HI - hp[0].LO) * .5;
+		ld d = r * cosl(t);
+		ld h = r - d;
+		return Sphere(0, 0, 0, r).vol(r + r - h);
+	}
+	auto inside = [&](const Pos& p, const ld& t) -> bool {
+		if (p.LO < p.HI) {
+			if (p.LO < t && t < p.HI) return 1;
+		}
+		else {//(p.LO > p.HI)
+			if (p.LO < t || t < p.HI) return 1;
+		}
+		return 0;
+		};
+	auto outer_check = [&](const Pos& p, const Pos& q) -> bool {
+		return !inside(p, q.LO) && !inside(p, q.HI);
+		};
+	auto the = [&](const ld& dd, const ld& rr) -> ld {
+		ld w = dd / rr;
+		assert(std::abs(dd) <= std::abs(rr));
+		return norm(acosl(fit(w, -1, 1))) * 2;
+		};
+	auto area_ = [&](const ld& rr, const ld& t) -> ld {
+		ld fan = std::abs(rr * rr * (2 * PI - t) * .5);
+		ld z = t * .5;
+		ld tri = rr * sin(z) * rr * cos(z);
+		tri = std::abs(tri);
+		if (t < PI) return fan + tri;
+		return fan - tri;
+		};
+	auto cone_vol = [&](const ld& rr, const ld& t, const ld& h) -> ld {
+		ld rat = area_(rr, t) / (rr * rr * PI);
+		ld vol = rr * rr / 3 * rat * PI * h;
+		return vol;
+		};
+	Circle c = Circle(Pos(), r);
+	assert(sz == 2);
+	Pos u = hp[0], v = hp[1];
+	ld tu = norm(u.HI - u.LO) * .5;
+	ld mu = norm(u.HI + u.LO) * .5;
+	if (!inside(u, mu)) mu = norm(mu + PI);
+	ld du = r * cosl(tu);
+	ld ru = r * sinl(tu);
+	ld hu = r - du;
+	ld tv = norm(v.HI - v.LO) * .5;
+	ld mv = norm(v.HI + v.LO) * .5;
+	if (!inside(v, mv)) mv = norm(mv + PI);
+	ld dv = r * cosl(tv);
+	ld rv = r * sinl(tv);
+	ld hv = r - dv;
+	if (eq(tu * 2, PI) && eq(tv * 2, PI)) {
+		Polygon P;
+		for (const Pos& p : hp) {
+			if (p.LO < p.HI) P.push_back(p);
+			else {
+				P.push_back(Pos(0, p.LO));
+				P.push_back(Pos(p.HI, 2 * PI));
 			}
 		}
-	}
-	return;
-}
-void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
-	S.clear();
-	vp = 0;
-	V[vp++] = s;
-	V[vp++] = e;
-	int sz = P.size();
-	Pos p0, p1, p2, p3;
-	for (int i = 0; i < sz; i++) {
-		ld t1 = get_theta(s, P[i], r);
-		ld t2 = get_theta(e, P[i], r);
-		p0 = rotate(P[i], s, t1, i);
-		p1 = rotate(P[i], s, -t1, i);
-		p2 = rotate(P[i], e, t2, i);
-		p3 = rotate(P[i], e, -t2, i);
-		for (const Pos& p : { p0, p1, p2, p3 }) {
-			if (!S.count(p) && circle_is_ok(p, r, P)) {
-				V[vp++] = p; S.insert(p);
-			}
+		std::sort(P.begin(), P.end());
+		P.push_back(Pos(2 * PI, 2 * PI));
+		ld hi = 0, tt = 0;
+		for (const Pos& p : P) {
+			if (hi < p.LO) tt += (p.LO - hi), hi = p.HI;
+			else hi = std::max(hi, p.HI);
 		}
+		ld vol = Sphere(0, 0, 0, r).vol();
+		return vol * (tt / (2 * PI));
 	}
-	for (int i = 0; i < sz; i++) {
-		for (int j = i + 1; j < sz; j++) {
+	bool f1 = outer_check(u, v), f2 = outer_check(v, u);
+	if (f1 && f2) {
+		ld volu = Sphere(0, 0, 0, r).vol(hu);
+		ld volv = Sphere(0, 0, 0, r).vol(hv);
+		return Sphere(0, 0, 0, r).vol() - volu - volv;
+	}
+	if (f1) return Sphere(0, 0, 0, r).vol(r + r - hv);
+	if (f2) return Sphere(0, 0, 0, r).vol(r + r - hu);
+	Pos us = c.p(u.LO), ue = c.p(u.HI);
+	Pos vs = c.p(v.LO), ve = c.p(v.HI);
+	Seg U = Seg(us, ue);
+	Seg V = Seg(vs, ve);
+	Pos m = intersection(us, ue, vs, ve);
+	ld dm = m.mag();
+	ld tm = norm(m.rad());
+	if (du < TOL && dv < TOL) { dm *= -1; tm = norm(tm + PI); }
+	ld ttu = std::min(norm(tm - mu), norm(mu - tm));
+	ld ttv = std::min(norm(tm - mv), norm(mv - tm));
+	ld a_ = the(dm, r);
+	ld suf = 0;
+	ld x;
+	x = intersection(U, V);
+	assert(-TOL < x && x < 1 + TOL);
+	x = .5 - x;
+	if (inside(v, u.HI)) x *= -1;
+	ld ang_u = the(x, 0.5);
+	suf += Sphere(0, 0, 0, r).surf(hu) * ((PI * 2 - ang_u) / (PI * 2));
+	x = intersection(V, U);
+	assert(-TOL < x && x < 1 + TOL);
+	x = .5 - x;
+	if (inside(u, v.HI)) x *= -1;
+	ld ang_v = the(x, 0.5);
+	suf += Sphere(0, 0, 0, r).surf(hv) * ((PI * 2 - ang_v) / (PI * 2));
+	int su = 0;
+	if ((inside(Pos(u.LO, mu), tm) && inside(v, u.HI)) ||
+		(inside(Pos(mu, u.HI), tm) && inside(v, u.LO))) su = -1;
+	else su = 1;
+	int sv = 0;
+	if ((inside(Pos(v.LO, mv), tm) && inside(u, v.HI)) ||
+		(inside(Pos(mv, v.HI), tm) && inside(u, v.LO))) sv = -1;
+	else sv = 1;
+	x = intersection(U, V);
+	if (du < 0 && dv > 0 && (
+		(inside(v, u.LO) && x > .5) ||
+		(inside(v, u.HI) && x < .5)
+		)) suf += (Sphere(0, 0, 0, r).surf() - area(a_, tu, tu, r, ttu)) * su;
+	else suf += area(a_, tu, tu, r, ttu) * su;
+	x = intersection(V, U);
+	if (dv < 0 && du > 0 && (
+		(inside(u, v.LO) && x > .5) ||
+		(inside(u, v.HI) && x < .5)
+		)) suf += (Sphere(0, 0, 0, r).surf() - area(a_, tv, tv, r, ttv)) * sv;
+	else suf += area(a_, tv, tv, r, ttv) * sv;
+	suf = Sphere(0, 0, 0, r).surf() - suf;
+	ld ratio = suf / Sphere(0, 0, 0, r).surf();
+	ld total = Sphere(0, 0, 0, r).vol() * ratio;
+	total += cone_vol(ru, ang_u, du);
+	total += cone_vol(rv, ang_v, dv);
+	if (total < 0 || zero(du) || zero(dv)) {
+		bool f = 1;
+		Pos u_ = eq(tu * 2, PI) ? u : v;
+		Pos v_ = eq(tu * 2, PI) ? v : u;
+		assert(u_ != v_);
+		ld suf = Sphere(0, 0, 0, r).surf() * .5, x;
+		mv = norm(v_.HI + v_.LO) * .5;
+		if (!inside(v_, mv)) mv = norm(mv + PI);
+		if (eq(u_.LO, mv) || eq(u_.HI, mv)) {
+			tv = norm(v_.HI - v_.LO) * .5;
+			dv = r * cosl(tv);
+			rv = r * sinl(tv);
+			hv = r - dv;
+			return Sphere(0, 0, 0, r).vol(r + r - hv) * .5;
+		}
+		if (inside(u_, mv)) { f = 0; std::swap(v_.LO, v_.HI); }
+		mv = norm(v_.HI + v_.LO) * .5;
+		if (!inside(v_, mv)) mv = norm(mv + PI);
+		Pos us = c.p(u_.LO), ue = c.p(u_.HI);
+		Pos vs = c.p(v_.LO), ve = c.p(v_.HI);
+		Seg U = Seg(us, ue);
+		Seg V = Seg(vs, ve);
+		assert(!inside(u_, mv));
+		tv = norm(v_.HI - v_.LO) * .5;
+		dv = r * cosl(tv);
+		rv = r * sinl(tv);
+		hv = r - dv;
+		x = intersection(U, V);
+		assert(-TOL < x && x < 1 + TOL);
+		x = .5 - x;
+		if (inside(v_, u_.HI)) x *= -1;
+		assert(x != 0);
+		ld a_ = the(x, .5);
+		x = intersection(V, U);
+		assert(-TOL < x && x < 1 + TOL);
+		x = .5 - x;
+		if (inside(u_, v_.HI)) x *= -1;
+		ld ang_v = the(x, 0.5);
+		suf += Sphere(0, 0, 0, r).surf(hv) * ((PI * 2 - ang_v) / (PI * 2));
+		ld ttv = 0;
+		if (inside(u_, v_.HI)) ttv = std::min(norm(u_.LO - mv), norm(mv - u_.LO));
+		else ttv = std::min(norm(u_.HI - mv), norm(mv - u_.HI));
+		ld tri = area(a_, tv, tv, r, ttv);
+		suf += tri;
+		suf = Sphere(0, 0, 0, r).surf() - suf;
+		ld ratio = suf / Sphere(0, 0, 0, r).surf();
+		ld total = Sphere(0, 0, 0, r).vol() * ratio;
+		total += cone_vol(rv, ang_v, dv);
+		return f ? total : (Sphere(0, 0, 0, r).vol() * .5 - total);
+	}
+	return total;
+}
+void query(const int& q) {
+	for (int i = 0; i < 3; i++) {
+		std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r, F[i] = 0;
+		SP[q * 3 + i] = S[i];
+	}
+	std::sort(S, S + 3);
+	assert(S[0].r >= S[1].r && S[1].r >= S[2].r);
+	int f01 = meet(S[0], S[1]);
+	int f02 = meet(S[0], S[2]);
+	int f12 = meet(S[1], S[2]);
+	if (f01 == INSIDE) F[1] = 1;
+	if (f02 == INSIDE || f12 == INSIDE) F[2] = 1;
+	if (F[1] && F[2]) { Q[q] = S[0].vol(); sts[q] = 1; return; }
+	if (F[1]) { Q[q] = two_union(S[0], S[2]); sts[q] = 2; return; }
+	if (F[2]) { Q[q] = two_union(S[0], S[1]); sts[q] = 2; return; }
+	if (f01 == OUTSIDE && f02 == OUTSIDE) {
+		ld ret = S[0].vol() + two_union(S[1], S[2]);
+		Q[q] = ret;
+		sts[q] = 2;
+		return;
+	}
+	if (f01 == OUTSIDE && f12 == OUTSIDE) {
+		ld ret = S[1].vol() + two_union(S[0], S[2]);
+		Q[q] = ret;
+		sts[q] = 2;
+		return;
+	}
+	if (f02 == OUTSIDE && f12 == OUTSIDE) {
+		ld ret = S[2].vol() + two_union(S[0], S[1]);
+		Q[q] = ret;
+		sts[q] = 2;
+		return;
+	}
+	ld dab = mag(S[0], S[1]);
+	ld dac = mag(S[0], S[2]);
+	Pos ca = Pos(0, 0);
+	Pos cb = Pos(dab, 0);
+	ld t = rad(S[0], S[1], S[2]);
+	Pos cc = Pos(dac, 0).rot(t);
+	C[0] = Circle(ca, S[0].r);
+	C[1] = Circle(cb, S[1].r);
+	C[2] = Circle(cc, S[2].r);
+	ld ret = 0;
+	for (int i = 0; i < 3; i++) {
+		Polygon arc, hp;
+		for (int j = 0; j < 3; j++) {
 			if (i == j) continue;
-			Pos v = ~(P[j] - P[i]).unit();
-			p0 = P[i] + v * r;
-			p1 = P[j] + v * r;
-			p2 = P[i] - v * r;
-			p3 = P[j] - v * r;
-			for (const Pos& p : { p0, p1, p2, p3 }) {
-				if (!S.count(p) && circle_is_ok(p, r, P)) {
-					V[vp++] = p; S.insert(p);
-				}
-			}
-			ld d = (P[j] - P[i]).mag();
-			if (d > r * 2) {//tangent from m
-				Pos m = mid(P[i], P[j]);
-				ld t = get_theta(m, P[i], r);
-				p0 = rotate(P[i], m, t, i);
-				p1 = rotate(P[j], m, t + PI, j);
-				p2 = rotate(P[i], m, -t, i);
-				p3 = rotate(P[j], m, -t - PI, j);
-				for (const Pos& p : { p0, p1, p2, p3 }) {
-					if (!S.count(p) && circle_is_ok(p, r, P)) {
-						V[vp++] = p; S.insert(p);
-					}
-				}
+			Vld inxs = intersections(C[i], C[j]);
+			int sz = inxs.size();
+			if (sz == 0) continue;
+			assert(sz == 2);
+			ld lo = inxs[0], hi = inxs[1];
+			hp.push_back(Pos(lo, hi));
+			if (lo < hi) arc.push_back(Pos(lo, hi));
+			else {
+				arc.push_back(Pos(lo, 2 * PI));
+				arc.push_back(Pos(0, hi));
 			}
 		}
-	}
-	assert(vp < 2500);
-	for (int i = 0; i < vp; i++) G[i].clear();
-	for (int i = 0; i < 20; i++) RV[i].clear();
-	for (int j = 2; j < vp; j++) {
-		V[j].j = j;
-		for (int i = 0; i < sz; i++) {
-			ld d = (P[i] - V[j]).mag();
-			if (zero(d - r)) RV[i].push_back(V[j]);
+		std::sort(arc.begin(), arc.end());
+		arc.push_back(Pos(2 * PI, 2 * PI));
+		ld hi = 0, rnd = 0;
+		for (const Pos& p : arc) {
+			if (hi < p.LO) rnd += (p.LO - hi), hi = p.HI;
+			else hi = std::max(hi, p.HI);
 		}
+		if (rnd < TOL) {
+			Q[q] = two_union(S[(i + 1) % 3], S[(i + 2) % 3]);
+			sts[q] = 2;
+			return;
+		}
+		ld vol = volume(C[i].r, hp);
+		ret += vol;
 	}
+	Q[q] = ret;
+	sts[q] = 3;
 	return;
-}
-bool query() {
-	std::cin >> N;
-	if (!N) return 0;
-	Polygon P(N); std::cin >> P; norm(P); for (int i = 0; i < N; i++) P[i].i = i;
-	Pos s, e; std::cin >> s >> e; s.i = -1; e.i = -2;
-	ld r = 1;
-	pos_init(s, e, P, r);
-	connect_seg(P, r);
-	connect_arc(P, r);
-	ld d = dijkstra(0, 1); assert(d < INF); std::cout << d << "\n";
-	return 1;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(4);
-	while (query());
+	std::cout.precision(9);
+
 	return;
 }
-int main() { solve(); return 0; }//boj22801
+int main() { solve(); return 0; }//boj23590

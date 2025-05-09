@@ -424,7 +424,7 @@ ld get_theta(const Pos& d1, const Pos& d2, const ld& r) { return asin(r / (d1 - 
 Pos mid(const Pos& d1, const Pos& d2) { return (d1 + d2) * .5; }
 bool between(const Pos& d1, const Pos& d2, const Pos& q) { return sign(dot(d1, d2, q)) <= 0 && sign(dot(d2, d1, q)) <= 0; }
 bool close(const Pos& d, const Pos& q, const ld& r) { return (d - q).mag() < r; }
-bool close(const Pos& d1, const Pos& d2, const Pos& q, const ld& r) { dist(d1, d2, q, ABS) < r; }
+bool close(const Pos& d1, const Pos& d2, const Pos& q, const ld& r) { return dist(d1, d2, q, ABS) < r; }
 Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 	Pos v = p - pv;
 	ld rat = cos(t);

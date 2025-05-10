@@ -723,6 +723,7 @@ struct Pos3D {
 		ld s = sin(th), c = cos(th); Pos3D n = axis.unit();
 		return n * (*this * n) * (1 - c) + (*this * c) + (n / *this) * s;
 	}
+	friend ld rad(const Pos3D& p1, const Pos3D& p2) { return atan2l((p1 / p2).mag(), p1 * p2); }
 	friend std::istream& operator >> (std::istream& is, Pos3D& p) { is >> p.x >> p.y >> p.z; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos3D& p) { os << p.x << " " << p.y << " " << p.z; return os; }
 };
@@ -740,7 +741,6 @@ Pos3D S2C(const ld& lon, const ld& lat) {//Spherical to Cartesian
 }
 Pos3D point(const Pos3D Xaxis, const Pos3D Yaxis, const ld& th) { return Xaxis * cos(th) + Yaxis * sin(th); }
 ld angle(const Pos3D Xaxis, const Pos3D Yaxis, const Pos3D& p) { return norm(atan2(Yaxis * p, Xaxis * p)); }
-int above(const Plane& S, const Pos3D& p) { return sign(p * S.norm() + S.d); }
 //ld randTOL() {
 //	ld rand01 = rand() / (ld)RAND_MAX;
 //	ld err = (rand01 - .5) * TOL;
@@ -835,6 +835,7 @@ struct Plane {
 } knife;
 Plane plane(const Pos3D& p, const ld& n) { return Plane(p.x, p.y, p.z, n); }
 ld dist(const Plane& s, const Pos3D& p) { return (s.norm() * p + s.d) / s.norm().mag(); }
+int above(const Plane& S, const Pos3D& p) { return sign(p * S.norm() + S.d); }
 Pos3D intersection(const Plane& S, const Line3D& l) {
 	ld det = S.norm() * l.dir;
 	if (zero(det)) return { INF, INF, INF };
@@ -1071,11 +1072,11 @@ struct Planar {
 	Pos3D norm, p0;
 	Planar(Pos3D n = Pos3D(0, 0, 0), Pos3D p0_ = Pos3D(0, 0, 0)) : norm(n), p0(p0_) {}
 };
-Planar P(const Pos3D& p1, const Pos3D& p2, const Pos3D& p3) {
+Planar planar(const Pos3D& p1, const Pos3D& p2, const Pos3D& p3) {
 	Pos3D norm = (p2 - p1) / (p3 - p2);
 	return Planar(norm, p1);
 }
-Planar P(std::vector<Pos3D>& tri) {
+Planar planar(std::vector<Pos3D>& tri) {
 	Pos3D p1 = tri[0], p2 = tri[1], p3 = tri[2];
 	Pos3D norm = (p2 - p1) / (p3 - p2);
 	return Planar(norm, p1);

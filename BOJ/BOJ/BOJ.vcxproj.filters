@@ -117,5 +117,8 @@
     <ClCompile Include="..\library\concave_inner_circle_bfs_green.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\boj23590_ing.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

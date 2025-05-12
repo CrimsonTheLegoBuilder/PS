@@ -763,4 +763,4 @@ void solve() {
 
 	return;
 }
-int main() { solve(); return 0; }//boj23590
+int main() { solve(); return 0; }//boj30123

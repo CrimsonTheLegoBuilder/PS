@@ -9,28 +9,22 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 
-int N, M, K;
-ll c, s, i, a;
+int N, M, K, T;
+ll A, B, C;
+int I[1005];
 std::vector<ll> V;
-char t;
+std::string S;
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	while (N--) {
-		std::cin >> t;
-		if (t == 'C') c++;
-		if (t == 'S') s++;
-		if (t == 'I') i++;
-		if (t == 'A') a++;
-	}
-	std::cin >> t;
-	if (t == 'C') K = c;
-	if (t == 'S') K = s;
-	if (t == 'I') K = i;
-	if (t == 'A') K = a;
-	std::cout << K << "\n";
+	while (std::cin >> S) {
+		int sz = S.size();
+		for (int i = 0; i < sz; i++) {
+			if (i == 0 || S[i - 1] != S[i]) std::cout << S[i];
+		}
+		std::cout << " ";
+	} 
 	return 0;
 }

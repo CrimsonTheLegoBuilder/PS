@@ -218,12 +218,14 @@ Pos rotate(const Pos& p, const Pos& pv, const ld& t, const int& i) {
 	Pos q = v.rot(t) * rat; q += pv; q.i = i;
 	return q;
 }
-bool circle_is_ok(const Pos& c, const ld& r, const Polygon& P) {
-	int sz = P.size();
-	for (int i = 0; i < sz; i++) {
-		if (sign(dist(P[i], P[(i + 1) % sz], c, ABS) - r + TOL) < 0) return 0;
+bool circle_is_ok(const Pos& c, const ld& r) {
+	for (int j = 0; j < N; j++) {
+		const Polygon& P = H[j];
+		for (int i = 0; i < 4; i++) {
+			if (sign(dist(P[i], P[(i + 1) % 4], c, ABS) - r + TOL) < 0) return 0;
+		}
+		if (inner_check(P, c)) return 0;
 	}
-	if (inner_check(P, c)) return 0;
 	return 1;
 }
 bool connectable(const Pos& s, const Pos& e, const ld& r) {
@@ -244,13 +246,13 @@ void connect_node(const int& n1, const int& n2, const ld& r) {
 	}
 	return;
 }
-void connect_seg(const Polygon& P, const ld& r) {
+void connect_seg(const ld& r) {
 	for (int i = 0; i < vp; i++)
 		for (int j = i + 1; j < vp; j++)
 			connect_node(i, j, r);
 	return;
 }
-void connect_arc(const Polygon& P, const ld& r) {
+void connect_arc(const ld& r) {
 	int psz = P.size();
 	for (int i = 0; i < psz; i++) {
 		int sz = RV[i].size();
@@ -299,23 +301,25 @@ void connect_arc(const Polygon& P, const ld& r) {
 	}
 	return;
 }
-void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
+void pos_init(const Pos& s, const Pos& e, const ld& r) {
 	S.clear();
 	vp = 0;
 	V[vp++] = s;
 	V[vp++] = e;
-	int sz = P.size();
 	Pos p0, p1, p2, p3;
-	for (int i = 0; i < sz; i++) {//tangent from S || E
-		ld t1 = get_theta(s, P[i], r);
-		ld t2 = get_theta(e, P[i], r);
-		p0 = rotate(P[i], s, t1, i);
-		p1 = rotate(P[i], s, -t1, i);
-		p2 = rotate(P[i], e, t2, i);
-		p3 = rotate(P[i], e, -t2, i);
-		for (const Pos& p : { p0, p1, p2, p3 }) {
-			if (!S.count(p) && circle_is_ok(p, r, P)) {
-				V[vp++] = p; S.insert(p);
+	for (int j = 0; j < N; j++) {//tangent from S || E
+		const Polygon& P = H[j];
+		for (int i = 0; i < 4; i++) {
+			ld t1 = get_theta(s, P[i], r);
+			ld t2 = get_theta(e, P[i], r);
+			p0 = rotate(P[i], s, t1, i);
+			p1 = rotate(P[i], s, -t1, i);
+			p2 = rotate(P[i], e, t2, i);
+			p3 = rotate(P[i], e, -t2, i);
+			for (const Pos& p : { p0, p1, p2, p3 }) {
+				if (!S.count(p) && circle_is_ok(p, r)) {
+					V[vp++] = p; S.insert(p);
+				}
 			}
 		}
 	}
@@ -360,24 +364,22 @@ void pos_init(const Pos& s, const Pos& e, const Polygon& P, const ld& r) {
 	}
 	return;
 }
-bool query() {
-	std::cin >> N;
-	if (!N) return 0;
-	Polygon P(N); std::cin >> P; norm(P); for (int i = 0; i < N; i++) P[i].i = i;
-	Pos s, e; std::cin >> s >> e; s.i = -1; e.i = -2;
-	ld r = 1;
-	pos_init(s, e, P, r);
-	connect_seg(P, r);
-	connect_arc(P, r);
-	ld d = dijkstra(0, 1); assert(d < INF); std::cout << d << "\n";
-	return 1;
-}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(4);
-	while (query());
+	std::cout.precision(9);
+	int r;
+	std::cin >> r >> N;
+	Pos s, e; std::cin >> s >> e; s.i = -1; e.i = -2;
+	for (int i = 0; i < N; i++) {
+		Pos dl, ur; std::cin >> dl >> ur;
+		H[i] = { dl, Pos(ur.x, dl.y), ur, Pos(dl.x, ur.y) };
+	}
+	pos_init(s, e, r);
+	connect_seg(r);
+	connect_arc(r);
+	ld d = dijkstra(0, 1); assert(d < INF); std::cout << d << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj3607

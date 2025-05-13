@@ -323,43 +323,62 @@ void pos_init(const Pos& s, const Pos& e, const ld& r) {
 			}
 		}
 	}
-	for (int i = 0; i < sz; i++) {
-		for (int j = i + 1; j < sz; j++) {
-			if (i == j) continue;
-			Pos v = ~(P[j] - P[i]).unit();
-			p0 = P[i] + v * r;
-			p1 = P[j] + v * r;
-			p2 = P[i] - v * r;
-			p3 = P[j] - v * r;
+	for (int i = 0; i < N; i++) {
+		const Polygon& P = H[i];
+		for (int k = 0; k < 4; k++) {
+			int k1 = (k + 1) % 4;
+			Pos v = ~(P[k] - P[k1]).unit();
+			p0 = P[k] + v * r;
+			p1 = P[k1] + v * r;
+			p2 = P[k] - v * r;
+			p3 = P[k1] - v * r;
 			for (const Pos& p : { p0, p1, p2, p3 }) {
-				if (!S.count(p) && circle_is_ok(p, r, P)) {
+				if (!S.count(p) && circle_is_ok(p, r)) {
 					V[vp++] = p; S.insert(p);
 				}
 			}
-			ld d = (P[j] - P[i]).mag();
-			if (d > r * 2) {//tangent from m
-				Pos m = mid(P[i], P[j]);
-				ld t = get_theta(m, P[i], r);
-				p0 = rotate(P[i], m, t, i);
-				p1 = rotate(P[j], m, t + PI, j);
-				p2 = rotate(P[i], m, -t, i);
-				p3 = rotate(P[j], m, -t - PI, j);
-				for (const Pos& p : { p0, p1, p2, p3 }) {
-					if (!S.count(p) && circle_is_ok(p, r, P)) {
-						V[vp++] = p; S.insert(p);
+			for (int j = i + 1; j < N; j++) {
+				const Polygon& Q = H[j];
+				if (i == j) continue;
+				for (int l = 0; l < 4; l++) {
+					Pos v = ~(P[k] - Q[l]).unit();
+					p0 = P[k] + v * r;
+					p1 = Q[l] + v * r;
+					p2 = P[k] - v * r;
+					p3 = Q[l] - v * r;
+					for (const Pos& p : { p0, p1, p2, p3 }) {
+						if (!S.count(p) && circle_is_ok(p, r)) {
+							V[vp++] = p; S.insert(p);
+						}
+					}
+					ld d = (P[k] - Q[l]).mag();
+					if (d > r * 2) {//tangent from m
+						Pos m = mid(P[k], Q[l]);
+						ld t = get_theta(m, P[k], r);
+						p0 = rotate(P[k], m, t, k);
+						p1 = rotate(Q[l], m, t + PI, l);
+						p2 = rotate(P[k], m, -t, k);
+						p3 = rotate(Q[l], m, -t - PI, l);
+						for (const Pos& p : { p0, p1, p2, p3 }) {
+							if (!S.count(p) && circle_is_ok(p, r)) {
+								V[vp++] = p; S.insert(p);
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-	assert(vp < 2500);
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < 20; i++) RV[i].clear();
 	for (int j = 2; j < vp; j++) {
 		V[j].j = j;
-		for (int i = 0; i < sz; i++) {
-			ld d = (P[i] - V[j]).mag();
-			if (zero(d - r)) RV[i].push_back(V[j]);
+		for (int i = 0; i < N; i++) {
+			const Polygon& P = H[i];
+			for (int k = 0; k < 4; k++) {
+				ld d = (P[k] - V[j]).mag();
+				if (zero(d - r)) RV[i + k].push_back(V[j]);
+			}
 		}
 	}
 	return;

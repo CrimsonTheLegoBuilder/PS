@@ -253,11 +253,11 @@ void connect_seg(const ld& r) {
 	return;
 }
 void connect_arc(const ld& r) {
-	for (int z = 0; z < N; z++) {
-		const Polygon& P = H[z];
+	for (int n = 0; n < N; n++) {
+		const Polygon& P = H[n];
 		int psz = P.size();
 		for (int i = 0; i < psz; i++) {
-			int x = z + i;
+			int x = n * 4 + i;
 			int sz = RV[x].size();
 			for (int j = 0; j < sz; j++) RV[x][j] -= P[i];
 			std::sort(RV[x].begin(), RV[x].end(), cmpr);
@@ -274,7 +274,7 @@ void connect_arc(const ld& r) {
 					const Polygon& Q = H[q];
 					int qsz = Q.size();
 					for (int k = 0; k < psz; k++) {
-						if (z != q || i != k) {
+						if (n != q || i != k) {
 							bool f1 = inside(hi, P[i], lo, Q[k]);
 							bool f2 = sign((P[i] - Q[k]).mag() - r * 2) < 0;
 							bool f3 = sign((lo - Q[k]).mag() - r) < 0
@@ -284,10 +284,13 @@ void connect_arc(const ld& r) {
 								break;
 							}
 						}
+						if (!f0) break;
 						const Pos& q0 = Q[(k - 1 + psz) % psz], & q1 = Q[k];
+						if (q0 == P[i] || q1 == P[i]) continue;
 						Polygon inx = circle_seg_intersection(P[i], r * 2, q0, q1);
 						for (const Pos& p : inx) {
-							if (inside(hi, P[i], lo, p, WEAK)) {
+							//if (inside(hi, P[i], lo, p, WEAK)) {
+							if (inside(hi, P[i], lo, p, STRONG)) {
 								ld d = dist(q0, q1, P[i]);
 								if (d < r * 2) {
 									f0 = 0;

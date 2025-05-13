@@ -284,7 +284,6 @@ void connect_arc(const ld& r) {
 								break;
 							}
 						}
-						if (!f0) break;
 						const Pos& q0 = Q[(k - 1 + psz) % psz], & q1 = Q[k];
 						if (q0 == P[i] || q1 == P[i]) continue;
 						Polygon inx = circle_seg_intersection(P[i], r * 2, q0, q1);

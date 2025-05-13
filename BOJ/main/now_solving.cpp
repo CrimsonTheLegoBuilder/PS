@@ -408,7 +408,9 @@ void solve() {
 	pos_init(s, e, r);
 	connect_seg(r);
 	connect_arc(r);
-	ld d = dijkstra(0, 1); assert(d < INF); std::cout << d << "\n";
+	ld d = dijkstra(0, 1);
+	if (d > 1e16) std::cout << "no solution\n";
+	else std::cout << d << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj3607

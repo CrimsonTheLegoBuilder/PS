@@ -69,7 +69,7 @@ struct Pos {
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-} V[LEN * LEN * 4]; const Pos O = { 0, 0 };
+} V[LEN * LEN * 4 * 4]; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 typedef std::set<Pos> MapPos;
 MapPos S;
@@ -180,14 +180,14 @@ Polygon circle_seg_intersection(const Pos& o, const ld& r, const Pos& p1, const 
 	if (on_seg_strong(p1, p2, m2)) ret.push_back(m2);
 	return ret;//p1->p2
 }
-ld C[LEN * LEN * 4]; int vp;
+ld C[LEN * LEN * 4 * 4]; int vp;
 struct Info {
 	int i;
 	ld c;
 	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
 	bool operator < (const Info& x) const { return c > x.c; }
 };
-std::vector<Info> G[LEN * LEN * 4];
+std::vector<Info> G[LEN * LEN * 4 * 4];
 ld dijkstra(const int& v, const int& g) {
 	std::priority_queue<Info> PQ;
 	for (int i = 0; i < vp; i++) C[i] = INF;
@@ -379,8 +379,9 @@ void pos_init(const Pos& s, const Pos& e, const ld& r) {
 			}
 		}
 	}
+	//std::cout << "vp:: " << vp << "\n";
 	for (int i = 0; i < vp; i++) G[i].clear();
-	for (int i = 0; i < LEN; i++) RV[i].clear();
+	for (int i = 0; i < LEN * 4; i++) RV[i].clear();
 	for (int j = 2; j < vp; j++) {
 		V[j].j = j;
 		for (int i = 0; i < N; i++) {

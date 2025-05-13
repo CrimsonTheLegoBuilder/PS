@@ -222,7 +222,7 @@ bool circle_is_ok(const Pos& c, const ld& r) {
 	for (int j = 0; j < N; j++) {
 		const Polygon& P = H[j];
 		for (int i = 0; i < 4; i++) {
-			if (sign(dist(P[i], P[(i + 1) % 4], c, ABS) - r + TOL) < 0) return 0;
+			if (sign(dist(P[i], P[(i + 1) % 4], c, ABS) - r) < 0) return 0;
 		}
 		if (inner_check(P, c)) return 0;
 	}
@@ -273,7 +273,7 @@ void connect_arc(const ld& r) {
 				for (int q = 0; q < N; q++) {
 					const Polygon& Q = H[q];
 					int qsz = Q.size();
-					for (int k = 0; k < psz; k++) {
+					for (int k = 0; k < qsz; k++) {
 						if (n != q || i != k) {
 							bool f1 = inside(hi, P[i], lo, Q[k]);
 							bool f2 = sign((P[i] - Q[k]).mag() - r * 2) < 0;
@@ -319,15 +319,15 @@ void pos_init(const Pos& s, const Pos& e, const ld& r) {
 	V[vp++] = s;
 	V[vp++] = e;
 	Pos p0, p1, p2, p3;
-	for (int j = 0; j < N; j++) {//tangent from S || E
-		const Polygon& P = H[j];
-		for (int i = 0; i < 4; i++) {
-			ld t1 = get_theta(s, P[i], r);
-			ld t2 = get_theta(e, P[i], r);
-			p0 = rotate(P[i], s, t1, i);
-			p1 = rotate(P[i], s, -t1, i);
-			p2 = rotate(P[i], e, t2, i);
-			p3 = rotate(P[i], e, -t2, i);
+	for (int i = 0; i < N; i++) {//tangent from S || E
+		const Polygon& P = H[i];
+		for (int j = 0; j < 4; j++) {
+			ld t1 = get_theta(s, P[j], r);
+			ld t2 = get_theta(e, P[j], r);
+			p0 = rotate(P[j], s, t1, j);
+			p1 = rotate(P[j], s, -t1, j);
+			p2 = rotate(P[j], e, t2, j);
+			p3 = rotate(P[j], e, -t2, j);
 			for (const Pos& p : { p0, p1, p2, p3 }) {
 				if (!S.count(p) && circle_is_ok(p, r)) {
 					V[vp++] = p; S.insert(p);
@@ -351,7 +351,6 @@ void pos_init(const Pos& s, const Pos& e, const ld& r) {
 			}
 			for (int j = i + 1; j < N; j++) {
 				const Polygon& Q = H[j];
-				if (i == j) continue;
 				for (int l = 0; l < 4; l++) {
 					Pos v = ~(P[k] - Q[l]).unit();
 					p0 = P[k] + v * r;

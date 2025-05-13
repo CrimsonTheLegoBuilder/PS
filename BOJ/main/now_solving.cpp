@@ -240,7 +240,7 @@ bool connectable(const Pos& s, const Pos& e, const ld& r) {
 }
 void connect_node(const int& n1, const int& n2, const ld& r) {
 	Pos d1 = V[n1], d2 = V[n2];
-	if (d1.i != d2.i && connectable(d1, d2, r)) {
+	if (connectable(d1, d2, r)) {
 		G[n1].push_back({ n2, (d1 - d2).mag() });
 		G[n2].push_back({ n1, (d1 - d2).mag() });
 	}
@@ -253,49 +253,53 @@ void connect_seg(const ld& r) {
 	return;
 }
 void connect_arc(const ld& r) {
-	int psz = P.size();
-	for (int i = 0; i < psz; i++) {
-		int sz = RV[i].size();
-		for (int j = 0; j < sz; j++) RV[i][j] -= P[i];
-		std::sort(RV[i].begin(), RV[i].end(), cmpr);
-		for (int j = 0; j < sz; j++) RV[i][j] += P[i];
-		for (int j = 0; j < sz; j++) {
-			Pos lo = RV[i][j], hi = RV[i][(j + 1) % sz];
-			if (lo == hi) {
-				G[lo.j].push_back({ hi.j, 0 });
-				G[hi.j].push_back({ lo.j, 0 });
-				continue;
-			}
-			bool f0 = 1;
-			for (int k = 0; k < psz; k++) {
-				if (i != k) {
-					bool f1 = inside(hi, P[i], lo, P[k]);
-					bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
-					bool f3 = sign((lo - P[k]).mag() - r) < 0
-						|| sign((hi - P[k]).mag() - r) < 0;
-					if ((f1 && f2) || f3) {
-						f0 = 0;
-						break;
-					}
+	for (int z = 0; z < N; z++) {
+		const Polygon& P = H[z];
+		int psz = P.size();
+		for (int i = 0; i < psz; i++) {
+			int x = z + i;
+			int sz = RV[x].size();
+			for (int j = 0; j < sz; j++) RV[x][j] -= P[i];
+			std::sort(RV[i].begin(), RV[i].end(), cmpr);
+			for (int j = 0; j < sz; j++) RV[x][j] += P[i];
+			for (int j = 0; j < sz; j++) {
+				Pos lo = RV[x][j], hi = RV[x][(j + 1) % sz];
+				if (lo == hi) {
+					G[lo.j].push_back({ hi.j, 0 });
+					G[hi.j].push_back({ lo.j, 0 });
+					continue;
 				}
-				const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
-				Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
-				for (const Pos& p : inx) {
-					if (inside(hi, P[i], lo, p, WEAK)) {
-						ld d = dist(p0, p1, P[i]);
-						if (d < r * 2) {
-							f0 = 0;
-							break;
-						}
-					}
+				bool f0 = 1;
+				//for (int k = 0; k < psz; k++) {
+				//	if (i != k) {
+				//		bool f1 = inside(hi, P[i], lo, P[k]);
+				//		bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
+				//		bool f3 = sign((lo - P[k]).mag() - r) < 0
+				//			|| sign((hi - P[k]).mag() - r) < 0;
+				//		if ((f1 && f2) || f3) {
+				//			f0 = 0;
+				//			break;
+				//		}
+				//	}
+				//	const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
+				//	Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
+				//	for (const Pos& p : inx) {
+				//		if (inside(hi, P[i], lo, p, WEAK)) {
+				//			ld d = dist(p0, p1, P[i]);
+				//			if (d < r * 2) {
+				//				f0 = 0;
+				//				break;
+				//			}
+				//		}
+				//	}
+				//	if (!f0) break;
+				//}
+				if (f0) {
+					ld t = norm(rad(lo, P[i], hi));
+					ld rd = r * t;
+					G[lo.j].push_back({ hi.j, rd });
+					G[hi.j].push_back({ lo.j, rd });
 				}
-				if (!f0) break;
-			}
-			if (f0) {
-				ld t = norm(rad(lo, P[i], hi));
-				ld rd = r * t;
-				G[lo.j].push_back({ hi.j, rd });
-				G[hi.j].push_back({ lo.j, rd });
 			}
 		}
 	}
@@ -370,14 +374,14 @@ void pos_init(const Pos& s, const Pos& e, const ld& r) {
 		}
 	}
 	for (int i = 0; i < vp; i++) G[i].clear();
-	for (int i = 0; i < 20; i++) RV[i].clear();
+	for (int i = 0; i < LEN; i++) RV[i].clear();
 	for (int j = 2; j < vp; j++) {
 		V[j].j = j;
 		for (int i = 0; i < N; i++) {
 			const Polygon& P = H[i];
 			for (int k = 0; k < 4; k++) {
 				ld d = (P[k] - V[j]).mag();
-				if (zero(d - r)) RV[i + k].push_back(V[j]);
+				if (zero(d - r)) RV[i * 4 + k].push_back(V[j]);
 			}
 		}
 	}

@@ -260,7 +260,7 @@ void connect_arc(const ld& r) {
 			int x = z + i;
 			int sz = RV[x].size();
 			for (int j = 0; j < sz; j++) RV[x][j] -= P[i];
-			std::sort(RV[i].begin(), RV[i].end(), cmpr);
+			std::sort(RV[x].begin(), RV[x].end(), cmpr);
 			for (int j = 0; j < sz; j++) RV[x][j] += P[i];
 			for (int j = 0; j < sz; j++) {
 				Pos lo = RV[x][j], hi = RV[x][(j + 1) % sz];
@@ -270,30 +270,35 @@ void connect_arc(const ld& r) {
 					continue;
 				}
 				bool f0 = 1;
-				//for (int k = 0; k < psz; k++) {
-				//	if (i != k) {
-				//		bool f1 = inside(hi, P[i], lo, P[k]);
-				//		bool f2 = sign((P[i] - P[k]).mag() - r * 2) < 0;
-				//		bool f3 = sign((lo - P[k]).mag() - r) < 0
-				//			|| sign((hi - P[k]).mag() - r) < 0;
-				//		if ((f1 && f2) || f3) {
-				//			f0 = 0;
-				//			break;
-				//		}
-				//	}
-				//	const Pos& p0 = P[(k - 1 + psz) % psz], & p1 = P[k];
-				//	Polygon inx = circle_seg_intersection(P[i], r * 2, p0, p1);
-				//	for (const Pos& p : inx) {
-				//		if (inside(hi, P[i], lo, p, WEAK)) {
-				//			ld d = dist(p0, p1, P[i]);
-				//			if (d < r * 2) {
-				//				f0 = 0;
-				//				break;
-				//			}
-				//		}
-				//	}
-				//	if (!f0) break;
-				//}
+				for (int q = 0; q < N; q++) {
+					const Polygon& Q = H[q];
+					int qsz = Q.size();
+					for (int k = 0; k < psz; k++) {
+						if (z != q || i != k) {
+							bool f1 = inside(hi, P[i], lo, Q[k]);
+							bool f2 = sign((P[i] - Q[k]).mag() - r * 2) < 0;
+							bool f3 = sign((lo - Q[k]).mag() - r) < 0
+								|| sign((hi - Q[k]).mag() - r) < 0;
+							if ((f1 && f2) || f3) {
+								f0 = 0;
+								break;
+							}
+						}
+						const Pos& q0 = Q[(k - 1 + psz) % psz], & q1 = Q[k];
+						Polygon inx = circle_seg_intersection(P[i], r * 2, q0, q1);
+						for (const Pos& p : inx) {
+							if (inside(hi, P[i], lo, p, WEAK)) {
+								ld d = dist(q0, q1, P[i]);
+								if (d < r * 2) {
+									f0 = 0;
+									break;
+								}
+							}
+						}
+						if (!f0) break;
+					}
+					if (!f0) break;
+				}
 				if (f0) {
 					ld t = norm(rad(lo, P[i], hi));
 					ld rd = r * t;

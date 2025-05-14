@@ -196,6 +196,8 @@ void solve() {
 }
 int main() { solve(); return 0; }//boj33519 Andrew the Diver
 
+*/
+
 /*
 
 16
@@ -543,7 +545,5 @@ int main() { solve(); return 0; }//boj33519 Andrew the Diver
 6 5
 5 6
 5 10
-
-*/
 
 */

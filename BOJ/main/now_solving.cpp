@@ -161,7 +161,12 @@ void solve() {
 	std::cout.precision(9);
 	std::cin >> Q; while (Q--) {
 		std::cin >> T[0] >> V[0] >> T[1] >> V[1];
-		V[0] -= V[1];
+		ld ret = INF;
+		Pos v = V[0] - V[1];
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+			}
+		}
 
 	}
 }

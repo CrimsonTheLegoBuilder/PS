@@ -204,5 +204,5 @@ void solve() {
 	}
 	return;
 }
-int main() { return 0; }//boj30123
+int main() { solve(); return 0; }//boj30123
 //boj30123 27712 3607

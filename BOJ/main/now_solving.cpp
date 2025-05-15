@@ -126,9 +126,9 @@ ll area(Polygon& H) {
 	return a;
 }
 void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
-bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& t) {
+bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& q) {
 	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
-	return ccw(p0, p1, t) >= 0 && ccw(p1, p2, t) >= 0 && ccw(p2, p0, t) >= 0;
+	return ccw(p0, p1, q) >= 0 && ccw(p1, p2, q) >= 0 && ccw(p2, p0, q) >= 0;
 }
 int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
 	int cnt{ 0 };
@@ -154,6 +154,16 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 	}
 	return (cnt & 1) * 2;
 }
+ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const bool& f = 0) {
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	return a1;
+	//if (f == 1) return fit(a1, 0, 1);
+	//if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	//return -1;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -162,13 +172,37 @@ void solve() {
 	std::cin >> Q; while (Q--) {
 		std::cin >> T[0] >> V[0] >> T[1] >> V[1];
 		ld ret = INF;
-		Pos v = V[0] - V[1];
+		Pos v0 = V[0] - V[1];
 		for (int i = 0; i < 3; i++) {
+			const Pos& p0 = T[0][i];
+			Pos p1 = p0 + v0;
 			for (int j = 0; j < 3; j++) {
+				const Pos& q0 = T[1][j], & q1 = T[1][(j + 1) % 3];
+				int f1 = ccw(p0, p1, q0);
+				int f2 = ccw(p0, p1, q1);
+				if (inner_check(q0, q1, p0, p1) && f1 * f2 <= 0) {
+					ld x = intersection(p0, p1, q0, q1);
+					ret = std::min(ret, x);
+				}
 			}
 		}
-
+		Pos v1 = V[1] - V[0];
+		for (int j = 0; j < 3; j++) {
+			const Pos& q0 = T[1][j];
+			Pos q1 = q0 + v1;
+			for (int i = 0; i < 3; i++) {
+				const Pos& p0 = T[0][j], & p1 = T[0][(j + 1) % 3];
+				int f1 = ccw(q0, q1, p0);
+				int f2 = ccw(q0, q1, p1);
+				if (inner_check(p0, p1, q0, q1) && f1 * f2 <= 0) {
+					ld x = intersection(q0, q1, p0, p1);
+					ret = std::min(ret, x);
+				}
+			}
+		}
+		std::cout << ret << "\n";
 	}
+	return;
 }
 int main() { return 0; }//boj30123
 //boj30123 27712 3607

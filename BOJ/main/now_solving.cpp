@@ -184,6 +184,7 @@ void solve() {
 		std::cin >> T[0] >> V[0] >> T[1] >> V[1];
 		ld ret = INF;
 		Pos v0 = V[0] - V[1];
+		if (!v0.Euc()) { std::cout << "NO COLLISION\n"; continue; }
 		for (int i = 0; i < 3; i++) {
 			const Pos& p0 = T[0][i];
 			Pos p1 = p0 + v0;

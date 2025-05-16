@@ -21,7 +21,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 2;
+const int LEN = 4;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -126,10 +126,10 @@ ll area(Polygon& H) {
 	return a;
 }
 void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
-bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& q) {
-	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
-	return ccw(p0, p1, q) >= 0 && ccw(p1, p2, q) >= 0 && ccw(p2, p0, q) >= 0;
-}
+//bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& q) {
+//	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
+//	return ccw(p0, p1, q) >= 0 && ccw(p1, p2, q) >= 0 && ccw(p2, p0, q) >= 0;
+//}
 int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
 	int cnt{ 0 };
 	for (int i = 0; i < sz; i++) {
@@ -154,6 +154,16 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 	}
 	return (cnt & 1) * 2;
 }
+bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& q) {
+	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
+	return (ccw(p0, p1, q) > 0 
+		&& ccw(p1, p2, q) > 0 
+		&& ccw(p2, p0, q) > 0) || (
+			on_seg_strong(p0, p1, q) || 
+			on_seg_strong(p1, p2, q) || 
+			on_seg_strong(p2, p0, q)
+			);
+}
 ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const bool& f = 0) {
 	ld det = (q2 - q1) / (p2 - p1);
 	if (zero(det)) return -1;
@@ -169,6 +179,7 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
+	T[0].resize(3); T[1].resize(3);
 	std::cin >> Q; while (Q--) {
 		std::cin >> T[0] >> V[0] >> T[1] >> V[1];
 		ld ret = INF;
@@ -178,6 +189,7 @@ void solve() {
 			Pos p1 = p0 + v0;
 			for (int j = 0; j < 3; j++) {
 				const Pos& q0 = T[1][j], & q1 = T[1][(j + 1) % 3];
+				if (!ccw(p0, p1, q0, q1)) continue;
 				int f1 = ccw(p0, p1, q0);
 				int f2 = ccw(p0, p1, q1);
 				if (inner_check(q0, q1, p0, p1) && f1 * f2 <= 0) {
@@ -192,6 +204,7 @@ void solve() {
 			Pos q1 = q0 + v1;
 			for (int i = 0; i < 3; i++) {
 				const Pos& p0 = T[0][j], & p1 = T[0][(j + 1) % 3];
+				if (!ccw(p0, p1, q0, q1)) continue;
 				int f1 = ccw(q0, q1, p0);
 				int f2 = ccw(q0, q1, p1);
 				if (inner_check(p0, p1, q0, q1) && f1 * f2 <= 0) {
@@ -200,7 +213,8 @@ void solve() {
 				}
 			}
 		}
-		std::cout << ret << "\n";
+		if (ret > 1e16) std::cout << "NO COLLISION\n";
+		else std::cout << ret << "\n";
 	}
 	return;
 }

@@ -203,7 +203,7 @@ void solve() {
 			const Pos& q0 = T[1][j];
 			Pos q1 = q0 + v1;
 			for (int i = 0; i < 3; i++) {
-				const Pos& p0 = T[0][j], & p1 = T[0][(j + 1) % 3];
+				const Pos& p0 = T[0][i], & p1 = T[0][(i + 1) % 3];
 				if (!ccw(p0, p1, q0, q1)) continue;
 				int f1 = ccw(q0, q1, p0);
 				int f2 = ccw(q0, q1, p1);

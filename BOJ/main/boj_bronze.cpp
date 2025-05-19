@@ -12,7 +12,7 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 
-int T, L, N, H, C, A, B, D;
+ll T, L, N, H, C, A, B, D, a, b;
 std::string S;
 int I[10];
 int main() {
@@ -26,19 +26,16 @@ int main() {
 	//		std::cout << A + B << " " << A * B << "\n";
 	//	}
 	//}
-	for (int i = 0; i < 10; i++) {
-		std::cin >> I[i];
+	std::cin >> A >> B;
+	D = 1;
+	while (A) {
+		a = A % 10;
+		b = B % 10;
+		T += std::max(a, b) * D;
+		D *= 10;
+		A /= 10;
+		B /= 10;
 	}
-	for (int i = 0; i < 10; i++) {
-		T = 0;
-		for (int j = 0; j < 10; j++) {
-			if (i == j) continue;
-			T += I[j];
-		}
-		if (T == I[i]) {
-			std::cout << I[i] << "\n";
-			break;
-		}
-	}
+	std::cout << T << "\n";
 	return 0;
 }

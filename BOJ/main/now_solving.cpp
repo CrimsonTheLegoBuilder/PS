@@ -49,6 +49,8 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 #define LINE 1
 #define CIRCLE 2
+#define SEG 3
+#define POS 4
 
 #define STRONG 0
 #define WEAK 1
@@ -122,6 +124,18 @@ ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
 	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
 	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
+}
+ld area(const Polygon& H) {
+	ld A = 0;
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
+	return A * .5;
+}
+void norm(Polygon& H, const int& d = 1) {
+	ld A = area(H);
+	if (d == 1 && A < 0) std::reverse(H.begin(), H.end());
+	else if (d == -1 && A > 0) std::reverse(H.begin(), H.end());
+	return;
 }
 int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
 	int cnt = 0;
@@ -317,6 +331,27 @@ Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
 	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
 	return HPI;
 }
+bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F = POS, const bool& srt = 1) {
+	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
+		return w.inner(intersection_(u, v));
+		};
+	if (srt) std::sort(HP.begin(), HP.end());
+	std::deque<Seg> dq;
+	int sz = HP.size();
+	for (int i = 0; i < sz; ++i) {
+		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
+		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
+		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
+		dq.push_back(HP[i]);
+	}
+	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
+	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
+	sz = dq.size();
+	if (sz < 3) return 0;
+	if (F == POS) for (int i = 0; i < sz; ++i) PHPI.push_back(intersection_(dq[i], dq[(i + 1) % sz]));
+	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
+	return 1;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -324,19 +359,35 @@ void solve() {
 	std::cout.precision(13);
 	std::cin >> N;
 	for (int i = 0; i < N; i++) std::cin >> P[i][0] >> P[i][1];
+	Segs HP;
 	for (int i = 0; i < N; i++) {
 		for (int j = i + 1; j < N; j++) {
 			for (int u = 0; u < 2; u++) {
 				for (int v = 0; v < 2; v++) {
-					const Pos& p0 = P[i][u], & p1 = P[j][v];
+					Pos s = P[i][u], e = P[j][v];
+					if (collinear(s, P[i][!u], e, P[j][!v])) {
+						std::cout << "0\n";
+						return;
+					}
+					if (ccw(s, e, P[i][!u]) > 0) std::swap(s, e);
+					if (ccw(s, e, P[j][!v]) > 0) continue;;
 					bool f = 1;
 					for (int k = 0; k < N; k++) {
 						if (k == i || k == j) continue;
+						if (ccw(s, e, P[k][0]) < 0 || ccw(s, e, P[k][1]) < 0) {
+							f = 0;
+							break;
+						}
 					}
+					if (f) HP.push_back(Seg(s, e));
 				}
 			}
 		}
 	}
+	Polygon HPI;
+	Segs tmp;
+	bool f = half_plane_intersection(HP, tmp, HPI, POS);
+	std::cout << (!f ? 0 : area(HPI)) << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj26639

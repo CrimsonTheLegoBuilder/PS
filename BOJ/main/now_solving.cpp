@@ -95,7 +95,7 @@ struct Pos {
 	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-} P1[LEN], P2[LEN]; const Pos O = { 0, 0 };
+} P[LEN][2]; const Pos O = {0, 0};
 typedef std::vector<Pos> Polygon;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
@@ -323,7 +323,20 @@ void solve() {
 	std::cout << std::fixed;
 	std::cout.precision(13);
 	std::cin >> N;
-	for (int i = 0; i < N; i++) std::cin >> P1[i] >> P2[i];
+	for (int i = 0; i < N; i++) std::cin >> P[i][0] >> P[i][1];
+	for (int i = 0; i < N; i++) {
+		for (int j = i + 1; j < N; j++) {
+			for (int u = 0; u < 2; u++) {
+				for (int v = 0; v < 2; v++) {
+					const Pos& p0 = P[i][u], & p1 = P[j][v];
+					bool f = 1;
+					for (int k = 0; k < N; k++) {
+						if (k == i || k == j) continue;
+					}
+				}
+			}
+		}
+	}
 	return;
 }
 int main() { solve(); return 0; }//boj26639

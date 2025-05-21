@@ -267,7 +267,6 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 	}
 	return ret;
 }
-
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -358,6 +357,7 @@ void solve() {
 	std::cout << std::fixed;
 	std::cout.precision(13);
 	std::cin >> N;
+	//std::cout << cross(Pos(18, -25), Pos(-23, 30), Pos(-13, 4)) << "\n";
 	for (int i = 0; i < N; i++) std::cin >> P[i][0] >> P[i][1];
 	Segs HP;
 	for (int i = 0; i < N; i++) {
@@ -380,14 +380,16 @@ void solve() {
 						}
 						continue;
 					}
+					//std::cout << "fuck::\n";
 					bool f1 = 0, f2 = 0;
 					if (ccw(s, e, P[i][!u]) > 0) f1 = 1, std::swap(s, e);
 					if (ccw(s, e, P[j][!v]) > 0) f2 = 1, std::swap(s, e);
 					if (f1 && f2) continue;
+					if (ccw(s, e, P[i][!u]) > 0) continue;
 					bool f = 1;
 					for (int k = 0; k < N; k++) {
 						if (k == i || k == j) continue;
-						if (ccw(s, e, P[k][0]) < 0 || ccw(s, e, P[k][1]) < 0) {
+						if (ccw(s, e, P[k][0]) < 0 && ccw(s, e, P[k][1]) < 0) {
 							f = 0;
 							break;
 						}
@@ -400,9 +402,9 @@ void solve() {
 	Polygon HPI;
 	Segs tmp;
 	int sz = HP.size();
-	for (int i = 0; i < sz; i++) {
-		std::cout << "hp:: " << HP[i].s << ", " << HP[i].e << "\n";
-	}
+	//for (int i = 0; i < sz; i++) {
+	//	std::cout << "hp:: " << HP[i].s << ", " << HP[i].e << "\n";
+	//}
 	bool f = half_plane_intersection(HP, tmp, HPI, POS);
 	std::cout << (!f ? 0 : area(HPI)) << "\n";
 	return;

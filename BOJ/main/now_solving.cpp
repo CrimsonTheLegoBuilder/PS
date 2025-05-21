@@ -399,6 +399,10 @@ void solve() {
 	}
 	Polygon HPI;
 	Segs tmp;
+	int sz = HP.size();
+	for (int i = 0; i < sz; i++) {
+		std::cout << "hp:: " << HP[i].s << ", " << HP[i].e << "\n";
+	}
 	bool f = half_plane_intersection(HP, tmp, HPI, POS);
 	std::cout << (!f ? 0 : area(HPI)) << "\n";
 	return;

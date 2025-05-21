@@ -366,11 +366,24 @@ void solve() {
 				for (int v = 0; v < 2; v++) {
 					Pos s = P[i][u], e = P[j][v];
 					if (collinear(s, P[i][!u], e, P[j][!v])) {
-						std::cout << "0\n";
-						return;
+						for (int _ = 0; _ < 2; _++) {
+							bool f = 1;
+							for (int k = 0; k < N; k++) {
+								if (k == i || k == j) continue;
+								if (ccw(s, e, P[k][0]) < 0 || ccw(s, e, P[k][1]) < 0) {
+									f = 0;
+									break;
+								}
+							}
+							if (f) HP.push_back(Seg(s, e));
+							std::swap(s, e);
+						}
+						continue;
 					}
-					if (ccw(s, e, P[i][!u]) > 0) std::swap(s, e);
-					if (ccw(s, e, P[j][!v]) > 0) continue;;
+					bool f1 = 0, f2 = 0;
+					if (ccw(s, e, P[i][!u]) > 0) f1 = 1, std::swap(s, e);
+					if (ccw(s, e, P[j][!v]) > 0) f2 = 1, std::swap(s, e);
+					if (f1 && f2) continue;
 					bool f = 1;
 					for (int k = 0; k < N; k++) {
 						if (k == i || k == j) continue;

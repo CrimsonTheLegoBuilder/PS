@@ -351,6 +351,193 @@ bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F =
 	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
 	return 1;
 }
+struct Circle {
+	Pos c;
+	int r;
+	Circle(Pos c_ = Pos(), int r_ = 0) : c(c_), r(r_) {}
+	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
+	bool operator != (const Circle& q) const { return !(*this == q); }
+	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
+	//bool operator < (const Circle& q) const { return r < q.r && (c - q.c).mag() + r < q.r + TOL; }
+	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq((ll)r + q.r)) >= 0; }
+	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
+	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
+	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
+	ld rad(const Pos& p) const { return (p - c).rad(); }
+	ld area(const ld& lo, const ld& hi) const { return (hi - lo) * r * r * .5; }
+	ld green(const ld& lo, const ld& hi) const {
+		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
+		ld fan = area(lo, hi);
+		Pos m = c + (s + e) * r * (ld).5;
+		ld tz = (cos(lo) - cos(hi)) * m.y * r;
+		return fan + tz - (s / e) * r * r * (ld).5;
+	}
+	ld H(const ld& th) const { return sin(th) * c.x + cos(th) * c.y + r; }//coord trans | check right
+	//bool operator < (const Pos& p) const { return r < (c - p).mag(); }
+	bool operator < (const Pos& p) const { return sign(r - (c - p).mag()) < 0; }
+	bool operator > (const Pos& p) const { return r > (c - p).mag(); }
+	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
+	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
+} INVAL = { { 0, 0 }, -1 };
+bool cmpr(const Circle& p, const Circle& q) { return p.r > q.r; }//sort descending order
+Vld intersections(const Circle& a, const Circle& b) {
+	Pos ca = a.c, cb = b.c;
+	Pos vec = cb - ca;
+	ll ra = a.r, rb = b.r;
+	ld distance = vec.mag();
+	ld rd = vec.rad();
+	if (vec.Euc() > sq(ra + rb) + TOL) return {};
+	if (vec.Euc() < sq(ra - rb) - TOL) return {};
+	ld X = (ra * ra - rb * rb + vec.Euc()) / (2 * distance * ra);
+	if (X < -1) X = -1;
+	if (X > 1) X = 1;
+	ld h = acos(X);
+	Vld ret = {};
+	ret.push_back(norm(rd + h));
+	if (zero(h)) return ret;
+	ret.push_back(norm(rd - h));
+	return ret;
+}
+Circle enclose_circle(const Pos& u, const Pos& v) {
+	Pos c = (u + v) * .5;
+	return Circle(c, (c - u).mag());
+}
+//Circle enclose_circle(const Pos& u, const Pos& v, const Pos& w) {
+//	Line l1 = rotate90(L(u, v), (u + v) * .5);
+//	Line l2 = rotate90(L(v, w), (v + w) * .5);
+//	if (zero(l1 / l2)) return { { 0, 0 }, -1 };
+//	Pos c = intersection(l1, l2);
+//	ld r = (c - u).mag();
+//	return Circle(c, r);
+//}
+Circle enclose_circle(const Pos& u, const Pos& v, const Pos& w) {
+	if (!ccw(u, v, w)) return INVAL;
+	Pos m1 = (u + v) * .5, v1 = ~(v - u);
+	Pos m2 = (u + w) * .5, v2 = ~(w - u);
+	Pos c = intersection(m1, m1 + v1, m2, m2 + v2);
+	return Circle(c, (u - c).mag());
+}
+Circle enclose_circle(std::vector<Pos> R) {
+	if (R.size() == 0) return Circle(O, -1);
+	else if (R.size() == 1) return Circle(R[0], 0);
+	else if (R.size() == 2) return enclose_circle(R[0], R[1]);
+	else return enclose_circle(R[0], R[1], R[2]);
+}
+Circle minimum_enclose_circle(std::vector<Pos> P) {
+	shuffle(P.begin(), P.end(), std::mt19937(0x14004));
+	Circle mec = INVAL;
+	int sz = P.size();
+	for (int i = 0; i < sz; i++) {
+		if (mec.r < -1 || mec < P[i]) {
+			mec = Circle(P[i], 0);
+			for (int j = 0; j <= i; j++) {
+				if (mec < P[j]) {
+					Circle ans = enclose_circle(P[i], P[j]);
+					if (zero(mec.r)) { mec = ans; continue; }
+					Circle l = INVAL, r = INVAL;
+					//Pos vec = P[j] - P[i];
+					for (int k = 0; k <= j; k++) {
+						if (ans < P[k]) {
+							//ld CCW = vec / (P[k] - P[j]);
+							ld CCW = cross(P[i], P[j], P[k]);
+							Circle c = enclose_circle(P[i], P[j], P[k]);
+							if (c.r < 0) continue;
+							//else if (CCW > 0 && (l.r < 0 || (vec / (c.c - P[i])) > (vec / (l.c - P[i])))) l = c;
+							//else if (CCW < 0 && (r.r < 0 || (vec / (c.c - P[i])) < (vec / (r.c - P[i])))) r = c;
+							else if (CCW > 0 && (l.r < 0 || cross(P[i], P[j], c.c) > cross(P[i], P[j], l.c))) l = c;
+							else if (CCW < 0 && (r.r < 0 || cross(P[i], P[j], c.c) < cross(P[i], P[j], r.c))) r = c;
+						}
+					}
+					if (l.r < 0 && r.r < 0) mec = ans;
+					else if (l.r < 0) mec = r;
+					else if (r.r < 0) mec = l;
+					else mec = l.r < r.r ? l : r;
+				}
+			}
+		}
+	}
+	return mec;
+}
+Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos s = l.s, e = l.e;
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (t == LINE) {
+		if (0 < lo && lo < 1) ret.push_back(lo);
+		if (zero(det)) return ret;
+		if (0 < hi && hi < 1) ret.push_back(hi);
+	}
+	else {//circle
+		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+		if (zero(det)) return ret;
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+	}
+	return ret;
+}
+Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const bool& f = 0) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
+	}
+	else {
+		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+	}
+	return ret;
+}
+Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const Pos& p2) {
+	ld d = dist(p1, p2, o);
+	if (std::abs(d) > r) return {};
+	Pos vec = p2 - p1;
+	Pos m = intersection(p1, p2, o, o + ~vec);
+	ld distance = vec.mag();
+	ld ratio = sqrt(r * r - d * d);
+	Pos m1 = m - vec * ratio / distance;
+	Pos m2 = m + vec * ratio / distance;
+	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
+	return { m1, m2 };//p1->p2
+}
+ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
+	Pos v1 = p1 - c.c, v2 = p2 - c.c;
+	ld r = c.r;
+	std::vector<Pos> inx = circle_line_intersection(O, r, v1, v2);
+	if (inx.empty()) return r * r * rad(v1, v2) * .5;
+	Pos m1 = inx[0], m2 = inx[1];
+	bool d1 = dot(m1, v1, m2) > -TOL, d2 = dot(m1, v2, m2) > -TOL;
+	if (d1 && d2) return (v1 / v2) * .5;
+	else if (d1) return (v1 / m2 + r * r * rad(m2, v2)) * .5;
+	else if (d2) return (r * r * rad(v1, m1) + m1 / v2) * .5;
+	else if (dot(v1, m1, v2) > 0 && dot(v1, m2, v2) > 0)
+		return (r * r * (rad(v1, m1) + rad(m2, v2)) + m1 / m2) * .5;
+	else return (r * r * rad(v1, v2)) * .5;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -409,5 +596,5 @@ void solve() {
 	std::cout << (!f ? 0 : area(HPI)) << "\n";
 	return;
 }
-int main() { solve(); return 0; }//boj26639
+int main() { solve(); return 0; }//boj7951
 //boj30123 27712 3607

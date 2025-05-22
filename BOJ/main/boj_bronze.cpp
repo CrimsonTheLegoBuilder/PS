@@ -26,10 +26,7 @@ int main() {
 	//		std::cout << A + B << " " << A * B << "\n";
 	//	}
 	//}
-	std::cin >> N;
-	while (N--) {
-		std::cin >> P >> T;
-		std::cout << P - (T / 7) + (T / 4) << "\n";
-	}
+	std::cin >> A >> B;
+	std::cout << std::min(A + 1, B) << "\n";
 	return 0;
 }

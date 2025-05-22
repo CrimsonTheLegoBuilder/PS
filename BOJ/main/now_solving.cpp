@@ -538,62 +538,25 @@ ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
 		return (r * r * (rad(v1, m1) + rad(m2, v2)) + m1 / m2) * .5;
 	else return (r * r * rad(v1, v2)) * .5;
 }
+void query() {
+	Circle rd;
+	std::cin >> rd >> N;
+	Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
+	ld A = 0;
+	for (int i = 0; i < N; i++) {
+		const Pos& p0 = H[i], & p1 = H[(i + 1) % N];
+		A += circle_cut(rd, p0, p1);
+	}
+	std::cout << A << "\n";
+	return;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	std::cin >> N;
-	//std::cout << cross(Pos(18, -25), Pos(-23, 30), Pos(-13, 4)) << "\n";
-	for (int i = 0; i < N; i++) std::cin >> P[i][0] >> P[i][1];
-	Segs HP;
-	for (int i = 0; i < N; i++) {
-		for (int j = i + 1; j < N; j++) {
-			for (int u = 0; u < 2; u++) {
-				for (int v = 0; v < 2; v++) {
-					Pos s = P[i][u], e = P[j][v];
-					if (collinear(s, P[i][!u], e, P[j][!v])) {
-						for (int _ = 0; _ < 2; _++) {
-							bool f = 1;
-							for (int k = 0; k < N; k++) {
-								if (k == i || k == j) continue;
-								if (ccw(s, e, P[k][0]) < 0 || ccw(s, e, P[k][1]) < 0) {
-									f = 0;
-									break;
-								}
-							}
-							if (f) HP.push_back(Seg(s, e));
-							std::swap(s, e);
-						}
-						continue;
-					}
-					//std::cout << "fuck::\n";
-					bool f1 = 0, f2 = 0;
-					if (ccw(s, e, P[i][!u]) > 0) f1 = 1, std::swap(s, e);
-					if (ccw(s, e, P[j][!v]) > 0) f2 = 1, std::swap(s, e);
-					if (f1 && f2) continue;
-					if (ccw(s, e, P[i][!u]) > 0) continue;
-					bool f = 1;
-					for (int k = 0; k < N; k++) {
-						if (k == i || k == j) continue;
-						if (ccw(s, e, P[k][0]) < 0 && ccw(s, e, P[k][1]) < 0) {
-							f = 0;
-							break;
-						}
-					}
-					if (f) HP.push_back(Seg(s, e));
-				}
-			}
-		}
-	}
-	Polygon HPI;
-	Segs tmp;
-	int sz = HP.size();
-	//for (int i = 0; i < sz; i++) {
-	//	std::cout << "hp:: " << HP[i].s << ", " << HP[i].e << "\n";
-	//}
-	bool f = half_plane_intersection(HP, tmp, HPI, POS);
-	std::cout << (!f ? 0 : area(HPI)) << "\n";
+	std::cin >> Q;
+	while (Q--) query();
 	return;
 }
 int main() { solve(); return 0; }//boj7951

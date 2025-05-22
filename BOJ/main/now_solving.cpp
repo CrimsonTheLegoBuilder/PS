@@ -560,4 +560,4 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj7951
-//boj30123 27712 3607
+//boj30123 27712 3607 10239

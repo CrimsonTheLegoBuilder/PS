@@ -561,18 +561,35 @@ void solve() {
 			ld lo = inxs[0];
 			ld hi = inxs[1];
 			if (lo < hi) A += C.green(lo, hi);
-			else A += C.green(0, lo) + C.green(hi, 2 * PI);
+			else A += C.green(lo, 2 * PI) + C.green(0, hi);
 			std::cout << A << "\n";
 			return;
 		}
 	}
 	Segs S;
+	ld lo = (H[l] - C.c).rad();
+	ld hi = (H[r] - C.c).rad();
+	ld A = 0;
+	if (lo < hi) A += C.green(lo, hi);
+	else A += C.green(lo, 2 * PI) + C.green(0, hi);
 	for (int i = l, j; i != r; i = (i + 1) % N) {
 		j = (i + 1) % N;
-		if (C >= H[i] && C >= H[j]) S.push_back(Seg(H[i], H[j]));
-		else {
-
+		Seg se = Seg(H[j], H[i]);
+		if (C >= H[i] && C >= H[j]) S.push_back(se);
+		else if (C >= H[i]) {
+			Vld inxs = circle_line_intersections(H[j], H[i], C);
+			S.push_back(Seg(se.p(inxs[0]), H[i]));
 		}
+		else if (C >= H[j]) {
+			Vld inxs = circle_line_intersections(H[j], H[i], C);
+			S.push_back(Seg(H[j], se.p(inxs[0])));
+		}
+	}
+	ld L = C.r;
+	L -= (H[l] - C.c).mag();
+	for (int i = l, j; 1; i = (i - 1 + N) % N) {
+		j = (i - 1 + N) % N;
+
 	}
 	return;
 }

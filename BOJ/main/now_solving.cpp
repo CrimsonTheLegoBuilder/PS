@@ -86,7 +86,7 @@ struct Pos {
 	Pos operator ~ () const { return { -y, x }; }
 	Pos operator ! () const { return { y, x }; }
 	ld xy() const { return x * y; }
-	Pos rot(const ld& t) const { return { x * cosl(t) - y * sinl(t), x * sinl(t) + y * cosl(t) }; }
+	Pos rot(const ld& t) const { return Pos(x * cosl(t) - y * sinl(t), x * sinl(t) + y * cosl(t)); }
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrtl(Euc()); }
 	Pos unit() const { return *this / mag(); }
@@ -561,3 +561,18 @@ void solve() {
 }
 int main() { solve(); return 0; }//boj7951
 //boj30123 27712 3607 10239
+
+/*
+
+1
+0 0 10 8
+2 4
+2 2
+-2 2
+-2 4
+-4 4
+-4 -4
+4 -4
+4 4
+
+*/

@@ -486,7 +486,7 @@ Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE
 	}
 	return ret;
 }
-Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const bool& f = 0) {
+Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const bool& f = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
 	Pos OM = s - q.c;
@@ -553,10 +553,26 @@ void solve() {
 		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) out = 0;
 	}
 	if (out) { std::cout << C.area() << "\n"; return; }
+	if ((l + 1) % N == r) {
+		Vld inxs = circle_line_intersections(H[r], H[l], C);
+		if (inxs.size() == 2) {
+			ld A = Seg(H[r], H[l]).green(inxs[0], inxs[1]);
+			inxs = circle_line_intersections(H[r], H[l], C, CIRCLE);
+			ld lo = inxs[0];
+			ld hi = inxs[1];
+			if (lo < hi) A += C.green(lo, hi);
+			else A += C.green(0, lo) + C.green(hi, 2 * PI);
+			std::cout << A << "\n";
+			return;
+		}
+	}
 	Segs S;
 	for (int i = l, j; i != r; i = (i + 1) % N) {
 		j = (i + 1) % N;
+		if (C >= H[i] && C >= H[j]) S.push_back(Seg(H[i], H[j]));
+		else {
 
+		}
 	}
 	return;
 }

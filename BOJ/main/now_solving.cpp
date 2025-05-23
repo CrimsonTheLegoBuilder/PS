@@ -86,11 +86,11 @@ struct Pos {
 	Pos operator ~ () const { return { -y, x }; }
 	Pos operator ! () const { return { y, x }; }
 	ld xy() const { return x * y; }
-	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
+	Pos rot(const ld& t) const { return { x * cosl(t) - y * sinl(t), x * sinl(t) + y * cosl(t) }; }
 	ld Euc() const { return x * x + y * y; }
-	ld mag() const { return sqrt(Euc()); }
+	ld mag() const { return sqrtl(Euc()); }
 	Pos unit() const { return *this / mag(); }
-	ld rad() const { return atan2(y, x); }
+	ld rad() const { return atan2l(y, x); }
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
 	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
@@ -518,7 +518,7 @@ Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const
 	Pos vec = p2 - p1;
 	Pos m = intersection(p1, p2, o, o + ~vec);
 	ld distance = vec.mag();
-	ld ratio = sqrt(r * r - d * d);
+	ld ratio = sqrtl(r * r - d * d);
 	Pos m1 = m - vec * ratio / distance;
 	Pos m2 = m + vec * ratio / distance;
 	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
@@ -547,7 +547,7 @@ void query() {
 		const Pos& p0 = H[i], & p1 = H[(i + 1) % N];
 		A += circle_cut(rd, p0, p1);
 	}
-	std::cout << std::abs(std::max(A, 0.0)) << "\n";
+	std::cout << std::abs(std::max(A, (ld)0.0)) << "\n";
 	return;
 }
 void solve() {

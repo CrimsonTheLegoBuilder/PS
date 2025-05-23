@@ -547,7 +547,7 @@ void query() {
 		const Pos& p0 = H[i], & p1 = H[(i + 1) % N];
 		A += circle_cut(rd, p0, p1);
 	}
-	std::cout << A << "\n";
+	std::cout << std::abs(std::max(A, 0.0)) << "\n";
 	return;
 }
 void solve() {

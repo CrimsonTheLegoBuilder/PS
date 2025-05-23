@@ -371,7 +371,7 @@ struct Circle {
 	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
 	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
 	ld rad(const Pos& p) const { return (p - c).rad(); }
-	ld area(const ld& lo, const ld& hi) const { return (hi - lo) * r * r * .5; }
+	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
 		ld fan = area(lo, hi);

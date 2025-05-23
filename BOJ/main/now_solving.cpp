@@ -364,7 +364,7 @@ struct Circle {
 	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
 	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
 	ld rad(const Pos& p) const { return (p - c).rad(); }
-	ld area(const ld& lo, const ld& hi) const { return (hi - lo) * r * r * .5; }
+	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
 		ld fan = area(lo, hi);
@@ -538,28 +538,29 @@ ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
 		return (r * r * (rad(v1, m1) + rad(m2, v2)) + m1 / m2) * .5;
 	else return (r * r * rad(v1, v2)) * .5;
 }
-void query() {
-	Circle rd;
-	std::cin >> rd >> N;
-	Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
-	ld A = 0;
-	for (int i = 0; i < N; i++) {
-		const Pos& p0 = H[i], & p1 = H[(i + 1) % N];
-		A += circle_cut(rd, p0, p1);
-	}
-	std::cout << std::abs(std::max(A, (ld)0.0)) << "\n";
-	return;
-}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(3);
-	std::cin >> Q;
-	while (Q--) query();
+	std::cout.precision(10);
+	Circle C; std::cin >> C;
+	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
+	int r = 0, l = 0;
+	bool out = 1;
+	for (int i = 0; i < N; i++) {
+		if (ccw(C.c, H[0], H[r]) < 0) r = i;
+		if (ccw(C.c, H[0], H[l]) > 0) l = i;
+		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) out = 0;
+	}
+	if (out) { std::cout << C.area() << "\n"; return; }
+	Segs S;
+	for (int i = l, j; i != r; i = (i + 1) % N) {
+		j = (i + 1) % N;
+
+	}
 	return;
 }
-int main() { solve(); return 0; }//boj7951
+int main() { solve(); return 0; }//boj14873
 //boj30123 27712 3607 10239
 
 /*

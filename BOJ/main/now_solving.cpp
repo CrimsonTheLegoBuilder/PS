@@ -546,13 +546,15 @@ void solve() {
 	Circle C; std::cin >> C;
 	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
 	int r = 0, l = 0;
-	bool out = 1;
+	bool meet = 1;
 	for (int i = 0; i < N; i++) {
-		if (ccw(C.c, H[0], H[r]) < 0) r = i;
-		if (ccw(C.c, H[0], H[l]) > 0) l = i;
-		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) out = 0;
+		if (ccw(C.c, H[r], H[i]) < 0) r = i;
+		if (!ccw(C.c, H[r], H[i]) && dot(C.c, H[r], H[i]) > 0) r = i;
+		if (ccw(C.c, H[l], H[i]) > 0) l = i;
+		if (!ccw(C.c, H[l], H[i]) && dot(C.c, H[l], H[i]) > 0) l = i;
+		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) meet = 0;
 	}
-	if (out) { std::cout << C.area() << "\n"; return; }
+	if (meet) { std::cout << C.area() << "\n"; return; }
 	if ((l + 1) % N == r) {
 		Vld inxs = circle_line_intersections(H[r], H[l], C);
 		if (inxs.size() == 2) {
@@ -589,7 +591,7 @@ void solve() {
 	L -= (H[l] - C.c).mag();
 	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
 		i = (j + 1) % N;
-		k = (i - 1 + N) % N;
+		k = (j - 1 + N) % N;
 		d = (H[k] - H[j]).mag();
 		lo = (H[k] - H[j]).rad();
 		hi = (H[j] - H[i]).rad();
@@ -616,29 +618,31 @@ void solve() {
 	R -= (H[r] - C.c).mag();
 	for (int j = r, i, k; 1; j = (j + 1) % N) {
 		i = (j - 1 + N) % N;
-		k = (i + 1) % N;
+		k = (j + 1) % N;
 		d = (H[k] - H[j]).mag();
 		lo = (H[j] - H[i]).rad();
 		hi = (H[k] - H[j]).rad();
 		Seg kj = Seg(H[k], H[j]);
-		if (d < L) {
+		if (d < R) {
 			S.push_back(kj);
-			ld r_ = L - d;
+			ld r_ = R - d;
 			Circle D = Circle(H[j], r_);
 			if (lo < hi) A += D.green(lo, hi);
 			else A += C.green(lo, 2 * PI) + D.green(0, hi);
 		}
 		else {
-			//ld ratio = L / d;
-			//Pos p = kj.p(ratio);
-			//S.push_back(Seg(H[j], p));
-			ld r_ = L;
+			ld ratio = 1 - (R / d);
+			Pos p = kj.p(ratio);
+			S.push_back(Seg(p, H[j]));
+			ld r_ = R;
 			Circle D = Circle(H[j], r_);
 			if (lo < hi) A += D.green(lo, hi);
 			else A += C.green(lo, 2 * PI) + D.green(0, hi);
 			break;
 		}
 	}
+	for (Seg& se : S) A += se.green();
+	std::cout << A << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj14873

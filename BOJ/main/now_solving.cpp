@@ -353,13 +353,13 @@ bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F =
 }
 struct Circle {
 	Pos c;
-	int r;
-	Circle(Pos c_ = Pos(), int r_ = 0) : c(c_), r(r_) {}
-	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
+	ld r;
+	Circle(Pos c_ = Pos(), ld r_ = 0) : c(c_), r(r_) {}
+	bool operator == (const Circle& q) const { return c == q.c && eq(r, q.r); }
 	bool operator != (const Circle& q) const { return !(*this == q); }
 	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
 	//bool operator < (const Circle& q) const { return r < q.r && (c - q.c).mag() + r < q.r + TOL; }
-	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq((ll)r + q.r)) >= 0; }
+	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq(r + q.r)) >= 0; }
 	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
 	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
 	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
@@ -384,7 +384,7 @@ bool cmpr(const Circle& p, const Circle& q) { return p.r > q.r; }//sort descendi
 Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
-	ll ra = a.r, rb = b.r;
+	ld ra = a.r, rb = b.r;
 	ld distance = vec.mag();
 	ld rd = vec.rad();
 	if (vec.Euc() > sq(ra + rb) + TOL) return {};
@@ -569,7 +569,7 @@ void solve() {
 	Segs S;
 	ld lo = (H[l] - C.c).rad();
 	ld hi = (H[r] - C.c).rad();
-	ld A = 0;
+	ld A = 0, d;
 	if (lo < hi) A += C.green(lo, hi);
 	else A += C.green(lo, 2 * PI) + C.green(0, hi);
 	for (int i = l, j; i != r; i = (i + 1) % N) {
@@ -587,9 +587,57 @@ void solve() {
 	}
 	ld L = C.r;
 	L -= (H[l] - C.c).mag();
-	for (int i = l, j; 1; i = (i - 1 + N) % N) {
-		j = (i - 1 + N) % N;
-
+	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
+		i = (j + 1) % N;
+		k = (i - 1 + N) % N;
+		d = (H[k] - H[j]).mag();
+		lo = (H[k] - H[j]).rad();
+		hi = (H[j] - H[i]).rad();
+		Seg jk = Seg(H[j], H[k]);
+		if (d < L) {
+			S.push_back(jk);
+			ld r_ = L - d;
+			Circle D = Circle(H[j], r_);
+			if (lo < hi) A += D.green(lo, hi);
+			else A += C.green(lo, 2 * PI) + D.green(0, hi);
+		}
+		else {
+			ld ratio = L / d;
+			Pos p = jk.p(ratio);
+			S.push_back(Seg(H[j], p));
+			ld r_ = L;
+			Circle D = Circle(H[j], r_);
+			if (lo < hi) A += D.green(lo, hi);
+			else A += C.green(lo, 2 * PI) + D.green(0, hi);
+			break;
+		}
+	}
+	ld R = C.r;
+	R -= (H[r] - C.c).mag();
+	for (int j = r, i, k; 1; j = (j + 1) % N) {
+		i = (j - 1 + N) % N;
+		k = (i + 1) % N;
+		d = (H[k] - H[j]).mag();
+		lo = (H[j] - H[i]).rad();
+		hi = (H[k] - H[j]).rad();
+		Seg kj = Seg(H[k], H[j]);
+		if (d < L) {
+			S.push_back(kj);
+			ld r_ = L - d;
+			Circle D = Circle(H[j], r_);
+			if (lo < hi) A += D.green(lo, hi);
+			else A += C.green(lo, 2 * PI) + D.green(0, hi);
+		}
+		else {
+			//ld ratio = L / d;
+			//Pos p = kj.p(ratio);
+			//S.push_back(Seg(H[j], p));
+			ld r_ = L;
+			Circle D = Circle(H[j], r_);
+			if (lo < hi) A += D.green(lo, hi);
+			else A += C.green(lo, 2 * PI) + D.green(0, hi);
+			break;
+		}
 	}
 	return;
 }

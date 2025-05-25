@@ -2,6 +2,358 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <cassert>
+#include <vector>
+typedef long long ll;
+//typedef long double ld;
+typedef double ld;
+typedef std::vector<int> Vint;
+typedef std::vector<ld> Vld;
+const ld INF = 1e17;
+const ld TOL = 1e-7;
+const ld PI = acos(-1);
+inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
+inline bool zero(const ld& x) { return !sign(x); }
+inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
+inline ld sq(const ld& x) { return x * x; }
+inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
+
+#define LINE 1
+#define CIRCLE 2
+
+int N, M, K, T, Q;
+struct Pos {
+	ld x, y;
+	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator * (const ld& n) const { return { x * n, y * n }; }
+	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
+	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
+	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
+	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
+	Pos rot(const ld& t) const { return Pos(x * cosl(t) - y * sinl(t), x * sinl(t) + y * cosl(t)); }
+	ld Euc() const { return x * x + y * y; }
+	ld mag() const { return sqrtl(Euc()); }
+	Pos unit() const { return *this / mag(); }
+	ld rad() const { return atan2l(y, x); }
+	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+}; const Pos O = { 0, 0 };
+typedef std::vector<Pos> Polygon;
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
+ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
+	if (!f) return cross(d1, d2, t) / (d1 - d2).mag();
+	if (sign(projection(d1, d2, d2, t)) <= 0 &&
+		sign(projection(d2, d1, d1, t)) <= 0)
+		return std::abs(cross(d1, d2, t)) / (d1 - d2).mag();
+	return std::min((d1 - t).mag(), (d2 - t).mag());
+}
+ld area(const Polygon& H) {
+	ld A = 0;
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
+	return A * .5;
+}
+void norm(Polygon& H) {
+	ld A = area(H); if (A < 0) std::reverse(H.begin(), H.end());
+	return;
+}
+struct Seg {
+	Pos s, e, dir;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
+	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
+	ld green(const ld& lo = 0, const ld& hi = 1) const {
+		ld d = hi - lo;
+		ld ratio = (lo + hi) * .5;
+		Pos m = p(ratio);
+		return m.y * d * (s.x - e.x);
+	}
+};
+struct Circle {
+	Pos c;
+	ld r;
+	Circle(Pos c_ = Pos(), ld r_ = 0) : c(c_), r(r_) {}
+	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
+	ld rad(const Pos& p) const { return (p - c).rad(); }
+	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
+	ld green(const ld& lo, const ld& hi) const {
+		//if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
+		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
+		ld fan = area(lo, hi);
+		Pos m = c + (s + e) * r * (ld).5;
+		ld tz = (cos(lo) - cos(hi)) * m.y * r;
+		return fan + tz - (s / e) * r * r * (ld).5;
+	}
+	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
+};
+typedef std::vector<Circle> Disks;
+Vld intersections(const Circle& a, const Circle& b) {
+	Pos ca = a.c, cb = b.c;
+	Pos vec = cb - ca;
+	ll ra = a.r, rb = b.r;
+	ld distance = vec.mag();
+	ld rd = vec.rad();
+	if (vec.Euc() > sq(ra + rb) + TOL) return {};
+	if (vec.Euc() < sq(ra - rb) - TOL) return {};
+	ld X = (ra * ra - rb * rb + vec.Euc()) / (2 * distance * ra);
+	if (X < -1) X = -1;
+	if (X > 1) X = 1;
+	ld h = acos(X);
+	Vld ret = {};
+	ret.push_back(norm(rd - h));
+	if (zero(h)) return ret;
+	ret.push_back(norm(rd + h));
+	return ret;
+}
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f == LINE) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
+	}
+	else {
+		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+	}
+	return ret;
+}
+ld green(const Circle& c, const ld& lo, const ld& hi) {
+	if (lo < hi) return c.green(lo, hi);
+	return c.green(lo, 2 * PI) + c.green(0, hi);
+}
+void solve() {
+	std::cin.tie(0)->sync_with_stdio(0);
+	std::cout.tie(0);
+	std::cout << std::fixed;
+	std::cout.precision(5);
+	Circle C; std::cin >> C.c.x >> C.c.y >> C.r;
+	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p.x >> p.y; norm(H);
+	int r = 0, l = 0;
+	bool meet = 0;
+	bool f0 = 0;
+	ld A = 0;
+	for (int i = 0, j; i < N; i++) {
+		if (ccw(C.c, H[r], H[i]) < 0) r = i;
+		if (!ccw(C.c, H[r], H[i]) && dot(C.c, H[r], H[i]) < 0) r = i;
+		if (ccw(C.c, H[l], H[i]) > 0) l = i;
+		if (!ccw(C.c, H[l], H[i]) && dot(C.c, H[l], H[i]) < 0) l = i;
+		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) meet = 1;
+		j = (i + 1) % N;
+		Vld inxs = circle_line_intersections(C, H[j], H[i]);
+		if (inxs.size() == 2) {
+			ld lo = inxs[0];
+			ld hi = inxs[1];
+			A += Seg(H[j], H[i]).green(lo, hi);
+			inxs = circle_line_intersections(C, H[j], H[i], CIRCLE);
+			assert(inxs.size() == 2);
+			lo = inxs[0];
+			hi = inxs[1];
+			A += green(C, lo, hi);
+			std::cout << A << "\n";
+			return;
+		}
+	}
+	if (!meet) { std::cout << C.area() << "\n"; return; }
+	ld lo = norm((H[l] - C.c).rad());
+	for (int j = l, k; 1; j = (j + 1) % N) {
+		k = (j + 1) % N;
+		bool fj = C >= H[j];
+		bool fk = C >= H[k];
+		if (fj) break;
+		if (fk) {
+			Vld inx = circle_line_intersections(C, H[k], H[j], CIRCLE);
+			assert(inx.size() == 1);
+			lo = inx[0];
+			l = j;
+			break;
+		}
+	}
+	ld hi = norm((H[r] - C.c).rad());
+	for (int j = r, i; 1; j = (j - 1 + N) % N) {
+		i = (j - 1 + N) % N;
+		bool fj = C >= H[j];
+		bool fi = C >= H[i];
+		if (fj) break;
+		if (fi) {
+			Vld inx = circle_line_intersections(C, H[i], H[j], CIRCLE);
+			assert(inx.size() == 1);
+			hi = inx[0];
+			r = j;
+			break;
+		}
+	}
+	A = 0;
+	for (int i = l, j; i != r; i = (i + 1) % N) {
+		j = (i + 1) % N;
+		bool fi = C >= H[i];
+		bool fj = C >= H[j];
+		if (fi && fj) {
+			A += Seg(H[j], H[i]).green();
+			continue;
+		}
+		Vld inx = circle_line_intersections(C, H[j], H[i]);
+		assert(inx.size() == 1);
+		ld x = inx[0];
+		if (fi) A += Seg(H[j], H[i]).green(x, 1);
+		if (fj) A += Seg(H[j], H[i]).green(0, x);
+	}
+	A += green(C, lo, hi);
+	ld L = C.r;
+	int el = l, er = r;
+	Disks VC;
+	Circle cl, cr;
+	ld aa = 0;
+	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
+		i = (j - 1 + N) % N;
+		k = (j + 1) % N;
+		lo = norm((H[i] - H[j]).rad());
+		hi = norm((H[j] - H[k]).rad());
+		if (j == l) hi = norm((H[j] - C.c).rad());
+		ld d = (H[j] - H[k]).mag();
+		if (j == l) d = (H[j] - C.c).mag();
+		if (L <= d) break;
+		L -= d;
+		Circle c = Circle(H[j], L);
+		VC.push_back(c);
+		if (c >= H[i]) {
+			A += green(c, lo, hi);
+			A += Seg(H[j], H[i]).green();
+		}
+		else {
+			el = j;
+			cl = c;
+			aa += green(c, lo, hi);
+			Vld inx = circle_line_intersections(c, H[j], H[i]);
+			assert(inx.size() == 1);
+			ld x = inx[0];
+			aa += Seg(H[j], H[i]).green(0, x);
+			break;
+		}
+	}
+	ld R = C.r;
+	for (int j = r, i, k; 1; j = (j + 1) % N) {
+		i = (j - 1 + N) % N;
+		k = (j + 1) % N;
+		lo = norm((H[j] - H[i]).rad());
+		hi = norm((H[k] - H[j]).rad());
+		if (j == r) lo = norm((H[j] - C.c).rad());
+		ld d = (H[j] - H[i]).mag();
+		if (j == r) d = (H[j] - C.c).mag();
+		if (R <= d) break;
+		R -= d;
+		Circle c = Circle(H[j], R);
+		VC.push_back(c);
+		if (c >= H[k]) {
+			A += green(c, lo, hi);
+			A += Seg(H[k], H[j]).green();
+		}
+		else {
+			er = j;
+			cr = c;
+			aa += green(c, lo, hi);
+			Vld inx = circle_line_intersections(c, H[k], H[j]);
+			assert(inx.size() == 1);
+			ld x = inx[0];
+			aa += Seg(H[k], H[j]).green(x, 1);
+			break;
+		}
+	}
+	int il = (el - 1 + N) % N;
+	int jl = el;
+	int kl = (el + 1) % N;
+	int ir = (er - 1 + N) % N;
+	int jr = er;
+	int kr = (er + 1) % N;
+	Vld inxs = intersections(cr, cl);
+	ld x = 0;
+	if (inxs.size() == 2) {
+		//for (ld x : inxs) std::cout << x << "\n";
+		Pos q = cr.p(inxs[0]);
+			//std::cout << "suck::\n";
+		if (ccw(cr.c, cl.c, q) < 0) {
+			//std::cout << "fuck::\n";
+			x = norm(inxs[0]);
+			lo = norm((H[jr] - H[ir]).rad());
+			A += cr.green(lo, x);
+			Pos p = cr.p(x);
+			x = cl.rad(p);
+			hi = norm((H[kl] - H[jl]).rad());
+			A += cl.green(lo, x);
+			A += Seg(cl.c, cr.c).green();
+		}
+		else A += aa;
+	}
+	else A += aa;
+	std::cout << A << "\n";
+	return;
+}
+int main() { solve(); return 0; }//boj14873
+//boj30123 27712 3607 10239
+
+/*
+
+1 6 18
+5
+6 -1
+3 0
+2 6
+3 9
+6 13
+
+10 60 180
+5
+60 -10
+30 0
+20 60
+30 90
+60 130
+90858.58632
+
+7 15 32
+11
+13 16
+12 20
+12 24
+14 27
+17 29
+22 31
+27 31
+29 27
+27 19
+21 14
+17 13
+
+0 0 4
+3
+0 2
+1 4
+-1 4
+
+
+
+
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <cassert>
 #include <vector>
@@ -97,7 +449,7 @@ struct Pos {
 	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-} P[LEN][2]; const Pos O = {0, 0};
+} P[LEN][2]; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
@@ -366,6 +718,7 @@ struct Circle {
 	ld rad(const Pos& p) const { return (p - c).rad(); }
 	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
+		if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
 		ld fan = area(lo, hi);
 		Pos m = c + (s + e) * r * (ld).5;
@@ -459,7 +812,7 @@ Circle minimum_enclose_circle(std::vector<Pos> P) {
 	}
 	return mec;
 }
-Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE) {
+Vld circle_line_intersections(const Circle& q, const Seg& l, const int& t = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos s = l.s, e = l.e;
 	Pos vec = e - s;
@@ -486,7 +839,7 @@ Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE
 	}
 	return ret;
 }
-Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const bool& f = LINE) {
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
 	Pos OM = s - q.c;
@@ -499,7 +852,7 @@ Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const
 	ld lo = (-b - det) / a;
 	ld hi = (-b + det) / a;
 	Vld ret;
-	if (f) {
+	if (f == LINE) {
 		if (0 < hi && hi < 1) ret.push_back(hi);
 		if (zero(det)) return ret;
 		if (0 < lo && lo < 1) ret.push_back(lo);
@@ -524,6 +877,9 @@ Polygon circle_line_intersection(const Pos& o, const ld& r, const Pos& p1, const
 	if (dot(p1, p2, m1, m2) < 0) std::swap(m1, m2);
 	return { m1, m2 };//p1->p2
 }
+Polygon circle_line_intersection(const Circle& c, const Pos& p1, const Pos& p2) {
+	return circle_line_intersection(c.c, c.r, p1, p2);
+}
 ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
 	Pos v1 = p1 - c.c, v2 = p2 - c.c;
 	ld r = c.r;
@@ -542,129 +898,162 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(10);
+	std::cout.precision(5);
 	Circle C; std::cin >> C;
 	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
 	int r = 0, l = 0;
-	bool meet = 1;
-	for (int i = 0; i < N; i++) {
+	bool meet = 0;
+	bool f0 = 0;
+	ld A = 0;
+	for (int i = 0, j; i < N; i++) {
 		if (ccw(C.c, H[r], H[i]) < 0) r = i;
-		if (!ccw(C.c, H[r], H[i]) && dot(C.c, H[r], H[i]) > 0) r = i;
+		if (!ccw(C.c, H[r], H[i]) && dot(C.c, H[r], H[i]) < 0) r = i;
 		if (ccw(C.c, H[l], H[i]) > 0) l = i;
-		if (!ccw(C.c, H[l], H[i]) && dot(C.c, H[l], H[i]) > 0) l = i;
-		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) meet = 0;
-	}
-	if (meet) { std::cout << C.area() << "\n"; return; }
-	if ((l + 1) % N == r) {
-		Vld inxs = circle_line_intersections(H[r], H[l], C);
+		if (!ccw(C.c, H[l], H[i]) && dot(C.c, H[l], H[i]) < 0) l = i;
+		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) meet = 1;
+		j = (i + 1) % N;
+		Vld inxs = circle_line_intersections(C, H[j], H[i]);
 		if (inxs.size() == 2) {
-			ld A = Seg(H[r], H[l]).green(inxs[0], inxs[1]);
-			inxs = circle_line_intersections(H[r], H[l], C, CIRCLE);
 			ld lo = inxs[0];
 			ld hi = inxs[1];
-			if (lo < hi) A += C.green(lo, hi);
-			else A += C.green(lo, 2 * PI) + C.green(0, hi);
+			A += Seg(H[j], H[i]).green(lo, hi);
+			inxs = circle_line_intersections(C, H[j], H[i], CIRCLE);
+			assert(inxs.size() == 2);
+			lo = inxs[0];
+			hi = inxs[1];
+			A += C.green(lo, hi);
 			std::cout << A << "\n";
 			return;
 		}
 	}
-	Segs S;
+	if (!meet) { std::cout << C.area() << "\n"; return; }
 	ld lo = norm((H[l] - C.c).rad());
-	ld hi = norm((H[r] - C.c).rad());
-	ld A = 0, d;
-	std::cout << "cen:: " << C.c << " lo:: " << lo * 180 / PI << " hi:: " << hi * 180 / PI << "\n";
-	if (lo < hi) A += C.green(lo, hi);
-	else A += C.green(lo, 2 * PI) + C.green(0, hi);
-	for (int i = l, j; i != r; i = (i + 1) % N) {
-		j = (i + 1) % N;
-		Seg se = Seg(H[j], H[i]);
-		if (C >= H[i] && C >= H[j]) S.push_back(se);
-		else if (C >= H[i]) {
-			Vld inxs = circle_line_intersections(H[j], H[i], C);
-			S.push_back(Seg(se.p(inxs[0]), H[i]));
-		}
-		else if (C >= H[j]) {
-			Vld inxs = circle_line_intersections(H[j], H[i], C);
-			S.push_back(Seg(H[j], se.p(inxs[0])));
-		}
-	}
-	ld L = C.r;
-	L -= (H[l] - C.c).mag();
-	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
-		i = (j + 1) % N;
-		k = (j - 1 + N) % N;
-		d = (H[k] - H[j]).mag();
-		lo = norm((H[k] - H[j]).rad());
-		hi = norm((H[j] - H[i]).rad());
-		Seg jk = Seg(H[j], H[k]);
-		std::cout << "cen:: " << H[j] << " lo:: " << lo * 180 / PI << " hi:: " << hi * 180 / PI << "\n";
-		if (d < L) {
-			S.push_back(jk);
-			ld r_ = L - d;
-			Circle D = Circle(H[j], r_);
-			if (lo < hi) A += D.green(lo, hi);
-			else A += C.green(lo, 2 * PI) + D.green(0, hi);
-		}
-		else {
-			ld ratio = L / d;
-			Pos p = jk.p(ratio);
-			S.push_back(Seg(H[j], p));
-			ld r_ = L;
-			Circle D = Circle(H[j], r_);
-			if (lo < hi) A += D.green(lo, hi);
-			else A += C.green(lo, 2 * PI) + D.green(0, hi);
+	//std::cout << "lo 1:: " << lo << "\n";
+	for (int j = l, k; 1; j = (j + 1) % N) {
+		k = (j + 1) % N;
+		//std::cout << "j:: " << j << " k:: " << k << "\n";
+		bool fj = C >= H[j];
+		bool fk = C >= H[k];
+		//std::cout << "fj:: " << fj << " fk:: " << fk << "\n";
+		if (fj) break;
+		if (fk) {
+			Vld inx = circle_line_intersections(C, H[k], H[j], CIRCLE);
+			assert(inx.size() == 1);
+			lo = inx[0];
+			l = j;
 			break;
 		}
 	}
+	//std::cout << "lo 2:: " << lo << "\n";
+	//std::cout << "fuck 1-1::\n";
+	ld hi = norm((H[r] - C.c).rad());
+	//std::cout << "hi 1:: " << hi << "\n";
+	for (int j = r, i; 1; j = (j - 1 + N) % N) {
+		i = (j - 1 + N) % N;
+		//std::cout << "j:: " << j << " i:: " << i << "\n";
+		bool fj = C >= H[j];
+		bool fi = C >= H[i];
+		//std::cout << "fj:: " << fj << " fi:: " << fi << "\n";
+		if (fj) break;
+		if (fi) {
+			Vld inx = circle_line_intersections(C, H[i], H[j], CIRCLE);
+			assert(inx.size() == 1);
+			hi = inx[0];
+			r = j;
+			break;
+		}
+	}
+	//std::cout << "hi 2:: " << hi << "\n";
+	//std::cout << "fuck 1-2::\n";
+	//std::cout << "l:: " << l << " r:: " << r << "\n";
+	A = 0;
+	for (int i = l, j; i != r; i = (i + 1) % N) {
+		j = (i + 1) % N;
+		//std::cout << "i::" << i << "\n";
+		bool fi = C >= H[i];
+		bool fj = C >= H[j];
+		if (fi && fj) {
+			//std::cout << "H[j]::" << H[j] << " H[i]:: " << H[i] << "\n";
+			A += Seg(H[j], H[i]).green();
+			continue;
+		}
+		Vld inx = circle_line_intersections(C, H[j], H[i]);
+		//std::cout << "inx.sz:: " << inx.size() << "\n";
+		assert(inx.size() == 1);
+		ld x = inx[0];
+		if (fi) A += Seg(H[j], H[i]).green(x, 1);
+		if (fj) A += Seg(H[j], H[i]).green(0, x);
+	}
+	//std::cout << "fuck 2-0::\n";
+	//std::cout << "lo:: " << lo << " hi:: " << hi << "\n";
+	A += C.green(lo, hi);
+	ld L = C.r;
+	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
+		i = (j - 1 + N) % N;
+		k = (j + 1) % N;
+		lo = norm((H[i] - H[j]).rad());
+		hi = norm((H[j] - H[k]).rad());
+		if (j == l) hi = norm((H[j] - C.c).rad());
+		ld d = (H[j] - H[k]).mag();
+		if (j == l) d = (H[j] - C.c).mag();
+		//std::cout << "L:: " << L << " d:: " << d << "\n";
+		if (L <= d) break;
+		L -= d;
+		//std::cout << "lo:: " << lo << " hi:: " << hi << " L:: " << L << "\n";
+		Circle c = Circle(H[j], L);
+		A += c.green(lo, hi);
+		if (c >= H[i]) A += Seg(H[j], H[i]).green();
+		else {
+			//std::cout << "H[j]::" << H[j] << " H[i]:: " << H[i] << "\n";
+			Vld inx = circle_line_intersections(c, H[j], H[i]);
+			assert(inx.size() = 1);
+			ld x = inx[0];
+			//std::cout << "x:: " << x << "\n";
+			A += Seg(H[j], H[i]).green(0, x);
+			break;
+		}
+	}
+	//std::cout << "fuck 3-1::\n";
 	ld R = C.r;
-	R -= (H[r] - C.c).mag();
 	for (int j = r, i, k; 1; j = (j + 1) % N) {
 		i = (j - 1 + N) % N;
 		k = (j + 1) % N;
-		d = (H[k] - H[j]).mag();
 		lo = norm((H[j] - H[i]).rad());
 		hi = norm((H[k] - H[j]).rad());
-		Seg kj = Seg(H[k], H[j]);
-		std::cout << "cen:: " << H[j] << " lo:: " << lo * 180 / PI << " hi:: " << hi * 180 / PI << "\n";
-		if (d < R) {
-			S.push_back(kj);
-			ld r_ = R - d;
-			Circle D = Circle(H[j], r_);
-			if (lo < hi) A += D.green(lo, hi);
-			else A += C.green(lo, 2 * PI) + D.green(0, hi);
-		}
+		if (j == r) lo = norm((H[j] - C.c).rad());
+		ld d = (H[j] - H[i]).mag();
+		if (j == r) d = (H[j] - C.c).mag();
+		//std::cout << "R:: " << R << " d:: " << d << "\n";
+		if (R <= d) break;
+		R -= d;
+		//std::cout << "lo:: " << lo << " hi:: " << hi << " R:: " << R << "\n";
+		Circle c = Circle(H[j], R);
+		A += c.green(lo, hi);
+		if (c >= H[k]) A += Seg(H[k], H[j]).green();
 		else {
-			ld ratio = 1 - (R / d);
-			Pos p = kj.p(ratio);
-			S.push_back(Seg(p, H[j]));
-			ld r_ = R;
-			Circle D = Circle(H[j], r_);
-			if (lo < hi) A += D.green(lo, hi);
-			else A += C.green(lo, 2 * PI) + D.green(0, hi);
+			//std::cout << "H[k]::" << H[k] << " H[j]:: " << H[j] << "\n";
+			Vld inx = circle_line_intersections(c, H[k], H[j]);
+			assert(inx.size() = 1);
+			ld x = inx[0];
+			//std::cout << "x:: " << x << "\n";
+			A += Seg(H[k], H[j]).green(x, 1);
 			break;
 		}
 	}
-	for (Seg& se : S) {
-		std::cout << "se:: " << se.s << " " << se.e << "\n";
-		A += se.green();
-	}
+	//std::cout << "fuck 3-2::\n";
 	std::cout << A << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj14873
 //boj30123 27712 3607 10239
 
-/*
 
-1
-0 0 10 8
-2 4
-2 2
--2 2
--2 4
--4 4
--4 -4
-4 -4
-4 4
+
+0 0 4
+3
+0 2
+1 4
+-1 4
+
 
 */

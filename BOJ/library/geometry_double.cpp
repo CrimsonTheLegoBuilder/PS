@@ -373,6 +373,7 @@ struct Circle {
 	ld rad(const Pos& p) const { return (p - c).rad(); }
 	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
+		if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
 		ld fan = area(lo, hi);
 		Pos m = c + (s + e) * r * (ld).5;
@@ -466,7 +467,7 @@ Circle minimum_enclose_circle(std::vector<Pos> P) {
 	}
 	return mec;
 }
-Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE) {
+Vld circle_line_intersections(const Circle& q, const Seg& l, const int& t = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos s = l.s, e = l.e;
 	Pos vec = e - s;
@@ -493,7 +494,7 @@ Vld circle_line_intersections(const Seg& l, const Circle& q, const int& t = LINE
 	}
 	return ret;
 }
-Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const bool& f = 0) {
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
 	Pos OM = s - q.c;
@@ -506,7 +507,7 @@ Vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const
 	ld lo = (-b - det) / a;
 	ld hi = (-b + det) / a;
 	Vld ret;
-	if (f) {
+	if (f == LINE) {
 		if (0 < hi && hi < 1) ret.push_back(hi);
 		if (zero(det)) return ret;
 		if (0 < lo && lo < 1) ret.push_back(lo);

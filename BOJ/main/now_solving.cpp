@@ -569,9 +569,10 @@ void solve() {
 		}
 	}
 	Segs S;
-	ld lo = (H[l] - C.c).rad();
-	ld hi = (H[r] - C.c).rad();
+	ld lo = norm((H[l] - C.c).rad());
+	ld hi = norm((H[r] - C.c).rad());
 	ld A = 0, d;
+	std::cout << "cen:: " << C.c << " lo:: " << lo * 180 / PI << " hi:: " << hi * 180 / PI << "\n";
 	if (lo < hi) A += C.green(lo, hi);
 	else A += C.green(lo, 2 * PI) + C.green(0, hi);
 	for (int i = l, j; i != r; i = (i + 1) % N) {
@@ -593,9 +594,10 @@ void solve() {
 		i = (j + 1) % N;
 		k = (j - 1 + N) % N;
 		d = (H[k] - H[j]).mag();
-		lo = (H[k] - H[j]).rad();
-		hi = (H[j] - H[i]).rad();
+		lo = norm((H[k] - H[j]).rad());
+		hi = norm((H[j] - H[i]).rad());
 		Seg jk = Seg(H[j], H[k]);
+		std::cout << "cen:: " << H[j] << " lo:: " << lo * 180 / PI << " hi:: " << hi * 180 / PI << "\n";
 		if (d < L) {
 			S.push_back(jk);
 			ld r_ = L - d;
@@ -620,9 +622,10 @@ void solve() {
 		i = (j - 1 + N) % N;
 		k = (j + 1) % N;
 		d = (H[k] - H[j]).mag();
-		lo = (H[j] - H[i]).rad();
-		hi = (H[k] - H[j]).rad();
+		lo = norm((H[j] - H[i]).rad());
+		hi = norm((H[k] - H[j]).rad());
 		Seg kj = Seg(H[k], H[j]);
+		std::cout << "cen:: " << H[j] << " lo:: " << lo * 180 / PI << " hi:: " << hi * 180 / PI << "\n";
 		if (d < R) {
 			S.push_back(kj);
 			ld r_ = R - d;
@@ -641,7 +644,10 @@ void solve() {
 			break;
 		}
 	}
-	for (Seg& se : S) A += se.green();
+	for (Seg& se : S) {
+		std::cout << "se:: " << se.s << " " << se.e << "\n";
+		A += se.green();
+	}
 	std::cout << A << "\n";
 	return;
 }

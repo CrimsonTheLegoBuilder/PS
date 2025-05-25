@@ -93,7 +93,7 @@ typedef std::vector<Circle> Disks;
 Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
-	ll ra = a.r, rb = b.r;
+	ld ra = a.r, rb = b.r;
 	ld distance = vec.mag();
 	ld rd = vec.rad();
 	if (vec.Euc() > sq(ra + rb) + TOL) return {};
@@ -291,11 +291,13 @@ void solve() {
 			//std::cout << "fuck::\n";
 			x = norm(inxs[0]);
 			lo = norm((H[jr] - H[ir]).rad());
+			if (jr == r) lo = norm((H[jr] - C.c).rad());
 			A += cr.green(lo, x);
 			Pos p = cr.p(x);
 			x = cl.rad(p);
-			hi = norm((H[kl] - H[jl]).rad());
-			A += cl.green(lo, x);
+			hi = norm((H[jl] - H[kl]).rad());
+			if (jr == r) hi = norm((H[jl] - C.c).rad());
+			A += cl.green(x, hi);
 			A += Seg(cl.c, cr.c).green();
 		}
 		else A += aa;
@@ -308,6 +310,13 @@ int main() { solve(); return 0; }//boj14873
 //boj30123 27712 3607 10239
 
 /*
+
+150 160 100
+4
+10 60
+150 120
+300 50
+150 10
 
 1 6 18
 5

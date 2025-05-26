@@ -302,8 +302,31 @@ void solve() {
 					break;
 				}
 				if (!fl && !fr) {
-					dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
-					AL.pop_back(); AR.pop_back();
+					bool ffr = 0, ffl = 0;
+					if (szl > 1) {
+						Arc a = AL[szl - 2];
+						inxs = intersections(AR.back().c, a.c);
+						x = inxs[0];
+						m = AR.back().c.p(x);
+						if (a.inside(m) && AR.back().inside(m)) ffl = 1;
+					}
+					if (szr > 1) {
+						Arc a = AR[szr - 2];
+						inxs = intersections(a.c, AL.back().c);
+						x = inxs[0];
+						m = a.c.p(x);
+						if (a.inside(m) && AL.back().inside(m)) ffr = 1;
+					}
+					if (ffl && ffr) {
+						dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
+						AL.pop_back(); AR.pop_back();
+					}
+					else if (ffl) {
+						dq.push_front(AR.back().c.c); AR.pop_back(); continue;
+					}
+					else if (ffr) {
+						dq.push_back(AL.back().c.c); AL.pop_back(); continue;
+					}
 					continue;
 				}
 				if (!AL.back().inside(m)) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
@@ -359,6 +382,7 @@ int main() { solve(); return 0; }//boj14873
 130 30
 80 20
 60 40
+294892.948786434659269
 
 10 60 180
 5

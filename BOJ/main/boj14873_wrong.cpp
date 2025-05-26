@@ -259,15 +259,26 @@ void solve() {
 	Vld inxs = intersections(AR.back().c, AL.back().c);
 	ld x = 0;
 	//std::cout << "FUCK::\n";
-	if ((er + 1) % N == el) {
+	if ((er + 1) % N == el && inxs.size() == 2) {
 		while (1) {
+			int szl = AL.size();
+			int szr = AR.size();
+			inxs = intersections(AR.back().c, AL.back().c);
+			x = inxs[0];
+			Pos m = AR.back().c.p(x);
+			if (szl < 2 || szr < 2) {
+				std::cout << "something wrong::\n";
+				return;
+			}
+			int i0 = szl - 1;
+			int i1 = szl - 2;
+			int j0 = szl - 1;
+			int j1 = szl - 2;
 
 		}
 	}
-	else {
-		for (const Arc& q : AL) A += area(q);
-		for (const Arc& q : AR) A += area(q);
-	}
+	for (const Arc& q : AL) A += area(q);
+	for (const Arc& q : AR) A += area(q);
 	std::cout << A << "\n";
 	return;
 }

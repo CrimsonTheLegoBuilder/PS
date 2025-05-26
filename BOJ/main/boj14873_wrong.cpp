@@ -21,6 +21,9 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 #define LINE 1
 #define CIRCLE 2
 
+#define LEFT 1
+#define RIGHT -1
+
 int N, M, K, T, Q;
 struct Pos {
 	ld x, y;
@@ -88,6 +91,7 @@ struct Circle {
 		return fan + tz - (s / e) * r * r * (ld).5;
 	}
 	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
+	bool operator < (const Pos& p) const { return r < (c - p).mag(); }
 };
 typedef std::vector<Circle> Disks;
 Vld intersections(const Circle& a, const Circle& b) {
@@ -145,7 +149,8 @@ struct Arc {
 	Arc(Circle c_, ld l_, ld h_) : c(c_), lo(l_), hi(h_) {}
 };
 typedef std::vector<Arc> Arcs;
-Arcs RA, LA;
+Arcs AR, AL;
+ld area(const Arc& q) { return q.c.area(0, norm(q.hi - q.lo)); }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -158,22 +163,16 @@ void solve() {
 	bool f0 = 0;
 	ld A = 0;
 	for (int i = 0, j; i < N; i++) {
-		if (ccw(C.c, H[r], H[i]) < 0) r = i;
-		if (!ccw(C.c, H[r], H[i]) && dot(C.c, H[r], H[i]) < 0) r = i;
-		if (ccw(C.c, H[l], H[i]) > 0) l = i;
-		if (!ccw(C.c, H[l], H[i]) && dot(C.c, H[l], H[i]) < 0) l = i;
+		if (ccw(C.c, H[r], H[i]) < 0 || (!ccw(C.c, H[r], H[i]) && dot(C.c, H[r], H[i]) < 0)) r = i;
+		if (ccw(C.c, H[l], H[i]) > 0 || (!ccw(C.c, H[l], H[i]) && dot(C.c, H[l], H[i]) < 0)) l = i;
 		if (dist(H[i], H[(i + 1) % N], C.c, 1) < C.r) meet = 1;
 		j = (i + 1) % N;
-		Vld inxs = circle_line_intersections(C, H[j], H[i]);
+		Vld inxs = circle_line_intersections(C, H[j], H[i], CIRCLE);
 		if (inxs.size() == 2) {
-			ld lo = inxs[0];
-			ld hi = inxs[1];
-			A += Seg(H[j], H[i]).green(lo, hi);
-			inxs = circle_line_intersections(C, H[j], H[i], CIRCLE);
-			assert(inxs.size() == 2);
-			lo = inxs[0];
-			hi = inxs[1];
-			A += green(C, lo, hi);
+			ld lo = norm(inxs[0]), hi = norm(inxs[1]);
+			ld t = norm(hi - lo);
+			A += C.area(0, t);
+			A += std::abs(C.r * C.r * .5 * sin(t));
 			std::cout << A << "\n";
 			return;
 		}
@@ -182,8 +181,7 @@ void solve() {
 	ld lo = norm((H[l] - C.c).rad());
 	for (int j = l, k; 1; j = (j + 1) % N) {
 		k = (j + 1) % N;
-		bool fj = C >= H[j];
-		bool fk = C >= H[k];
+		bool fj = C >= H[j], fk = C >= H[k];
 		if (fj) break;
 		if (fk) {
 			Vld inx = circle_line_intersections(C, H[k], H[j], CIRCLE);
@@ -196,8 +194,7 @@ void solve() {
 	ld hi = norm((H[r] - C.c).rad());
 	for (int j = r, i; 1; j = (j - 1 + N) % N) {
 		i = (j - 1 + N) % N;
-		bool fj = C >= H[j];
-		bool fi = C >= H[i];
+		bool fj = C >= H[j], fi = C >= H[i];
 		if (fj) break;
 		if (fi) {
 			Vld inx = circle_line_intersections(C, H[i], H[j], CIRCLE);
@@ -210,22 +207,20 @@ void solve() {
 	A = 0;
 	for (int i = l, j; i != r; i = (i + 1) % N) {
 		j = (i + 1) % N;
-		bool fi = C >= H[i];
-		bool fj = C >= H[j];
+		bool fi = C >= H[i], fj = C >= H[j];
 		if (fi && fj) {
-			A += Seg(H[j], H[i]).green();
+			A += cross(C.c, H[j], H[i]) * .5;
 			continue;
 		}
 		Vld inx = circle_line_intersections(C, H[j], H[i]);
 		assert(inx.size() == 1);
 		ld x = inx[0];
-		if (fi) A += Seg(H[j], H[i]).green(x, 1);
-		if (fj) A += Seg(H[j], H[i]).green(0, x);
+		if (fi) A += cross(C.c, Seg(H[j], H[i]).p(x), H[i]) * .5;
+		if (fj) A += cross(C.c, H[j], Seg(H[j], H[i]).p(x)) * .5;
 	}
-	A += green(C, lo, hi);
+	A += C.area(0, norm(hi - lo));
 	ld L = C.r;
 	int el = l, er = r;
-	Disks VC = { C };
 	Circle cl, cr;
 	ld aa = 0;
 	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
@@ -239,21 +234,8 @@ void solve() {
 		if (L <= d) break;
 		L -= d;
 		Circle c = Circle(H[j], L);
-		VC.push_back(c);
-		if (c >= H[i]) {
-			A += green(c, lo, hi);
-			A += Seg(H[j], H[i]).green();
-		}
-		else {
-			el = j;
-			cl = c;
-			aa += green(c, lo, hi);
-			Vld inx = circle_line_intersections(c, H[j], H[i]);
-			assert(inx.size() == 1);
-			ld x = inx[0];
-			aa += Seg(H[j], H[i]).green(0, x);
-			break;
-		}
+		AL.push_back(Arc(c, lo, hi));
+		if (c < H[i]) { el = j; break; }
 	}
 	ld R = C.r;
 	for (int j = r, i, k; 1; j = (j + 1) % N) {
@@ -267,62 +249,25 @@ void solve() {
 		if (R <= d) break;
 		R -= d;
 		Circle c = Circle(H[j], R);
-		VC.push_back(c);
-		if (c >= H[k]) {
-			A += green(c, lo, hi);
-			A += Seg(H[k], H[j]).green();
-		}
-		else {
-			er = j;
-			cr = c;
-			aa += green(c, lo, hi);
-			Vld inx = circle_line_intersections(c, H[k], H[j]);
-			assert(inx.size() == 1);
-			ld x = inx[0];
-			aa += Seg(H[k], H[j]).green(x, 1);
-			break;
-		}
+		AR.push_back(Arc(c, lo, hi));
+		if (c < H[k]) { er = j; break; }
 	}
-	for (Circle& c : VC) {
-		std::cout << c.c.x << c.c.y << c.r << "\n";
-	}
+	//for (Circle& c : ) {
+	//	std::cout << c.c.x << c.c.y << c.r << "\n";
+	//}
 	//std::cout << "FUCK::\n";
-	int il = (el - 1 + N) % N;
-	int jl = el;
-	int kl = (el + 1) % N;
-	int ir = (er - 1 + N) % N;
-	int jr = er;
-	int kr = (er + 1) % N;
-	Vld inxs = intersections(cr, cl);
+	Vld inxs = intersections(AR.back().c, AL.back().c);
 	ld x = 0;
 	//std::cout << "FUCK::\n";
-	if ((jr + 1) % N == jl) {
-		//std::cout << "jr:: " << H[jr].x << " " << H[jr].y << "\n";
-		//std::cout << "jl:: " << H[jl].x << " " << H[jl].y << "\n";
-		if (inxs.size() == 2) {
-			//for (ld x : inxs) std::cout << x << "\n";
-			Pos q = cr.p(inxs[0]);
-			//std::cout << "suck::\n";
-			if (ccw(cr.c, cl.c, q) < 0) {
-				//std::cout << "fuck::\n";
-				x = norm(inxs[0]);
-				lo = norm((H[jr] - H[ir]).rad());
-				std::cout << "lo:: " << lo << " x:: " << x << "\n";
-				if (jr == r) lo = norm((H[jr] - C.c).rad());
-				A += green(cr, lo, x);
-				Pos p = cr.p(x);
-				x = norm(cl.rad(p));
-				hi = norm((H[jl] - H[kl]).rad());
-				std::cout << "hi:: " << hi << " x:: " << x << "\n";
-				if (jl == l) hi = norm((H[jl] - C.c).rad());
-				A += green(cl, x, hi);
-				A += Seg(cl.c, cr.c).green();
-			}
-			else A += aa;
+	if ((er + 1) % N == el) {
+		while (1) {
+
 		}
-		else A += aa;
 	}
-	else A += aa;
+	else {
+		for (const Arc& q : AL) A += area(q);
+		for (const Arc& q : AR) A += area(q);
+	}
 	std::cout << A << "\n";
 	return;
 }

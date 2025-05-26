@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cassert>
 #include <vector>
+#include <deque>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -75,6 +76,7 @@ struct Seg {
 		return m.y * d * (s.x - e.x);
 	}
 };
+typedef std::vector<Seg> Vseg;
 struct Circle {
 	Pos c;
 	ld r;
@@ -147,6 +149,11 @@ struct Arc {
 	Circle c;
 	ld lo, hi;
 	Arc(Circle c_, ld l_, ld h_) : c(c_), lo(l_), hi(h_) {}
+	bool inside(const Pos& p) const {
+		ld t = c.rad(p);
+		if (lo < hi) return lo < t && t < hi;
+		else return lo < t || t < hi;
+	}
 };
 typedef std::vector<Arc> Arcs;
 Arcs AR, AL;
@@ -260,21 +267,19 @@ void solve() {
 	ld x = 0;
 	//std::cout << "FUCK::\n";
 	if ((er + 1) % N == el && inxs.size() == 2) {
+		std::deque<Pos> dq;
 		while (1) {
 			int szl = AL.size();
 			int szr = AR.size();
-			inxs = intersections(AR.back().c, AL.back().c);
-			x = inxs[0];
-			Pos m = AR.back().c.p(x);
 			if (szl < 2 || szr < 2) {
 				std::cout << "something wrong::\n";
 				return;
 			}
-			int i0 = szl - 1;
-			int i1 = szl - 2;
-			int j0 = szl - 1;
-			int j1 = szl - 2;
-
+			inxs = intersections(AR.back().c, AL.back().c);
+			x = inxs[0];
+			Pos m = AR.back().c.p(x);
+			if (!AR.back().inside(m)) { AR.pop_back(); dq.push_front(m); continue; }
+			if (!AL.back().inside(m)) { AL.pop_back(); dq.push_back(m); continue; }
 		}
 	}
 	for (const Arc& q : AL) A += area(q);

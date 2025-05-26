@@ -268,19 +268,32 @@ void solve() {
 	//std::cout << "FUCK::\n";
 	if ((er + 1) % N == el && inxs.size() == 2) {
 		std::deque<Pos> dq;
+		Pos m;
 		while (1) {
 			int szl = AL.size();
 			int szr = AR.size();
-			if (szl < 2 || szr < 2) {
+			if (szl < 1 || szr < 1) {
 				std::cout << "something wrong::\n";
 				return;
 			}
 			inxs = intersections(AR.back().c, AL.back().c);
 			x = inxs[0];
-			Pos m = AR.back().c.p(x);
-			if (!AR.back().inside(m)) { AR.pop_back(); dq.push_front(m); continue; }
+			m = AR.back().c.p(x);
+			bool fl = AL.back().inside(m);
+			bool fr = AR.back().inside(m);
+			if (!fl && !fr) {
+				AL.pop_back(); AR.pop_back();
+				dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
+				continue;
+			}
 			if (!AL.back().inside(m)) { AL.pop_back(); dq.push_back(m); continue; }
+			if (!AR.back().inside(m)) { AR.pop_back(); dq.push_front(m); continue; }
 		}
+
+		inxs = intersections(AR.back().c, AL.back().c);
+		x = inxs[0];
+		m = AR.back().c.p(x);
+
 	}
 	for (const Arc& q : AL) A += area(q);
 	for (const Arc& q : AR) A += area(q);
@@ -346,6 +359,7 @@ int main() { solve(); return 0; }//boj14873
 0 0 4
 3
 0 2
+1 4
 1 4
 -1 4
 

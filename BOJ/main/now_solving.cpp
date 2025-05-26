@@ -244,7 +244,7 @@ void solve() {
 		AL.push_back(Arc(c, lo, hi));
 		if (c < H[i]) { el = j; break; }
 	}
-	std::cout << "FUCK::\n";
+	//std::cout << "FUCK::\n";
 	ld R = C.r;
 	for (int j = r, i, k; 1; j = (j + 1) % N) {
 		i = (j - 1 + N) % N;
@@ -260,62 +260,68 @@ void solve() {
 		AR.push_back(Arc(c, lo, hi));
 		if (c < H[k]) { er = j; break; }
 	}
-	std::cout << "FUCK::\n";
+	//std::cout << "FUCK::\n";
 	//for (Circle& c : ) {
 	//	std::cout << c.c.x << c.c.y << c.r << "\n";
 	//}
 	//std::cout << "FUCK::\n";
-	Vld inxs = intersections(AR.back().c, AL.back().c);
-	ld x = 0;
-	std::cout << "FUCK::\n";
-	if ((er + 1) % N == el && inxs.size() == 2) {
-		std::deque<Pos> dq;
-		Pos m;
-		std::cout << "FUCK::\n";
-		while (1) {
-			std::cout << "FUCK::\n";
-			int szl = AL.size();
-			int szr = AR.size();
-			std::cout << "DEBUG:: szl:: " << szl << " szr:: " << szr << "\n";
-			if (szl < 1 || szr < 1) {
-				std::cout << "something wrong::\n";
-				return;
+	if (AL.size() > 0 && AR.size() > 0) {
+		//std::cout << AL.size() << " " << AR.size() << "\n";
+		//std::cout << AL.back().c.c.x << AL.back().c.c.y << AL.back().c.r << "\n";
+		//std::cout << AR.back().c.c.x << AR.back().c.c.y << AR.back().c.r << "\n";
+		Vld inxs = intersections(AR.back().c, AL.back().c);
+		ld x = 0;
+		//std::cout << "FUCK::\n";
+		if ((er + 1) % N == el && inxs.size() == 2) {
+			std::deque<Pos> dq;
+			Pos m;
+			//std::cout << "FUCK::\n";
+			while (1) {
+				//std::cout << "FUCK::\n";
+				int szl = AL.size();
+				int szr = AR.size();
+				//std::cout << "DEBUG:: szl:: " << szl << " szr:: " << szr << "\n";
+				if (szl < 1 || szr < 1) {
+					std::cout << "something wrong::\n";
+					return;
+				}
+				inxs = intersections(AR.back().c, AL.back().c);
+				x = inxs[0];
+				m = AR.back().c.p(x);
+				bool fl = AL.back().inside(m);
+				bool fr = AR.back().inside(m);
+				if (fl && fr) {
+					dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
+					break;
+				}
+				if (!fl && !fr) {
+					dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
+					AL.pop_back(); AR.pop_back();
+					continue;
+				}
+				if (!AL.back().inside(m)) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
+				if (!AR.back().inside(m)) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
 			}
-			inxs = intersections(AR.back().c, AL.back().c);
+			ld t = 0;
+			Circle cl = AL.back().c;
+			Circle cr = AR.back().c;
+			//std::cout << cl.c.x << " " << cl.c.y << " " << cl.r << "\n";
+			//std::cout << cr.c.x << " " << cr.c.y << " " << cr.r << "\n";
+			inxs = intersections(cr, cl);
+			//std::cout << "inxs.sz:: " << inxs.size() << "\n";
 			x = inxs[0];
-			m = AR.back().c.p(x);
-			bool fl = AL.back().inside(m);
-			bool fr = AR.back().inside(m);
-			if (fl && fr) {
-				dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
-				AL.pop_back(); AR.pop_back();
-				break;
-			}
-			if (!fl && !fr) {
-				dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
-				AL.pop_back(); AR.pop_back();
-				continue;
-			}
-			if (!AL.back().inside(m)) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
-			if (!AR.back().inside(m)) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
+			m = cr.p(x);
+			A += cross(cr.c, m, cl.c) * .5;
+			ld lo = cl.rad(m);
+			t = norm(AL.back().hi - lo);
+			A += cl.area(0, t);
+			ld hi = cr.rad(m);
+			t = norm(hi - AR.back().lo);
+			A += cr.area(0, t);
+			int sz = dq.size();
+			for (int i = 0; i < sz; i++) A -= dq[i] / dq[(i + 1) % sz] * .5;
+			AL.pop_back(); AR.pop_back();
 		}
-		ld a = 0, t = 0;
-		Circle cl = AL.back().c;
-		Circle cr = AR.back().c;
-		std::cout << cl.c.x << " " << cl.c.y << " " << cl.r << "\n";
-		std::cout << cr.c.x << " " << cr.c.y << " " << cr.r << "\n";
-		inxs = intersections(cr.c, cl.c);
-		x = inxs[0];
-		m = cr.p(x);
-		a += cross(cr.c, m, cl.c) * .5;
-		ld lo = cl.rad(m);
-		t = norm(AL.back().hi - lo);
-		a += cl.area(0, t);
-		ld hi = cr.rad(m);
-		t = norm(hi - AR.back().lo);
-		a += cr.area(0, t);
-		int sz = dq.size();
-		for (int i = 0; i < sz; i++) a -= dq[i] / dq[(i + 1) % sz] * .5;
 	}
 	for (const Arc& q : AL) A += area(q);
 	for (const Arc& q : AR) A += area(q);
@@ -326,6 +332,13 @@ int main() { solve(); return 0; }//boj14873
 //boj30123 27712 3607 10239
 
 /*
+
+150 160 100
+4
+10 60
+150 120
+300 50
+150 10
 
 20 90 328
 10
@@ -340,21 +353,6 @@ int main() { solve(); return 0; }//boj14873
 80 20
 60 40
 
-150 160 100
-4
-10 60
-150 120
-300 50
-150 10
-
-1 6 18
-5
-6 -1
-3 0
-2 6
-3 9
-6 13
-
 10 60 180
 5
 60 -10
@@ -363,26 +361,5 @@ int main() { solve(); return 0; }//boj14873
 30 90
 60 130
 89371.544433201986458
-90858.58632
-
-7 15 32
-11
-13 16
-12 20
-12 24
-14 27
-17 29
-22 31
-27 31
-29 27
-27 19
-21 14
-17 13
-
-0 0 4
-3
-0 2
-1 4
--1 4
 
 */

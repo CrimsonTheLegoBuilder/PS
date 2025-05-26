@@ -159,7 +159,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(15);
+	std::cout.precision(5);
 	Circle C; std::cin >> C.c.x >> C.c.y >> C.r;
 	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p.x >> p.y; norm(H);
 	int r = 0, l = 0;

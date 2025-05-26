@@ -330,7 +330,21 @@ void solve() {
 					}
 					continue;
 				}
-				if (!AL.back().inside(m)) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
+				if (!AL.back().inside(m)) {
+					bool ffr = 0, ffl = 0;
+					if (szl > 1) {
+						Arc a = AL[szl - 2];
+						inxs = intersections(AR.back().c, a.c);
+						x = inxs[0];
+						m = AR.back().c.p(x);
+						std::cout << AR.back().c.c.x << " " << AR.back().c.c.y << " " << AR.back().c.r << " " << AR.back().lo << " " << AR.back().hi << "\n";
+						std::cout << norm(AR.back().c.rad(m)) << "\n";
+						std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << " " << a.lo << " " << a.hi << "\n";
+						std::cout << norm(a.c.rad(m)) << "\n";
+						if (a.inside(m) && AR.back().inside(m)) ffl = 1;
+					}
+					dq.push_back(AL.back().c.c); AL.pop_back(); continue;
+				}
 				if (!AR.back().inside(m)) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
 			}
 			ld t = 0;

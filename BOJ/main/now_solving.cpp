@@ -302,9 +302,8 @@ void solve() {
 						m = a.c.p(x);
 						if (a.inside(m) && AL.back().inside(m)) ffr = 1;
 					}
-					if (ffr) { dq.push_front(AR.back().c.c); AR.pop_back(); }
-					if (ffl) { dq.push_back(AL.back().c.c); AL.pop_back(); }
-					if (!ffr && !ffl) break;
+					if (!ffl) { dq.push_front(AR.back().c.c); AR.pop_back(); }
+					if (!ffr) { dq.push_back(AL.back().c.c); AL.pop_back(); }
 					continue;
 				}
 				if (!fl) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }

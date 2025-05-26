@@ -264,6 +264,13 @@ void solve() {
 	//for (Circle& c : ) {
 	//	std::cout << c.c.x << c.c.y << c.r << "\n";
 	//}
+	std::cout << C.c.x << C.c.y << C.r << "\n";
+	for (Arc& a : AL) {
+		std::cout << a.c.c.x << a.c.c.y << a.c.r << "\n";
+	}
+	for (Arc& a : AR) {
+		std::cout << a.c.c.x << a.c.c.y << a.c.r << "\n";
+	}
 	//std::cout << "FUCK::\n";
 	if (AL.size() > 0 && AR.size() > 0) {
 		//std::cout << AL.size() << " " << AR.size() << "\n";

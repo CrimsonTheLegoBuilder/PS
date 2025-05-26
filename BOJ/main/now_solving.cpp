@@ -223,10 +223,10 @@ void solve() {
 		if (fj) A += cross(C.c, H[j], Seg(H[j], H[i]).p(x)) * .5;
 	}
 	A += C.area(0, norm(hi - lo));
-	ld L = C.r;
 	int el = l, er = r;
 	Circle cl, cr;
 	ld aa = 0;
+	ld L = C.r;
 	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
 		i = (j - 1 + N) % N;
 		k = (j + 1) % N;
@@ -241,6 +241,7 @@ void solve() {
 		AL.push_back(Arc(c, lo, hi));
 		if (c < H[i]) { el = j; break; }
 	}
+	std::cout << "FUCK::\n";
 	ld R = C.r;
 	for (int j = r, i, k; 1; j = (j + 1) % N) {
 		i = (j - 1 + N) % N;
@@ -256,6 +257,7 @@ void solve() {
 		AR.push_back(Arc(c, lo, hi));
 		if (c < H[k]) { er = j; break; }
 	}
+	std::cout << "FUCK::\n";
 	if (AL.size() > 0 && AR.size() > 0) {
 		Vld inxs = intersections(AR.back().c, AL.back().c);
 		ld x = 0;
@@ -263,6 +265,7 @@ void solve() {
 			std::deque<Pos> dq;
 			Pos m;
 			while (1) {
+				//std::cout << "FUCK::\n";
 				int szl = AL.size();
 				int szr = AR.size();
 				if (szl < 1 || szr < 1) {
@@ -270,6 +273,7 @@ void solve() {
 					return;
 				}
 				inxs = intersections(AR.back().c, AL.back().c);
+				std::cout << inxs.size() << "\n";
 				x = inxs[0];
 				m = AR.back().c.p(x);
 				bool fl = AL.back().inside(m);
@@ -293,6 +297,11 @@ void solve() {
 						x = inxs[0];
 						m = a.c.p(x);
 						if (a.inside(m) && AL.back().inside(m)) ffr = 1;
+					}
+					if (ffl && ffr) {
+						dq.push_back(AL.back().c.c); AL.pop_back();
+						dq.push_front(AR.back().c.c); AR.pop_back();
+						continue;
 					}
 					if (ffr) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
 					if (ffl) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }

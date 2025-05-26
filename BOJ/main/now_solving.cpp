@@ -305,6 +305,10 @@ void solve() {
 						inxs = intersections(AR.back().c, a.c);
 						x = inxs[0];
 						m = AR.back().c.p(x);
+						std::cout << AR.back().c.c.x << " " << AR.back().c.c.y << " " << AR.back().c.r << " " << AR.back().lo << " " << AR.back().hi << "\n";
+						std::cout << norm(AR.back().c.rad(m)) << "\n";
+						std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << " " << a.lo << " " << a.hi << "\n";
+						std::cout << norm(a.c.rad(m)) << "\n";
 						if (a.inside(m) && AR.back().inside(m)) ffl = 1;
 					}
 					if (szr > 1) {

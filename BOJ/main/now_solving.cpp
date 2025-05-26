@@ -286,14 +286,18 @@ void solve() {
 			m = AR.back().c.p(x);
 			bool fl = AL.back().inside(m);
 			bool fr = AR.back().inside(m);
-			if (fl && fr) break;
-			if (!fl && !fr) {
-				AL.pop_back(); AR.pop_back();
+			if (fl && fr) {
 				dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
+				AL.pop_back(); AR.pop_back();
+				break;
+			}
+			if (!fl && !fr) {
+				dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
+				AL.pop_back(); AR.pop_back();
 				continue;
 			}
-			if (!AL.back().inside(m)) { AL.pop_back(); dq.push_back(m); continue; }
-			if (!AR.back().inside(m)) { AR.pop_back(); dq.push_front(m); continue; }
+			if (!AL.back().inside(m)) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
+			if (!AR.back().inside(m)) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
 		}
 		ld a = 0, t = 0;
 		Circle cl = AL.back().c;
@@ -358,6 +362,7 @@ int main() { solve(); return 0; }//boj14873
 20 60
 30 90
 60 130
+89371.544433201986458
 90858.58632
 
 7 15 32

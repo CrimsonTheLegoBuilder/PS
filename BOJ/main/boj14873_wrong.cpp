@@ -289,11 +289,21 @@ void solve() {
 			if (!AL.back().inside(m)) { AL.pop_back(); dq.push_back(m); continue; }
 			if (!AR.back().inside(m)) { AR.pop_back(); dq.push_front(m); continue; }
 		}
-
-		inxs = intersections(AR.back().c, AL.back().c);
+		ld a = 0, t = 0;
+		Circle cl = AL.back().c;
+		Circle cr = AR.back().c;
+		inxs = intersections(cr.c, cl.c);
 		x = inxs[0];
-		m = AR.back().c.p(x);
-
+		m = cr.p(x);
+		a += cross(cr.c, m, cl.c) * .5;
+		ld lo = cl.rad(m);
+		t = norm(AL.back().hi - lo);
+		a += cl.area(0, t);
+		ld hi = cr.rad(m);
+		t = norm(hi - AR.back().lo);
+		a += cr.area(0, t);
+		int sz = dq.size();
+		for (int i = 0; i < sz; i++) a -= dq[i] / dq[(i + 1) % sz] * .5;
 	}
 	for (const Arc& q : AL) A += area(q);
 	for (const Arc& q : AR) A += area(q);

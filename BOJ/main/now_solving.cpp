@@ -151,8 +151,8 @@ struct Arc {
 	Arc(Circle c_, ld l_, ld h_) : c(c_), lo(l_), hi(h_) {}
 	bool inside(const Pos& p) const {
 		ld t = c.rad(p);
-		if (lo < hi) return lo < t && t < hi;
-		else return lo < t || t < hi;
+		if (lo < hi) return lo <= t && t <= hi;
+		else return lo <= t || t <= hi;
 	}
 };
 typedef std::vector<Arc> Arcs;
@@ -261,16 +261,13 @@ void solve() {
 		if (c < H[k]) { er = j; break; }
 	}
 	//std::cout << "FUCK::\n";
-	//for (Circle& c : ) {
-	//	std::cout << c.c.x << c.c.y << c.r << "\n";
+	//std::cout << C.c.x << " " << C.c.y << " " << C.r << "\n";
+	//for (Arc& a : AL) {
+	//	std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << "\n";
 	//}
-	std::cout << C.c.x << C.c.y << C.r << "\n";
-	for (Arc& a : AL) {
-		std::cout << a.c.c.x << a.c.c.y << a.c.r << "\n";
-	}
-	for (Arc& a : AR) {
-		std::cout << a.c.c.x << a.c.c.y << a.c.r << "\n";
-	}
+	//for (Arc& a : AR) {
+	//	std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << "\n";
+	//}
 	//std::cout << "FUCK::\n";
 	if (AL.size() > 0 && AR.size() > 0) {
 		//std::cout << AL.size() << " " << AR.size() << "\n";
@@ -321,10 +318,10 @@ void solve() {
 						dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
 						AL.pop_back(); AR.pop_back();
 					}
-					else if (ffl) {
+					else if (ffr) {
 						dq.push_front(AR.back().c.c); AR.pop_back(); continue;
 					}
-					else if (ffr) {
+					else if (ffl) {
 						dq.push_back(AL.back().c.c); AL.pop_back(); continue;
 					}
 					continue;
@@ -335,8 +332,8 @@ void solve() {
 			ld t = 0;
 			Circle cl = AL.back().c;
 			Circle cr = AR.back().c;
-			//std::cout << cl.c.x << " " << cl.c.y << " " << cl.r << "\n";
-			//std::cout << cr.c.x << " " << cr.c.y << " " << cr.r << "\n";
+			std::cout << cl.c.x << " " << cl.c.y << " " << cl.r << "\n";
+			std::cout << cr.c.x << " " << cr.c.y << " " << cr.r << "\n";
 			inxs = intersections(cr, cl);
 			//std::cout << "inxs.sz:: " << inxs.size() << "\n";
 			x = inxs[0];

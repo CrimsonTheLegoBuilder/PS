@@ -25,7 +25,7 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 #define LEFT 1
 #define RIGHT -1
 
-int N, M, K, T, Q;
+int N;
 struct Pos {
 	ld x, y;
 	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
@@ -34,8 +34,6 @@ struct Pos {
 	Pos operator * (const ld& n) const { return { x * n, y * n }; }
 	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
 	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
-	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
-	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
 	Pos rot(const ld& t) const { return Pos(x * cosl(t) - y * sinl(t), x * sinl(t) + y * cosl(t)); }
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrtl(Euc()); }
@@ -50,8 +48,8 @@ ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
 ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
 	if (!f) return cross(d1, d2, t) / (d1 - d2).mag();
-	if (sign(projection(d1, d2, d2, t)) <= 0 &&
-		sign(projection(d2, d1, d1, t)) <= 0)
+	if (sign(dot(d1, d2, t)) <= 0 &&
+		sign(dot(d2, d1, t)) <= 0)
 		return std::abs(cross(d1, d2, t)) / (d1 - d2).mag();
 	return std::min((d1 - t).mag(), (d2 - t).mag());
 }
@@ -85,7 +83,6 @@ struct Circle {
 	ld rad(const Pos& p) const { return (p - c).rad(); }
 	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
-		//if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
 		ld fan = area(lo, hi);
 		Pos m = c + (s + e) * r * (ld).5;
@@ -150,7 +147,7 @@ struct Arc {
 	ld lo, hi;
 	Arc(Circle c_, ld l_, ld h_) : c(c_), lo(l_), hi(h_) {}
 	bool inside(const Pos& p) const {
-		ld t = c.rad(p);
+		ld t = norm(c.rad(p));
 		if (lo < hi) return lo <= t && t <= hi;
 		else return lo <= t || t <= hi;
 	}
@@ -244,7 +241,6 @@ void solve() {
 		AL.push_back(Arc(c, lo, hi));
 		if (c < H[i]) { el = j; break; }
 	}
-	//std::cout << "FUCK::\n";
 	ld R = C.r;
 	for (int j = r, i, k; 1; j = (j + 1) % N) {
 		i = (j - 1 + N) % N;
@@ -260,31 +256,15 @@ void solve() {
 		AR.push_back(Arc(c, lo, hi));
 		if (c < H[k]) { er = j; break; }
 	}
-	//std::cout << "FUCK::\n";
-	//std::cout << C.c.x << " " << C.c.y << " " << C.r << "\n";
-	//for (Arc& a : AL) {
-	//	std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << "\n";
-	//}
-	//for (Arc& a : AR) {
-	//	std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << "\n";
-	//}
-	//std::cout << "FUCK::\n";
 	if (AL.size() > 0 && AR.size() > 0) {
-		//std::cout << AL.size() << " " << AR.size() << "\n";
-		//std::cout << AL.back().c.c.x << AL.back().c.c.y << AL.back().c.r << "\n";
-		//std::cout << AR.back().c.c.x << AR.back().c.c.y << AR.back().c.r << "\n";
 		Vld inxs = intersections(AR.back().c, AL.back().c);
 		ld x = 0;
-		//std::cout << "FUCK::\n";
 		if ((er + 1) % N == el && inxs.size() == 2) {
 			std::deque<Pos> dq;
 			Pos m;
-			//std::cout << "FUCK::\n";
 			while (1) {
-				//std::cout << "FUCK::\n";
 				int szl = AL.size();
 				int szr = AR.size();
-				//std::cout << "DEBUG:: szl:: " << szl << " szr:: " << szr << "\n";
 				if (szl < 1 || szr < 1) {
 					std::cout << "something wrong::\n";
 					return;
@@ -305,10 +285,6 @@ void solve() {
 						inxs = intersections(AR.back().c, a.c);
 						x = inxs[0];
 						m = AR.back().c.p(x);
-						std::cout << AR.back().c.c.x << " " << AR.back().c.c.y << " " << AR.back().c.r << " " << AR.back().lo << " " << AR.back().hi << "\n";
-						std::cout << norm(AR.back().c.rad(m)) << "\n";
-						std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << " " << a.lo << " " << a.hi << "\n";
-						std::cout << norm(a.c.rad(m)) << "\n";
 						if (a.inside(m) && AR.back().inside(m)) ffl = 1;
 					}
 					if (szr > 1) {
@@ -318,42 +294,17 @@ void solve() {
 						m = a.c.p(x);
 						if (a.inside(m) && AL.back().inside(m)) ffr = 1;
 					}
-					if (ffl && ffr) {
-						dq.push_back(AL.back().c.c); dq.push_front(AR.back().c.c);
-						AL.pop_back(); AR.pop_back();
-					}
-					else if (ffr) {
-						dq.push_front(AR.back().c.c); AR.pop_back(); continue;
-					}
-					else if (ffl) {
-						dq.push_back(AL.back().c.c); AL.pop_back(); continue;
-					}
+					if (ffr) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
+					if (ffl) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
 					continue;
 				}
-				if (!AL.back().inside(m)) {
-					bool ffr = 0, ffl = 0;
-					if (szl > 1) {
-						Arc a = AL[szl - 2];
-						inxs = intersections(AR.back().c, a.c);
-						x = inxs[0];
-						m = AR.back().c.p(x);
-						std::cout << AR.back().c.c.x << " " << AR.back().c.c.y << " " << AR.back().c.r << " " << AR.back().lo << " " << AR.back().hi << "\n";
-						std::cout << norm(AR.back().c.rad(m)) << "\n";
-						std::cout << a.c.c.x << " " << a.c.c.y << " " << a.c.r << " " << a.lo << " " << a.hi << "\n";
-						std::cout << norm(a.c.rad(m)) << "\n";
-						if (a.inside(m) && AR.back().inside(m)) ffl = 1;
-					}
-					dq.push_back(AL.back().c.c); AL.pop_back(); continue;
-				}
-				if (!AR.back().inside(m)) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
+				if (!fl) { dq.push_back(AL.back().c.c); AL.pop_back(); continue; }
+				if (!fr) { dq.push_front(AR.back().c.c); AR.pop_back(); continue; }
 			}
 			ld t = 0;
 			Circle cl = AL.back().c;
 			Circle cr = AR.back().c;
-			std::cout << cl.c.x << " " << cl.c.y << " " << cl.r << "\n";
-			std::cout << cr.c.x << " " << cr.c.y << " " << cr.r << "\n";
 			inxs = intersections(cr, cl);
-			//std::cout << "inxs.sz:: " << inxs.size() << "\n";
 			x = inxs[0];
 			m = cr.p(x);
 			A += cross(cr.c, m, cl.c) * .5;
@@ -407,5 +358,57 @@ int main() { solve(); return 0; }//boj14873
 30 90
 60 130
 89371.544433201986458
+
+853 271 1110
+49
+599 275
+593 238
+587 213
+583 201
+563 155
+535 114
+527 104
+491 69
+471 54
+450 40
+416 23
+393 15
+331 2
+319 1
+294 0
+269 2
+195 19
+172 29
+109 69
+90 86
+65 114
+43 145
+31 167
+1 275
+1 325
+7 362
+50 466
+65 486
+129 546
+150 560
+172 571
+184 577
+207 585
+219 589
+244 595
+269 598
+281 599
+331 598
+369 592
+393 585
+405 581
+428 571
+450 560
+491 531
+519 505
+535 486
+543 476
+579 410
+587 387
 
 */

@@ -224,7 +224,7 @@ void solve() {
 	A += green(C, lo, hi);
 	ld L = C.r;
 	int el = l, er = r;
-	Disks VC;
+	Disks VC = { C };
 	Circle cl, cr;
 	ld aa = 0;
 	for (int j = l, i, k; 1; j = (j - 1 + N) % N) {
@@ -282,6 +282,9 @@ void solve() {
 			break;
 		}
 	}
+	for (Circle& c : VC) {
+		std::cout << c.c.x << c.c.y << c.r << "\n";
+	}
 	//std::cout << "FUCK::\n";
 	int il = (el - 1 + N) % N;
 	int jl = el;
@@ -326,6 +329,19 @@ int main() { solve(); return 0; }//boj14873
 //boj30123 27712 3607 10239
 
 /*
+
+20 90 328
+10
+40 90
+80 210
+130 230
+190 220
+210 180
+210 100
+180 50
+130 30
+80 20
+60 40
 
 150 160 100
 4

@@ -373,7 +373,7 @@ struct Circle {
 	ld rad(const Pos& p) const { return (p - c).rad(); }
 	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
-		if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
+		//if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
 		ld fan = area(lo, hi);
 		Pos m = c + (s + e) * r * (ld).5;

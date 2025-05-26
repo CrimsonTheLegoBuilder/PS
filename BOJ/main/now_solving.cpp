@@ -305,13 +305,13 @@ void solve() {
 				lo = norm((H[jr] - H[ir]).rad());
 				std::cout << "lo:: " << lo << " x:: " << x << "\n";
 				if (jr == r) lo = norm((H[jr] - C.c).rad());
-				A += cr.green(lo, x);
+				A += green(cr, lo, x);
 				Pos p = cr.p(x);
 				x = norm(cl.rad(p));
 				hi = norm((H[jl] - H[kl]).rad());
 				std::cout << "hi:: " << hi << " x:: " << x << "\n";
 				if (jl == l) hi = norm((H[jl] - C.c).rad());
-				A += cl.green(x, hi);
+				A += green(cl, x, hi);
 				A += Seg(cl.c, cr.c).green();
 			}
 			else A += aa;

@@ -94,11 +94,18 @@ Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
 	ld ra = a.r, rb = b.r;
+	if (zero(a.r) || zero(b.r)) return {};
+	//std::cout << "ra:: " << ra << "\n";
+	//std::cout << "rb:: " << rb << "\n";
 	ld distance = vec.mag();
 	ld rd = vec.rad();
+	//std::cout << "FUCK::\n";
 	if (vec.Euc() > sq(ra + rb) + TOL) return {};
 	if (vec.Euc() < sq(ra - rb) - TOL) return {};
+	//std::cout << "FUCK::\n";
 	ld X = (ra * ra - rb * rb + vec.Euc()) / (2 * distance * ra);
+	//std::cout << "FUCK::\n";
+	//std::cout << "X:: " << X << "\n";
 	if (X < -1) X = -1;
 	if (X > 1) X = 1;
 	ld h = acos(X);
@@ -275,6 +282,7 @@ void solve() {
 			break;
 		}
 	}
+	//std::cout << "FUCK::\n";
 	int il = (el - 1 + N) % N;
 	int jl = el;
 	int kl = (el + 1) % N;
@@ -283,22 +291,30 @@ void solve() {
 	int kr = (er + 1) % N;
 	Vld inxs = intersections(cr, cl);
 	ld x = 0;
-	if (inxs.size() == 2) {
-		//for (ld x : inxs) std::cout << x << "\n";
-		Pos q = cr.p(inxs[0]);
-			//std::cout << "suck::\n";
-		if (ccw(cr.c, cl.c, q) < 0) {
-			//std::cout << "fuck::\n";
-			x = norm(inxs[0]);
-			lo = norm((H[jr] - H[ir]).rad());
-			if (jr == r) lo = norm((H[jr] - C.c).rad());
-			A += cr.green(lo, x);
-			Pos p = cr.p(x);
-			x = cl.rad(p);
-			hi = norm((H[jl] - H[kl]).rad());
-			if (jr == r) hi = norm((H[jl] - C.c).rad());
-			A += cl.green(x, hi);
-			A += Seg(cl.c, cr.c).green();
+	//std::cout << "FUCK::\n";
+	if ((jr + 1) % N == jl) {
+		//std::cout << "jr:: " << H[jr].x << " " << H[jr].y << "\n";
+		//std::cout << "jl:: " << H[jl].x << " " << H[jl].y << "\n";
+		if (inxs.size() == 2) {
+			//for (ld x : inxs) std::cout << x << "\n";
+			Pos q = cr.p(inxs[0]);
+				//std::cout << "suck::\n";
+			if (ccw(cr.c, cl.c, q) < 0) {
+				//std::cout << "fuck::\n";
+				x = norm(inxs[0]);
+				lo = norm((H[jr] - H[ir]).rad());
+				std::cout << "lo:: " << lo << " x:: " << x << "\n";
+				if (jr == r) lo = norm((H[jr] - C.c).rad());
+				A += cr.green(lo, x);
+				Pos p = cr.p(x);
+				x = norm(cl.rad(p));
+				hi = norm((H[jl] - H[kl]).rad());
+				std::cout << "hi:: " << hi << " x:: " << x << "\n";
+				if (jl == l) hi = norm((H[jl] - C.c).rad());
+				A += cl.green(x, hi);
+				A += Seg(cl.c, cr.c).green();
+			}
+			else A += aa;
 		}
 		else A += aa;
 	}

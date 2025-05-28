@@ -169,6 +169,7 @@ typedef std::vector<Pii> Vpii;
 ll cross(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) * (d3 - d2); }
+ll dot(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pii& d1, const Pii& d2, const Pii& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return sign(cross(d1, d2, d3, d4)); }
 bool on_seg_strong(const Pii& d1, const Pii& d2, const Pii& d3) { ll ret = dot(d1, d3, d2); return !ccw(d1, d2, d3) && ret >= 0; }
@@ -193,9 +194,16 @@ bool symmetry(const Vpii& P, const int& i0, const int& i1, const int& l, const i
 	}
 	else {
 		if (i1 != -1) {//seg-seg
+			for (int i = (i0 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
+				if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
+				if (dot(P[i0], P[l], P[i], P[j])) return 0;
+			}
 		}
 		else {//pos-pos
-
+			for (int i = (i0 + 1) % sz, j = (i1 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
+				if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
+				if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
+			}
 		}
 	}
 	return 1;

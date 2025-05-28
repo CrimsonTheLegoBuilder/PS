@@ -161,7 +161,8 @@ struct Pii {
 	Pii operator / (const int& n) const { return { x / n, y / n }; }
 	ll operator * (const Pii& p) const { return { (ll)x * p.x + (ll)y * p.y }; }
 	ll operator / (const Pii& p) const { return { (ll)x * p.y - (ll)y * p.x }; }
-	ll Euc() const { return (ll)x * x + (ll)y * y;  }
+	ll Euc() const { return (ll)x * x + (ll)y * y; }
+	Pos p() const { return Pos(x, y); }
 	friend std::istream& operator >> (std::istream& is, Pii& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pii& p) { os << p.x << " " << p.y; return os; }
 };
@@ -184,25 +185,45 @@ void norm(Vpii& H, const bool& f = 1) {
 	if (!f && area(H) > 0) std::reverse(H.begin(), H.end());//cw
 	return;
 }
+bool check_diagonal(const Vpii& P, const int& i1, const int& j1) {
+	int sz = P.size();
+	int i0 = (i1 - 1 + sz) % sz, i2 = (i1 + 1) % sz;
+	int j0 = (j1 - 1 + sz) % sz, j2 = (j1 + 1) % sz;
+	if ((P[i0] - P[i1]).Euc() != (P[i2] - P[i1]).Euc()) return 0;
+	if ((P[j0] - P[j1]).Euc() != (P[j2] - P[j1]).Euc()) return 0;
+	if (ccw(P[i0], P[i2], P[j0], P[j2])) return 0;
+	return 1;
+}
+bool check_parallel(const Vpii& P, const int& i1, const int& j1) {
+	int sz = P.size();
+	int i2 = (i1 + 1) % sz;
+	int j0 = (j1 - 1 + sz) % sz;
+	if (ccw(P[i1], P[i2], P[j1], P[j0])) return 0;
+	if (dot(P[i1], P[i2], P[j0])) return 0;
+	if (dot(P[i2], P[i1], P[j1])) return 0;
+	return 1;
+}
 bool symmetry(const Vpii& P, const int& i0, const int& i1, const int& l, const int& r) {
 	int sz = P.size();
 	if (sz & 1) {
-		for (int i = (i0 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
-			if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
-			if (ccw(P[r], P[l], P[i], P[j])) return 0;
+		assert(r == -1);
+		for (int i = (i1 + 1) % sz, j = (i0 - 1 + sz) % sz; i != l; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
+			if ((P[i] - P[l]).Euc() != (P[j] - P[l]).Euc()) return 0;
+			if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
 		}
 	}
 	else {
 		if (i1 != -1) {//seg-seg
-			for (int i = (i0 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
+			for (int i = (i1 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
 				if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
-				if (dot(P[i0], P[l], P[i], P[j])) return 0;
+				if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
 			}
 		}
 		else {//pos-pos
-			for (int i = (i0 + 1) % sz, j = (i1 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
+			assert(r == -1);
+			for (int i = (i0 + 1) % sz, j = (i0 - 1 + sz) % sz; i != l; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
 				if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
-				if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
+				if (dot(P[i0], P[l], P[i], P[j])) return 0;
 			}
 		}
 	}
@@ -213,6 +234,13 @@ ld volume(const Polygon& H, const Pos& cen, const Seg& se) {
 	ld d = std::abs(dist(se.s, se.e, cen));
 	return 2 * PI * d * a;
 }
+ld volume(const Vpii& P, const Seg& se) {
+	Polygon H;
+	for (const Pii& p : P) H.push_back(p.p());
+	H = polygon_cut(H, se.s, se.e);
+	Pos cen = centroid(H);
+	return volume(H, cen, se);
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -221,39 +249,60 @@ void solve() {
 	std::cin >> N;
 	Vpii P(N); for (Pii& p : P) std::cin >> p; norm(P);
 	ld vol = 0;
+	int cnt = 0;
+	Seg s1, s2;
 	if (N & 1) {
-		int cnt = 0;
-		Seg s1, s2;
 		for (int i = 0, j = 1; i < N; i++) {
-			while (ccw(P[i], P[(i + 1) % N], P[j], P[(j + 1) % N]) > 0) j = (j + 1) % N;
+			while (ccw(P[i], P[(i + 1) % N], P[j], P[(j + 1) % N]) >= 0) j = (j + 1) % N;
 			if ((P[i] - P[j]).Euc() == (P[(i + 1) % N] - P[j]).Euc()) {
-				if (symmetry(P)) {
+				if (symmetry(P, i, (i + 1) % N, j, -1)) {
 					cnt++;
-					if (cnt == 1) {
-						s1;
-						Polygon H;
-						Pos cen = centroid(H);
-						vol = volume(H, cen, s1);
-					}
-					if (cnt == 2) {
-						s2;
-						break;
-					}
+					Pos m = (P[i] + P[(i + 1) % N]).p() * .5;
+					if (cnt == 1) s1 = Seg(m, P[j].p());
+					if (cnt == 2) s2 = Seg(m, P[j].p());
 				}
 			}
 			if (cnt > 1) break;
 		}
-		if (cnt == 0) std::cout << 0 << "\n";
-		else if (cnt == 1) std::cout << vol << "\n";
-		else {
-			Pos m = intersection(s1.s, s1.e, s2.s, s2.e);
-			for (int i = 0; i < N; i++) {
+	}
+	else {
+		for (int i = 0, j = 1; i < N / 2; i++) {
+			while (ccw(P[i], P[(i + 1) % N], P[j], P[(j + 1) % N]) >= 0) j = (j + 1) % N;
+			if (check_diagonal(P, i, j)) {
+				if (symmetry(P, i, -1, j, -1)) {
+					cnt++;
+					if (cnt == 1) s1 = Seg(P[i].p(), P[j].p());
+					if (cnt == 2) s2 = Seg(P[i].p(), P[j].p());
+				}
 			}
-			std::cout << vol << "\n";
+			if (check_parallel(P, i, j)) {
+				if (symmetry(P, i, (i + 1) % N, j, (j - 1 + N) % N)) {
+					cnt++;
+					Pos m0 = (P[i] + P[(i + 1) % N]).p() * .5;
+					Pos m1 = (P[j] + P[(j - 1 + N) % N]).p() * .5;
+					if (cnt == 1) s1 = Seg(m0, m1);
+					if (cnt == 2) s2 = Seg(m0, m1);
+				}
+			}
+			if (cnt > 1) break;
 		}
 	}
-
-
+	if (cnt == 0) std::cout << 0 << "\n";
+	else if (cnt == 1) {
+		vol = volume(P, s1);
+		std::cout << vol << "\n";
+	}
+	else {
+		assert(ccw(s1.s, s1.e, s2.s, s2.e));
+		Pos m = intersection(s1.s, s1.e, s2.s, s2.e);
+		ld d = -1;
+		for (int i = 0; i < N; i++) {
+			ld h = (P[i].p() - m).mag();
+			d = std::max(d, h);
+		}
+		vol = d * d * d * 4 / 3 * PI;
+		std::cout << vol << "\n";
+	}
 	return;
 }
 int main() { solve(); return 0; }//boj25646

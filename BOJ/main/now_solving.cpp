@@ -183,7 +183,21 @@ void norm(Vpii& H, const bool& f = 1) {
 	if (!f && area(H) > 0) std::reverse(H.begin(), H.end());//cw
 	return;
 }
-bool symmetry(const Vpii& P) {
+bool symmetry(const Vpii& P, const int& i0, const int& i1, const int& l, const int& r) {
+	int sz = P.size();
+	if (sz & 1) {
+		for (int i = (i0 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
+			if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
+			if (ccw(P[r], P[l], P[i], P[j])) return 0;
+		}
+	}
+	else {
+		if (i1 != -1) {//seg-seg
+		}
+		else {//pos-pos
+
+		}
+	}
 	return 1;
 }
 ld volume(const Polygon& H, const Pos& cen, const Seg& se) {

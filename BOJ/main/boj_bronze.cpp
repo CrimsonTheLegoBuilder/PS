@@ -12,15 +12,25 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 
-ll p, q;
-std::string S, s;
+int N;
+ll T, S, M, Ds, Ys, Dm, Ym;
 int I[10];
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
-	std::cin >> p >> q;
-	if (p <= 50 && q <= 10) std::cout << "White\n";
-	else if (q >= 30) std::cout << "Red\n";
-	else std::cout << "Yellow\n";
+	std::cin >> Ds >> Ys >> Dm >> Ym;
+	S = -Ds;
+	while (S < 0) S += Ys;
+	M = -Dm;
+	while (M < 0) M += Ym;
+	while (1) {
+		while (M < S) M += Ym;
+		if (M == S) {
+			T = S;
+			break;
+		}
+		S += Ys;
+	}
+	std::cout << T << "\n";
 	return 0;
 }

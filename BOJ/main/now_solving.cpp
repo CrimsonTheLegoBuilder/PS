@@ -162,7 +162,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	memset(V, 0, sizeof V);
-	std::cin >> N >> K;
+	std::cin >> N;
 	Polygon C(N), H, I;
 	for (int i = 0; i < N; i++) std::cin >> C[i], C[i].i = i;
 	H = graham_scan(C);
@@ -173,14 +173,14 @@ void solve() {
 		A *= -1;
 	}
 	int sz = H.size();
-	ll ret = 0;
+	ll ret = INF;
 	for (const Pos& p : H) V[p.i] = 1;
 	for (const Pos& p : C) if (!V[p.i]) I.push_back(p);
-	for (const Pos& p : I) inner_check_bi_search(H, p), ret += sz == K;
+	for (const Pos& p : I) inner_check_bi_search(H, p);
 	for (int i = 0; i < sz; i++) {
 		ll L = lower_monotone_chain(H, i);
-		ll a = A - L;
-		ret = std::max(ret, a);
+		ll a = A + L;
+		ret = std::min(ret, a);
 	}
 	std::cout << ret << "\n";
 	return;

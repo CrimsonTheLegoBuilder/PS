@@ -14,7 +14,7 @@ typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
-const ll INF = 1e17;
+const ll INF = 4e18;
 const int LEN = 5e5 + 1;
 const ld TOL = 1e-7;
 const ll MOD = 1'000'000'007;

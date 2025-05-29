@@ -68,6 +68,12 @@ bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, 
 bool inner_check(const Pos& d0, const Pos& d1, const Pos& d2, const Pos& t) {
 	return ccw(d0, d1, t) >= 0 && ccw(d1, d2, t) >= 0 && ccw(d2, d0, t) >= 0;
 }
+ll area(Polygon& H) {
+	ll a = 0; int sz = H.size();
+	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
+	return a;
+}
+void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
 Polygon graham_scan(Polygon& C) {
 	Polygon H;
 	if (C.size() < 3) {
@@ -159,6 +165,12 @@ void solve() {
 	Polygon C(N), H, I;
 	for (int i = 0; i < N; i++) std::cin >> C[i], C[i].i = i;
 	H = graham_scan(C);
+	ll A = area(H);
+	if (A == 0) { std::cout << "0\n"; return; }
+	if (A < 0) {
+		std::reverse(H.begin(), H.end());
+		A *= -1;
+	}
 	int sz = H.size(), ret = 0;
 	for (const Pos& p : H) V[p.i] = 1;
 	for (const Pos& p : C) if (!V[p.i]) I.push_back(p);

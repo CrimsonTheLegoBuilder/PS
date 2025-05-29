@@ -167,7 +167,7 @@ void solve() {
 	for (int i = 0; i < N; i++) std::cin >> C[i], C[i].i = i;
 	H = graham_scan(C);
 	ll A = area(H);
-	if (A == 0) { std::cout << "0\n"; return; }
+	if (A == 0 || N < 4) { std::cout << "0\n"; return; }
 	if (A < 0) {
 		std::reverse(H.begin(), H.end());
 		A *= -1;

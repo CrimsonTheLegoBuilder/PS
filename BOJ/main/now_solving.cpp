@@ -134,7 +134,7 @@ int inner_check_bi_search(const std::vector<Pos>& H, const Pos& p) {//convex
 	if (e == sz - 2 && on_seg_weak(H[sz - 2], H[0], p)) { DEL[sz - 1].push_back(p); }
 	return 1;
 }
-int lower_monotone_chain(const Polygon& H, const int& x) {
+ll lower_monotone_chain(const Polygon& H, const int& x) {
 	Polygon& C = DEL[x];
 	int sz = H.size();
 	const Pos& s = H[(x - 1 + sz) % sz], & e = H[(x + 1) % sz];
@@ -155,7 +155,8 @@ int lower_monotone_chain(const Polygon& H, const int& x) {
 			S.pop_back();
 		S.push_back(C[i]);
 	}
-	return S.size() - 2;
+	S.push_back(H[x]);
+	return area(S);
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -171,13 +172,15 @@ void solve() {
 		std::reverse(H.begin(), H.end());
 		A *= -1;
 	}
-	int sz = H.size(), ret = 0;
+	int sz = H.size();
+	ll ret = 0;
 	for (const Pos& p : H) V[p.i] = 1;
 	for (const Pos& p : C) if (!V[p.i]) I.push_back(p);
 	for (const Pos& p : I) inner_check_bi_search(H, p), ret += sz == K;
 	for (int i = 0; i < sz; i++) {
-		int tmp = lower_monotone_chain(H, i);
-		ret += sz - 1 + tmp == K;
+		ll L = lower_monotone_chain(H, i);
+		ll a = A - L;
+		ret = std::max(ret, a);
 	}
 	std::cout << ret << "\n";
 	return;

@@ -231,6 +231,59 @@ Vld intersections(const Circle& a, const Circle& b) {
 	ret.push_back(norm(rd + h));
 	return ret;
 }
+Vld circle_line_intersections(const Circle& q, const Seg& l, const int& t = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos s = l.s, e = l.e;
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (t == LINE) {
+		if (0 < lo && lo < 1) ret.push_back(lo);
+		if (zero(det)) return ret;
+		if (0 < hi && hi < 1) ret.push_back(hi);
+	}
+	else {//circle
+		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+		if (zero(det)) return ret;
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+	}
+	return ret;
+}
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f == LINE) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
+	}
+	else {
+		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+	}
+	return ret;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);

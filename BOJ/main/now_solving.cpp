@@ -305,7 +305,7 @@ void query() {
 	std::cin >> wh;
 	std::cin >> M; Disks C(M); for (Circle& c : C) std::cin >> c;
 	std::cin >> S; Polygon P(S); for (Pos& p : P) std::cin >> p;
-	ld A = area(P);
+	ld A = std::abs(area(P));
 	std::sort(C.begin(), C.end(), cmpr);
 	Vbool F(M, 0);
 	for (int i = 0; i < M; i++) {

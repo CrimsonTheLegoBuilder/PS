@@ -11,6 +11,7 @@ typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
+typedef std::vector<bool> Vbool;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
@@ -36,8 +37,6 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 #define REL 1
 
 int T, N, S, M;
-bool F[3];
-Vld Q;
 Vint sts;
 struct Pos {
 	ld x, y;
@@ -60,6 +59,7 @@ struct Pos {
 	Pos& operator /= (const ld& n) { x /= n; y /= n; return *this; }
 	Pos operator - () const { return { -x, -y, i }; }
 	Pos operator ~ () const { return { -y, x, i }; }
+	ld xy() const { return x * y; }
 	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrt(Euc()); }
@@ -68,10 +68,10 @@ struct Pos {
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-} V[LEN * LEN * 4]; const Pos O = { 0, 0 };
+}; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 std::istream& operator >> (std::istream& is, Polygon& P) { for (Pos& p : P) is >> p.x >> p.y; return is; }
-bool cmpr(const Pos& p, const Pos& q) {
+bool cmpt(const Pos& p, const Pos& q) {
 	bool f1 = O < p;
 	bool f2 = O < q;
 	if (f1 != f2) return f1;
@@ -102,7 +102,7 @@ bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int
 ld area(const Polygon& H) {
 	ld a = 0; int sz = H.size();
 	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
+	return a * .5;
 }
 bool norm(Polygon& H) {
 	ld a = area(H);
@@ -199,7 +199,13 @@ struct Circle {
 	Pos c;
 	ld r;
 	Circle(Pos c_ = Pos(), ld r_ = 0) : c(c_), r(r_) {}
+	bool operator < (const Circle& q) const { return eq(r, q.r) ? c < q.c : r < q.r; }
 	bool operator > (const Pos& p) const { return sign(r - (c - p).mag()) > 0; }
+	bool outer(const Circle& q) const {
+		ld d = (c - q.c).mag();
+		ld r_ = std::abs(r - q.r);
+		return sign(r_ - d) >= 0;
+	}
 	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
 	ld rad(const Pos& p) const { return (p - c).rad(); }
 	ld area(const ld& lo, const ld& hi) const { return (hi - lo) * r * r * .5; }
@@ -214,6 +220,7 @@ struct Circle {
 	friend std::ostream& operator << (std::ostream& os, const Circle& p) { os << p.c.x << " " << p.c.y << " " << p.r; return os; }
 };
 typedef std::vector<Circle> Disks;
+bool cmpr(const Circle& p, const Circle& q) { return p.r > q.r; }
 Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
@@ -285,15 +292,61 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	}
 	return ret;
 }
+struct Arc {
+	ld lo, hi;
+	Arc(ld l_ = 0, ld h_ = 0) : lo(l_), hi(h_) {}
+	bool operator < (const Arc& a) const { return zero(lo - a.lo) ? hi < a.hi : lo < a.lo; }
+	inline friend std::istream& operator >> (std::istream& is, Arc& a) { is >> a.lo >> a.hi; return is; }
+	inline friend std::ostream& operator << (std::ostream& os, const Arc& a) { os << a.lo << " " << a.hi; return os; }
+};
+typedef std::vector<Arc> Arcs;
 void query() {
 	Pos wh;
 	std::cin >> wh;
 	std::cin >> M; Disks C(M); for (Circle& c : C) std::cin >> c;
 	std::cin >> S; Polygon P(S); for (Pos& p : P) std::cin >> p;
 	ld A = area(P);
+	std::sort(C.begin(), C.end(), cmpr);
+	Vbool F(M, 0);
 	for (int i = 0; i < M; i++) {
-
+		if (F[i]) continue;
+		for (int j = i + 1; j < M; j++) {
+			if (F[j]) continue;
+			if (C[i].outer(C[j])) F[j] = 1;
+		}
 	}
+	Disks tmp;
+	for (int i = 0; i < M; i++) if (!F[i]) tmp.push_back(C[i]);
+	C = tmp;
+	M = C.size();
+	ld U = 0;
+	for (int i = 0; i < M; i++) {
+		Arcs va;
+		for (int j = 0; j < M; j++) {
+			if (i == j) continue;
+			Vld inxs = intersections(C[i], C[j]);
+			if (inxs.size() != 2) continue;
+			ld lo = inxs[0];
+			ld hi = inxs[1];
+			if (lo < hi) va.push_back(Arc(lo, hi));
+			else va.push_back(Arc(lo, 2 * PI)), va.push_back(Arc(0, hi));
+		}
+		std::sort(va.begin(), va.end());
+		va.push_back(Arc(2 * PI, 2 * PI));
+		ld hi = 0;
+		for (const Arc& a : va) {
+			if (a.lo > hi) {
+				U += C[i].green(hi, a.lo);
+				hi = a.hi;
+			}
+			else hi = std::max(hi, a.hi);
+		}
+	}
+	ld D = wh.xy() - U;
+	//std::cout << "Area :: " << A << "\n";
+	//std::cout << "Union:: " << U << "\n";
+	//std::cout << "Diff:: " << D << "\n";
+	std::cout << int(D / A) << "\n";
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -306,7 +359,3 @@ void solve() {
 }
 int main() { solve(); return 0; }//boj31021
 //boj30123 27712 3607 10239 25646
-
-/*
-
-*/

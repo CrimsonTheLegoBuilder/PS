@@ -35,7 +35,7 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 #define ABS 0
 #define REL 1
 
-int T, N, M;
+int T, N, S, M;
 bool F[3];
 Vld Q;
 Vint sts;
@@ -212,7 +212,8 @@ struct Circle {
 	}
 	friend std::istream& operator >> (std::istream& is, Circle& p) { is >> p.c.x >> p.c.y >> p.r; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Circle& p) { os << p.c.x << " " << p.c.y << " " << p.r; return os; }
-} C[3];
+};
+typedef std::vector<Circle> Disks;
 Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
@@ -284,12 +285,23 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	}
 	return ret;
 }
+void query() {
+	Pos wh;
+	std::cin >> wh;
+	std::cin >> M; Disks C(M); for (Circle& c : C) std::cin >> c;
+	std::cin >> S; Polygon P(S); for (Pos& p : P) std::cin >> p;
+	ld A = area(P);
+	for (int i = 0; i < M; i++) {
+
+	}
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-
+	std::cin >> N;
+	while (N--) query();
 	return;
 }
 int main() { solve(); return 0; }//boj31021

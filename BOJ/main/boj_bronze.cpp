@@ -18,19 +18,8 @@ int I[10];
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
-	std::cin >> Ds >> Ys >> Dm >> Ym;
-	S = -Ds;
-	while (S < 0) S += Ys;
-	M = -Dm;
-	while (M < 0) M += Ym;
-	while (1) {
-		while (M < S) M += Ym;
-		if (M == S) {
-			T = S;
-			break;
-		}
-		S += Ys;
-	}
-	std::cout << T << "\n";
+	std::cin >> I[0] >> I[1] >> I[2];
+	std::sort(I, I + 3);
+	std::cout << I[1] << "\n";
 	return 0;
 }

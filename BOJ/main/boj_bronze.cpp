@@ -22,7 +22,7 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(9);
 	std::cin >> X >> Y >> Z;
-
-
+	X += Y;
+	std::cout << (X <= Z ? "1\n" : "0\n");
 	return 0;
 }

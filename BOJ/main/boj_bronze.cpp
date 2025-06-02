@@ -13,16 +13,16 @@ typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 
 int N;
-ll X, Y, Z;
+ll X, Y, Z, B, P;
 int I[10];
-ld T;
+ld a;
+std::string S, R;
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(9);
-	std::cin >> X >> Y >> Z;
-	X += Y;
-	std::cout << (X <= Z ? "1\n" : "0\n");
+	std::cout.precision(13);
+	std::cin >> a;
+	std::cout << 100 / a << "\n" << 100 / (100 - a) << "\n";
 	return 0;
 }

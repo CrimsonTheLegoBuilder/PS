@@ -129,8 +129,5 @@
     <ClCompile Include="..\main\boj7951_wrong.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj25646_wrong.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

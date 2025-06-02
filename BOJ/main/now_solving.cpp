@@ -201,8 +201,8 @@ bool check_parallel(const Vpii& P, const int& i1, const int& j1) {
 	int i2 = (i1 + 1) % sz;
 	int j0 = (j1 - 1 + sz) % sz;
 	if (ccw(P[i1], P[i2], P[j1], P[j0])) return 0;
-	if (dot(P[i1], P[i2], P[j0])) return 0;
-	if (dot(P[i2], P[i1], P[j1])) return 0;
+	if (dot(P[i1], P[i2], P[j0]) != dot(P[i2], P[i1], P[j1])) return 0;
+	//if (dot(P[i2], P[i1], P[j1])) return 0;
 	return 1;
 }
 bool symmetry(const Vpii& P, const int& i0, const int& i1, const int& l, const int& r) {
@@ -217,7 +217,8 @@ bool symmetry(const Vpii& P, const int& i0, const int& i1, const int& l, const i
 	else {
 		if (i1 != -1) {//seg-seg
 			for (int i = (i1 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
-				if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
+				//if ((P[i] - P[i1]).Euc() != (P[j] - P[i0]).Euc()) return 0;
+				if (dot(P[i0], P[i1], P[i]) != dot(P[i1], P[i0], P[j])) return 0;
 				if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
 			}
 		}
@@ -268,6 +269,7 @@ void solve() {
 		}
 	}
 	else {
+		//std::cout << "even\n";
 		for (int i = 0, j = 1; i < N / 2; i++) {
 			while (ccw(P[i], P[(i + 1) % N], P[j], P[(j + 1) % N]) >= 0) j = (j + 1) % N;
 			if (check_diagonal(P, i, j)) {
@@ -277,9 +279,17 @@ void solve() {
 					if (cnt == 2) s2 = Seg(P[i].p(), P[j].p());
 				}
 			}
+			if (check_diagonal(P, i, (j - 1 + N) % N)) {
+				if (symmetry(P, i, -1, (j - 1 + N) % N, -1)) {
+					cnt++;
+					if (cnt == 1) s1 = Seg(P[i].p(), P[(j - 1 + N) % N].p());
+					if (cnt == 2) s2 = Seg(P[i].p(), P[(j - 1 + N) % N].p());
+				}
+			}
 			if (check_parallel(P, i, j)) {
-				std::cout << "fuck::\n";
+				//std::cout << "fuck1::\n";
 				if (symmetry(P, i, (i + 1) % N, j, (j - 1 + N) % N)) {
+					//std::cout << "fuck2::\n";
 					cnt++;
 					Pos m0 = (P[i] + P[(i + 1) % N]).p() * .5;
 					Pos m1 = (P[j] + P[(j - 1 + N) % N]).p() * .5;

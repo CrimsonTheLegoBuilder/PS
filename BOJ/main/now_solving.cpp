@@ -85,26 +85,6 @@ void norm(Polygon& H) {
 	ld A = area(H); if (A < 0) std::reverse(H.begin(), H.end());
 	return;
 }
-Polygon polygon_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
-	Polygon qs;
-	int n = ps.size();
-	for (int i = 0; i < n; i++) {
-		Pos p1 = ps[i], p2 = ps[(i + 1) % n];
-		int d1 = ccw(b1, b2, p1), d2 = ccw(b1, b2, p2);
-		if (d1 >= 0) qs.push_back(p1);
-		if (d1* d2 < 0) qs.push_back(intersection(p1, p2, b1, b2));
-	}
-	return qs;
-}
-Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
-	int sz = clip.size();
-	std::vector<Pos> ret = C;
-	for (int i = 0; i < sz; i++) {
-		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
-		ret = polygon_cut(ret, b1, b2);
-	}
-	return ret;
-}
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -136,190 +116,118 @@ struct Seg {
 	}
 };
 typedef std::vector<Seg> Vseg;
-Pos centroid(const Polygon& H) {
-	Pos cen = Pos(0, 0);
-	ld A = 0;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) {
-		ld a = H[i] / H[(i + 1) % sz];
-		cen += (H[i] + H[(i + 1) % sz]) * a;
-		A += a;
+struct Circle {
+	Pos c;
+	int r;
+	Circle(Pos c_ = Pos(), int r_ = 0) : c(c_), r(r_) {}
+	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
+	bool operator != (const Circle& q) const { return !(*this == q); }
+	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
+	//bool operator < (const Circle& q) const { return r < q.r && (c - q.c).mag() + r < q.r + TOL; }
+	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq((ll)r + q.r)) >= 0; }
+	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
+	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
+	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
+	ld rad(const Pos& p) const { return (p - c).rad(); }
+	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
+	ld green(const ld& lo, const ld& hi) const {
+		//if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
+		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
+		ld fan = area(lo, hi);
+		Pos m = c + (s + e) * r * (ld).5;
+		ld tz = (cos(lo) - cos(hi)) * m.y * r;
+		return fan + tz - (s / e) * r * r * (ld).5;
 	}
-	A *= .5;
-	cen /= 6;
-	if (!zero(A)) cen /= A;
-	return cen;
-}
-struct Pii {
-	int x, y;
-	int i;
-	Pii(int X = 0, int Y = 0) : x(X), y(Y) { i = -1; }
-	bool operator == (const Pii& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pii& p) const { return x != p.x || y != p.y; }
-	bool operator < (const Pii& p) const { return x == p.x ? y < p.y : x < p.x; }
-	Pii operator + (const Pii& p) const { return { x + p.x, y + p.y }; }
-	Pii operator - (const Pii& p) const { return { x - p.x, y - p.y }; }
-	Pii operator * (const int& n) const { return { x * n, y * n }; }
-	Pii operator / (const int& n) const { return { x / n, y / n }; }
-	ll operator * (const Pii& p) const { return { (ll)x * p.x + (ll)y * p.y }; }
-	ll operator / (const Pii& p) const { return { (ll)x * p.y - (ll)y * p.x }; }
-	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	Pos p() const { return Pos(x, y); }
-	friend std::istream& operator >> (std::istream& is, Pii& p) { is >> p.x >> p.y; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Pii& p) { os << p.x << " " << p.y; return os; }
-};
-typedef std::vector<Pii> Vpii;
-ll cross(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) / (d3 - d2); }
-ll cross(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) * (d3 - d2); }
-ll dot(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) * (d4 - d3); }
-int ccw(const Pii& d1, const Pii& d2, const Pii& d3) { return sign(cross(d1, d2, d3)); }
-int ccw(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return sign(cross(d1, d2, d3, d4)); }
-bool on_seg_strong(const Pii& d1, const Pii& d2, const Pii& d3) { ll ret = dot(d1, d3, d2); return !ccw(d1, d2, d3) && ret >= 0; }
-ll area(const Vpii& H) {
-	ll ret = 0;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) ret += H[i] / H[(i + 1) % sz];
+	ld H(const ld& th) const { return sin(th) * c.x + cos(th) * c.y + r; }//coord trans | check right
+	//bool operator < (const Pos& p) const { return r < (c - p).mag(); }
+	bool operator < (const Pos& p) const { return sign(r - (c - p).mag()) < 0; }
+	bool operator > (const Pos& p) const { return r > (c - p).mag(); }
+	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
+	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
+} INVAL = { { 0, 0 }, -1 };
+bool cmpr(const Circle& p, const Circle& q) { return p.r > q.r; }//sort descending order
+Vld intersections(const Circle& a, const Circle& b) {
+	Pos ca = a.c, cb = b.c;
+	Pos vec = cb - ca;
+	ll ra = a.r, rb = b.r;
+	ld distance = vec.mag();
+	ld rd = vec.rad();
+	if (vec.Euc() > sq(ra + rb) + TOL) return {};
+	if (vec.Euc() < sq(ra - rb) - TOL) return {};
+	ld X = (ra * ra - rb * rb + vec.Euc()) / (2 * distance * ra);
+	if (X < -1) X = -1;
+	if (X > 1) X = 1;
+	ld h = acos(X);
+	Vld ret = {};
+	ret.push_back(norm(rd + h));
+	if (zero(h)) return ret;
+	ret.push_back(norm(rd - h));
 	return ret;
 }
-void norm(Vpii& H, const bool& f = 1) {
-	if (f && area(H) < 0) std::reverse(H.begin(), H.end());//ccw
-	if (!f && area(H) > 0) std::reverse(H.begin(), H.end());//cw
-	return;
-}
-bool check_diagonal(const Vpii& P, const int& i1, const int& j1) {
-	int sz = P.size();
-	int i0 = (i1 - 1 + sz) % sz, i2 = (i1 + 1) % sz;
-	int j0 = (j1 - 1 + sz) % sz, j2 = (j1 + 1) % sz;
-	if ((P[i0] - P[i1]).Euc() != (P[i2] - P[i1]).Euc()) return 0;
-	if ((P[j0] - P[j1]).Euc() != (P[j2] - P[j1]).Euc()) return 0;
-	if (ccw(P[i0], P[i2], P[j0], P[j2])) return 0;
-	return 1;
-}
-bool check_parallel(const Vpii& P, const int& i1, const int& j1) {
-	int sz = P.size();
-	int i2 = (i1 + 1) % sz;
-	int j0 = (j1 - 1 + sz) % sz;
-	if (ccw(P[i1], P[i2], P[j1], P[j0])) return 0;
-	if (dot(P[i1], P[i2], P[j0]) != dot(P[i2], P[i1], P[j1])) return 0;
-	//if (dot(P[i2], P[i1], P[j1])) return 0;
-	return 1;
-}
-bool symmetry(const Vpii& P, const int& i0, const int& i1, const int& l, const int& r) {
-	int sz = P.size();
-	if (sz & 1) {
-		assert(r == -1);
-		for (int i = (i1 + 1) % sz, j = (i0 - 1 + sz) % sz; i != l; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
-			if ((P[i] - P[l]).Euc() != (P[j] - P[l]).Euc()) return 0;
-			if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
-		}
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f == LINE) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
 	}
 	else {
-		if (i1 != -1) {//seg-seg
-			for (int i = (i1 + 1) % sz, j = (i0 - 1 + sz) % sz; i != r; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
-				//if ((P[i] - P[i1]).Euc() != (P[j] - P[i0]).Euc()) return 0;
-				if (dot(P[i0], P[i1], P[i]) != dot(P[i1], P[i0], P[j])) return 0;
-				if (ccw(P[i0], P[i1], P[i], P[j])) return 0;
-			}
-		}
-		else {//pos-pos
-			assert(r == -1);
-			for (int i = (i0 + 1) % sz, j = (i0 - 1 + sz) % sz; i != l; i = (i + 1) % sz, j = (j - 1 + sz) % sz) {
-				if ((P[i] - P[i0]).Euc() != (P[j] - P[i0]).Euc()) return 0;
-				if (dot(P[i0], P[l], P[i], P[j])) return 0;
-			}
-		}
+		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
 	}
+	return ret;
+}
+ld area(const Polygon& P, const ld& r) {
+	assert(P.size() == 4);
+	Circle c0 = Circle(P[0], r);
+	Circle c1 = Circle(P[1], r);
+	Circle c2 = Circle(P[2], r);
+	Circle c3 = Circle(P[3], r);
+	ld a = 0;
+}
+ld bi_search(const int& W, const int& H, const int& S) {
+	Polygon P = { Pos(0, 0), Pos(W, 0), Pos(W, H), Pos(0, H) };
+	ld s = 0, e = P[2].mag() + TOL;
+	int c = 30; while (c--) {
+		ld m = (s + e) * .5;
+		ld A = area(P, m);
+		if (A > S) e = m;
+		else s = m;
+	}
+	return s * e;
+}
+bool query() {
+	int W, H, S;
+	std::cin >> W >> H >> S;
+	if (!W && !H && !S) return 0;
+	ld A = bi_search(W, H, S);
+	std::cout << A << "\n";
 	return 1;
-}
-ld volume(const Polygon& H, const Pos& cen, const Seg& se) {
-	ld a = area(H);
-	ld d = std::abs(dist(se.s, se.e, cen));
-	return 2 * PI * d * a;
-}
-ld volume(const Vpii& P, const Seg& se) {
-	Polygon H;
-	for (const Pii& p : P) H.push_back(p.p());
-	H = polygon_cut(H, se.s, se.e);
-	Pos cen = centroid(H);
-	return volume(H, cen, se);
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	std::cin >> N;
-	Vpii P(N); for (Pii& p : P) std::cin >> p; norm(P);
-	ld vol = 0;
-	int cnt = 0;
-	Seg s1, s2;
-	if (N & 1) {
-		for (int i = 0, j = 1; i < N; i++) {
-			while (ccw(P[i], P[(i + 1) % N], P[j], P[(j + 1) % N]) >= 0) j = (j + 1) % N;
-			if ((P[i] - P[j]).Euc() == (P[(i + 1) % N] - P[j]).Euc()) {
-				if (symmetry(P, i, (i + 1) % N, j, -1)) {
-					cnt++;
-					Pos m = (P[i] + P[(i + 1) % N]).p() * .5;
-					if (cnt == 1) s1 = Seg(m, P[j].p());
-					if (cnt == 2) s2 = Seg(m, P[j].p());
-				}
-			}
-			if (cnt > 1) break;
-		}
-	}
-	else {
-		//std::cout << "even\n";
-		for (int i = 0, j = 1; i < N / 2; i++) {
-			while (ccw(P[i], P[(i + 1) % N], P[j], P[(j + 1) % N]) >= 0) j = (j + 1) % N;
-			if (check_diagonal(P, i, j)) {
-				if (symmetry(P, i, -1, j, -1)) {
-					cnt++;
-					if (cnt == 1) s1 = Seg(P[i].p(), P[j].p());
-					if (cnt == 2) s2 = Seg(P[i].p(), P[j].p());
-				}
-			}
-			if (check_diagonal(P, i, (j - 1 + N) % N)) {
-				if (symmetry(P, i, -1, (j - 1 + N) % N, -1)) {
-					cnt++;
-					if (cnt == 1) s1 = Seg(P[i].p(), P[(j - 1 + N) % N].p());
-					if (cnt == 2) s2 = Seg(P[i].p(), P[(j - 1 + N) % N].p());
-				}
-			}
-			if (check_parallel(P, i, j)) {
-				//std::cout << "fuck1::\n";
-				if (symmetry(P, i, (i + 1) % N, j, (j - 1 + N) % N)) {
-					//std::cout << "fuck2::\n";
-					cnt++;
-					Pos m0 = (P[i] + P[(i + 1) % N]).p() * .5;
-					Pos m1 = (P[j] + P[(j - 1 + N) % N]).p() * .5;
-					if (cnt == 1) s1 = Seg(m0, m1);
-					if (cnt == 2) s2 = Seg(m0, m1);
-				}
-			}
-			if (cnt > 1) break;
-		}
-	}
-	if (cnt == 0) std::cout << 0 << "\n";
-	else if (cnt == 1) {
-		vol = volume(P, s1);
-		std::cout << vol << "\n";
-	}
-	else {
-		assert(ccw(s1.s, s1.e, s2.s, s2.e));
-		Pos m = intersection(s1.s, s1.e, s2.s, s2.e);
-		ld d = -1;
-		for (int i = 0; i < N; i++) {
-			ld h = (P[i].p() - m).mag();
-			d = std::max(d, h);
-		}
-		vol = d * d * d * 4 / 3 * PI;
-		std::cout << vol << "\n";
-	}
+	while (query());
 	return;
 }
-int main() { solve(); return 0; }//boj25646
-//boj30123 27712 3607 10239 22635 22676
+int main() { solve(); return 0; }//boj22676
+//boj30123 27712 3607 10239 22635
 
 /*
 

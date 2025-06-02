@@ -288,7 +288,7 @@ void solve() {
 	while (query());
 	return;
 }
-int main() { solve(); return 0; }//boj22676
+int main() { solve(); return 0; }//boj22635
 //boj30123 27712 3607 10239 22635
 
 /*

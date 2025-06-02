@@ -85,6 +85,11 @@ void norm(Polygon& H) {
 	ld A = area(H); if (A < 0) std::reverse(H.begin(), H.end());
 	return;
 }
+bool inner_check(const Polygon& P, const Pos& q) {
+	int sz = P.size();
+	for (int i = 0; i < sz; i++) if (ccw(P[i], P[(i + 1) % sz], q) < 0) return 0;
+	return 1;
+}
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -146,6 +151,7 @@ struct Circle {
 	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
 } INVAL = { { 0, 0 }, -1 };
+typedef std::vector<Circle> Disks;
 bool cmpr(const Circle& p, const Circle& q) { return p.r > q.r; }//sort descending order
 Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
@@ -191,20 +197,68 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	}
 	return ret;
 }
-ld area(const Polygon& P, const ld& r) {
+ld area(const Polygon& P, const ld& r, const ld& d) {
+	if (d >= r * 2) return 0;
 	assert(P.size() == 4);
-	Circle c0 = Circle(P[0], r);
-	Circle c1 = Circle(P[1], r);
-	Circle c2 = Circle(P[2], r);
-	Circle c3 = Circle(P[3], r);
-	ld a = 0;
+	Disks C(4);
+	ld A = 0;
+	for (int i = 0; i < 4; i++) C[i] = Circle(P[i], r);
+	for (int i = 0; i < 4; i++) {
+		Vld V = { 0, 2 * PI };
+		for (int j = 0; j < 4; j++) {
+			int j0 = (j + 1) % 4;
+			Vld I = circle_line_intersections(C[i], P[j], P[j0], CIRCLE);
+			V.insert(V.end(), I.begin(), I.end());
+			if (j == i) continue;
+			I = intersections(C[i], C[j]);
+			V.insert(V.end(), I.begin(), I.end());
+		}
+		std::sort(V.begin(), V.end());
+		V.erase(unique(V.begin(), V.end()), V.end());
+		int sz = V.size();
+		for (int j = 0; i < sz - 1; i++) {
+			ld s = V[j], e = V[j + 1];
+			ld m = (s + e) * .5;
+			Pos p = C[i].p(m);
+			int c = 0;
+			for (int k = 0; k < 4; k++) {
+				if (k == i) continue;
+				if (C[k] > p) c++;
+			}
+			if (inner_check(P, m)) c++;
+			if (c == 4) A += C[i].green(s, e);
+		}
+	}
+	for (int i = 0; i < 4; i++) {
+		int i0 = (i + 1) % 4;
+		const Pos& p0 = P[i], & p1 = P[i0];
+		Seg se = Seg(p0, p1);
+		Vld V = { 0, 1 };
+		for (int j = 0; j < 4; j++) {
+			Vld I = circle_line_intersections(C[j], p0, p1, LINE);
+			V.insert(V.end(), I.begin(), I.end());
+		}
+		std::sort(V.begin(), V.end());
+		V.erase(unique(V.begin(), V.end()), V.end());
+		int sz = V.size();
+		for (int j = 0; i < sz - 1; i++) {
+			ld s = V[j], e = V[j + 1];
+			ld m = (s + e) * .5;
+			Pos p = se.p(m);
+			int c = 0;
+			for (int k = 0; k < 4; k++) if (C[k] > p) c++;
+			if (c == 4) A += C[i].green(s, e);
+		}
+	}
+	return A;
 }
 ld bi_search(const int& W, const int& H, const int& S) {
 	Polygon P = { Pos(0, 0), Pos(W, 0), Pos(W, H), Pos(0, H) };
-	ld s = 0, e = P[2].mag() + TOL;
+	ld d = P[2].mag();
+	ld s = 0, e = d + TOL;
 	int c = 30; while (c--) {
 		ld m = (s + e) * .5;
-		ld A = area(P, m);
+		ld A = area(P, m, d);
 		if (A > S) e = m;
 		else s = m;
 	}
@@ -215,7 +269,7 @@ bool query() {
 	std::cin >> W >> H >> S;
 	if (!W && !H && !S) return 0;
 	ld A = bi_search(W, H, S);
-	std::cout << A << "\n";
+	std::cout << A * 4 << "\n";
 	return 1;
 }
 void solve() {

@@ -62,7 +62,9 @@ struct Pos {
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
 ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
@@ -306,8 +308,22 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj25646
-//boj30123 27712 3607 10239
+//boj30123 27712 3607 10239 22635 22676
 
 /*
+
+12
+66207546 277078203
+66231235 277049680
+66236583 277045669
+66270598 277030914
+66302758 277017619
+66330166 277008238
+66376807 277002726
+66421946 277004478
+66139790 277216095
+66150747 277172271
+66169098 277129039
+66185778 277105354
 
 */

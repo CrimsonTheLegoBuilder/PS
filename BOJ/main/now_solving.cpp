@@ -87,7 +87,9 @@ void norm(Polygon& H) {
 }
 bool inner_check(const Polygon& P, const Pos& q) {
 	int sz = P.size();
-	for (int i = 0; i < sz; i++) if (ccw(P[i], P[(i + 1) % sz], q) < 0) return 0;
+	for (int i = 0; i < sz; i++)
+		if (ccw(P[i], P[(i + 1) % sz], q) < 0)
+			return 0;
 	return 1;
 }
 struct Seg {
@@ -123,13 +125,13 @@ struct Seg {
 typedef std::vector<Seg> Vseg;
 struct Circle {
 	Pos c;
-	int r;
-	Circle(Pos c_ = Pos(), int r_ = 0) : c(c_), r(r_) {}
+	ld r;
+	Circle(Pos c_ = Pos(), ld r_ = 0) : c(c_), r(r_) {}
 	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
 	bool operator != (const Circle& q) const { return !(*this == q); }
 	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
 	//bool operator < (const Circle& q) const { return r < q.r && (c - q.c).mag() + r < q.r + TOL; }
-	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq((ll)r + q.r)) >= 0; }
+	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq(r + q.r)) >= 0; }
 	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
 	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
 	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
@@ -156,7 +158,7 @@ bool cmpr(const Circle& p, const Circle& q) { return p.r > q.r; }//sort descendi
 Vld intersections(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
-	ll ra = a.r, rb = b.r;
+	ld ra = a.r, rb = b.r;
 	ld distance = vec.mag();
 	ld rd = vec.rad();
 	if (vec.Euc() > sq(ra + rb) + TOL) return {};
@@ -190,15 +192,14 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 		if (0 < lo && lo < 1) ret.push_back(lo);
 	}
 	else {
-		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
 		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
 		if (zero(det)) return ret;
 		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
 	}
 	return ret;
 }
-ld area(const Polygon& P, const ld& r, const ld& d) {
-	if (d >= r * 2) return 0;
+ld area(const Polygon& P, const ld& r) {
 	assert(P.size() == 4);
 	Disks C(4);
 	ld A = 0;
@@ -216,22 +217,26 @@ ld area(const Polygon& P, const ld& r, const ld& d) {
 		std::sort(V.begin(), V.end());
 		V.erase(unique(V.begin(), V.end()), V.end());
 		int sz = V.size();
-		for (int j = 0; i < sz - 1; i++) {
+		for (int j = 0; j < sz - 1; j++) {
 			ld s = V[j], e = V[j + 1];
 			ld m = (s + e) * .5;
 			Pos p = C[i].p(m);
 			int c = 0;
 			for (int k = 0; k < 4; k++) {
 				if (k == i) continue;
-				if (C[k] > p) c++;
+				if (C[k] >= p) c++;
 			}
-			if (inner_check(P, m)) c++;
+			//std::cout << "c1:: " << c << "\n";
+			if (inner_check(P, p)) c++;
+			//std::cout << "c2:: " << c << "\n";
 			if (c == 4) A += C[i].green(s, e);
 		}
 	}
+	//std::cout << "a:: " << A << "\n";
 	for (int i = 0; i < 4; i++) {
 		int i0 = (i + 1) % 4;
 		const Pos& p0 = P[i], & p1 = P[i0];
+		if (eq(p0.x, p1.x)) continue;
 		Seg se = Seg(p0, p1);
 		Vld V = { 0, 1 };
 		for (int j = 0; j < 4; j++) {
@@ -241,27 +246,30 @@ ld area(const Polygon& P, const ld& r, const ld& d) {
 		std::sort(V.begin(), V.end());
 		V.erase(unique(V.begin(), V.end()), V.end());
 		int sz = V.size();
-		for (int j = 0; i < sz - 1; i++) {
+		for (int j = 0; j < sz - 1; j++) {
 			ld s = V[j], e = V[j + 1];
 			ld m = (s + e) * .5;
 			Pos p = se.p(m);
 			int c = 0;
-			for (int k = 0; k < 4; k++) if (C[k] > p) c++;
-			if (c == 4) A += C[i].green(s, e);
+			for (int k = 0; k < 4; k++) if (C[k] >= p) c++;
+			if (c == 4) A += se.green(s, e);
 		}
 	}
+	//std::cout << "A:: " << A << "\n";
 	return A;
 }
 ld bi_search(const int& W, const int& H, const int& S) {
 	Polygon P = { Pos(0, 0), Pos(W, 0), Pos(W, H), Pos(0, H) };
 	ld d = P[2].mag();
-	ld s = 0, e = d + TOL;
-	int c = 30; while (c--) {
+	ld s = d * .5, e = d + TOL;
+	//std::cout << "FUCK:: " << area(P, sqrt(2)) << "\n";
+	int c = 35; while (c--) {
 		ld m = (s + e) * .5;
-		ld A = area(P, m, d);
+		ld A = area(P, m);
 		if (A > S) e = m;
 		else s = m;
 	}
+	//std::cout << "s:: " << s << " e:: " << e << "\n";
 	return s * e;
 }
 bool query() {

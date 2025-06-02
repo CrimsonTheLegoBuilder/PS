@@ -487,7 +487,7 @@ Vld circle_line_intersections(const Circle& q, const Seg& l, const int& t = LINE
 		if (0 < hi && hi < 1) ret.push_back(hi);
 	}
 	else {//circle
-		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
 		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
 		if (zero(det)) return ret;
 		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
@@ -513,7 +513,7 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 		if (0 < lo && lo < 1) ret.push_back(lo);
 	}
 	else {
-		auto the = [&](ld rt) { return q.rad(s + (e - s) * rt); };
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
 		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
 		if (zero(det)) return ret;
 		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));

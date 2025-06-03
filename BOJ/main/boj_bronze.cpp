@@ -12,8 +12,8 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 
-int N;
-ll X, Y, Z, B, P;
+int T, N;
+ll X, Y, A, B, Z, P;
 int I[10];
 ld a;
 std::string S, R;
@@ -22,10 +22,11 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	std::cin >> N;
+	std::cin >> N >> A;
 	while (N--) {
-		std::cin >> S;
-		std::cout << S.size() << "\n";
+		std::cin >> B;
+		T += B / A;
 	}
+	std::cout << T << "\n";
 	return 0;
 }

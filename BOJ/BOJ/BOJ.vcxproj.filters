@@ -129,7 +129,7 @@
     <ClCompile Include="..\main\boj7951_wrong.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="polygon_compose_dfs.cpp">
+    <ClCompile Include="..\library\polygon_compose_dfs.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
   </ItemGroup>

@@ -22,11 +22,11 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	std::cin >> N >> A;
+	std::cin >> N;
 	while (N--) {
-		std::cin >> B;
-		T += B / A;
+		std::cin >> A >> B;
+		if (A < 3 && B < 3 && (A + B) <= 3) std::cout << "Yes\n";
+		else std::cout << "No\n";
 	}
-	std::cout << T << "\n";
 	return 0;
 }

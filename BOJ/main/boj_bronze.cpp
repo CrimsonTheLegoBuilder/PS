@@ -22,7 +22,10 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	std::cin >> a;
-	std::cout << 100 / a << "\n" << 100 / (100 - a) << "\n";
+	std::cin >> N;
+	while (N--) {
+		std::cin >> S;
+		std::cout << S.size() << "\n";
+	}
 	return 0;
 }

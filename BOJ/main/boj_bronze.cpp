@@ -13,20 +13,29 @@ typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 
 int T, N;
-ll X, Y, A, B, Z, P;
+ll X, Y, A, B, C, D, E, Z, P, a, c, e;
 int I[10];
-ld a;
 std::string S, R;
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	std::cin >> N;
-	while (N--) {
-		std::cin >> A >> B;
-		if (A < 3 && B < 3 && (A + B) <= 3) std::cout << "Yes\n";
-		else std::cout << "No\n";
+	std::cin >> A >> C >> E;
+	std::cin >> a >> c >> e;
+	if (e < E) std::cout << "E\n";
+	else {
+		if (c < C) {
+			if (C / 2 < c) std::cout << "D\n";
+			else std::cout << "E\n";
+		}
+		else {
+			if (a < A) {
+				if (A / 2 < a) std::cout << "B\n";
+				else std::cout << "C\n";
+			}
+			else std::cout << "A\n";
+		}
 	}
 	return 0;
 }

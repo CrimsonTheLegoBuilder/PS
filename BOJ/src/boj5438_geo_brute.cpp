@@ -15,9 +15,9 @@ const ld TOL = 1e-9;
 const ld PI = acos(-1);
 const int LEN = 2e4;
 int Q, N;
-inline bool zero(const ld& x) { return std::abs(x) < TOL; }
-inline ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
+inline bool zero(const ld& x) { return !sign(x); }
+inline ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 inline ld norm(ld th) {
 	while (th < 0) th += PI * 2;
 	while (th > PI * 2 - TOL) th -= PI * 2;

@@ -386,30 +386,11 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	freopen("stadium.in", "r", stdin);
-	freopen("stadium.out", "w", stdout);
+	//freopen("stadium.in", "r", stdin);
+	//freopen("stadium.out", "w", stdout);
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
 	P = graham_scan(P);
 	std::cout << bi_search(P) << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj29691
-//boj30123 27712 3607 10239 22635
-
-/*
-
-12
-66207546 277078203
-66231235 277049680
-66236583 277045669
-66270598 277030914
-66302758 277017619
-66330166 277008238
-66376807 277002726
-66421946 277004478
-66139790 277216095
-66150747 277172271
-66169098 277129039
-66185778 277105354
-
-*/

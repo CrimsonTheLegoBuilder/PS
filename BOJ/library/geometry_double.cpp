@@ -120,7 +120,7 @@ ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
 }
 bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
-ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+//ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
 	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
 	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
@@ -247,6 +247,18 @@ Polygon monotone_chain(Polygon& C) {
 	}
 	return H;
 }
+ld rotating_calipers(const Polygon& H) {
+	int sz = H.size();
+	if (sz < 2) return 0;
+	if (sz == 2) return (H[0] - H[1]).mag();
+	ld d = -1;
+	for (int i = 0, j = 1; i < sz; i++) {
+		while (ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0)
+			j = (j + 1) % sz, d = std::max(d, (H[i] - H[j]).mag());
+		d = std::max(d, (H[i] - H[j]).mag());
+	}
+	return d;
+}
 Polygon polygon_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
 	Polygon qs;
 	int n = ps.size();
@@ -297,6 +309,10 @@ struct Seg {
 		Pos m = p(ratio);
 		return m.y * d * (s.x - e.x);
 	}
+	Seg operator + (const ld& d) const { Pos v = ~dir.unit(); return Seg(s - v * d, e - v * d); }
+	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
+	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
+	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
 };
 typedef std::vector<Seg> Segs;
 ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }

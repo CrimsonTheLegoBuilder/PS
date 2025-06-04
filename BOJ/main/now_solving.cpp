@@ -299,6 +299,11 @@ struct Seg {
 	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
 	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
 	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
+	Seg operator + (const Pos& v) const { return Seg(s + v, e + v); }
+	Seg operator - (const Pos& v) const { return Seg(s - v, e - v); }
+	Seg operator += (const Pos& v) { s += v; e += v; return *this; }
+	Seg operator -= (const Pos& v) { s -= v; e -= v; return *this; }
+	Seg operator * (const ld& d) const { return Seg(s, s + dir * d); }
 };
 typedef std::vector<Seg> Segs;
 ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }

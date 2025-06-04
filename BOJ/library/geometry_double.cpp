@@ -302,6 +302,15 @@ struct Seg {
 		return sign(dir / l.dir) > 0;
 	}
 	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
+	Seg operator + (const ld& d) const { Pos v = ~dir.unit(); return Seg(s - v * d, e - v * d); }
+	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
+	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
+	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
+	Seg operator + (const Pos& v) const { return Seg(s + v, e + v); }
+	Seg operator - (const Pos& v) const { return Seg(s - v, e - v); }
+	Seg operator += (const Pos& v) { s += v; e += v; return *this; }
+	Seg operator -= (const Pos& v) { s -= v; e -= v; return *this; }
+	Seg operator * (const ld& d) const { return Seg(s, s + dir * d); }
 	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
 	ld green(const ld& lo = 0, const ld& hi = 1) const {
 		ld d = hi - lo;
@@ -309,10 +318,6 @@ struct Seg {
 		Pos m = p(ratio);
 		return m.y * d * (s.x - e.x);
 	}
-	Seg operator + (const ld& d) const { Pos v = ~dir.unit(); return Seg(s - v * d, e - v * d); }
-	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
-	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
-	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
 };
 typedef std::vector<Seg> Segs;
 ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }

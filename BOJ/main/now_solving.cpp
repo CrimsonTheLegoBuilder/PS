@@ -359,7 +359,7 @@ bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F =
 	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
 	return 1;
 }
-bool minimize(const Polygon& H, const ld& d) {
+bool tight(const Polygon& H, const ld& d) {
 	Segs HP, z;
 	Polygon HPI;
 	int sz = H.size();
@@ -375,7 +375,7 @@ ld bi_search(const Polygon& H) {
 	ld s = 0, e = 35000;
 	int c = 50; while (c--) {
 		ld m = (s + e) * .5;
-		bool f = minimize(H, m);
+		bool f = tight(H, m);
 		if (!f) e = m;
 		else s = m;
 	}

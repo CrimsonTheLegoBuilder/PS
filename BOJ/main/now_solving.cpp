@@ -489,6 +489,26 @@ bool inner_check(const Pos3D& p, const Pos3D& q, const ld& R = 0) {
 	if (p.r > q.r && std::abs(t1 - t2) >= ang) return 1;
 	return 0;
 }
+int D_[13] = { 0, 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
+int rad(const int& d, const std::string& s, const int& h) {
+	int t;
+	if (s == "jul") t += D_[1];
+}
+void solve() {
+	std::cin.tie(0)->sync_with_stdio(0);
+	std::cout.tie(0);
+	std::cout << std::fixed;
+	std::cout.precision(9);
+	ld l;
+	std::cin >> l >> N;
+	for (int i = 1; i < 13; i++) D_[i] = D_[i - 1] + D_[i];
+	while (N--) {
+		int D, h; std::string S;
+		std::cin >> D >> S >> h;
+
+	}
+}
+int main() { solve(); return 0; }//boj31392
 //boj 27712 10239 22635 29691 31392
 
 /*

@@ -11,6 +11,7 @@
 #include <array>
 #include <tuple>
 #include <complex>
+#include <map>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -63,7 +64,7 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 //2D============================================================================//
 
-int N, M, K, T, Q;
+int N;
 struct Pos {
 	ld x, y;
 	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
@@ -490,9 +491,26 @@ bool inner_check(const Pos3D& p, const Pos3D& q, const ld& R = 0) {
 	return 0;
 }
 int D_[13] = { 0, 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
-int rad(const int& d, const std::string& s, const int& h) {
-	int t;
-	if (s == "jul") t += D_[1];
+std::map<std::string, int> M;
+void init() {
+	M["jan"] = D_[2];
+	M["feb"] = D_[2];
+	M["mar"] = D_[3];
+	M["apr"] = D_[4];
+	M["may"] = D_[5];
+	M["jun"] = D_[6];
+	M["jul"] = D_[7];
+	M["aug"] = D_[8];
+	M["sep"] = D_[9];
+	M["oct"] = D_[10];
+	M["nov"] = D_[11];
+	M["dec"] = D_[12];
+	return ;
+}
+ld w = 23.439281;
+ld z = (2 * PI / 365) / 24;
+ld rad(const ll& d, const std::string& s, const int& h) {
+	return (M[s] + d) / 365.0 + z * h;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -502,9 +520,12 @@ void solve() {
 	ld l;
 	std::cin >> l >> N;
 	for (int i = 1; i < 13; i++) D_[i] = D_[i - 1] + D_[i];
+	Pos3D e = Pos3D(acos(1));
 	while (N--) {
 		int D, h; std::string S;
 		std::cin >> D >> S >> h;
+		ld t = rad(D, S, h);
+
 
 	}
 }

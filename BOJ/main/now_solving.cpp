@@ -203,203 +203,293 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-Polygon graham_scan(Polygon& C) {
-	Polygon H;
-	if (C.size() < 3) {
-		std::sort(C.begin(), C.end());
-		return C;
+struct Pos3D {
+	ld x, y, z;
+	int r, i;
+	Pos3D(ld x_ = 0, ld y_ = 0, ld z_ = 0) : x(x_), y(y_), z(z_) {}
+	bool operator == (const Pos3D& p) const { return zero(x - p.x) && zero(y - p.y) && zero(z - p.z); }
+	bool operator != (const Pos3D& p) const { return !zero(x - p.x) || !zero(y - p.y) || !zero(z - p.z); }
+	bool operator < (const Pos3D& p) const { return zero(x - p.x) ? zero(y - p.y) ? z < p.z : y < p.y : x < p.x; }
+	ld operator * (const Pos3D& p) const { return x * p.x + y * p.y + z * p.z; }
+	Pos3D operator / (const Pos3D& p) const { return { y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x }; }
+	Pos3D operator + (const Pos3D& p) const { return { x + p.x, y + p.y, z + p.z }; }
+	Pos3D operator - (const Pos3D& p) const { return { x - p.x, y - p.y, z - p.z }; }
+	Pos3D operator * (const ld& n) const { return { x * n, y * n, z * n }; }
+	Pos3D operator / (const ld& n) const { return { x / n, y / n, z / n }; }
+	Pos3D& operator += (const Pos3D& p) { x += p.x; y += p.y; z += p.z; return *this; }
+	Pos3D& operator -= (const Pos3D& p) { x -= p.x; y -= p.y; z -= p.z; return *this; }
+	Pos3D& operator *= (const ld& n) { x *= n; y *= n; z *= n; return *this; }
+	Pos3D& operator /= (const ld& n) { x /= n; y /= n; z /= n; return *this; }
+	ld Euc() const { return x * x + y * y + z * z; }
+	ld mag() const { return sqrtl(Euc()); }
+	ld lon() const { return atan2(y, x); }
+	ld lat() const { return atan2(z, sqrtl(x * x + y * y)); }
+	Pos3D operator - () const { return { -x, -y, -z }; }
+	Pos3D unit() const { return *this / mag(); }
+	Pos3D norm(const Pos3D& p) const { return (*this / p).unit(); }
+	Pos3D rodrigues_rotate(const ld& th, const Pos3D& axis) const {
+		ld s = sin(th), c = cos(th); Pos3D n = axis.unit();
+		return n * (*this * n) * (1 - c) + (*this * c) + (n / *this) * s;
 	}
+	friend ld rad(const Pos3D& p1, const Pos3D& p2) { return atan2l((p1 / p2).mag(), p1 * p2); }
+	friend std::istream& operator >> (std::istream& is, Pos3D& p) { is >> p.x >> p.y >> p.z; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Pos3D& p) { os << p.x << " " << p.y << " " << p.z; return os; }
+};
+typedef std::vector<Pos3D> Polyhedron;
+const Pos3D O3D = { 0, 0, 0 };
+const Pos3D X_axis = { 1, 0, 0 };
+const Pos3D Y_axis = { 0, 1, 0 };
+const Pos3D Z_axis = { 0, 0, 1 };
+const Pos3D MAXP3D = { INF, INF, INF };
+std::vector<Pos3D> pos;
+Pos3D S2C(const ld& lon, const ld& lat) {//Spherical to Cartesian
+	ld phi = lon * PI / 180;
+	ld the = lat * PI / 180;
+	return Pos3D(cos(phi) * cos(the), sin(phi) * cos(the), sin(the));
+}
+Pos3D point(const Pos3D Xaxis, const Pos3D Yaxis, const ld& th) { return Xaxis * cos(th) + Yaxis * sin(th); }
+ld angle(const Pos3D Xaxis, const Pos3D Yaxis, const Pos3D& p) { return norm(atan2(Yaxis * p, Xaxis * p)); }
+//ld randTOL() {
+//	ld rand01 = rand() / (ld)RAND_MAX;
+//	ld err = (rand01 - .5) * TOL;
+//	return err;
+//}
+//Pos3D add_noise(const Pos3D& p) {//refer to BIGINTEGER
+//	return p + Pos3D(randTOL(), randTOL(), randTOL());
+//}
+Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) / (d3 - d2); }
+ld dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
+int ccw(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& norm) { return sign(cross(d1, d2, d3) * norm); }
+ld area(const std::vector<Pos3D>& H, const Pos3D& norm) {
+	if (H.size() < 3) return 0;
+	ld ret = 0;
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		const Pos3D& cur = H[i], nxt = H[(i + 1) % sz];
+		ret += cross(H[0], cur, nxt) * norm / norm.mag();
+	}
+	return std::abs(ret * .5);
+}
+bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).mag()) && sign(dot(d1, d3, d2)) >= 0; }
+bool on_seg_weak(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).mag()) && sign(dot(d1, d3, d2)) > 0; }
+//std::vector<Pos3D> graham_scan(std::vector<Pos3D>& C, const Pos3D& norm) {
+ld graham_scan(std::vector<Pos3D>& C, const Pos3D& norm) {
+	//if (C.size() < 3) {
+	//	std::sort(C.begin(), C.end());
+	//	return C;
+	// }
+	if (C.size() < 3) return 0;
+	std::vector<Pos3D> H;
 	std::swap(C[0], *min_element(C.begin(), C.end()));
-	std::sort(C.begin() + 1, C.end(), [&](const Pos& p, const Pos& q) -> bool {
-		int ret = ccw(C[0], p, q);
-		if (!ret) return (C[0] - p).Euc() < (C[0] - q).Euc();
+	std::sort(C.begin() + 1, C.end(), [&](const Pos3D& p, const Pos3D& q) -> bool {
+		ld ret = ccw(C[0], p, q, norm);
+		if (zero(ret)) return (C[0] - p).Euc() < (C[0] - q).Euc();
 		return ret > 0;
 		}
 	);
 	C.erase(unique(C.begin(), C.end()), C.end());
 	int sz = C.size();
 	for (int i = 0; i < sz; i++) {
-		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
+		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i], norm) <= 0)
 			H.pop_back();
 		H.push_back(C[i]);
 	}
-	return H;
+	//return H;
+	return area(H, norm);
 }
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	std::sort(C.begin(), C.end());
-	if (C.size() <= 2) { for (const Pos& p : C) H.push_back(p); }
-	else {
-		for (int i = 0; i < C.size(); i++) {
-			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
+bool inner_check(const Pos3D& d1, const Pos3D& d2, const Pos3D& t) {
+	Pos3D nrm = cross(O3D, d1, d2);
+	Pos3D p1 = d1, p2 = d2;
+	if (ccw(O3D, p1, p2, nrm) < 0) std::swap(p1, p2);
+	return ccw(O3D, p1, t, nrm) >= 0 && ccw(O3D, p2, t, nrm) <= 0;
+}
+int inner_check(std::vector<Pos3D>& H, const Pos3D& p) {//for convex hull
+	int sz = H.size();
+	if (sz <= 1) return -1;
+	if (sz == 2) {
+		if (on_seg_strong(H[0], H[1], p)) return 0;
+		else return -1;
+	}
+	Pos3D torque0 = cross(H[0], H[1], p);
+	for (int i = 1; i < sz; i++) {
+		Pos3D cur = H[i], nxt = H[(i + 1) % sz];
+		Pos3D torqueI = cross(cur, nxt, p);
+		if (zero(torqueI.mag())) {
+			if (on_seg_strong(cur, nxt, p)) return 0;
+			else return -1;
 		}
-		H.pop_back();
-		int s = H.size() + 1;
-		for (int i = C.size() - 1; i >= 0; i--) {
-			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
+		if (torque0 * torqueI < 0) return -1;
 	}
-	return H;
-}
-Polygon polygon_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
-	Polygon qs;
-	int n = ps.size();
-	for (int i = 0; i < n; i++) {
-		Pos p1 = ps[i], p2 = ps[(i + 1) % n];
-		int d1 = ccw(b1, b2, p1), d2 = ccw(b1, b2, p2);
-		if (d1 >= 0) qs.push_back(p1);
-		if (d1* d2 < 0) qs.push_back(intersection(p1, p2, b1, b2));
-	}
-	return qs;
-}
-Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
-	int sz = clip.size();
-	std::vector<Pos> ret = C;
-	for (int i = 0; i < sz; i++) {
-		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
-		ret = polygon_cut(ret, b1, b2);
-	}
-	return ret;
-}
-struct Seg {
-	Pos s, e, dir;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
-	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
-	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
-	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
-	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
-	friend Pos intersection_(const Seg& s1, const Seg& s2) {
-		const Pos& p1 = s1.s, & p2 = s1.e;
-		const Pos& q1 = s2.s, & q2 = s2.e;
-		ld a1 = cross(q1, q2, p1);
-		ld a2 = -cross(q1, q2, p2);
-		return (p1 * a2 + p2 * a1) / (a1 + a2);
-	}
-	bool operator < (const Seg& l) const {
-		if (same_dir(*this, l)) return l.inner(s);
-		bool f0 = O < dir;
-		bool f1 = O < l.dir;
-		if (f0 != f1) return f1;
-		return sign(dir / l.dir) > 0;
-	}
-	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
-	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
-	ld green(const ld& lo = 0, const ld& hi = 1) const {
-		ld d = hi - lo;
-		ld ratio = (lo + hi) * .5;
-		Pos m = p(ratio);
-		return m.y * d * (s.x - e.x);
-	}
-	Seg operator + (const ld& d) const { Pos v = ~dir.unit(); return Seg(s - v * d, e - v * d); }
-	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
-	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
-	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
-	Seg operator + (const Pos& v) const { return Seg(s + v, e + v); }
-	Seg operator - (const Pos& v) const { return Seg(s - v, e - v); }
-	Seg operator += (const Pos& v) { s += v; e += v; return *this; }
-	Seg operator -= (const Pos& v) { s -= v; e -= v; return *this; }
-	Seg operator * (const ld& d) const { return Seg(s, s + dir * d); }
-};
-typedef std::vector<Seg> Segs;
-ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
-	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
-	ld det = (q2 - q1) / (p2 - p1);
-	if (zero(det)) return -1;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (f == 1) return fit(a1, 0, 1);
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
-}
-Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return {};
-	std::vector<Seg> HPI;
-	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
-	return HPI;
-}
-Segs half_plane_intersection(const Segs& P, const Segs& Q) {
-	Segs HP(P.size() + Q.size());
-	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
-	return half_plane_intersection(HP, 0);
-}
-bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F = POS, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return 0;
-	if (F == POS) for (int i = 0; i < sz; ++i) PHPI.push_back(intersection_(dq[i], dq[(i + 1) % sz]));
-	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
 	return 1;
 }
-bool tighten(const Polygon& H, const ld& d) {
-	Segs HP, z;
-	Polygon HPI;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) {
-		int i0 = (i + 1) % sz;
-		Seg se = Seg(H[i], H[i0]) - d;
-		HP.push_back(se);
+
+struct Line3D {
+	Pos3D dir, p0;
+	Line3D(Pos3D dir_ = Pos3D(0, 0, 0), Pos3D p0_ = Pos3D(0, 0, 0)) : dir(dir_), p0(p0_) {}
+};
+Line3D L(const Pos3D& p1, const Pos3D& p2) { return { p2 - p1, p1 }; }
+Line3D line(const Pos3D& p1, const Pos3D& p2) { return { p2 - p1, p1 }; }
+
+struct Plane {
+	ld a, b, c, d;
+	Plane(ld a_ = 0, ld b_ = 0, ld c_ = 0, ld d_ = 0) : a(a_), b(b_), c(c_), d(d_) {}
+	Pos3D norm() const { return Pos3D(a, b, c); };
+	Plane operator + (const ld& n) const { return { a, b, c, d + n }; }
+	Plane operator - (const ld& n) const { return { a, b, c, d - n }; }
+	Plane& operator += (const ld& n) { d += n; return *this; }
+	Plane& operator -= (const ld& n) { d -= n; return *this; }
+	friend std::istream& operator >> (std::istream& is, Plane& f) { is >> f.a >> f.b >> f.c >> f.d; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Plane& f) { os << f.a << " " << f.b << " " << f.c << " " << f.d; return os; }
+} knife;
+Plane plane(const Pos3D& p, const ld& n) { return Plane(p.x, p.y, p.z, n); }
+ld dist(const Plane& s, const Pos3D& p) { return (s.norm() * p + s.d) / s.norm().mag(); }
+int above(const Plane& S, const Pos3D& p) { return sign(p * S.norm() + S.d); }
+Pos3D intersection(const Plane& S, const Line3D& l) {
+	ld det = S.norm() * l.dir;
+	if (zero(det)) return { INF, INF, INF };
+	ld t = -((S.norm() * l.p0 + S.d) / det);
+	return l.p0 + (l.dir * t);
+}
+Pos3D intersection(const Plane& S, const Pos3D& p1, const Pos3D& p2, const bool& f = 0) {
+	Line3D l = line(p1, p2);
+	Pos3D inx = intersection(S, l);
+	if (f && !on_seg_strong(p1, p2, inx)) return { INF, INF, INF };
+	return inx;
+}
+bool circle_intersection(const Pos3D& a, const Pos3D& b, const ld& th, std::vector<Pos3D>& inxs) {
+	inxs.clear();
+	Pos3D mid = (a + b) * .5;
+	if (zero(mid.mag())) return 0;
+	ld x = cos(th) / mid.mag();
+	if (x < -1 || 1 < x) return 0;
+	Pos3D w = mid.unit() * x;
+	ld ratio = sqrtl(1 - x * x);
+	Pos3D h = (mid.unit() / (b - a).unit()) * ratio;
+	inxs.push_back(w + h);
+	inxs.push_back(w - h);
+	return 1;
+}
+//bool plane_circle_intersection(const Pos3D& a, const Pos3D& perp, const ld& th, std::vector<Pos3D>& inxs) {
+//	inxs.clear();
+//	Pos3D vec = a - (perp * (perp * a));
+//	if (zero(vec.mag())) return 0;
+//	ld x = cos(th) / vec.mag();
+//	if (x < -1 || 1 < x) return 0;
+//	Pos3D w = vec.unit() * x;
+//	ld ratio = sqrtl(1 - x * x);
+//	Pos3D h = (vec.unit() / perp) * ratio;
+//	inxs.push_back(w + h);
+//	inxs.push_back(w - h);
+//	return 1;
+//}
+int intersection(const Plane& p1, const Plane& p2, Line3D& l) {
+	Pos3D n1 = p1.norm();
+	Pos3D n2 = p2.norm();
+	Pos3D dir = n2 / n1;
+	if (zero(dir.mag())) {
+		ld f = n1 * n2;
+		ld d1 = dist(p1, O3D);
+		ld d2 = dist(p2, O3D);
+		if (sign(f) > 0) return sign(d2 - d1) >= 0 ? 0 : -1;
+		else return sign(d2 + d1) >= 0 ? 0 : -2;
 	}
-	return half_plane_intersection(HP, z, HPI, POS);
+	dir = dir.unit();
+	Pos3D q1 = intersection(p1, Line3D(n1, O3D));
+	Pos3D v1 = n1 / dir;
+	Pos3D p0 = intersection(p2, Line3D(v1, q1));
+	l = Line3D(dir, p0);
+	return 1;
 }
-ld bi_search(const Polygon& H) {
-	int sz = H.size();
-	ld s = 0, e = 35000;
-	int c = 50; while (c--) {
-		ld m = (s + e) * .5;
-		bool f = tighten(H, m);
-		if (!f) e = m;
-		else s = m;
+Pos3D s2c(const ld& phi, const ld& psi) {//Spherical to Cartesian
+	ld lat = phi * PI / 180, lon = psi * PI / 180;
+	return Pos3D(cos(lon) * cos(lat), sin(lon) * cos(lat), sin(lat));
+}
+bool plane_circle_intersection(const Pos3D& perp, const Pos3D& a, Polyhedron& inxs, const ld& R = 0) {
+	inxs.clear();
+	Pos3D vec = a - (perp * (perp * a));
+	if (zero(vec.mag())) return 0;
+	ld th = (ld)a.r / R;
+	ld x = cos(th) / vec.mag();
+	if (x < -1 || 1 < x) return 0;
+	Pos3D w = vec.unit() * x;
+	ld ratio = sqrtl(1 - x * x);
+	Pos3D h = (vec.unit() / perp) * ratio;
+	inxs.push_back(w + h);
+	if (!zero(ratio)) inxs.push_back(w - h);
+	return 1;
+}
+ld angle(const Pos3D Xaxis, const Pos3D Yaxis, const Pos3D& p) {
+	ld X = Xaxis * p, Y = Yaxis * p;
+	ld th = atan2(Y, X);
+	return th;
+}
+ld angle(const Pos3D& a, const Pos3D& b) {
+	Pos3D perp = (a / b).unit();
+	Pos3D X = a.unit();//X-axis
+	Pos3D Y = (perp / a).unit();//Y-axis
+	return angle(X, Y, b);
+}
+bool inner_check(const Pos3D& d1, const Pos3D& d2, const Pos3D& t, const Pos3D& nrm) {
+	return ccw(O3D, d1, t, nrm) >= 0 && ccw(O3D, d2, t, nrm) <= 0;
+}
+bool connectable(const Polyhedron& P, const Pos3D& a, const Pos3D& b, const int& i, const int& j, const ld& R = 0) {
+	if (a == b) return 1;
+	Pos3D perp = (a / b).unit();
+	Polyhedron inxs;
+	for (int k = 0; k < N; k++) {
+		if (k == i || k == j) continue;
+		Pos3D axis = (P[k] / perp).unit();
+		if (zero(axis.Euc())) {
+			if ((ld)P[k].r / R < PI * .5) continue;
+			else return 0;
+		}
+		bool f = plane_circle_intersection(perp, P[k], inxs);
+		if (!f) continue;
+		if (inxs.size() == 1) {
+			if (inner_check(a, b, inxs[0], perp)) return 0;
+			continue;
+		}
+		Pos3D hi = inxs[0], lo = inxs[1];
+		Pos3D mid = (perp / axis).unit();
+		if (ccw(O3D, mid, lo, perp) < 0) std::swap(hi, lo);
+		if (inner_check(lo, hi, a, perp) || inner_check(lo, hi, b, perp)) return 0;
+		if (inner_check(a, b, lo, perp) || inner_check(a, b, hi, perp)) return 0;
 	}
-	return (s + e) * .5;
+	return 1;
 }
-void solve() {
-	std::cin.tie(0)->sync_with_stdio(0);
-	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(9);
-	freopen("stadium.in", "r", stdin);
-	freopen("stadium.out", "w", stdout);
-	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
-	P = graham_scan(P);
-	std::cout << bi_search(P) << "\n";
-	return;
+Polyhedron circle_circle_intersections(const Pos3D& p, const Pos3D& q, const ld& R = 0) {
+	ld ang = angle(p, q);
+	ld t1 = (ld)p.r / R;
+	ld t2 = (ld)q.r / R;
+	assert(t1 <= PI * .5); assert(t2 <= PI * .5);
+	if (t1 + t2 < ang || std::abs(t1 - t2) >= ang) return {};
+	ld d1 = cos(t1);
+	ld d2 = cos(t2);
+	Plane p1 = plane(p, -d1);
+	Plane p2 = plane(q, -d2);
+	Line3D inx;
+	if (intersection(p1, p2, inx) != 1) return {};
+	ld w = inx.p0.mag();
+	ld h = sqrt(1 - sq(w));
+	Pos3D v = inx.dir;
+	return { inx.p0 + v * h, inx.p0 - v * h };
 }
-int main() { solve(); return 0; }//boj29691
-//boj30123 27712 3607 10239 22635
+ld spherical_pythagorean(const ld& a, const ld& b, const ld& A, const ld& B) {
+	assert(sin(a) > 0); assert(cos(b) > 0);
+	ld cosc = fit(cos(a) / cos(b), -1, 1);
+	ld c = acos(cosc);
+	ld sinC = sin(c) * sin(A) / sin(a);
+	return asin(sinC);
+}
+bool inner_check(const Pos3D& p, const Pos3D& q, const ld& R = 0) {
+	ld ang = angle(p, q);
+	ld t1 = (ld)p.r / R;
+	ld t2 = (ld)q.r / R;
+	assert(t1 <= PI * .5); assert(t2 <= PI * .5);
+	if (p.r > q.r && std::abs(t1 - t2) >= ang) return 1;
+	return 0;
+}
+//boj 27712 10239 22635 29691 31392
 
 /*
 

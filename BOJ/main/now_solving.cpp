@@ -1,4 +1,4 @@
-#d#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -323,49 +323,31 @@ bool query() {//brute O(N^4)
 	for (int i = 0; i <= ci; i++) cell[i].clear();
 
 	//std::cout << "query start::\n";
-
-	std::cin >> B; Polygon P(B); for (Pos& p : P) std::cin >> p;// , p *= SCALE;
-	std::cin >> N; Polygon I(N); for (Pos& p : I) std::cin >> p;// , p *= SCALE;
-	std::cin >> M; Disks C(M); for (Circle& c : C) std::cin >> c;// , c *= SCALE;
-
+	Disks C(1); std::cin >> C[0].r;
+	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;// , p *= SCALE;
 	//std::cout << "input OK::\n";
 
-	if (!B && !N && !M) return 0;
+	//if (!B && !N && !M) return 0;
 
 	//circle remove
-	std::sort(C.begin(), C.end());
-	Vbool F(M, 1);
-	for (int i = 0; i < M; i++) {
-		for (int j = i + 1; j < M; j++) {
-			if (C[i] >= C[j]) F[j] = 0;
-		}
-	}
-	Disks tmp;
-	for (int i = 0; i < M; i++) if (F[i]) tmp.push_back(C[i]);
-	C = tmp;
-	M = C.size();
+	//std::sort(C.begin(), C.end());
+	//Vbool F(M, 1);
+	//for (int i = 0; i < M; i++) {
+	//	for (int j = i + 1; j < M; j++) {
+	//		if (C[i] >= C[j]) F[j] = 0;
+	//	}
+	//}
+	//Disks tmp;
+	//for (int i = 0; i < M; i++) if (F[i]) tmp.push_back(C[i]);
+	//C = tmp;
+	//M = C.size();
 	//circle remove
 
-	//if (N >= 778) std::cout << "q = (" << I[778].x << ", " << I[778].y << ")\n";
-	//if (N >= 777) std::cout << "p = (" << I[777].x << ", " << I[777].y << ")\n";
-	//if (N >= 776) std::cout << "r = (" << I[776].x << ", " << I[776].y << ")\n";
 	//std::cout << "C = [\n";
 	//for (Circle& c : C) {
 	//	std::cout << "(" << c.c.x << ", " << c.c.y << ", " << c.r << "),\n";
 	//}
 	//std::cout << "]\n";
-
-	//informer remove
-	F.resize(N, 1);
-	for (int i = 0; i < N; i++) {
-		for (const Circle& c : C) {
-			if (c >= I[i]) {
-				F[i] = 0;
-				break;
-			}
-		}
-	}
-	//informer remove
 
 	//get segments
 	Segs segs;
@@ -517,26 +499,30 @@ bool query() {//brute O(N^4)
 		}
 	}
 	assert(ii != -1);
+	//get outer polygon
+
 	const Segs& sg = SG[ii];
 	int sz = sg.size();
 	ld rd = 0;
 	for (int i = 0; i < sz; i++) {
-		if (sg[i].f == 0) rd;
+		Seg se = Seg(sg[i].e, sg[i].s, sg[i].f);
+		if (se.f == 0) rd += se.d();
+		else rd += se.rd();
 	}
-
+	std::cout << rd << "\n";
 	return 1;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(3);
+	std::cout.precision(13);
 	//freopen("impos.in", "r", stdin);
 	//freopen("impos.txt", "w", stdout);
-	while (query());
+	query();
 	return;
 }
-int main() { solve(); return 0; }//boj31392
+int main() { solve(); return 0; }//boj22635
 //boj 27712 10239 22635 29691 31392
 
 /*

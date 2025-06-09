@@ -108,10 +108,12 @@ struct Seg {
 	Pos s, e;
 	int i;
 	bool f;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1) : s(s_), e(e_), i(i_) { f = 0; }
+	Seg(Pos s_ = Pos(), Pos e_ = Pos(), bool f_ = 0, int i_ = -1) : s(s_), e(e_), i(i_), f(f_) {}
 	bool operator < (const Seg& o) const { return s == o.s ? e < o.e : s < o.s; }
 	bool operator == (const Seg& o) const { return s == o.s && e == o.e; }
 	//Pos inx(const Seg& o) const { return intersection(s, e, o.s, o.e); }
+	ld d() const { return (s - e).mag(); }
+	ld rd() const { ld r = s.mag(), lo = s.rad(), hi = e.rad(); return r * norm(hi - lo); }
 } seg[LEN], frag[LEN * LEN * 10];
 typedef std::vector<Seg> Segs;
 bool intersect(const Seg& p, const Seg& q) { return intersect(p.s, p.e, q.s, q.e); }
@@ -390,7 +392,7 @@ bool query() {//brute O(N^4)
 			if (a.lo > hi) {
 				Pos s = p.p(hi), e = p.p(a.lo);
 				if (e < s) std::swap(s, e);
-				segs.push_back(Seg(s, e));
+				segs.push_back(Seg(s, e, 1));
 				hi = a.hi;
 			}
 			else hi = std::max(hi, a.hi);
@@ -429,7 +431,7 @@ bool query() {//brute O(N^4)
 		Polygon& v = INX[i];
 		int sz = v.size();
 		for (int j = 0; j < sz - 1; j++) {
-			frag[I0] = Seg(v[j], v[j + 1]);
+			frag[I0] = Seg(v[j], v[j + 1], 0);
 			frag[I0].i = I0;
 			I0++;
 		}
@@ -439,7 +441,7 @@ bool query() {//brute O(N^4)
 		Polygon& v = INX[i];
 		int sz = v.size();
 		for (int j = 0; j < sz - 1; j++) {
-			frag[I0] = Seg(v[j + 1], v[j]);
+			frag[I0] = Seg(v[j + 1], v[j], 0);
 			frag[I0].i = I0;
 			I0++;
 		}
@@ -515,9 +517,11 @@ bool query() {//brute O(N^4)
 		}
 	}
 	assert(ii != -1);
-	int sz = cell[ii].size();
+	const Segs& sg = SG[ii];
+	int sz = sg.size();
+	ld rd = 0;
 	for (int i = 0; i < sz; i++) {
-
+		if (sg[i].f == 0) rd;
 	}
 
 	return 1;

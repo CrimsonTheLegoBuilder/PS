@@ -1257,7 +1257,8 @@ int prep(std::vector<Pos3D>& p) {//refer to Koosaga'
 struct Face {
 	int v[3];
 	Face(int a = 0, int b = 0, int c = 0) { v[0] = a; v[1] = b; v[2] = c; }
-	Pos3D norm(std::vector<Pos3D>& C) const { return cross(C[v[0]], C[v[1]], C[v[2]]); }
+	Pos3D norm(const std::vector<Pos3D>& C) const { return cross(C[v[0]], C[v[1]], C[v[2]]); }
+	bool visible(const std::vector<Pos3D>& P, int i) const { return (P[i] - P[v[0]]) * norm(P) > 0; }
 	Planar P(std::vector<Pos3D>& C) const { return Planar(norm(C), C[v[0]]); }
 };
 ld dist(const std::vector<Pos3D>& C, const Face& F, const Pos3D& p) {

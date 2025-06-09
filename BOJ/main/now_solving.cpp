@@ -33,6 +33,18 @@ inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std
 #define SCALE 1
 #define __FUCK__ ;
 #define WHAT_THE_FUCK
+
+#define LO x
+#define HI y
+
+#define LINE 1
+#define CIRCLE 2
+#define SEG 3
+#define POS 4
+
+#define STRONG 0
+#define WEAK 1
+
 //#define DEBUG
 
 int B, M, N, S;
@@ -289,6 +301,59 @@ Vld intersections(const Circle& a, const Circle& b) {
 	ret.push_back(norm(rd + h));
 	return ret;
 }
+Vld circle_line_intersections(const Circle& q, const Seg& l, const int& t = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos s = l.s, e = l.e;
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (t == LINE) {
+		if (0 < lo && lo < 1) ret.push_back(lo);
+		if (zero(det)) return ret;
+		if (0 < hi && hi < 1) ret.push_back(hi);
+	}
+	else {//circle
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+		if (zero(det)) return ret;
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+	}
+	return ret;
+}
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f == LINE) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
+	}
+	else {
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+	}
+	return ret;
+}
 struct Arc {
 	ld lo, hi;// [lo, hi] - radian range of arc, 0 ~ 2pi
 	Arc(ld l_ = 0, ld h_ = 0) : lo(l_), hi(h_) {}
@@ -323,7 +388,8 @@ bool query() {//brute O(N^4)
 	for (int i = 0; i <= ci; i++) cell[i].clear();
 
 	//std::cout << "query start::\n";
-	Disks C(1); std::cin >> C[0].r;
+	//Disks C(1); std::cin >> C[0].r;
+	Circle C; std::cin >> C.r;
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;// , p *= SCALE;
 	std::cout << "input OK::\n";
 
@@ -350,35 +416,45 @@ bool query() {//brute O(N^4)
 	//std::cout << "]\n";
 
 	//get segments
+	//Segs segs;
+	//for (int i = 0; i < M; i++) {
+	//	const Circle& p = C[i];
+	//	arcs[i] = { Arc(0, 0) };
+	//	for (int j = 0; j < M; j++) {
+	//		if (i == j) continue;
+	//		Vld inxs = intersections(C[i], C[j]);
+	//		if (!inxs.size()) continue;
+	//		ld lo, hi;
+	//		if (inxs.size() == 1) { lo = hi = inxs[0]; }
+	//		else { assert(inxs.size() == 2); lo = inxs[0], hi = inxs[1]; }
+	//		if (lo <= hi) arcs[i].push_back(Arc(lo, hi));
+	//		else {
+	//			arcs[i].push_back(Arc(0, hi));
+	//			arcs[i].push_back(Arc(lo, PI * 2));
+	//		}
+	//	}
+	//	std::sort(arcs[i].begin(), arcs[i].end());
+	//	arcs[i].push_back(Arc(PI * 2, PI * 2));
+	//	ld hi = 0;
+	//	for (const Arc& a : arcs[i]) {//sweep circle
+	//		if (a.lo > hi) {
+	//			Pos s = p.p(hi), e = p.p(a.lo);
+	//			if (e < s) std::swap(s, e);
+	//			segs.push_back(Seg(s, e, 1));
+	//			hi = a.hi;
+	//		}
+	//		else hi = std::max(hi, a.hi);
+	//	}
+	//}
+	//get segments
+
+	//get segments
 	Segs segs;
-	for (int i = 0; i < M; i++) {
-		const Circle& p = C[i];
-		arcs[i] = { Arc(0, 0) };
-		for (int j = 0; j < M; j++) {
-			if (i == j) continue;
-			Vld inxs = intersections(C[i], C[j]);
-			if (!inxs.size()) continue;
-			ld lo, hi;
-			if (inxs.size() == 1) { lo = hi = inxs[0]; }
-			else { assert(inxs.size() == 2); lo = inxs[0], hi = inxs[1]; }
-			if (lo <= hi) arcs[i].push_back(Arc(lo, hi));
-			else {
-				arcs[i].push_back(Arc(0, hi));
-				arcs[i].push_back(Arc(lo, PI * 2));
-			}
-		}
-		std::sort(arcs[i].begin(), arcs[i].end());
-		arcs[i].push_back(Arc(PI * 2, PI * 2));
-		ld hi = 0;
-		for (const Arc& a : arcs[i]) {//sweep circle
-			if (a.lo > hi) {
-				Pos s = p.p(hi), e = p.p(a.lo);
-				if (e < s) std::swap(s, e);
-				segs.push_back(Seg(s, e, 1));
-				hi = a.hi;
-			}
-			else hi = std::max(hi, a.hi);
-		}
+	Vld X;
+	for (int i = 0; i < N; i++) {
+		int i0 = (i + 1) % N;
+		Vld inxs = circle_line_intersections(C, P[i], P[i0], LINE);
+		X.insert(X.end(), inxs.begin(), inxs.end());
 	}
 	//get segments
 

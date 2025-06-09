@@ -325,7 +325,7 @@ bool query() {//brute O(N^4)
 	//std::cout << "query start::\n";
 	Disks C(1); std::cin >> C[0].r;
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;// , p *= SCALE;
-	//std::cout << "input OK::\n";
+	std::cout << "input OK::\n";
 
 	//if (!B && !N && !M) return 0;
 
@@ -382,7 +382,7 @@ bool query() {//brute O(N^4)
 	}
 	//get segments
 
-	//std::cout << "segs:: " << segs.size() << "\n";
+	std::cout << "segs:: " << segs.size() << "\n";
 
 	//get intersections
 	Polygon INXS;

@@ -107,11 +107,13 @@ ld area(const Polygon& H) {
 struct Seg {
 	Pos s, e;
 	int i;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1) : s(s_), e(e_), i(i_) {}
+	bool f;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1) : s(s_), e(e_), i(i_) { f = 0; }
 	bool operator < (const Seg& o) const { return s == o.s ? e < o.e : s < o.s; }
 	bool operator == (const Seg& o) const { return s == o.s && e == o.e; }
 	//Pos inx(const Seg& o) const { return intersection(s, e, o.s, o.e); }
 } seg[LEN], frag[LEN * LEN * 10];
+typedef std::vector<Seg> Segs;
 bool intersect(const Seg& p, const Seg& q) { return intersect(p.s, p.e, q.s, q.e); }
 Pos intersection(const Seg& p, const Seg& q) {
 	if (p.s == q.s) return p.s;
@@ -132,6 +134,7 @@ int I0, I1;
 std::map<Pos, Polygon> map_pos;
 ld A[LEN * LEN + 10];
 Polygon cell[LEN * LEN + 10]; int ci;
+Segs SG[LEN * LEN + 10];
 //std::set<int> cell_i[LEN * LEN + 10];
 //int P[LEN * LEN + 10];//disjoint set
 //int find(int i) { return P[i] < 0 ? i : P[i] = find(P[i]); }
@@ -147,6 +150,7 @@ Vint GS[LEN * LEN * 10];
 void dfs(const int& i, int v) {
 	V[v] = 1;
 	cell[i].push_back(frag[v].s);
+	SG[i].push_back(frag[v]);
 	//cell_i[i].insert(v);
 	for (const int& w : GS[v]) {
 		if (V[w]) continue;
@@ -501,34 +505,21 @@ bool query() {//brute O(N^4)
 
 	//std::cout << "ci:: " << ci << "\n";
 
-	//get informer's id & distance
-	Vint OK, ID;
-	for (int i = 0; i < N; i++) if (F[i]) OK.push_back(i);
-	for (const int i : OK) {
-		for (int c = 0; c < ci; c++) {
-			//std::cout << "fuck::\n";
-			if (inner_check_concave(cell[c], I[i])) {
-				//if (inner_check(cell[c], I[i])) {
-				F[i] = 0;
-				break;
-			}
+	//get outer polygon
+	int ii = -1;
+	ld aa = 1;
+	for (int c = 0; c < ci; c++) {
+		if (aa > A[c]) {
+			aa = A[c];
+			ii = c;
 		}
 	}
-	for (const int& i : OK) if (F[i]) ID.push_back(i);
-	ld d = 0;
-	int ret = -1;
-	for (const int& i : ID) {
-		ld t = dist(P, I[i]);
-		if (d < t) {
-			//if (sign(d - t) < 0) {
-			d = t;
-			ret = i;
-		}
-	}
-	//get informer's id & distance
+	assert(ii != -1);
+	int sz = cell[ii].size();
+	for (int i = 0; i < sz; i++) {
 
-	if (ret == -1) std::cout << "Mission impossible\n";
-	else std::cout << "Contact informer " << ret + 1 << "\n";
+	}
+
 	return 1;
 }
 void solve() {

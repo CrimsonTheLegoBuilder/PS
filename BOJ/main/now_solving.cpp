@@ -130,9 +130,9 @@ void solve() {
 				if (k == i || k == j) continue;
 				int k1 = (k + 1) % N;
 				if (!ccw(H[k], H[k1], H[j], H[j1])) continue;
-				Pos vi = ~(H[i1] - H[i]);
-				Pos vj = ~(H[j1] - H[j]);
-				Pos vk = ~(H[k1] - H[k]);
+				Pos vi = ~(H[i1] - H[i]).unit();
+				Pos vj = ~(H[j1] - H[j]).unit();
+				Pos vk = ~(H[k1] - H[k]).unit();
 				Pos p1 = intersection(H[i], H[i1], H[j], H[j1]);
 				Pos p2 = intersection(H[i] + vi, H[i1] + vi, H[j] + vj, H[j1] + vj);
 				Pos p3 = intersection(H[k], H[k1], H[j], H[j1]);

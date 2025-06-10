@@ -88,12 +88,36 @@ void norm(Polygon& H, const int& d = 1) {
 	else if (d == -1 && A > 0) std::reverse(H.begin(), H.end());
 	return;
 }
+Polygon graham_scan(Polygon& C) {
+	Polygon H;
+	if (C.size() < 3) {
+		std::sort(C.begin(), C.end());
+		return C;
+	}
+	std::swap(C[0], *min_element(C.begin(), C.end()));
+	std::sort(C.begin() + 1, C.end(), [&](const Pos& p, const Pos& q) -> bool {
+		int ret = ccw(C[0], p, q);
+		if (!ret) return (C[0] - p).Euc() < (C[0] - q).Euc();
+		return ret > 0;
+		}
+	);
+	C.erase(unique(C.begin(), C.end()), C.end());
+	int sz = C.size();
+	for (int i = 0; i < sz; i++) {
+		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
+			H.pop_back();
+		H.push_back(C[i]);
+	}
+	return H;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
+	//std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
+	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p;
+	H = graham_scan(H);
 	ld ret = -1;
 	for (int i = 0; i < N; i++) {
 		int i1 = (i + 1) % N;

@@ -118,6 +118,7 @@ void solve() {
 	//std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
 	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p;
 	H = graham_scan(H);
+	N = H.size();
 	ld ret = -1;
 	for (int i = 0; i < N; i++) {
 		int i1 = (i + 1) % N;

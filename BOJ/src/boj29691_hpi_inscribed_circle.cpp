@@ -372,7 +372,7 @@ bool tighten(const Polygon& H, const ld& d) {
 }
 ld bi_search(const Polygon& H) {
 	int sz = H.size();
-	ld s = 0, e = 35000;
+	ld s = 0, e = 40000;
 	int c = 50; while (c--) {
 		ld m = (s + e) * .5;
 		bool f = tighten(H, m);
@@ -386,8 +386,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	freopen("stadium.in", "r", stdin);
-	freopen("stadium.out", "w", stdout);
+	//freopen("stadium.in", "r", stdin);
+	//freopen("stadium.out", "w", stdout);
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
 	P = graham_scan(P);
 	std::cout << bi_search(P) << "\n";

@@ -32,7 +32,7 @@ struct Frac {
 	}
 	bool operator < (const Frac& o) const { return num * o.den < o.num * den; }
 	bool operator == (const Frac& o) const { return num == o.num && den == o.den; }
-};
+} _1 = Frac(1), _0 = Frac(0);
 struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
@@ -52,13 +52,14 @@ struct Seg {
 	Pos s, e;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
 };
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
+Frac intersection(const Seg& s1, const Seg& s2) {
 	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
-	ld det = (q2 - q1) / (p2 - p1);
-	if (zero(det)) return -1;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (f == 1) return fit(a1, 0, 1);
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
+	ll det = (q2 - q1) / (p2 - p1);
+	if (!det) return Frac(-1);
+	//ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ll a1 = (q2 - q1) / (q1 - p1);
+	//ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	ll a2 = (p2 - p1) / (p1 - q1);
+	//if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	return Frac(-1);
 }

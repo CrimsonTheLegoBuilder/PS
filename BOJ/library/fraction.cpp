@@ -43,18 +43,22 @@ struct Pos {
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 };
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
-	ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);
-	return (p1 * a2 + p2 * a1) / (a1 + a2);
-}
-struct Event {
+struct Range {
 	Frac s, e;
-	Event(Frac s_, Frac e_) : s(s_), e(e_) {}
-
+	Range(Frac s_ = Frac(), Frac e_ = Frac()) : s(s_), e(e_) {}
+	bool operator < (const Range& r) const { return s == r.s ? e < r.e : s < r.s; }
 };
+struct Seg {
+	Pos s, e;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
+};
+ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
+	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	if (f == 1) return fit(a1, 0, 1);
+	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	return -1;
+}

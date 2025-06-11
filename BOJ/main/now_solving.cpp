@@ -114,10 +114,12 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
-	ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);
-	return (p1 * a2 + p2 * a1) / (a1 + a2);
+ll area(Polygon& H) {
+	ll a = 0; int sz = H.size();
+	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
+	return a;
 }
+void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
 struct Seg {
 	Pos s, e;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
@@ -152,6 +154,7 @@ struct Range {
 	Range(Frac s_ = Frac(-1), Frac e_ = Frac(-1)) : s(s_), e(e_) {}
 	bool operator < (const Range& r) const { return s == r.s ? e < r.e : s < r.s; }
 };
+typedef std::vector<Range> Vrange;
 Frac intersection(const Seg& s1, const Seg& s2) {
 	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
 	ll det = (q2 - q1) / (p2 - p1);
@@ -183,9 +186,49 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-	//std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p; norm(H);
-	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p;
+	Pos u;
+	std::cin >> N; Polygon H(N); std::cin >> u;
+	for (Pos& p : H) std::cin >> p; norm(H);
+	for (int i = 0, i1; i < N; i++) {
+		i1 = (i + 1) % N;
+		Pos p0 = H[i], p1 = H[i1];
+		bool vis;
+		if (!ccw(u, p0, p1)) {
+			if (dot(p0, p1, u) < 0) std::swap(p0, p1);
+			for (int j = 0, j1; j < N; j++) {
+				if (j == i) continue;
+				j1 = (j + 1) % N;
+				Pos q0 = H[j], q1 = H[j1];
+				if (ccw(u, q0, q1) < 0) std::swap(q0, q1);
+			}
+			vis = 1;
 
+		}
+		else {
+			if (ccw(u, p0, p1) < 0) std::swap(p0, p1);
+			Seg s1 = Seg(p0, p1);
+			Vrange V;
+			for (int j = 0, j1; j < N; j++) {
+				if (j == i) continue;
+				j1 = (j + 1) % N;
+				Pos q0 = H[j], q1 = H[j1];
+				if (ccw(u, q0, q1) < 0) std::swap(q0, q1);
+				Seg s2 = Seg(q0, q1);
+				Range r = range(s1, s2, u);
+				if (r.s.den != -1) V.push_back(r);
+			}
+			vis = 0;
+			std::sort(V.begin(), V.end());
+			V.push_back(Range(Frac(1), Frac(1)));
+			int sz = V.size();
+			Frac hi = Frac(0);
+			for (const Range& r : V) {
+				if (hi < r.s) { vis = 1; break; }
+				else hi = std::max(hi, r.e);
+			}
+		}
+		if (vis);
+	}
 	return;
 }
 int main() { solve(); return 0; }//boj29931

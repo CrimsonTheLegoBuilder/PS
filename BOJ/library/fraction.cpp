@@ -53,10 +53,14 @@ int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2,
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-bool inner_check(const Polygon& H, const Pos& p) {
+bool inner_check(const Polygon& H, const Pos& q) {
 	int sz = H.size();
-	for (int i = 0; i < sz; i++) if (cross(H[i], H[(i + 1) % sz], p) < 0) return 0;
+	for (int i = 0; i < sz; i++) if (cross(H[i], H[(i + 1) % sz], q) <= 0) return 0;
 	return 1;
+}
+bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& q) {
+	if (cross(p0, p1, p2) < 0) std::swap(p1, p2);
+	return inner_check({ p0, p1, p2 }, q);
 }
 bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2) {
 	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
@@ -88,5 +92,10 @@ Frac intersection(const Seg& s1, const Seg& s2) {
 	return Frac(-1);
 }
 Range range(const Seg& s1, const Seg& s2, const Pos& o) {
+	Pos p0 = o, p1 = s1.s, p2 = s1.e;
+	Pos q1 = s2.s, q2 = s2.e;
+	if (cross(p0, p1, p2) < 0) std::swap(p1, p2);
+	if (intersect(p0, p1, s2.s, s2.e) && intersect(p0, p2, s2.s, s2.e))
+		return Range(_0, _1);
 
 }

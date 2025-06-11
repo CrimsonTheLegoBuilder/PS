@@ -154,7 +154,7 @@ void solve() {
 	std::cout << ret << "\n";
 	return;
 }
-int main() { solve(); return 0; }//boj22635
+int main() { solve(); return 0; }//boj29931
 //boj 27712 10239 22635 29691 31392
 
 /*

@@ -73,7 +73,7 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2) {
 }
 struct Range {
 	Frac s, e;
-	Range(Frac s_ = Frac(), Frac e_ = Frac()) : s(s_), e(e_) {}
+	Range(Frac s_ = Frac(-1), Frac e_ = Frac(-1)) : s(s_), e(e_) {}
 	bool operator < (const Range& r) const { return s == r.s ? e < r.e : s < r.s; }
 };
 struct Seg {
@@ -85,17 +85,24 @@ Frac intersection(const Seg& s1, const Seg& s2) {
 	ll det = (q2 - q1) / (p2 - p1);
 	if (!det) return Frac(-1);
 	ll a1 = (q2 - q1) / (q1 - p1);
-	Frac f1 = Frac(a1, det);
-	ll a2 = (p2 - p1) / (p1 - q1);
-	Frac f2 = Frac(-a2, det);
-	if (_0 < f1 && f1 < _1 && _0 <= f2 && f2 <= _1) return f1;
-	return Frac(-1);
+	Frac f1 = Frac(a1, det); f1.fit(); return f1;
+	//ll a2 = (p2 - p1) / (p1 - q1);
+	//Frac f2 = Frac(-a2, det);
+	//if (_0 < f1 && f1 < _1 && _0 <= f2 && f2 <= _1) return f1;
+	//return Frac(-1);
 }
 Range range(const Seg& s1, const Seg& s2, const Pos& o) {
 	Pos p0 = o, p1 = s1.s, p2 = s1.e;
 	Pos q1 = s2.s, q2 = s2.e;
 	if (cross(p0, p1, p2) < 0) std::swap(p1, p2);
+	if (cross(p0, q1, q2) < 0) std::swap(q1, q2);
 	if (intersect(p0, p1, s2.s, s2.e) && intersect(p0, p2, s2.s, s2.e))
 		return Range(_0, _1);
-
+	bool i1 = inner_check(p0, p1, p2, q1);
+	bool i2 = inner_check(p0, p1, p2, q2);
+	if (!i1 && !i2) return Range();
+	Frac f1 = _0, f2 = _1;
+	if (i1) f1 = intersection(s1, Seg(p0, q1));
+	if (i2) f2 = intersection(s1, Seg(p0, q2));
+	return Range(f1, f2);
 }

@@ -28,6 +28,9 @@
     <Filter Include="소스 파일\graph">
       <UniqueIdentifier>{2fd60fc0-95c6-4c60-943a-23c257c5cffd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\fraction">
+      <UniqueIdentifier>{761aa78d-dca4-4d75-9044-259fbf182fcc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\library\geometry_int.cpp">
@@ -137,6 +140,9 @@
     </ClCompile>
     <ClCompile Include="..\main\boj22635_ing.cpp">
       <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\fraction.cpp">
+      <Filter>소스 파일\fraction</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

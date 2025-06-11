@@ -2,8 +2,12 @@
 #include <numeric>
 #include <stdexcept>
 #include <cassert>
+#include <vector>
 typedef long long ll;
-ll gcd(ll a, ll b) { while (b) { a %= b; std::swap(a, b); }return a; }
+typedef long double ld;
+inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
+inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+inline ll gcd(ll a, ll b) { while (b) { a %= b; std::swap(a, b); }return a; }
 
 struct Frac {
 	ll num, den;//numerator, denominator (num/den)
@@ -13,7 +17,7 @@ struct Frac {
 		simplify();
 	}
 	void fit() {
-		if (num < 0) num = 1;
+		if (num < 0) num = 0, den = 1;
 		else if (num > den) num = den = 1;
 		return;
 	}
@@ -27,74 +31,30 @@ struct Frac {
 		os << f.num; if (f.den != 1) os << "/" << f.den; return os;
 	}
 	bool operator < (const Frac& o) const { return num * o.den < o.num * den; }
+	bool operator == (const Frac& o) const { return num == o.num && den == o.den; }
 };
-/*
-struct Frac {
-	ll num, den;//numerator, denominator
-
-	Fraction() : numerator(0), denominator(1) {}
-
-
-	Fraction(long long n) : numerator(n), denominator(1) {
-		simplify();
-	}
-
-	// 분자와 분모를 받는 생성자
-	Fraction(long long num, long long den) : numerator(num), denominator(den) {
-		if (den == 0) {
-			throw std::invalid_argument("Denominator cannot be zero.");
-		}
-		if (den < 0) { // 분모를 항상 양수로 유지
-			numerator = -numerator;
-			denominator = -denominator;
-		}
-
-		// 0부터 1까지의 범위 체크
-		// 문제의 요구사항에 따라 0 <= 분자 <= 분모 를 만족해야 합니다.
-		if (numerator < 0 || numerator > denominator) {
-			throw std::out_of_range("Fraction out of [0, 1] range.");
-		}
-
-		simplify(); // 항상 기약분수 형태로 유지
-	}
-
-	// 분수를 기약분수 형태로 단순화하는 private 메서드
-	void simplify() {
-		if (numerator == 0) { // 0/X 는 0/1 로
-			denominator = 1;
-			return;
-		}
-		// std::gcd를 사용하거나 custom_gcd를 사용합니다.
-		// ICPC 환경에서는 C++17이 아닐 수도 있으므로 custom_gcd를 선호할 수 있습니다.
-		long long common = custom_gcd(std::abs(numerator), denominator);
-		numerator /= common;
-		denominator /= common;
-	}
-
-	// 출력 스트림 오버로딩 (cout << Fraction 객체)
-	friend std::ostream& operator<<(std::ostream& os, const Fraction& f) {
-		os << f.numerator;
-		if (f.denominator != 1) { // 분모가 1이 아니면 분모도 출력
-			os << "/" << f.denominator;
-		}
-		return os;
-	}
-
-	bool operator<(const Fraction& other) const {
-		return numerator * other.denominator < other.numerator * denominator;
-	}
-	bool operator<=(const Fraction& other) const {
-		return numerator * other.denominator <= other.numerator * denominator;
-	}
-	bool operator>(const Fraction& other) const {
-		return numerator * other.denominator > other.numerator * denominator;
-	}
-	bool operator>=(const Fraction& other) const {
-		return numerator * other.denominator >= other.numerator * denominator;
-	}
-	bool operator==(const Fraction& other) const {
-		return numerator == other.numerator && denominator == other.denominator;
-	}
-	bool operator!=(const Fraction& other) const { return !(*this == other); }
+struct Pos {
+	int x, y;
+	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator * (const int& n) const { return { x * n, y * n }; }
+	Pos operator / (const int& n) const { return { x / n, y / n }; }
+	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
+	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 };
-*/
+ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
+ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
+Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
+	ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);
+	return (p1 * a2 + p2 * a1) / (a1 + a2);
+}
+struct Event {
+	Frac s, e;
+	Event(Frac s_, Frac e_) : s(s_), e(e_) {}
+
+};

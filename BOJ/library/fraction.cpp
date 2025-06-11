@@ -9,31 +9,6 @@ inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline ll gcd(ll a, ll b) { while (b) { a %= b; std::swap(a, b); }return a; }
 
-struct Frac {
-	ll num, den;//numerator, denominator (num/den)
-	Frac(ll n = 0, ll d = 1) : num(n), den(d) {
-		assert(den);
-		if (den < 0) num *= -1, den *= -1;
-		simplify();
-	}
-	void fit() {
-		if (num < 0) num = 0, den = 1;
-		else if (num > den) num = den = 1;
-		return;
-	}
-	void simplify() {
-		if (!num) { den = 1; return; }
-		ll com = gcd(std::abs(num), std::abs(den));
-		num /= com; den /= com;
-		return;
-	}
-	friend std::ostream& operator << (std::ostream& os, const Frac& f) {
-		os << f.num; if (f.den != 1) os << "/" << f.den; return os;
-	}
-	bool operator < (const Frac& o) const { return num * o.den < o.num * den; }
-	bool operator <= (const Frac& o) const { return num * o.den <= o.num * den; }
-	bool operator == (const Frac& o) const { return num == o.num && den == o.den; }
-} _1 = Frac(1), _0 = Frac(0);
 struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
@@ -71,14 +46,39 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2) {
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
+struct Seg {
+	Pos s, e;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
+};
+struct Frac {
+	ll num, den;//numerator, denominator (num/den)
+	Frac(ll n = 0, ll d = 1) : num(n), den(d) {
+		assert(den);
+		if (den < 0) num *= -1, den *= -1;
+		simplify();
+	}
+	void fit() {
+		if (num < 0) num = 0, den = 1;
+		else if (num > den) num = den = 1;
+		return;
+	}
+	void simplify() {
+		if (!num) { den = 1; return; }
+		ll com = gcd(std::abs(num), std::abs(den));
+		num /= com; den /= com;
+		return;
+	}
+	friend std::ostream& operator << (std::ostream& os, const Frac& f) {
+		os << f.num; if (f.den != 1) os << "/" << f.den; return os;
+	}
+	bool operator < (const Frac& o) const { return num * o.den < o.num * den; }
+	bool operator <= (const Frac& o) const { return num * o.den <= o.num * den; }
+	bool operator == (const Frac& o) const { return num == o.num && den == o.den; }
+} _1 = Frac(1), _0 = Frac(0);
 struct Range {
 	Frac s, e;
 	Range(Frac s_ = Frac(-1), Frac e_ = Frac(-1)) : s(s_), e(e_) {}
 	bool operator < (const Range& r) const { return s == r.s ? e < r.e : s < r.s; }
-};
-struct Seg {
-	Pos s, e;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
 };
 Frac intersection(const Seg& s1, const Seg& s2) {
 	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;

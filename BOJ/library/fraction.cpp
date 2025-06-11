@@ -31,6 +31,7 @@ struct Frac {
 		os << f.num; if (f.den != 1) os << "/" << f.den; return os;
 	}
 	bool operator < (const Frac& o) const { return num * o.den < o.num * den; }
+	bool operator <= (const Frac& o) const { return num * o.den <= o.num * den; }
 	bool operator == (const Frac& o) const { return num == o.num && den == o.den; }
 } _1 = Frac(1), _0 = Frac(0);
 struct Pos {
@@ -56,10 +57,10 @@ Frac intersection(const Seg& s1, const Seg& s2) {
 	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
 	ll det = (q2 - q1) / (p2 - p1);
 	if (!det) return Frac(-1);
-	//ld a1 = ((q2 - q1) / (q1 - p1)) / det;
 	ll a1 = (q2 - q1) / (q1 - p1);
-	//ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	Frac f1 = Frac(a1, det);
 	ll a2 = (p2 - p1) / (p1 - q1);
-	//if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	Frac f2 = Frac(-a2, det);
+	if (_0 < f1 && f1 < _1 && _0 <= f2 && f2 <= _1) return f1;
 	return Frac(-1);
 }

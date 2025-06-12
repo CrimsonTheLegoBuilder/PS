@@ -189,20 +189,21 @@ void solve() {
 	Pos u;
 	std::cin >> N; Polygon H(N); std::cin >> u;
 	for (Pos& p : H) std::cin >> p; norm(H);
+	Vint I;
 	for (int i = 0, i1; i < N; i++) {
 		i1 = (i + 1) % N;
 		Pos p0 = H[i], p1 = H[i1];
 		bool vis;
 		if (!ccw(u, p0, p1)) {
 			if (dot(p0, p1, u) < 0) std::swap(p0, p1);
+			vis = 1;
 			for (int j = 0, j1; j < N; j++) {
 				if (j == i) continue;
 				j1 = (j + 1) % N;
 				Pos q0 = H[j], q1 = H[j1];
 				if (ccw(u, q0, q1) < 0) std::swap(q0, q1);
+				if (intersect(q0, q1, p1, u)) { vis = 0; break; }
 			}
-			vis = 1;
-
 		}
 		else {
 			if (ccw(u, p0, p1) < 0) std::swap(p0, p1);
@@ -227,8 +228,10 @@ void solve() {
 				else hi = std::max(hi, r.e);
 			}
 		}
-		if (vis);
+		if (vis) I.push_back(i + 1);
 	}
+	std::cout << I.size() << "\n";
+	for (int i : I) std::cout << i << " ";
 	return;
 }
 int main() { solve(); return 0; }//boj29931

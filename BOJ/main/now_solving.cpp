@@ -34,7 +34,7 @@ ld flip(ld lat) {
 	if (lat < 0) return -(PI * .5) - lat;
 	return INF;
 }
-ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
+//ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define LO x

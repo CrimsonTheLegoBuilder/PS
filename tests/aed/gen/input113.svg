@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -200240 200240 200240">
+  <line x1="20" y1="-200240" x2="20" y2="0" stroke="gray" />
+  <line x1="0" y1="-200220" x2="200240" y2="-200220" stroke="gray" />
+  <line x1="0" y1="-199600" x2="200240" y2="-199600" stroke="gray" />
+  <line x1="760" y1="-200240" x2="760" y2="0" stroke="gray" />
+  <line x1="0" y1="-199480" x2="200240" y2="-199480" stroke="gray" />
+  <line x1="1360" y1="-200240" x2="1360" y2="0" stroke="gray" />
+  <line x1="0" y1="-199420" x2="200240" y2="-199420" stroke="gray" />
+  <line x1="2520" y1="-200240" x2="2520" y2="0" stroke="gray" />
+  <line x1="0" y1="-199180" x2="200240" y2="-199180" stroke="gray" />
+  <line x1="3160" y1="-200240" x2="3160" y2="0" stroke="gray" />
+  <line x1="0" y1="-198140" x2="200240" y2="-198140" stroke="gray" />
+  <line x1="4440" y1="-200240" x2="4440" y2="0" stroke="gray" />
+  <line x1="0" y1="-197660" x2="200240" y2="-197660" stroke="gray" />
+  <line x1="6800" y1="-200240" x2="6800" y2="0" stroke="gray" />
+  <line x1="0" y1="-196500" x2="200240" y2="-196500" stroke="gray" />
+  <line x1="7300" y1="-200240" x2="7300" y2="0" stroke="gray" />
+  <line x1="0" y1="-196440" x2="200240" y2="-196440" stroke="gray" />
+  <line x1="8720" y1="-200240" x2="8720" y2="0" stroke="gray" />
+  <line x1="0" y1="-195820" x2="200240" y2="-195820" stroke="gray" />
+  <line x1="9840" y1="-200240" x2="9840" y2="0" stroke="gray" />
+  <line x1="0" y1="-194280" x2="200240" y2="-194280" stroke="gray" />
+  <line x1="12720" y1="-200240" x2="12720" y2="0" stroke="gray" />
+  <line x1="0" y1="-191580" x2="200240" y2="-191580" stroke="gray" />
+  <line x1="13140" y1="-200240" x2="13140" y2="0" stroke="gray" />
+  <line x1="0" y1="-191540" x2="200240" y2="-191540" stroke="gray" />
+  <line x1="13360" y1="-200240" x2="13360" y2="0" stroke="gray" />
+  <line x1="0" y1="-190500" x2="200240" y2="-190500" stroke="gray" />
+  <line x1="13680" y1="-200240" x2="13680" y2="0" stroke="gray" />
+  <line x1="0" y1="-190120" x2="200240" y2="-190120" stroke="gray" />
+  <line x1="13700" y1="-200240" x2="13700" y2="0" stroke="gray" />
+  <line x1="0" y1="-189480" x2="200240" y2="-189480" stroke="gray" />
+  <line x1="14480" y1="-200240" x2="14480" y2="0" stroke="gray" />
+  <line x1="0" y1="-189360" x2="200240" y2="-189360" stroke="gray" />
+  <line x1="15160" y1="-200240" x2="15160" y2="0" stroke="gray" />
+  <line x1="0" y1="-187580" x2="200240" y2="-187580" stroke="gray" />
+  <line x1="16480" y1="-200240" x2="16480" y2="0" stroke="gray" />
+  <line x1="0" y1="-185960" x2="200240" y2="-185960" stroke="gray" />
+  <line x1="18060" y1="-200240" x2="18060" y2="0" stroke="gray" />
+  <line x1="0" y1="-183240" x2="200240" y2="-183240" stroke="gray" />
+  <line x1="18300" y1="-200240" x2="18300" y2="0" stroke="gray" />
+  <line x1="0" y1="-183020" x2="200240" y2="-183020" stroke="gray" />
+  <line x1="19060" y1="-200240" x2="19060" y2="0" stroke="gray" />
+  <line x1="0" y1="-181940" x2="200240" y2="-181940" stroke="gray" />
+  <line x1="20500" y1="-200240" x2="20500" y2="0" stroke="gray" />
+  <line x1="0" y1="-179440" x2="200240" y2="-179440" stroke="gray" />
+  <line x1="21280" y1="-200240" x2="21280" y2="0" stroke="gray" />
+  <line x1="0" y1="-177580" x2="200240" y2="-177580" stroke="gray" />
+  <line x1="22920" y1="-200240" x2="22920" y2="0" stroke="gray" />
+  <line x1="0" y1="-176580" x2="200240" y2="-176580" stroke="gray" />
+  <line x1="23120" y1="-200240" x2="23120" y2="0" stroke="gray" />
+  <line x1="0" y1="-173980" x2="200240" y2="-173980" stroke="gray" />
+  <line x1="23960" y1="-200240" x2="23960" y2="0" stroke="gray" />
+  <line x1="0" y1="-168300" x2="200240" y2="-168300" stroke="gray" />
+  <line x1="24680" y1="-200240" x2="24680" y2="0" stroke="gray" />
+  <line x1="0" y1="-168140" x2="200240" y2="-168140" stroke="gray" />
+  <line x1="25840" y1="-200240" x2="25840" y2="0" stroke="gray" />
+  <line x1="0" y1="-168040" x2="200240" y2="-168040" stroke="gray" />
+  <line x1="26560" y1="-200240" x2="26560" y2="0" stroke="gray" />
+  <line x1="0" y1="-167660" x2="200240" y2="-167660" stroke="gray" />
+  <line x1="26860" y1="-200240" x2="26860" y2="0" stroke="gray" />
+  <line x1="0" y1="-164080" x2="200240" y2="-164080" stroke="gray" />
+  <line x1="27000" y1="-200240" x2="27000" y2="0" stroke="gray" />
+  <line x1="0" y1="-163480" x2="200240" y2="-163480" stroke="gray" />
+  <line x1="27420" y1="-200240" x2="27420" y2="0" stroke="gray" />
+  <line x1="0" y1="-162840" x2="200240" y2="-162840" stroke="gray" />
+  <line x1="28520" y1="-200240" x2="28520" y2="0" stroke="gray" />
+  <line x1="0" y1="-159360" x2="200240" y2="-159360" stroke="gray" />
+  <line x1="28560" y1="-200240" x2="28560" y2="0" stroke="gray" />
+  <line x1="0" y1="-158460" x2="200240" y2="-158460" stroke="gray" />
+  <line x1="28800" y1="-200240" x2="28800" y2="0" stroke="gray" />
+  <line x1="0" y1="-157480" x2="200240" y2="-157480" stroke="gray" />
+  <line x1="29420" y1="-200240" x2="29420" y2="0" stroke="gray" />
+  <line x1="0" y1="-157020" x2="200240" y2="-157020" stroke="gray" />
+  <line x1="30500" y1="-200240" x2="30500" y2="0" stroke="gray" />
+  <line x1="0" y1="-156800" x2="200240" y2="-156800" stroke="gray" />
+  <line x1="30620" y1="-200240" x2="30620" y2="0" stroke="gray" />
+  <line x1="0" y1="-156500" x2="200240" y2="-156500" stroke="gray" />
+  <line x1="32020" y1="-200240" x2="32020" y2="0" stroke="gray" />
+  <line x1="0" y1="-154720" x2="200240" y2="-154720" stroke="gray" />
+  <line x1="34660" y1="-200240" x2="34660" y2="0" stroke="gray" />
+  <line x1="0" y1="-153460" x2="200240" y2="-153460" stroke="gray" />
+  <line x1="38260" y1="-200240" x2="38260" y2="0" stroke="gray" />
+  <line x1="0" y1="-152920" x2="200240" y2="-152920" stroke="gray" />
+  <line x1="38340" y1="-200240" x2="38340" y2="0" stroke="gray" />
+  <line x1="0" y1="-151640" x2="200240" y2="-151640" stroke="gray" />
+  <line x1="39020" y1="-200240" x2="39020" y2="0" stroke="gray" />
+  <line x1="0" y1="-150820" x2="200240" y2="-150820" stroke="gray" />
+  <line x1="39100" y1="-200240" x2="39100" y2="0" stroke="gray" />
+  <line x1="0" y1="-149780" x2="200240" y2="-149780" stroke="gray" />
+  <line x1="39160" y1="-200240" x2="39160" y2="0" stroke="gray" />
+  <line x1="0" y1="-149580" x2="200240" y2="-149580" stroke="gray" />
+  <line x1="39680" y1="-200240" x2="39680" y2="0" stroke="gray" />
+  <line x1="0" y1="-145440" x2="200240" y2="-145440" stroke="gray" />
+  <line x1="43360" y1="-200240" x2="43360" y2="0" stroke="gray" />
+  <line x1="0" y1="-144200" x2="200240" y2="-144200" stroke="gray" />
+  <line x1="43560" y1="-200240" x2="43560" y2="0" stroke="gray" />
+  <line x1="0" y1="-141900" x2="200240" y2="-141900" stroke="gray" />
+  <line x1="44860" y1="-200240" x2="44860" y2="0" stroke="gray" />
+  <line x1="0" y1="-141540" x2="200240" y2="-141540" stroke="gray" />
+  <line x1="45340" y1="-200240" x2="45340" y2="0" stroke="gray" />
+  <line x1="0" y1="-140960" x2="200240" y2="-140960" stroke="gray" />
+  <line x1="46000" y1="-200240" x2="46000" y2="0" stroke="gray" />
+  <line x1="0" y1="-139120" x2="200240" y2="-139120" stroke="gray" />
+  <line x1="46540" y1="-200240" x2="46540" y2="0" stroke="gray" />
+  <line x1="0" y1="-138700" x2="200240" y2="-138700" stroke="gray" />
+  <line x1="46920" y1="-200240" x2="46920" y2="0" stroke="gray" />
+  <line x1="0" y1="-138660" x2="200240" y2="-138660" stroke="gray" />
+  <line x1="47420" y1="-200240" x2="47420" y2="0" stroke="gray" />
+  <line x1="0" y1="-138380" x2="200240" y2="-138380" stroke="gray" />
+  <line x1="48060" y1="-200240" x2="48060" y2="0" stroke="gray" />
+  <line x1="0" y1="-137360" x2="200240" y2="-137360" stroke="gray" />
+  <line x1="48280" y1="-200240" x2="48280" y2="0" stroke="gray" />
+  <line x1="0" y1="-136520" x2="200240" y2="-136520" stroke="gray" />
+  <line x1="50360" y1="-200240" x2="50360" y2="0" stroke="gray" />
+  <line x1="0" y1="-136380" x2="200240" y2="-136380" stroke="gray" />
+  <line x1="51180" y1="-200240" x2="51180" y2="0" stroke="gray" />
+  <line x1="0" y1="-134300" x2="200240" y2="-134300" stroke="gray" />
+  <line x1="0" y1="-133240" x2="200240" y2="-133240" stroke="gray" />
+  <line x1="52940" y1="-200240" x2="52940" y2="0" stroke="gray" />
+  <line x1="0" y1="-132880" x2="200240" y2="-132880" stroke="gray" />
+  <line x1="53900" y1="-200240" x2="53900" y2="0" stroke="gray" />
+  <line x1="0" y1="-132860" x2="200240" y2="-132860" stroke="gray" />
+  <line x1="54640" y1="-200240" x2="54640" y2="0" stroke="gray" />
+  <line x1="0" y1="-132800" x2="200240" y2="-132800" stroke="gray" />
+  <line x1="55100" y1="-200240" x2="55100" y2="0" stroke="gray" />
+  <line x1="0" y1="-131020" x2="200240" y2="-131020" stroke="gray" />
+  <line x1="58700" y1="-200240" x2="58700" y2="0" stroke="gray" />
+  <line x1="0" y1="-130060" x2="200240" y2="-130060" stroke="gray" />
+  <line x1="59020" y1="-200240" x2="59020" y2="0" stroke="gray" />
+  <line x1="0" y1="-128660" x2="200240" y2="-128660" stroke="gray" />
+  <line x1="60940" y1="-200240" x2="60940" y2="0" stroke="gray" />
+  <line x1="0" y1="-128400" x2="200240" y2="-128400" stroke="gray" />
+  <line x1="61660" y1="-200240" x2="61660" y2="0" stroke="gray" />
+  <line x1="0" y1="-126920" x2="200240" y2="-126920" stroke="gray" />
+  <line x1="64880" y1="-200240" x2="64880" y2="0" stroke="gray" />
+  <line x1="0" y1="-125480" x2="200240" y2="-125480" stroke="gray" />
+  <line x1="66380" y1="-200240" x2="66380" y2="0" stroke="gray" />
+  <line x1="0" y1="-124880" x2="200240" y2="-124880" stroke="gray" />
+  <line x1="66560" y1="-200240" x2="66560" y2="0" stroke="gray" />
+  <line x1="0" y1="-124500" x2="200240" y2="-124500" stroke="gray" />
+  <line x1="66940" y1="-200240" x2="66940" y2="0" stroke="gray" />
+  <line x1="0" y1="-121480" x2="200240" y2="-121480" stroke="gray" />
+  <line x1="69820" y1="-200240" x2="69820" y2="0" stroke="gray" />
+  <line x1="0" y1="-120920" x2="200240" y2="-120920" stroke="gray" />
+  <line x1="76300" y1="-200240" x2="76300" y2="0" stroke="gray" />
+  <line x1="0" y1="-120080" x2="200240" y2="-120080" stroke="gray" />
+  <line x1="76820" y1="-200240" x2="76820" y2="0" stroke="gray" />
+  <line x1="0" y1="-118960" x2="200240" y2="-118960" stroke="gray" />
+  <line x1="77760" y1="-200240" x2="77760" y2="0" stroke="gray" />
+  <line x1="0" y1="-118160" x2="200240" y2="-118160" stroke="gray" />
+  <line x1="77840" y1="-200240" x2="77840" y2="0" stroke="gray" />
+  <line x1="0" y1="-116000" x2="200240" y2="-116000" stroke="gray" />
+  <line x1="78920" y1="-200240" x2="78920" y2="0" stroke="gray" />
+  <line x1="0" y1="-115160" x2="200240" y2="-115160" stroke="gray" />
+  <line x1="79380" y1="-200240" x2="79380" y2="0" stroke="gray" />
+  <line x1="0" y1="-113920" x2="200240" y2="-113920" stroke="gray" />
+  <line x1="79620" y1="-200240" x2="79620" y2="0" stroke="gray" />
+  <line x1="0" y1="-112780" x2="200240" y2="-112780" stroke="gray" />
+  <line x1="79740" y1="-200240" x2="79740" y2="0" stroke="gray" />
+  <line x1="0" y1="-112600" x2="200240" y2="-112600" stroke="gray" />
+  <line x1="80360" y1="-200240" x2="80360" y2="0" stroke="gray" />
+  <line x1="0" y1="-112240" x2="200240" y2="-112240" stroke="gray" />
+  <line x1="81200" y1="-200240" x2="81200" y2="0" stroke="gray" />
+  <line x1="0" y1="-111980" x2="200240" y2="-111980" stroke="gray" />
+  <line x1="81880" y1="-200240" x2="81880" y2="0" stroke="gray" />
+  <line x1="0" y1="-111500" x2="200240" y2="-111500" stroke="gray" />
+  <line x1="82160" y1="-200240" x2="82160" y2="0" stroke="gray" />
+  <line x1="0" y1="-109280" x2="200240" y2="-109280" stroke="gray" />
+  <line x1="82480" y1="-200240" x2="82480" y2="0" stroke="gray" />
+  <line x1="0" y1="-107100" x2="200240" y2="-107100" stroke="gray" />
+  <line x1="83420" y1="-200240" x2="83420" y2="0" stroke="gray" />
+  <line x1="0" y1="-106460" x2="200240" y2="-106460" stroke="gray" />
+  <line x1="89180" y1="-200240" x2="89180" y2="0" stroke="gray" />
+  <line x1="0" y1="-105580" x2="200240" y2="-105580" stroke="gray" />
+  <line x1="89880" y1="-200240" x2="89880" y2="0" stroke="gray" />
+  <line x1="0" y1="-105480" x2="200240" y2="-105480" stroke="gray" />
+  <line x1="90600" y1="-200240" x2="90600" y2="0" stroke="gray" />
+  <line x1="0" y1="-103880" x2="200240" y2="-103880" stroke="gray" />
+  <line x1="90920" y1="-200240" x2="90920" y2="0" stroke="gray" />
+  <line x1="0" y1="-103140" x2="200240" y2="-103140" stroke="gray" />
+  <line x1="91300" y1="-200240" x2="91300" y2="0" stroke="gray" />
+  <line x1="0" y1="-101640" x2="200240" y2="-101640" stroke="gray" />
+  <line x1="92700" y1="-200240" x2="92700" y2="0" stroke="gray" />
+  <line x1="0" y1="-99300" x2="200240" y2="-99300" stroke="gray" />
+  <line x1="93920" y1="-200240" x2="93920" y2="0" stroke="gray" />
+  <line x1="0" y1="-99160" x2="200240" y2="-99160" stroke="gray" />
+  <line x1="94360" y1="-200240" x2="94360" y2="0" stroke="gray" />
+  <line x1="0" y1="-95680" x2="200240" y2="-95680" stroke="gray" />
+  <line x1="94620" y1="-200240" x2="94620" y2="0" stroke="gray" />
+  <line x1="0" y1="-95520" x2="200240" y2="-95520" stroke="gray" />
+  <line x1="94640" y1="-200240" x2="94640" y2="0" stroke="gray" />
+  <line x1="0" y1="-94200" x2="200240" y2="-94200" stroke="gray" />
+  <line x1="94920" y1="-200240" x2="94920" y2="0" stroke="gray" />
+  <line x1="0" y1="-94060" x2="200240" y2="-94060" stroke="gray" />
+  <line x1="95760" y1="-200240" x2="95760" y2="0" stroke="gray" />
+  <line x1="0" y1="-93000" x2="200240" y2="-93000" stroke="gray" />
+  <line x1="96320" y1="-200240" x2="96320" y2="0" stroke="gray" />
+  <line x1="0" y1="-92320" x2="200240" y2="-92320" stroke="gray" />
+  <line x1="98240" y1="-200240" x2="98240" y2="0" stroke="gray" />
+  <line x1="0" y1="-92200" x2="200240" y2="-92200" stroke="gray" />
+  <line x1="98940" y1="-200240" x2="98940" y2="0" stroke="gray" />
+  <line x1="0" y1="-91700" x2="200240" y2="-91700" stroke="gray" />
+  <line x1="99080" y1="-200240" x2="99080" y2="0" stroke="gray" />
+  <line x1="0" y1="-90500" x2="200240" y2="-90500" stroke="gray" />
+  <line x1="101620" y1="-200240" x2="101620" y2="0" stroke="gray" />
+  <line x1="0" y1="-88780" x2="200240" y2="-88780" stroke="gray" />
+  <line x1="101700" y1="-200240" x2="101700" y2="0" stroke="gray" />
+  <line x1="0" y1="-86860" x2="200240" y2="-86860" stroke="gray" />
+  <line x1="102540" y1="-200240" x2="102540" y2="0" stroke="gray" />
+  <line x1="0" y1="-86340" x2="200240" y2="-86340" stroke="gray" />
+  <line x1="102820" y1="-200240" x2="102820" y2="0" stroke="gray" />
+  <line x1="0" y1="-86100" x2="200240" y2="-86100" stroke="gray" />
+  <line x1="103440" y1="-200240" x2="103440" y2="0" stroke="gray" />
+  <line x1="0" y1="-85320" x2="200240" y2="-85320" stroke="gray" />
+  <line x1="103900" y1="-200240" x2="103900" y2="0" stroke="gray" />
+  <line x1="0" y1="-84800" x2="200240" y2="-84800" stroke="gray" />
+  <line x1="105580" y1="-200240" x2="105580" y2="0" stroke="gray" />
+  <line x1="0" y1="-84460" x2="200240" y2="-84460" stroke="gray" />
+  <line x1="108240" y1="-200240" x2="108240" y2="0" stroke="gray" />
+  <line x1="0" y1="-83920" x2="200240" y2="-83920" stroke="gray" />
+  <line x1="108420" y1="-200240" x2="108420" y2="0" stroke="gray" />
+  <line x1="0" y1="-83300" x2="200240" y2="-83300" stroke="gray" />
+  <line x1="112360" y1="-200240" x2="112360" y2="0" stroke="gray" />
+  <line x1="0" y1="-80760" x2="200240" y2="-80760" stroke="gray" />
+  <line x1="112500" y1="-200240" x2="112500" y2="0" stroke="gray" />
+  <line x1="0" y1="-79020" x2="200240" y2="-79020" stroke="gray" />
+  <line x1="113440" y1="-200240" x2="113440" y2="0" stroke="gray" />
+  <line x1="0" y1="-78700" x2="200240" y2="-78700" stroke="gray" />
+  <line x1="116760" y1="-200240" x2="116760" y2="0" stroke="gray" />
+  <line x1="0" y1="-77220" x2="200240" y2="-77220" stroke="gray" />
+  <line x1="119220" y1="-200240" x2="119220" y2="0" stroke="gray" />
+  <line x1="0" y1="-76720" x2="200240" y2="-76720" stroke="gray" />
+  <line x1="120620" y1="-200240" x2="120620" y2="0" stroke="gray" />
+  <line x1="0" y1="-74440" x2="200240" y2="-74440" stroke="gray" />
+  <line x1="121900" y1="-200240" x2="121900" y2="0" stroke="gray" />
+  <line x1="0" y1="-73720" x2="200240" y2="-73720" stroke="gray" />
+  <line x1="122460" y1="-200240" x2="122460" y2="0" stroke="gray" />
+  <line x1="0" y1="-73260" x2="200240" y2="-73260" stroke="gray" />
+  <line x1="123040" y1="-200240" x2="123040" y2="0" stroke="gray" />
+  <line x1="0" y1="-71420" x2="200240" y2="-71420" stroke="gray" />
+  <line x1="123260" y1="-200240" x2="123260" y2="0" stroke="gray" />
+  <line x1="0" y1="-71320" x2="200240" y2="-71320" stroke="gray" />
+  <line x1="123660" y1="-200240" x2="123660" y2="0" stroke="gray" />
+  <line x1="0" y1="-69240" x2="200240" y2="-69240" stroke="gray" />
+  <line x1="125180" y1="-200240" x2="125180" y2="0" stroke="gray" />
+  <line x1="0" y1="-67380" x2="200240" y2="-67380" stroke="gray" />
+  <line x1="126260" y1="-200240" x2="126260" y2="0" stroke="gray" />
+  <line x1="0" y1="-67040" x2="200240" y2="-67040" stroke="gray" />
+  <line x1="0" y1="-63120" x2="200240" y2="-63120" stroke="gray" />
+  <line x1="126940" y1="-200240" x2="126940" y2="0" stroke="gray" />
+  <line x1="0" y1="-60980" x2="200240" y2="-60980" stroke="gray" />
+  <line x1="128160" y1="-200240" x2="128160" y2="0" stroke="gray" />
+  <line x1="0" y1="-57540" x2="200240" y2="-57540" stroke="gray" />
+  <line x1="128980" y1="-200240" x2="128980" y2="0" stroke="gray" />
+  <line x1="0" y1="-57060" x2="200240" y2="-57060" stroke="gray" />
+  <line x1="130280" y1="-200240" x2="130280" y2="0" stroke="gray" />
+  <line x1="0" y1="-54720" x2="200240" y2="-54720" stroke="gray" />
+  <line x1="131500" y1="-200240" x2="131500" y2="0" stroke="gray" />
+  <line x1="0" y1="-52660" x2="200240" y2="-52660" stroke="gray" />
+  <line x1="132240" y1="-200240" x2="132240" y2="0" stroke="gray" />
+  <line x1="0" y1="-52580" x2="200240" y2="-52580" stroke="gray" />
+  <line x1="133540" y1="-200240" x2="133540" y2="0" stroke="gray" />
+  <line x1="0" y1="-52420" x2="200240" y2="-52420" stroke="gray" />
+  <line x1="133780" y1="-200240" x2="133780" y2="0" stroke="gray" />
+  <line x1="0" y1="-52160" x2="200240" y2="-52160" stroke="gray" />
+  <line x1="134160" y1="-200240" x2="134160" y2="0" stroke="gray" />
+  <line x1="0" y1="-51600" x2="200240" y2="-51600" stroke="gray" />
+  <line x1="136520" y1="-200240" x2="136520" y2="0" stroke="gray" />
+  <line x1="0" y1="-50300" x2="200240" y2="-50300" stroke="gray" />
+  <line x1="140100" y1="-200240" x2="140100" y2="0" stroke="gray" />
+  <line x1="0" y1="-50160" x2="200240" y2="-50160" stroke="gray" />
+  <line x1="142380" y1="-200240" x2="142380" y2="0" stroke="gray" />
+  <line x1="0" y1="-48040" x2="200240" y2="-48040" stroke="gray" />
+  <line x1="142400" y1="-200240" x2="142400" y2="0" stroke="gray" />
+  <line x1="0" y1="-45560" x2="200240" y2="-45560" stroke="gray" />
+  <line x1="142680" y1="-200240" x2="142680" y2="0" stroke="gray" />
+  <line x1="0" y1="-45180" x2="200240" y2="-45180" stroke="gray" />
+  <line x1="145760" y1="-200240" x2="145760" y2="0" stroke="gray" />
+  <line x1="0" y1="-44720" x2="200240" y2="-44720" stroke="gray" />
+  <line x1="149440" y1="-200240" x2="149440" y2="0" stroke="gray" />
+  <line x1="0" y1="-44600" x2="200240" y2="-44600" stroke="gray" />
+  <line x1="150020" y1="-200240" x2="150020" y2="0" stroke="gray" />
+  <line x1="0" y1="-40640" x2="200240" y2="-40640" stroke="gray" />
+  <line x1="150520" y1="-200240" x2="150520" y2="0" stroke="gray" />
+  <line x1="0" y1="-40420" x2="200240" y2="-40420" stroke="gray" />
+  <line x1="153380" y1="-200240" x2="153380" y2="0" stroke="gray" />
+  <line x1="0" y1="-39280" x2="200240" y2="-39280" stroke="gray" />
+  <line x1="153820" y1="-200240" x2="153820" y2="0" stroke="gray" />
+  <line x1="0" y1="-38660" x2="200240" y2="-38660" stroke="gray" />
+  <line x1="158240" y1="-200240" x2="158240" y2="0" stroke="gray" />
+  <line x1="0" y1="-37900" x2="200240" y2="-37900" stroke="gray" />
+  <line x1="158560" y1="-200240" x2="158560" y2="0" stroke="gray" />
+  <line x1="0" y1="-35440" x2="200240" y2="-35440" stroke="gray" />
+  <line x1="159480" y1="-200240" x2="159480" y2="0" stroke="gray" />
+  <line x1="0" y1="-35280" x2="200240" y2="-35280" stroke="gray" />
+  <line x1="160900" y1="-200240" x2="160900" y2="0" stroke="gray" />
+  <line x1="0" y1="-33780" x2="200240" y2="-33780" stroke="gray" />
+  <line x1="161700" y1="-200240" x2="161700" y2="0" stroke="gray" />
+  <line x1="0" y1="-33440" x2="200240" y2="-33440" stroke="gray" />
+  <line x1="161840" y1="-200240" x2="161840" y2="0" stroke="gray" />
+  <line x1="0" y1="-33300" x2="200240" y2="-33300" stroke="gray" />
+  <line x1="162500" y1="-200240" x2="162500" y2="0" stroke="gray" />
+  <line x1="0" y1="-33200" x2="200240" y2="-33200" stroke="gray" />
+  <line x1="164800" y1="-200240" x2="164800" y2="0" stroke="gray" />
+  <line x1="0" y1="-32880" x2="200240" y2="-32880" stroke="gray" />
+  <line x1="164960" y1="-200240" x2="164960" y2="0" stroke="gray" />
+  <line x1="0" y1="-30760" x2="200240" y2="-30760" stroke="gray" />
+  <line x1="165320" y1="-200240" x2="165320" y2="0" stroke="gray" />
+  <line x1="0" y1="-27460" x2="200240" y2="-27460" stroke="gray" />
+  <line x1="166500" y1="-200240" x2="166500" y2="0" stroke="gray" />
+  <line x1="0" y1="-27300" x2="200240" y2="-27300" stroke="gray" />
+  <line x1="166800" y1="-200240" x2="166800" y2="0" stroke="gray" />
+  <line x1="0" y1="-26060" x2="200240" y2="-26060" stroke="gray" />
+  <line x1="166940" y1="-200240" x2="166940" y2="0" stroke="gray" />
+  <line x1="0" y1="-25760" x2="200240" y2="-25760" stroke="gray" />
+  <line x1="167200" y1="-200240" x2="167200" y2="0" stroke="gray" />
+  <line x1="0" y1="-24120" x2="200240" y2="-24120" stroke="gray" />
+  <line x1="167240" y1="-200240" x2="167240" y2="0" stroke="gray" />
+  <line x1="167800" y1="-200240" x2="167800" y2="0" stroke="gray" />
+  <line x1="0" y1="-22820" x2="200240" y2="-22820" stroke="gray" />
+  <line x1="168120" y1="-200240" x2="168120" y2="0" stroke="gray" />
+  <line x1="0" y1="-22680" x2="200240" y2="-22680" stroke="gray" />
+  <line x1="168580" y1="-200240" x2="168580" y2="0" stroke="gray" />
+  <line x1="0" y1="-21800" x2="200240" y2="-21800" stroke="gray" />
+  <line x1="168660" y1="-200240" x2="168660" y2="0" stroke="gray" />
+  <line x1="0" y1="-21620" x2="200240" y2="-21620" stroke="gray" />
+  <line x1="169920" y1="-200240" x2="169920" y2="0" stroke="gray" />
+  <line x1="0" y1="-21240" x2="200240" y2="-21240" stroke="gray" />
+  <line x1="169980" y1="-200240" x2="169980" y2="0" stroke="gray" />
+  <line x1="0" y1="-20700" x2="200240" y2="-20700" stroke="gray" />
+  <line x1="171880" y1="-200240" x2="171880" y2="0" stroke="gray" />
+  <line x1="0" y1="-20440" x2="200240" y2="-20440" stroke="gray" />
+  <line x1="172960" y1="-200240" x2="172960" y2="0" stroke="gray" />
+  <line x1="0" y1="-20220" x2="200240" y2="-20220" stroke="gray" />
+  <line x1="173200" y1="-200240" x2="173200" y2="0" stroke="gray" />
+  <line x1="0" y1="-19000" x2="200240" y2="-19000" stroke="gray" />
+  <line x1="173240" y1="-200240" x2="173240" y2="0" stroke="gray" />
+  <line x1="0" y1="-18400" x2="200240" y2="-18400" stroke="gray" />
+  <line x1="173480" y1="-200240" x2="173480" y2="0" stroke="gray" />
+  <line x1="0" y1="-17520" x2="200240" y2="-17520" stroke="gray" />
+  <line x1="173520" y1="-200240" x2="173520" y2="0" stroke="gray" />
+  <line x1="0" y1="-16960" x2="200240" y2="-16960" stroke="gray" />
+  <line x1="174480" y1="-200240" x2="174480" y2="0" stroke="gray" />
+  <line x1="0" y1="-16700" x2="200240" y2="-16700" stroke="gray" />
+  <line x1="175440" y1="-200240" x2="175440" y2="0" stroke="gray" />
+  <line x1="0" y1="-16340" x2="200240" y2="-16340" stroke="gray" />
+  <line x1="176720" y1="-200240" x2="176720" y2="0" stroke="gray" />
+  <line x1="0" y1="-16180" x2="200240" y2="-16180" stroke="gray" />
+  <line x1="180360" y1="-200240" x2="180360" y2="0" stroke="gray" />
+  <line x1="0" y1="-16040" x2="200240" y2="-16040" stroke="gray" />
+  <line x1="180940" y1="-200240" x2="180940" y2="0" stroke="gray" />
+  <line x1="0" y1="-15960" x2="200240" y2="-15960" stroke="gray" />
+  <line x1="182900" y1="-200240" x2="182900" y2="0" stroke="gray" />
+  <line x1="0" y1="-15860" x2="200240" y2="-15860" stroke="gray" />
+  <line x1="183240" y1="-200240" x2="183240" y2="0" stroke="gray" />
+  <line x1="0" y1="-14400" x2="200240" y2="-14400" stroke="gray" />
+  <line x1="183680" y1="-200240" x2="183680" y2="0" stroke="gray" />
+  <line x1="0" y1="-11560" x2="200240" y2="-11560" stroke="gray" />
+  <line x1="184200" y1="-200240" x2="184200" y2="0" stroke="gray" />
+  <line x1="0" y1="-11000" x2="200240" y2="-11000" stroke="gray" />
+  <line x1="185820" y1="-200240" x2="185820" y2="0" stroke="gray" />
+  <line x1="0" y1="-10760" x2="200240" y2="-10760" stroke="gray" />
+  <line x1="186040" y1="-200240" x2="186040" y2="0" stroke="gray" />
+  <line x1="0" y1="-10680" x2="200240" y2="-10680" stroke="gray" />
+  <line x1="186380" y1="-200240" x2="186380" y2="0" stroke="gray" />
+  <line x1="0" y1="-9700" x2="200240" y2="-9700" stroke="gray" />
+  <line x1="186560" y1="-200240" x2="186560" y2="0" stroke="gray" />
+  <line x1="0" y1="-9160" x2="200240" y2="-9160" stroke="gray" />
+  <line x1="187700" y1="-200240" x2="187700" y2="0" stroke="gray" />
+  <line x1="0" y1="-8500" x2="200240" y2="-8500" stroke="gray" />
+  <line x1="188620" y1="-200240" x2="188620" y2="0" stroke="gray" />
+  <line x1="0" y1="-7260" x2="200240" y2="-7260" stroke="gray" />
+  <line x1="191340" y1="-200240" x2="191340" y2="0" stroke="gray" />
+  <line x1="0" y1="-5980" x2="200240" y2="-5980" stroke="gray" />
+  <line x1="191400" y1="-200240" x2="191400" y2="0" stroke="gray" />
+  <line x1="0" y1="-5380" x2="200240" y2="-5380" stroke="gray" />
+  <line x1="193060" y1="-200240" x2="193060" y2="0" stroke="gray" />
+  <line x1="0" y1="-5160" x2="200240" y2="-5160" stroke="gray" />
+  <line x1="193720" y1="-200240" x2="193720" y2="0" stroke="gray" />
+  <line x1="0" y1="-4780" x2="200240" y2="-4780" stroke="gray" />
+  <line x1="194000" y1="-200240" x2="194000" y2="0" stroke="gray" />
+  <line x1="0" y1="-2480" x2="200240" y2="-2480" stroke="gray" />
+  <line x1="194940" y1="-200240" x2="194940" y2="0" stroke="gray" />
+  <line x1="0" y1="-2060" x2="200240" y2="-2060" stroke="gray" />
+  <line x1="197260" y1="-200240" x2="197260" y2="0" stroke="gray" />
+  <line x1="0" y1="-1800" x2="200240" y2="-1800" stroke="gray" />
+  <line x1="197720" y1="-200240" x2="197720" y2="0" stroke="gray" />
+  <line x1="0" y1="-360" x2="200240" y2="-360" stroke="gray" />
+  <line x1="198660" y1="-200240" x2="198660" y2="0" stroke="gray" />
+  <line x1="0" y1="-280" x2="200240" y2="-280" stroke="gray" />
+  <line x1="199320" y1="-200240" x2="199320" y2="0" stroke="gray" />
+  <line x1="0" y1="-260" x2="200240" y2="-260" stroke="gray" />
+  <line x1="200120" y1="-200240" x2="200120" y2="0" stroke="gray" />
+  <line x1="0" y1="-20" x2="200240" y2="-20" stroke="gray" />
+  <line x1="200220" y1="-200240" x2="200220" y2="0" stroke="black" />
+  <line x1="0" y1="-158980" x2="200240" y2="-158980" stroke="black" />
+  <circle cx="200220" cy="-158980" r="5" fill="red" />
+  <circle cx="20" cy="-200220" r="3" fill="blue" />
+  <line x1="112360" y1="-199600" x2="20" y2="-200220" stroke="blue" />
+  <circle cx="20" cy="-20" r="3" fill="blue" />
+  <line x1="20" y1="-200220" x2="20" y2="-20" stroke="blue" />
+  <circle cx="39100" cy="-260" r="3" fill="blue" />
+  <line x1="20" y1="-20" x2="39100" y2="-260" stroke="blue" />
+  <circle cx="126940" cy="-280" r="3" fill="blue" />
+  <line x1="39100" y1="-260" x2="126940" y2="-280" stroke="blue" />
+  <circle cx="59020" cy="-360" r="3" fill="blue" />
+  <line x1="126940" y1="-280" x2="59020" y2="-360" stroke="blue" />
+  <circle cx="2520" cy="-1800" r="3" fill="blue" />
+  <line x1="59020" y1="-360" x2="2520" y2="-1800" stroke="blue" />
+  <circle cx="131500" cy="-2060" r="3" fill="blue" />
+  <line x1="2520" y1="-1800" x2="131500" y2="-2060" stroke="blue" />
+  <circle cx="128980" cy="-2480" r="3" fill="blue" />
+  <line x1="131500" y1="-2060" x2="128980" y2="-2480" stroke="blue" />
+  <circle cx="90600" cy="-4780" r="3" fill="blue" />
+  <line x1="128980" y1="-2480" x2="90600" y2="-4780" stroke="blue" />
+  <circle cx="150020" cy="-5160" r="3" fill="blue" />
+  <line x1="90600" y1="-4780" x2="150020" y2="-5160" stroke="blue" />
+  <circle cx="180360" cy="-5380" r="3" fill="blue" />
+  <line x1="150020" y1="-5160" x2="180360" y2="-5380" stroke="blue" />
+  <circle cx="168580" cy="-5980" r="3" fill="blue" />
+  <line x1="180360" y1="-5380" x2="168580" y2="-5980" stroke="blue" />
+  <circle cx="28520" cy="-7260" r="3" fill="blue" />
+  <line x1="168580" y1="-5980" x2="28520" y2="-7260" stroke="blue" />
+  <circle cx="158240" cy="-8500" r="3" fill="blue" />
+  <line x1="28520" y1="-7260" x2="158240" y2="-8500" stroke="blue" />
+  <circle cx="77840" cy="-9160" r="3" fill="blue" />
+  <line x1="158240" y1="-8500" x2="77840" y2="-9160" stroke="blue" />
+  <circle cx="112500" cy="-9700" r="3" fill="blue" />
+  <line x1="77840" y1="-9160" x2="112500" y2="-9700" stroke="blue" />
+  <circle cx="51180" cy="-10680" r="3" fill="blue" />
+  <line x1="112500" y1="-9700" x2="51180" y2="-10680" stroke="blue" />
+  <circle cx="64880" cy="-10760" r="3" fill="blue" />
+  <line x1="51180" y1="-10680" x2="64880" y2="-10760" stroke="blue" />
+  <circle cx="166500" cy="-11000" r="3" fill="blue" />
+  <line x1="64880" y1="-10760" x2="166500" y2="-11000" stroke="blue" />
+  <circle cx="185820" cy="-11560" r="3" fill="blue" />
+  <line x1="166500" y1="-11000" x2="185820" y2="-11560" stroke="blue" />
+  <circle cx="89880" cy="-14400" r="3" fill="blue" />
+  <line x1="185820" y1="-11560" x2="89880" y2="-14400" stroke="blue" />
+  <circle cx="160900" cy="-15860" r="3" fill="blue" />
+  <line x1="89880" y1="-14400" x2="160900" y2="-15860" stroke="blue" />
+  <circle cx="79740" cy="-15960" r="3" fill="blue" />
+  <line x1="160900" y1="-15860" x2="79740" y2="-15960" stroke="blue" />
+  <circle cx="47420" cy="-16040" r="3" fill="blue" />
+  <line x1="79740" y1="-15960" x2="47420" y2="-16040" stroke="blue" />
+  <circle cx="167240" cy="-16180" r="3" fill="blue" />
+  <line x1="47420" y1="-16040" x2="167240" y2="-16180" stroke="blue" />
+  <circle cx="82160" cy="-16340" r="3" fill="blue" />
+  <line x1="167240" y1="-16180" x2="82160" y2="-16340" stroke="blue" />
+  <circle cx="193720" cy="-16700" r="3" fill="blue" />
+  <line x1="82160" y1="-16340" x2="193720" y2="-16700" stroke="blue" />
+  <circle cx="9840" cy="-16960" r="3" fill="blue" />
+  <line x1="193720" y1="-16700" x2="9840" y2="-16960" stroke="blue" />
+  <circle cx="153380" cy="-17520" r="3" fill="blue" />
+  <line x1="9840" y1="-16960" x2="153380" y2="-17520" stroke="blue" />
+  <circle cx="194940" cy="-18400" r="3" fill="blue" />
+  <line x1="153380" y1="-17520" x2="194940" y2="-18400" stroke="blue" />
+  <circle cx="191400" cy="-19000" r="3" fill="blue" />
+  <line x1="194940" y1="-18400" x2="191400" y2="-19000" stroke="blue" />
+  <circle cx="51180" cy="-20220" r="3" fill="blue" />
+  <line x1="191400" y1="-19000" x2="51180" y2="-20220" stroke="blue" />
+  <circle cx="22920" cy="-20440" r="3" fill="blue" />
+  <line x1="51180" y1="-20220" x2="22920" y2="-20440" stroke="blue" />
+  <circle cx="7300" cy="-20700" r="3" fill="blue" />
+  <line x1="22920" y1="-20440" x2="7300" y2="-20700" stroke="blue" />
+  <circle cx="105580" cy="-21240" r="3" fill="blue" />
+  <line x1="7300" y1="-20700" x2="105580" y2="-21240" stroke="blue" />
+  <circle cx="26860" cy="-21620" r="3" fill="blue" />
+  <line x1="105580" y1="-21240" x2="26860" y2="-21620" stroke="blue" />
+  <circle cx="26560" cy="-21800" r="3" fill="blue" />
+  <line x1="26860" y1="-21620" x2="26560" y2="-21800" stroke="blue" />
+  <circle cx="46540" cy="-22680" r="3" fill="blue" />
+  <line x1="26560" y1="-21800" x2="46540" y2="-22680" stroke="blue" />
+  <circle cx="164800" cy="-22820" r="3" fill="blue" />
+  <line x1="46540" y1="-22680" x2="164800" y2="-22820" stroke="blue" />
+  <circle cx="39160" cy="-24120" r="3" fill="blue" />
+  <line x1="164800" y1="-22820" x2="39160" y2="-24120" stroke="blue" />
+  <circle cx="149440" cy="-24120" r="3" fill="blue" />
+  <line x1="39160" y1="-24120" x2="149440" y2="-24120" stroke="blue" />
+  <circle cx="48060" cy="-25760" r="3" fill="blue" />
+  <line x1="149440" y1="-24120" x2="48060" y2="-25760" stroke="blue" />
+  <circle cx="200120" cy="-26060" r="3" fill="blue" />
+  <line x1="48060" y1="-25760" x2="200120" y2="-26060" stroke="blue" />
+  <circle cx="20500" cy="-27300" r="3" fill="blue" />
+  <line x1="200120" y1="-26060" x2="20500" y2="-27300" stroke="blue" />
+  <circle cx="760" cy="-27460" r="3" fill="blue" />
+  <line x1="20500" y1="-27300" x2="760" y2="-27460" stroke="blue" />
+  <circle cx="133780" cy="-30760" r="3" fill="blue" />
+  <line x1="760" y1="-27460" x2="133780" y2="-30760" stroke="blue" />
+  <circle cx="18060" cy="-32880" r="3" fill="blue" />
+  <line x1="133780" y1="-30760" x2="18060" y2="-32880" stroke="blue" />
+  <circle cx="113440" cy="-33200" r="3" fill="blue" />
+  <line x1="18060" y1="-32880" x2="113440" y2="-33200" stroke="blue" />
+  <circle cx="13700" cy="-33300" r="3" fill="blue" />
+  <line x1="113440" y1="-33200" x2="13700" y2="-33300" stroke="blue" />
+  <circle cx="94620" cy="-33440" r="3" fill="blue" />
+  <line x1="13700" y1="-33300" x2="94620" y2="-33440" stroke="blue" />
+  <circle cx="142400" cy="-33780" r="3" fill="blue" />
+  <line x1="94620" y1="-33440" x2="142400" y2="-33780" stroke="blue" />
+  <circle cx="128160" cy="-35280" r="3" fill="blue" />
+  <line x1="142400" y1="-33780" x2="128160" y2="-35280" stroke="blue" />
+  <circle cx="168660" cy="-35440" r="3" fill="blue" />
+  <line x1="128160" y1="-35280" x2="168660" y2="-35440" stroke="blue" />
+  <circle cx="39680" cy="-37900" r="3" fill="blue" />
+  <line x1="168660" y1="-35440" x2="39680" y2="-37900" stroke="blue" />
+  <circle cx="167200" cy="-38660" r="3" fill="blue" />
+  <line x1="39680" y1="-37900" x2="167200" y2="-38660" stroke="blue" />
+  <circle cx="121900" cy="-39280" r="3" fill="blue" />
+  <line x1="167200" y1="-38660" x2="121900" y2="-39280" stroke="blue" />
+  <circle cx="52940" cy="-40420" r="3" fill="blue" />
+  <line x1="121900" y1="-39280" x2="52940" y2="-40420" stroke="blue" />
+  <circle cx="23120" cy="-40640" r="3" fill="blue" />
+  <line x1="52940" y1="-40420" x2="23120" y2="-40640" stroke="blue" />
+  <circle cx="108240" cy="-44600" r="3" fill="blue" />
+  <line x1="23120" y1="-40640" x2="108240" y2="-44600" stroke="blue" />
+  <circle cx="103900" cy="-44720" r="3" fill="blue" />
+  <line x1="108240" y1="-44600" x2="103900" y2="-44720" stroke="blue" />
+  <circle cx="133540" cy="-45180" r="3" fill="blue" />
+  <line x1="103900" y1="-44720" x2="133540" y2="-45180" stroke="blue" />
+  <circle cx="186560" cy="-45560" r="3" fill="blue" />
+  <line x1="133540" y1="-45180" x2="186560" y2="-45560" stroke="blue" />
+  <circle cx="53900" cy="-48040" r="3" fill="blue" />
+  <line x1="186560" y1="-45560" x2="53900" y2="-48040" stroke="blue" />
+  <circle cx="169920" cy="-50160" r="3" fill="blue" />
+  <line x1="53900" y1="-48040" x2="169920" y2="-50160" stroke="blue" />
+  <circle cx="66940" cy="-50300" r="3" fill="blue" />
+  <line x1="169920" y1="-50160" x2="66940" y2="-50300" stroke="blue" />
+  <circle cx="18300" cy="-51600" r="3" fill="blue" />
+  <line x1="66940" y1="-50300" x2="18300" y2="-51600" stroke="blue" />
+  <circle cx="66380" cy="-52160" r="3" fill="blue" />
+  <line x1="18300" y1="-51600" x2="66380" y2="-52160" stroke="blue" />
+  <circle cx="39020" cy="-52420" r="3" fill="blue" />
+  <line x1="66380" y1="-52160" x2="39020" y2="-52420" stroke="blue" />
+  <circle cx="79620" cy="-52580" r="3" fill="blue" />
+  <line x1="39020" y1="-52420" x2="79620" y2="-52580" stroke="blue" />
+  <circle cx="173480" cy="-52660" r="3" fill="blue" />
+  <line x1="79620" y1="-52580" x2="173480" y2="-52660" stroke="blue" />
+  <circle cx="108420" cy="-54720" r="3" fill="blue" />
+  <line x1="173480" y1="-52660" x2="108420" y2="-54720" stroke="blue" />
+  <circle cx="28800" cy="-57060" r="3" fill="blue" />
+  <line x1="108420" y1="-54720" x2="28800" y2="-57060" stroke="blue" />
+  <circle cx="123260" cy="-57540" r="3" fill="blue" />
+  <line x1="28800" y1="-57060" x2="123260" y2="-57540" stroke="blue" />
+  <circle cx="4440" cy="-60980" r="3" fill="blue" />
+  <line x1="123260" y1="-57540" x2="4440" y2="-60980" stroke="blue" />
+  <circle cx="174480" cy="-63120" r="3" fill="blue" />
+  <line x1="4440" y1="-60980" x2="174480" y2="-63120" stroke="blue" />
+  <circle cx="161700" cy="-67040" r="3" fill="blue" />
+  <line x1="174480" y1="-63120" x2="161700" y2="-67040" stroke="blue" />
+  <circle cx="45340" cy="-67380" r="3" fill="blue" />
+  <line x1="161700" y1="-67040" x2="45340" y2="-67380" stroke="blue" />
+  <circle cx="80360" cy="-69240" r="3" fill="blue" />
+  <line x1="45340" y1="-67380" x2="80360" y2="-69240" stroke="blue" />
+  <circle cx="46000" cy="-71320" r="3" fill="blue" />
+  <line x1="80360" y1="-69240" x2="46000" y2="-71320" stroke="blue" />
+  <circle cx="169980" cy="-71420" r="3" fill="blue" />
+  <line x1="46000" y1="-71320" x2="169980" y2="-71420" stroke="blue" />
+  <circle cx="13680" cy="-73260" r="3" fill="blue" />
+  <line x1="169980" y1="-71420" x2="13680" y2="-73260" stroke="blue" />
+  <circle cx="193060" cy="-73720" r="3" fill="blue" />
+  <line x1="13680" y1="-73260" x2="193060" y2="-73720" stroke="blue" />
+  <circle cx="102820" cy="-74440" r="3" fill="blue" />
+  <line x1="193060" y1="-73720" x2="102820" y2="-74440" stroke="blue" />
+  <circle cx="168120" cy="-76720" r="3" fill="blue" />
+  <line x1="102820" y1="-74440" x2="168120" y2="-76720" stroke="blue" />
+  <circle cx="136520" cy="-77220" r="3" fill="blue" />
+  <line x1="168120" y1="-76720" x2="136520" y2="-77220" stroke="blue" />
+  <circle cx="13140" cy="-78700" r="3" fill="blue" />
+  <line x1="136520" y1="-77220" x2="13140" y2="-78700" stroke="blue" />
+  <circle cx="55100" cy="-79020" r="3" fill="blue" />
+  <line x1="13140" y1="-78700" x2="55100" y2="-79020" stroke="blue" />
+  <circle cx="184200" cy="-80760" r="3" fill="blue" />
+  <line x1="55100" y1="-79020" x2="184200" y2="-80760" stroke="blue" />
+  <circle cx="27420" cy="-83300" r="3" fill="blue" />
+  <line x1="184200" y1="-80760" x2="27420" y2="-83300" stroke="blue" />
+  <circle cx="194000" cy="-83920" r="3" fill="blue" />
+  <line x1="27420" y1="-83300" x2="194000" y2="-83920" stroke="blue" />
+  <circle cx="142380" cy="-84460" r="3" fill="blue" />
+  <line x1="194000" y1="-83920" x2="142380" y2="-84460" stroke="blue" />
+  <circle cx="89180" cy="-84800" r="3" fill="blue" />
+  <line x1="142380" y1="-84460" x2="89180" y2="-84800" stroke="blue" />
+  <circle cx="3160" cy="-85320" r="3" fill="blue" />
+  <line x1="89180" y1="-84800" x2="3160" y2="-85320" stroke="blue" />
+  <circle cx="43560" cy="-86100" r="3" fill="blue" />
+  <line x1="3160" y1="-85320" x2="43560" y2="-86100" stroke="blue" />
+  <circle cx="69820" cy="-86340" r="3" fill="blue" />
+  <line x1="43560" y1="-86100" x2="69820" y2="-86340" stroke="blue" />
+  <circle cx="58700" cy="-86860" r="3" fill="blue" />
+  <line x1="69820" y1="-86340" x2="58700" y2="-86860" stroke="blue" />
+  <circle cx="48280" cy="-88780" r="3" fill="blue" />
+  <line x1="58700" y1="-86860" x2="48280" y2="-88780" stroke="blue" />
+  <circle cx="30620" cy="-90500" r="3" fill="blue" />
+  <line x1="48280" y1="-88780" x2="30620" y2="-90500" stroke="blue" />
+  <circle cx="175440" cy="-91700" r="3" fill="blue" />
+  <line x1="30620" y1="-90500" x2="175440" y2="-91700" stroke="blue" />
+  <circle cx="145760" cy="-92200" r="3" fill="blue" />
+  <line x1="175440" y1="-91700" x2="145760" y2="-92200" stroke="blue" />
+  <circle cx="123660" cy="-92320" r="3" fill="blue" />
+  <line x1="145760" y1="-92200" x2="123660" y2="-92320" stroke="blue" />
+  <circle cx="183680" cy="-93000" r="3" fill="blue" />
+  <line x1="123660" y1="-92320" x2="183680" y2="-93000" stroke="blue" />
+  <circle cx="93920" cy="-94060" r="3" fill="blue" />
+  <line x1="183680" y1="-93000" x2="93920" y2="-94060" stroke="blue" />
+  <circle cx="79620" cy="-94200" r="3" fill="blue" />
+  <line x1="93920" y1="-94060" x2="79620" y2="-94200" stroke="blue" />
+  <circle cx="99080" cy="-95520" r="3" fill="blue" />
+  <line x1="79620" y1="-94200" x2="99080" y2="-95520" stroke="blue" />
+  <circle cx="167800" cy="-95680" r="3" fill="blue" />
+  <line x1="99080" y1="-95520" x2="167800" y2="-95680" stroke="blue" />
+  <circle cx="25840" cy="-99160" r="3" fill="blue" />
+  <line x1="167800" y1="-95680" x2="25840" y2="-99160" stroke="blue" />
+  <circle cx="66560" cy="-99300" r="3" fill="blue" />
+  <line x1="25840" y1="-99160" x2="66560" y2="-99300" stroke="blue" />
+  <circle cx="8720" cy="-101640" r="3" fill="blue" />
+  <line x1="66560" y1="-99300" x2="8720" y2="-101640" stroke="blue" />
+  <circle cx="103440" cy="-103140" r="3" fill="blue" />
+  <line x1="8720" y1="-101640" x2="103440" y2="-103140" stroke="blue" />
+  <circle cx="95760" cy="-103880" r="3" fill="blue" />
+  <line x1="103440" y1="-103140" x2="95760" y2="-103880" stroke="blue" />
+  <circle cx="38260" cy="-105480" r="3" fill="blue" />
+  <line x1="95760" y1="-103880" x2="38260" y2="-105480" stroke="blue" />
+  <circle cx="98940" cy="-105580" r="3" fill="blue" />
+  <line x1="38260" y1="-105480" x2="98940" y2="-105580" stroke="blue" />
+  <circle cx="134160" cy="-106460" r="3" fill="blue" />
+  <line x1="98940" y1="-105580" x2="134160" y2="-106460" stroke="blue" />
+  <circle cx="94360" cy="-107100" r="3" fill="blue" />
+  <line x1="134160" y1="-106460" x2="94360" y2="-107100" stroke="blue" />
+  <circle cx="126260" cy="-109280" r="3" fill="blue" />
+  <line x1="94360" y1="-107100" x2="126260" y2="-109280" stroke="blue" />
+  <circle cx="76300" cy="-111500" r="3" fill="blue" />
+  <line x1="126260" y1="-109280" x2="76300" y2="-111500" stroke="blue" />
+  <circle cx="54640" cy="-111980" r="3" fill="blue" />
+  <line x1="76300" y1="-111500" x2="54640" y2="-111980" stroke="blue" />
+  <circle cx="38340" cy="-112240" r="3" fill="blue" />
+  <line x1="54640" y1="-111980" x2="38340" y2="-112240" stroke="blue" />
+  <circle cx="15160" cy="-112600" r="3" fill="blue" />
+  <line x1="38340" y1="-112240" x2="15160" y2="-112600" stroke="blue" />
+  <circle cx="24680" cy="-112780" r="3" fill="blue" />
+  <line x1="15160" y1="-112600" x2="24680" y2="-112780" stroke="blue" />
+  <circle cx="173200" cy="-112780" r="3" fill="blue" />
+  <line x1="24680" y1="-112780" x2="173200" y2="-112780" stroke="blue" />
+  <circle cx="120620" cy="-113920" r="3" fill="blue" />
+  <line x1="173200" y1="-112780" x2="120620" y2="-113920" stroke="blue" />
+  <circle cx="198660" cy="-115160" r="3" fill="blue" />
+  <line x1="120620" y1="-113920" x2="198660" y2="-115160" stroke="blue" />
+  <circle cx="34660" cy="-116000" r="3" fill="blue" />
+  <line x1="198660" y1="-115160" x2="34660" y2="-116000" stroke="blue" />
+  <circle cx="61660" cy="-118160" r="3" fill="blue" />
+  <line x1="34660" y1="-116000" x2="61660" y2="-118160" stroke="blue" />
+  <circle cx="180940" cy="-118960" r="3" fill="blue" />
+  <line x1="61660" y1="-118160" x2="180940" y2="-118960" stroke="blue" />
+  <circle cx="165320" cy="-120080" r="3" fill="blue" />
+  <line x1="180940" y1="-118960" x2="165320" y2="-120080" stroke="blue" />
+  <circle cx="94920" cy="-120920" r="3" fill="blue" />
+  <line x1="165320" y1="-120080" x2="94920" y2="-120920" stroke="blue" />
+  <circle cx="186380" cy="-121480" r="3" fill="blue" />
+  <line x1="94920" y1="-120920" x2="186380" y2="-121480" stroke="blue" />
+  <circle cx="91300" cy="-124500" r="3" fill="blue" />
+  <line x1="186380" y1="-121480" x2="91300" y2="-124500" stroke="blue" />
+  <circle cx="50360" cy="-124880" r="3" fill="blue" />
+  <line x1="91300" y1="-124500" x2="50360" y2="-124880" stroke="blue" />
+  <circle cx="102540" cy="-125480" r="3" fill="blue" />
+  <line x1="50360" y1="-124880" x2="102540" y2="-125480" stroke="blue" />
+  <circle cx="166940" cy="-126920" r="3" fill="blue" />
+  <line x1="102540" y1="-125480" x2="166940" y2="-126920" stroke="blue" />
+  <circle cx="29420" cy="-128400" r="3" fill="blue" />
+  <line x1="166940" y1="-126920" x2="29420" y2="-128400" stroke="blue" />
+  <circle cx="158560" cy="-128660" r="3" fill="blue" />
+  <line x1="29420" y1="-128400" x2="158560" y2="-128660" stroke="blue" />
+  <circle cx="30500" cy="-130060" r="3" fill="blue" />
+  <line x1="158560" y1="-128660" x2="30500" y2="-130060" stroke="blue" />
+  <circle cx="162500" cy="-131020" r="3" fill="blue" />
+  <line x1="30500" y1="-130060" x2="162500" y2="-131020" stroke="blue" />
+  <circle cx="82480" cy="-132800" r="3" fill="blue" />
+  <line x1="162500" y1="-131020" x2="82480" y2="-132800" stroke="blue" />
+  <circle cx="43360" cy="-132860" r="3" fill="blue" />
+  <line x1="82480" y1="-132800" x2="43360" y2="-132860" stroke="blue" />
+  <circle cx="126260" cy="-132880" r="3" fill="blue" />
+  <line x1="43360" y1="-132860" x2="126260" y2="-132880" stroke="blue" />
+  <circle cx="78920" cy="-133240" r="3" fill="blue" />
+  <line x1="126260" y1="-132880" x2="78920" y2="-133240" stroke="blue" />
+  <circle cx="12720" cy="-134300" r="3" fill="blue" />
+  <line x1="78920" y1="-133240" x2="12720" y2="-134300" stroke="blue" />
+  <circle cx="81880" cy="-136380" r="3" fill="blue" />
+  <line x1="12720" y1="-134300" x2="81880" y2="-136380" stroke="blue" />
+  <circle cx="150520" cy="-136520" r="3" fill="blue" />
+  <line x1="81880" y1="-136380" x2="150520" y2="-136520" stroke="blue" />
+  <circle cx="81200" cy="-137360" r="3" fill="blue" />
+  <line x1="150520" y1="-136520" x2="81200" y2="-137360" stroke="blue" />
+  <circle cx="98240" cy="-138380" r="3" fill="blue" />
+  <line x1="81200" y1="-137360" x2="98240" y2="-138380" stroke="blue" />
+  <circle cx="76820" cy="-138660" r="3" fill="blue" />
+  <line x1="98240" y1="-138380" x2="76820" y2="-138660" stroke="blue" />
+  <circle cx="13360" cy="-138700" r="3" fill="blue" />
+  <line x1="76820" y1="-138660" x2="13360" y2="-138700" stroke="blue" />
+  <circle cx="23960" cy="-139120" r="3" fill="blue" />
+  <line x1="13360" y1="-138700" x2="23960" y2="-139120" stroke="blue" />
+  <circle cx="197260" cy="-140960" r="3" fill="blue" />
+  <line x1="23960" y1="-139120" x2="197260" y2="-140960" stroke="blue" />
+  <circle cx="90920" cy="-141540" r="3" fill="blue" />
+  <line x1="197260" y1="-140960" x2="90920" y2="-141540" stroke="blue" />
+  <circle cx="183240" cy="-141900" r="3" fill="blue" />
+  <line x1="90920" y1="-141540" x2="183240" y2="-141900" stroke="blue" />
+  <circle cx="101620" cy="-144200" r="3" fill="blue" />
+  <line x1="183240" y1="-141900" x2="101620" y2="-144200" stroke="blue" />
+  <circle cx="44860" cy="-145440" r="3" fill="blue" />
+  <line x1="101620" y1="-144200" x2="44860" y2="-145440" stroke="blue" />
+  <circle cx="6800" cy="-149580" r="3" fill="blue" />
+  <line x1="44860" y1="-145440" x2="6800" y2="-149580" stroke="blue" />
+  <circle cx="164960" cy="-149780" r="3" fill="blue" />
+  <line x1="6800" y1="-149580" x2="164960" y2="-149780" stroke="blue" />
+  <circle cx="96320" cy="-150820" r="3" fill="blue" />
+  <line x1="164960" y1="-149780" x2="96320" y2="-150820" stroke="blue" />
+  <circle cx="125180" cy="-151640" r="3" fill="blue" />
+  <line x1="96320" y1="-150820" x2="125180" y2="-151640" stroke="blue" />
+  <circle cx="14480" cy="-152920" r="3" fill="blue" />
+  <line x1="125180" y1="-151640" x2="14480" y2="-152920" stroke="blue" />
+  <circle cx="101700" cy="-153460" r="3" fill="blue" />
+  <line x1="14480" y1="-152920" x2="101700" y2="-153460" stroke="blue" />
+  <circle cx="173520" cy="-154720" r="3" fill="blue" />
+  <line x1="101700" y1="-153460" x2="173520" y2="-154720" stroke="blue" />
+  <circle cx="166800" cy="-156500" r="3" fill="blue" />
+  <line x1="173520" y1="-154720" x2="166800" y2="-156500" stroke="blue" />
+  <circle cx="186040" cy="-156800" r="3" fill="blue" />
+  <line x1="166800" y1="-156500" x2="186040" y2="-156800" stroke="blue" />
+  <circle cx="92700" cy="-157020" r="3" fill="blue" />
+  <line x1="186040" y1="-156800" x2="92700" y2="-157020" stroke="blue" />
+  <circle cx="188620" cy="-157480" r="3" fill="blue" />
+  <line x1="92700" y1="-157020" x2="188620" y2="-157480" stroke="blue" />
+  <circle cx="123040" cy="-158460" r="3" fill="blue" />
+  <line x1="188620" y1="-157480" x2="123040" y2="-158460" stroke="blue" />
+  <circle cx="94640" cy="-159360" r="3" fill="blue" />
+  <line x1="123040" y1="-158460" x2="94640" y2="-159360" stroke="blue" />
+  <circle cx="199320" cy="-162840" r="3" fill="blue" />
+  <line x1="94640" y1="-159360" x2="199320" y2="-162840" stroke="blue" />
+  <circle cx="32020" cy="-163480" r="3" fill="blue" />
+  <line x1="199320" y1="-162840" x2="32020" y2="-163480" stroke="blue" />
+  <circle cx="197720" cy="-164080" r="3" fill="blue" />
+  <line x1="32020" y1="-163480" x2="197720" y2="-164080" stroke="blue" />
+  <circle cx="173240" cy="-167660" r="3" fill="blue" />
+  <line x1="197720" y1="-164080" x2="173240" y2="-167660" stroke="blue" />
+  <circle cx="60940" cy="-168040" r="3" fill="blue" />
+  <line x1="173240" y1="-167660" x2="60940" y2="-168040" stroke="blue" />
+  <circle cx="28560" cy="-168140" r="3" fill="blue" />
+  <line x1="60940" y1="-168040" x2="28560" y2="-168140" stroke="blue" />
+  <circle cx="176720" cy="-168300" r="3" fill="blue" />
+  <line x1="28560" y1="-168140" x2="176720" y2="-168300" stroke="blue" />
+  <circle cx="122460" cy="-173980" r="3" fill="blue" />
+  <line x1="176720" y1="-168300" x2="122460" y2="-173980" stroke="blue" />
+  <circle cx="19060" cy="-176580" r="3" fill="blue" />
+  <line x1="122460" y1="-173980" x2="19060" y2="-176580" stroke="blue" />
+  <circle cx="1360" cy="-177580" r="3" fill="blue" />
+  <line x1="19060" y1="-176580" x2="1360" y2="-177580" stroke="blue" />
+  <circle cx="83420" cy="-179440" r="3" fill="blue" />
+  <line x1="1360" y1="-177580" x2="83420" y2="-179440" stroke="blue" />
+  <circle cx="153820" cy="-181940" r="3" fill="blue" />
+  <line x1="83420" y1="-179440" x2="153820" y2="-181940" stroke="blue" />
+  <circle cx="16480" cy="-183020" r="3" fill="blue" />
+  <line x1="153820" y1="-181940" x2="16480" y2="-183020" stroke="blue" />
+  <circle cx="21280" cy="-183240" r="3" fill="blue" />
+  <line x1="16480" y1="-183020" x2="21280" y2="-183240" stroke="blue" />
+  <circle cx="161840" cy="-185960" r="3" fill="blue" />
+  <line x1="21280" y1="-183240" x2="161840" y2="-185960" stroke="blue" />
+  <circle cx="77760" cy="-187580" r="3" fill="blue" />
+  <line x1="161840" y1="-185960" x2="77760" y2="-187580" stroke="blue" />
+  <circle cx="132240" cy="-189360" r="3" fill="blue" />
+  <line x1="77760" y1="-187580" x2="132240" y2="-189360" stroke="blue" />
+  <circle cx="191340" cy="-189480" r="3" fill="blue" />
+  <line x1="132240" y1="-189360" x2="191340" y2="-189480" stroke="blue" />
+  <circle cx="171880" cy="-190120" r="3" fill="blue" />
+  <line x1="191340" y1="-189480" x2="171880" y2="-190120" stroke="blue" />
+  <circle cx="159480" cy="-190500" r="3" fill="blue" />
+  <line x1="171880" y1="-190120" x2="159480" y2="-190500" stroke="blue" />
+  <circle cx="46920" cy="-191540" r="3" fill="blue" />
+  <line x1="159480" y1="-190500" x2="46920" y2="-191540" stroke="blue" />
+  <circle cx="172960" cy="-191580" r="3" fill="blue" />
+  <line x1="46920" y1="-191540" x2="172960" y2="-191580" stroke="blue" />
+  <circle cx="140100" cy="-194280" r="3" fill="blue" />
+  <line x1="172960" y1="-191580" x2="140100" y2="-194280" stroke="blue" />
+  <circle cx="130280" cy="-195820" r="3" fill="blue" />
+  <line x1="140100" y1="-194280" x2="130280" y2="-195820" stroke="blue" />
+  <circle cx="187700" cy="-196440" r="3" fill="blue" />
+  <line x1="130280" y1="-195820" x2="187700" y2="-196440" stroke="blue" />
+  <circle cx="119220" cy="-196500" r="3" fill="blue" />
+  <line x1="187700" y1="-196440" x2="119220" y2="-196500" stroke="blue" />
+  <circle cx="142680" cy="-197660" r="3" fill="blue" />
+  <line x1="119220" y1="-196500" x2="142680" y2="-197660" stroke="blue" />
+  <circle cx="116760" cy="-198140" r="3" fill="blue" />
+  <line x1="142680" y1="-197660" x2="116760" y2="-198140" stroke="blue" />
+  <circle cx="182900" cy="-199180" r="3" fill="blue" />
+  <line x1="116760" y1="-198140" x2="182900" y2="-199180" stroke="blue" />
+  <circle cx="79380" cy="-199420" r="3" fill="blue" />
+  <line x1="182900" y1="-199180" x2="79380" y2="-199420" stroke="blue" />
+  <circle cx="27000" cy="-199480" r="3" fill="blue" />
+  <line x1="79380" y1="-199420" x2="27000" y2="-199480" stroke="blue" />
+  <circle cx="112360" cy="-199600" r="3" fill="blue" />
+  <line x1="27000" y1="-199480" x2="112360" y2="-199600" stroke="blue" />
+</svg>

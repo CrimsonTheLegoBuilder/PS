@@ -1,0 +1,11 @@
+name: aed
+title: Aed
+time_limit: 1
+time_limit_python: 3
+memory_limit: 256
+n_input: 131
+public_testcases: all
+infile: aedsis.txt
+outfile: aedval.txt
+score_type: GroupMin
+score_mode: max

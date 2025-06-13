@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -260 300 240">
+  <line x1="20" y1="-260" x2="20" y2="-20" stroke="gray" />
+  <line x1="0" y1="-240" x2="300" y2="-240" stroke="gray" />
+  <line x1="60" y1="-260" x2="60" y2="-20" stroke="gray" />
+  <line x1="0" y1="-200" x2="300" y2="-200" stroke="gray" />
+  <line x1="100" y1="-260" x2="100" y2="-20" stroke="gray" />
+  <line x1="140" y1="-260" x2="140" y2="-20" stroke="gray" />
+  <line x1="0" y1="-160" x2="300" y2="-160" stroke="gray" />
+  <line x1="180" y1="-260" x2="180" y2="-20" stroke="gray" />
+  <line x1="0" y1="-80" x2="300" y2="-80" stroke="gray" />
+  <line x1="220" y1="-260" x2="220" y2="-20" stroke="gray" />
+  <line x1="260" y1="-260" x2="260" y2="-20" stroke="gray" />
+  <line x1="280" y1="-260" x2="280" y2="-20" stroke="black" />
+  <line x1="0" y1="-40" x2="300" y2="-40" stroke="black" />
+  <circle cx="280" cy="-40" r="5" fill="red" />
+  <circle cx="20" cy="-80" r="3" fill="blue" />
+  <line x1="20" y1="-240" x2="20" y2="-80" stroke="blue" />
+  <circle cx="60" cy="-80" r="3" fill="blue" />
+  <line x1="20" y1="-80" x2="60" y2="-80" stroke="blue" />
+  <circle cx="140" cy="-160" r="3" fill="blue" />
+  <line x1="60" y1="-80" x2="140" y2="-160" stroke="blue" />
+  <circle cx="100" cy="-200" r="3" fill="blue" />
+  <line x1="140" y1="-160" x2="100" y2="-200" stroke="blue" />
+  <circle cx="180" cy="-200" r="3" fill="blue" />
+  <line x1="100" y1="-200" x2="180" y2="-200" stroke="blue" />
+  <circle cx="220" cy="-160" r="3" fill="blue" />
+  <line x1="180" y1="-200" x2="220" y2="-160" stroke="blue" />
+  <circle cx="140" cy="-80" r="3" fill="blue" />
+  <line x1="220" y1="-160" x2="140" y2="-80" stroke="blue" />
+  <circle cx="260" cy="-80" r="3" fill="blue" />
+  <line x1="140" y1="-80" x2="260" y2="-80" stroke="blue" />
+  <circle cx="260" cy="-240" r="3" fill="blue" />
+  <line x1="260" y1="-80" x2="260" y2="-240" stroke="blue" />
+  <circle cx="20" cy="-240" r="3" fill="blue" />
+  <line x1="260" y1="-240" x2="20" y2="-240" stroke="blue" />
+</svg>

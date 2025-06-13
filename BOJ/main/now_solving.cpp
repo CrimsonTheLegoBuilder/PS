@@ -186,6 +186,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
+	freopen("../../tests/aed/input/input0.txt", "r", stdin);
+	freopen("../../tests/aed/input/ret.txt", "w", stdout);
 	Pos u;
 	std::cin >> N; Polygon H(N); std::cin >> u;
 	for (Pos& p : H) std::cin >> p; norm(H);

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-920 -2020 66560 138580">
+  <line x1="-900" y1="-2020" x2="-900" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-2000" x2="65640" y2="-2000" stroke="gray" />
+  <line x1="-880" y1="-2020" x2="-880" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1980" x2="65640" y2="-1980" stroke="gray" />
+  <line x1="-840" y1="-2020" x2="-840" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1940" x2="65640" y2="-1940" stroke="gray" />
+  <line x1="-780" y1="-2020" x2="-780" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1880" x2="65640" y2="-1880" stroke="gray" />
+  <line x1="-700" y1="-2020" x2="-700" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1800" x2="65640" y2="-1800" stroke="gray" />
+  <line x1="-600" y1="-2020" x2="-600" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1700" x2="65640" y2="-1700" stroke="gray" />
+  <line x1="-480" y1="-2020" x2="-480" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1580" x2="65640" y2="-1580" stroke="gray" />
+  <line x1="-340" y1="-2020" x2="-340" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1440" x2="65640" y2="-1440" stroke="gray" />
+  <line x1="-180" y1="-2020" x2="-180" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1280" x2="65640" y2="-1280" stroke="gray" />
+  <line x1="0" y1="-2020" x2="0" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-1100" x2="65640" y2="-1100" stroke="gray" />
+  <line x1="200" y1="-2020" x2="200" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-900" x2="65640" y2="-900" stroke="gray" />
+  <line x1="380" y1="-2020" x2="380" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-720" x2="65640" y2="-720" stroke="gray" />
+  <line x1="540" y1="-2020" x2="540" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-560" x2="65640" y2="-560" stroke="gray" />
+  <line x1="680" y1="-2020" x2="680" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-420" x2="65640" y2="-420" stroke="gray" />
+  <line x1="800" y1="-2020" x2="800" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-300" x2="65640" y2="-300" stroke="gray" />
+  <line x1="900" y1="-2020" x2="900" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-200" x2="65640" y2="-200" stroke="gray" />
+  <line x1="980" y1="-2020" x2="980" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-120" x2="65640" y2="-120" stroke="gray" />
+  <line x1="1040" y1="-2020" x2="1040" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-60" x2="65640" y2="-60" stroke="gray" />
+  <line x1="1080" y1="-2020" x2="1080" y2="136560" stroke="gray" />
+  <line x1="-920" y1="-20" x2="65640" y2="-20" stroke="gray" />
+  <line x1="1100" y1="-2020" x2="1100" y2="136560" stroke="gray" />
+  <line x1="-920" y1="0" x2="65640" y2="0" stroke="gray" />
+  <line x1="65620" y1="-2020" x2="65620" y2="136560" stroke="black" />
+  <line x1="-920" y1="136540" x2="65640" y2="136540" stroke="black" />
+  <circle cx="65620" cy="136540" r="5" fill="red" />
+  <circle cx="0" cy="0" r="3" fill="blue" />
+  <line x1="-180" y1="-20" x2="0" y2="0" stroke="blue" />
+  <circle cx="200" cy="0" r="3" fill="blue" />
+  <line x1="0" y1="0" x2="200" y2="0" stroke="blue" />
+  <circle cx="380" cy="-20" r="3" fill="blue" />
+  <line x1="200" y1="0" x2="380" y2="-20" stroke="blue" />
+  <circle cx="540" cy="-60" r="3" fill="blue" />
+  <line x1="380" y1="-20" x2="540" y2="-60" stroke="blue" />
+  <circle cx="680" cy="-120" r="3" fill="blue" />
+  <line x1="540" y1="-60" x2="680" y2="-120" stroke="blue" />
+  <circle cx="800" cy="-200" r="3" fill="blue" />
+  <line x1="680" y1="-120" x2="800" y2="-200" stroke="blue" />
+  <circle cx="900" cy="-300" r="3" fill="blue" />
+  <line x1="800" y1="-200" x2="900" y2="-300" stroke="blue" />
+  <circle cx="980" cy="-420" r="3" fill="blue" />
+  <line x1="900" y1="-300" x2="980" y2="-420" stroke="blue" />
+  <circle cx="1040" cy="-560" r="3" fill="blue" />
+  <line x1="980" y1="-420" x2="1040" y2="-560" stroke="blue" />
+  <circle cx="1080" cy="-720" r="3" fill="blue" />
+  <line x1="1040" y1="-560" x2="1080" y2="-720" stroke="blue" />
+  <circle cx="1100" cy="-900" r="3" fill="blue" />
+  <line x1="1080" y1="-720" x2="1100" y2="-900" stroke="blue" />
+  <circle cx="1100" cy="-1100" r="3" fill="blue" />
+  <line x1="1100" y1="-900" x2="1100" y2="-1100" stroke="blue" />
+  <circle cx="1080" cy="-1280" r="3" fill="blue" />
+  <line x1="1100" y1="-1100" x2="1080" y2="-1280" stroke="blue" />
+  <circle cx="1040" cy="-1440" r="3" fill="blue" />
+  <line x1="1080" y1="-1280" x2="1040" y2="-1440" stroke="blue" />
+  <circle cx="980" cy="-1580" r="3" fill="blue" />
+  <line x1="1040" y1="-1440" x2="980" y2="-1580" stroke="blue" />
+  <circle cx="900" cy="-1700" r="3" fill="blue" />
+  <line x1="980" y1="-1580" x2="900" y2="-1700" stroke="blue" />
+  <circle cx="800" cy="-1800" r="3" fill="blue" />
+  <line x1="900" y1="-1700" x2="800" y2="-1800" stroke="blue" />
+  <circle cx="680" cy="-1880" r="3" fill="blue" />
+  <line x1="800" y1="-1800" x2="680" y2="-1880" stroke="blue" />
+  <circle cx="540" cy="-1940" r="3" fill="blue" />
+  <line x1="680" y1="-1880" x2="540" y2="-1940" stroke="blue" />
+  <circle cx="380" cy="-1980" r="3" fill="blue" />
+  <line x1="540" y1="-1940" x2="380" y2="-1980" stroke="blue" />
+  <circle cx="200" cy="-2000" r="3" fill="blue" />
+  <line x1="380" y1="-1980" x2="200" y2="-2000" stroke="blue" />
+  <circle cx="0" cy="-2000" r="3" fill="blue" />
+  <line x1="200" y1="-2000" x2="0" y2="-2000" stroke="blue" />
+  <circle cx="-180" cy="-1980" r="3" fill="blue" />
+  <line x1="0" y1="-2000" x2="-180" y2="-1980" stroke="blue" />
+  <circle cx="-340" cy="-1940" r="3" fill="blue" />
+  <line x1="-180" y1="-1980" x2="-340" y2="-1940" stroke="blue" />
+  <circle cx="-480" cy="-1880" r="3" fill="blue" />
+  <line x1="-340" y1="-1940" x2="-480" y2="-1880" stroke="blue" />
+  <circle cx="-600" cy="-1800" r="3" fill="blue" />
+  <line x1="-480" y1="-1880" x2="-600" y2="-1800" stroke="blue" />
+  <circle cx="-700" cy="-1700" r="3" fill="blue" />
+  <line x1="-600" y1="-1800" x2="-700" y2="-1700" stroke="blue" />
+  <circle cx="-780" cy="-1580" r="3" fill="blue" />
+  <line x1="-700" y1="-1700" x2="-780" y2="-1580" stroke="blue" />
+  <circle cx="-840" cy="-1440" r="3" fill="blue" />
+  <line x1="-780" y1="-1580" x2="-840" y2="-1440" stroke="blue" />
+  <circle cx="-880" cy="-1280" r="3" fill="blue" />
+  <line x1="-840" y1="-1440" x2="-880" y2="-1280" stroke="blue" />
+  <circle cx="-900" cy="-1100" r="3" fill="blue" />
+  <line x1="-880" y1="-1280" x2="-900" y2="-1100" stroke="blue" />
+  <circle cx="-900" cy="-900" r="3" fill="blue" />
+  <line x1="-900" y1="-1100" x2="-900" y2="-900" stroke="blue" />
+  <circle cx="-880" cy="-720" r="3" fill="blue" />
+  <line x1="-900" y1="-900" x2="-880" y2="-720" stroke="blue" />
+  <circle cx="-840" cy="-560" r="3" fill="blue" />
+  <line x1="-880" y1="-720" x2="-840" y2="-560" stroke="blue" />
+  <circle cx="-780" cy="-420" r="3" fill="blue" />
+  <line x1="-840" y1="-560" x2="-780" y2="-420" stroke="blue" />
+  <circle cx="-700" cy="-300" r="3" fill="blue" />
+  <line x1="-780" y1="-420" x2="-700" y2="-300" stroke="blue" />
+  <circle cx="-600" cy="-200" r="3" fill="blue" />
+  <line x1="-700" y1="-300" x2="-600" y2="-200" stroke="blue" />
+  <circle cx="-480" cy="-120" r="3" fill="blue" />
+  <line x1="-600" y1="-200" x2="-480" y2="-120" stroke="blue" />
+  <circle cx="-340" cy="-60" r="3" fill="blue" />
+  <line x1="-480" y1="-120" x2="-340" y2="-60" stroke="blue" />
+  <circle cx="-180" cy="-20" r="3" fill="blue" />
+  <line x1="-340" y1="-60" x2="-180" y2="-20" stroke="blue" />
+</svg>

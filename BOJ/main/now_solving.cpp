@@ -420,28 +420,7 @@ ld dijkstra(const int& v, const int& g) {
 	}
 	return C[g];
 }
-struct Event {
-	Seg w, e;
-	Event(Seg w_ = Seg(), Seg e_ = Seg()) : w(w_), e(e_) {
-		if (w.s != w.e && e.s != e.e) {
-			ld lo = 0, hi = 1;
-			Pos v = ~w.dir;
-			ld wlo = intersection(w, Seg(e.e, e.e + v), 2);
-			ld whi = intersection(w, Seg(e.s, e.s + v), 2);
-			ld elo = intersection(e, Seg(w.e, w.e + v), 2);
-			ld ehi = intersection(e, Seg(w.s, w.s + v), 2);
-			w = Seg(w.p(std::max(wlo, lo)), w.p(std::min(whi, hi)));
-			e = Seg(e.p(std::min(ehi, hi)), e.p(std::max(elo, lo)));
-		}
-	}
-};
-ld dijkstra(std::vector<Info> G[], const int& v, const int& g, const int& sz,
-	const Event& we, const ld& m,
-	const Pos& s, const Pos& t,
-	const Polygon& W, const Polygon& E, const Polygon& H) {
-	for (int i = 0; i < sz; i++) while (G[i].back().t) G[i].pop_back();
-	Pos w = we.w.p(m), e = we.e.p(m);
-
+ld dijkstra(std::vector<Info> G[], const int& v, const int& g) {
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	std::priority_queue<Info> Q; Q.push(Info(v, 0));
 	C[v] = 0;
@@ -457,6 +436,37 @@ ld dijkstra(std::vector<Info> G[], const int& v, const int& g, const int& sz,
 		}
 	}
 	return C[g];
+}
+struct Event {
+	Seg w, e;
+	Event(Seg w_ = Seg(), Seg e_ = Seg()) : w(w_), e(e_) {
+		if (w.s != w.e && e.s != e.e) {
+			ld lo = 0, hi = 1;
+			Pos v = ~w.dir;
+			ld wlo = intersection(w, Seg(e.e, e.e + v), 2);
+			ld whi = intersection(w, Seg(e.s, e.s + v), 2);
+			ld elo = intersection(e, Seg(w.e, w.e + v), 2);
+			ld ehi = intersection(e, Seg(w.s, w.s + v), 2);
+			w = Seg(w.p(std::max(wlo, lo)), w.p(std::min(whi, hi)));
+			e = Seg(e.p(std::min(ehi, hi)), e.p(std::max(elo, lo)));
+		}
+	}
+};
+ld dijkstra(std::vector<Info> GW[], std::vector<Info> GE[],
+	const int& szw, const int& sze,
+	const Event& we, const ld& m,
+	const Pos& s, const Pos& t,
+	const Polygon& W, const Polygon& E, const Polygon& H) {
+	for (int i = 0; i < szw; i++) while (GW[i].back().t) GW[i].pop_back();
+	for (int i = 0; i < sze; i++) while (GE[i].back().t) GE[i].pop_back();
+	Pos w = we.w.p(m), e = we.e.p(m);
+	int sz;
+	if (connectable(w, s, H)) GW[0].push_back(Info(1, (s - w).mag()));
+	sz = W.size();
+	for (int i = 0; i < sz; i++) {
+		if (connectable(w, W[i], H)) GW[i + 1].push_back(Info());
+	}
+	
 }
 ld ternary_search(const Pos& s, const Pos& t, const Event& we, const Polygon& W, const Polygon& E) {
 	ld lo = 0, hi = 1;

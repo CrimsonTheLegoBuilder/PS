@@ -386,7 +386,13 @@ struct Info {
 	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
 };
 std::vector<Info> G[LEN];
+std::vector<Info> GW[LEN], GE[LEN];
 std::priority_queue<Info> Q;
+void init(std::vector<Info> G[], const int& sz, const Pos& u, const Pos& v, const Polygon& H) {
+	for (int i = 0; i < sz; i++) while (G[i].back().t) G[i].pop_back();
+
+	return;
+}
 ld dijkstra(const int& v, const int& g) {
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	Q.push(Info(v, 0));
@@ -395,6 +401,23 @@ ld dijkstra(const int& v, const int& g) {
 		Info p = Q.top(); Q.pop();
 		if (p.c > C[p.i]) continue;
 		for (Info& w : G[p.i]) {
+			ld cost = p.c + w.c;
+			if (C[w.i] > cost) {
+				C[w.i] = cost;
+				Q.push(Info(w.i, cost));
+			}
+		}
+	}
+	return C[g];
+}
+ld dijkstra(const std::vector<Info> G[], const int& v, const int& g) {
+	for (int i = 0; i < LEN; i++) C[i] = INF;
+	std::priority_queue<Info> Q; Q.push(Info(v, 0));
+	C[v] = 0;
+	while (Q.size()) {
+		Info p = Q.top(); Q.pop();
+		if (p.c > C[p.i]) continue;
+		for (const Info& w : G[p.i]) {
 			ld cost = p.c + w.c;
 			if (C[w.i] > cost) {
 				C[w.i] = cost;

@@ -397,12 +397,8 @@ struct Info {
 };
 std::vector<Info> G[LEN];
 std::vector<Info> GW[LEN], GE[LEN];
+int szw, sze;
 std::priority_queue<Info> Q;
-void init(std::vector<Info> G[], const int& sz, const Pos& u, const Pos& v, const Polygon& H) {
-	for (int i = 0; i < sz; i++) while (G[i].back().t) G[i].pop_back();
-
-	return;
-}
 ld dijkstra(const int& v, const int& g) {
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	Q.push(Info(v, 0));
@@ -452,10 +448,9 @@ struct Event {
 		}
 	}
 };
-ld dijkstra(std::vector<Info> GW[], std::vector<Info> GE[],
-	const int& szw, const int& sze,
-	const Event& we, const ld& m,
+ld dijkstra(
 	const Pos& s, const Pos& t,
+	const Event& we, const ld& m,
 	const Polygon& W, const Polygon& E, const Polygon& H) {
 	for (int i = 0; i < szw; i++) while (GW[i].back().t) GW[i].pop_back();
 	for (int i = 0; i < sze; i++) while (GE[i].back().t) GE[i].pop_back();
@@ -463,19 +458,39 @@ ld dijkstra(std::vector<Info> GW[], std::vector<Info> GE[],
 	int sz;
 	if (connectable(w, s, H)) GW[0].push_back(Info(1, (s - w).mag()));
 	sz = W.size();
-	for (int i = 0; i < sz; i++) {
-		if (connectable(w, W[i], H)) GW[i + 1].push_back(Info());
-	}
-	
+	for (int i = 0; i < sz; i++)
+		if (connectable(w, W[i], H)) {
+			ld d = (w - W[i]).mag();
+			GW[1].push_back(Info(i + 2, d, 1));
+			GW[i + 2].push_back(Info(1, d, 1));
+		}
+	if (connectable(e, t, H)) GE[0].push_back(Info(1, (t - e).mag()));
+	sz = E.size();
+	for (int i = 0; i < sz; i++)
+		if (connectable(e, E[i], H)) {
+			ld d = (e - E[i]).mag();
+			GE[1].push_back(Info(i + 2, d, 1));
+			GE[i + 2].push_back(Info(1, d, 1));
+		}
+	ld dw = dijkstra(GW, 0, 1);
+	ld de = dijkstra(GE, 0, 1);
+	return dw + de;
 }
-ld ternary_search(const Pos& s, const Pos& t, const Event& we, const Polygon& W, const Polygon& E) {
+ld ternary_search(
+	const Pos& s, const Pos& t,
+	const Event& we,
+	const Polygon& W, const Polygon& E, const Polygon& H) {
 	ld lo = 0, hi = 1;
 	int c = 100;
 	while (c--) {
 		ld m1 = (lo + lo + hi) / 3;
 		ld m2 = (lo + hi + hi) / 3;
-		ld d1;
+		ld d1 = dijkstra(s, t, we, m1, W, E, H);
+		ld d2 = dijkstra(s, t, we, m2, W, E, H);
+		if (d1 < d2) lo = m1;
+		else d2 = m2;
 	}
+	return (lo + hi) * .5;
 }
 #define BOJ
 #ifdef BOJ
@@ -492,9 +507,54 @@ void solve() {
 	std::cin >> M; Polygon E(M); for (Pos& p : E) std::cin >> p;
 	if (!eq(E.back().y, 1000)) std::reverse(E.begin(), E.end());
 	K = N + M; Polygon H = W; for (const Pos& p : E) H.push_back(p);
-	/*std::reverse(E.begin(), E.end());*/
+	//std::reverse(E.begin(), E.end());
+	ld b = INF;
+	Segs B;
 
+	//connect land
+	for (int i = 0; i < N; i++) {
+		if (connectable(s, W[i], H)) {
+			ld d = (s - W[i]).mag();
+			GW[0].push_back(Info(i + 2, d, 0));
+			GW[i + 2].push_back(Info(0, d, 0));
+			G[0].push_back(Info(i + 2, d, 0));
+			G[i + 2].push_back(Info(0, d, 0));
+		}
+		for (int j = i + 1; j < N; j++) {
+			if (connectable(W[i], W[j], H)) {
+				ld d = (W[i] - W[j]).mag();
+				GW[i + 2].push_back(Info(j + 2, d, 0));
+				GW[j + 2].push_back(Info(i + 2, d, 0));
+				G[i + 2].push_back(Info(j + 2, d, 0));
+				G[j + 2].push_back(Info(i + 2, d, 0));
+			}
+		}
+	}
+	for (int i = 0; i < M; i++) {
+		if (connectable(t, E[i], H)) {
+			ld d = (t - E[i]).mag();
+			GE[0].push_back(Info(i + 2, d, 0));
+			GE[i + 2].push_back(Info(0, d, 0));
+			GE[1].push_back(Info(N + i + 4, d, 0));
+			GE[N + i + 4].push_back(Info(1, d, 0));
+		}
+		for (int j = i + 1; j < M; j++) {
+			if (connectable(E[i], E[j], H)) {
+				ld d = (E[i] - E[j]).mag();
+				GE[N + i + 4].push_back(Info(N + j + 4, d, 0));
+				GE[N + j + 4].push_back(Info(N + i + 4, d, 0));
+			}
+		}
+	}
 
+	//connet bridge and get events
+	for (int n = 0; n < N; n++) {
+		const Pos& w0 = W[n], w1 = W[(n + 1) % N];
+		for (int m = 0; m < M; m++) {
+			const Pos& e0 = E[m], e1 = E[(m + 1) % M];
+
+		}
+	}
 	return;
 }
 #else

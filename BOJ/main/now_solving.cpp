@@ -279,7 +279,6 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 	}
 	return ret;
 }
-
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -321,12 +320,13 @@ struct Seg {
 };
 typedef std::vector<Seg> Segs;
 ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
+ld intersection(const Seg& s1, const Seg& s2, const int& f = 0) {
 	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
 	ld det = (q2 - q1) / (p2 - p1);
 	if (zero(det)) return -1;
 	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
 	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	if (f == 2) return a1;
 	if (f == 1) return fit(a1, 0, 1);
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
@@ -379,6 +379,13 @@ bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F =
 	return 1;
 }
 bool connectable(const Pos& u, const Pos& v, const Polygon& H) {
+	int sz = H.size();
+	Pos m = (u + v) * .5;
+	for (int i = 0; i < sz; i++) {
+		const Pos& p0 = H[i], p1 = H[(i + 1) % sz];
+		if (intersect(p0, p1, u, v, WEAK)) return 0;
+	}
+	if (inner_check(H, m) == 2) return 0;
 	return 1;
 }
 ld C[LEN]; int vp;
@@ -413,7 +420,28 @@ ld dijkstra(const int& v, const int& g) {
 	}
 	return C[g];
 }
-ld dijkstra(const std::vector<Info> G[], const int& v, const int& g) {
+struct Event {
+	Seg w, e;
+	Event(Seg w_ = Seg(), Seg e_ = Seg()) : w(w_), e(e_) {
+		if (w.s != w.e && e.s != e.e) {
+			ld lo = 0, hi = 1;
+			Pos v = ~w.dir;
+			ld wlo = intersection(w, Seg(e.e, e.e + v), 2);
+			ld whi = intersection(w, Seg(e.s, e.s + v), 2);
+			ld elo = intersection(e, Seg(w.e, w.e + v), 2);
+			ld ehi = intersection(e, Seg(w.s, w.s + v), 2);
+			w = Seg(w.p(std::max(wlo, lo)), w.p(std::min(whi, hi)));
+			e = Seg(e.p(std::min(ehi, hi)), e.p(std::max(elo, lo)));
+		}
+	}
+};
+ld dijkstra(std::vector<Info> G[], const int& v, const int& g, const int& sz,
+	const Event& we, const ld& m,
+	const Pos& s, const Pos& t,
+	const Polygon& W, const Polygon& E, const Polygon& H) {
+	for (int i = 0; i < sz; i++) while (G[i].back().t) G[i].pop_back();
+	Pos w = we.w.p(m), e = we.e.p(m);
+
 	for (int i = 0; i < LEN; i++) C[i] = INF;
 	std::priority_queue<Info> Q; Q.push(Info(v, 0));
 	C[v] = 0;
@@ -430,7 +458,15 @@ ld dijkstra(const std::vector<Info> G[], const int& v, const int& g) {
 	}
 	return C[g];
 }
-
+ld ternary_search(const Pos& s, const Pos& t, const Event& we, const Polygon& W, const Polygon& E) {
+	ld lo = 0, hi = 1;
+	int c = 100;
+	while (c--) {
+		ld m1 = (lo + lo + hi) / 3;
+		ld m2 = (lo + hi + hi) / 3;
+		ld d1;
+	}
+}
 #define BOJ
 #ifdef BOJ
 void solve() {
@@ -446,7 +482,7 @@ void solve() {
 	std::cin >> M; Polygon E(M); for (Pos& p : E) std::cin >> p;
 	if (!eq(E.back().y, 1000)) std::reverse(E.begin(), E.end());
 	K = N + M; Polygon H = W; for (const Pos& p : E) H.push_back(p);
-	std::reverse(E.begin(), E.end());
+	/*std::reverse(E.begin(), E.end());*/
 
 
 	return;

@@ -378,6 +378,9 @@ bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F =
 	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
 	return 1;
 }
+bool connectable(const Pos& u, const Pos& v, const Polygon& H) {
+	return 1;
+}
 ld C[LEN]; int vp;
 struct Info {
 	int i, t;
@@ -426,9 +429,6 @@ ld dijkstra(const std::vector<Info> G[], const int& v, const int& g) {
 		}
 	}
 	return C[g];
-}
-bool connectable(const Pos& u, const Pos& v, const Polygon& H) {
-	return 1;
 }
 
 #define BOJ

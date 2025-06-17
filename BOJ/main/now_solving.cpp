@@ -119,6 +119,7 @@ ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
 	return std::min((d1 - t).mag(), (d2 - t).mag());
 }
 bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
+bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
 //ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
@@ -554,18 +555,34 @@ void solve() {
 	//connect bridge and get events
 	for (int n = 0; n < N; n++) {
 		const Pos& w0 = W[n], w1 = W[(n + 1) % N];
+		Seg w01 = Seg(w0, w1);
 		for (int m = 0; m < M; m++) {
 			const Pos& e0 = E[m], e1 = E[(m + 1) % M];
+			Seg e01 = Seg(e0, e1);
 			ld d;
 			d = (w0 - e0).mag();
-			if (eq(d, b)) B.push_back(Seg(w0, e0));
-			else if (d < b) {
-				if (connectable(w0, e0, H, 0)) {
+			if (connectable(w0, e0, H, 0)) {
+				if (eq(d, b)) B.push_back(Seg(w0, e0));
+				else if (d < b) {
 					B.clear();
 					B.push_back(Seg(w0, e0));
 				}
 			}
-			if (m < M - 1 && sign(dot(e0, e1, w0)) < 0 && )
+			if (m < M - 1 && between(w0, w1, e0)) {
+				d = cross(w0, w1, e0) / (w0 - w1).mag();
+				if (sign(b - d) >= 0) {
+					Pos v = ~(w1 - w0);
+					ld x = intersection(w01, Seg(e0, e0 + v), 2);
+					Pos p = w01.p(x);
+					if (connectable(p, e0, H, 0)) {
+						if (eq(d, b)) B.push_back(Seg(p, e0));
+						else if (d < b) {
+							B.clear();
+							B.push_back(Seg(p, e0));
+						}
+					}
+				}
+			}
 		}
 	}
 	return;

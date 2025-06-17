@@ -12,15 +12,15 @@
 #include <tuple>
 #include <complex>
 typedef long long ll;
-//typedef long double ld;
-typedef double ld;
+typedef long double ld;
+//typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 1e3;
+const int LEN = 30;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -35,14 +35,6 @@ ld flip(ld lat) {
 	return INF;
 }
 ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
-//ll gcd(ll a, ll b) {
-//	while (b) {
-//		ll tmp = a % b;
-//		a = b;
-//		b = tmp;
-//	}
-//	return a;
-//}
 
 #define LO x
 #define HI y
@@ -54,14 +46,6 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 #define STRONG 0
 #define WEAK 1
-
-//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
-//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
-
-//Euler characteristic : v - e + f == 1
-//Pick`s Theorem : A = i + b/2 - 1
-
-//2D============================================================================//
 
 int N, M, K;
 struct Pos {
@@ -385,55 +369,11 @@ bool connectable(const Pos& u, const Pos& v, const Polygon& H, const bool& f = 1
 	for (int i = 0; i < sz; i++) {
 		const Pos& p0 = H[i], p1 = H[(i + 1) % sz];
 		if (intersect(p0, p1, u, v, WEAK)) return 0;
+		if (on_seg_weak(u, v, p0)) return 0;
 	}
 	if (f == 1 && inner_check(H, m) == 2) return 0;
 	if (f == 0 && inner_check(H, m) == 0) return 0;
 	return 1;
-}
-ld C[LEN]; int vp;
-struct Info {
-	int i, t;
-	ld c;
-	Info(int i_ = 0, ld c_ = 0, int t_ = 0) : i(i_), c(c_), t(t_) {}
-	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
-};
-std::vector<Info> G[LEN];
-std::vector<Info> GW[LEN], GE[LEN];
-int szw, sze;
-std::priority_queue<Info> Q;
-ld dijkstra(const int& v, const int& g) {
-	for (int i = 0; i < LEN; i++) C[i] = INF;
-	Q.push(Info(v, 0));
-	C[v] = 0;
-	while (Q.size()) {
-		Info p = Q.top(); Q.pop();
-		if (p.c > C[p.i]) continue;
-		for (Info& w : G[p.i]) {
-			ld cost = p.c + w.c;
-			if (C[w.i] > cost) {
-				C[w.i] = cost;
-				Q.push(Info(w.i, cost));
-			}
-		}
-	}
-	return C[g];
-}
-ld dijkstra(std::vector<Info> G[], const int& v, const int& g) {
-	for (int i = 0; i < LEN; i++) C[i] = INF;
-	std::priority_queue<Info> Q; Q.push(Info(v, 0));
-	C[v] = 0;
-	while (Q.size()) {
-		Info p = Q.top(); Q.pop();
-		if (p.c > C[p.i]) continue;
-		for (const Info& w : G[p.i]) {
-			ld cost = p.c + w.c;
-			if (C[w.i] > cost) {
-				C[w.i] = cost;
-				Q.push(Info(w.i, cost));
-			}
-		}
-	}
-	return C[g];
 }
 struct Event {
 	Seg w, e;
@@ -452,32 +392,52 @@ struct Event {
 	bool val() const { return w.s != w.e && e.s != e.e; }
 };
 typedef std::vector<Event> Vevent;
+struct Info {
+	int i;
+	ld c;
+	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
+	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
+};
+ld C[LEN * LEN]; int vp;
+std::vector<Info> G[LEN * LEN];
+std::vector<Info> GW[LEN], GE[LEN];
+int szw, sze;
+ld dijkstra(const std::vector<Info> G[], const int& v, const int& g, const int& sz) {
+	for (int i = 0; i < sz; i++) C[i] = INF;
+	std::priority_queue<Info> Q; Q.push(Info(v, 0));
+	C[v] = 0;
+	while (Q.size()) {
+		Info p = Q.top(); Q.pop();
+		if (p.c > C[p.i]) continue;
+		for (const Info& w : G[p.i]) {
+			ld cost = p.c + w.c;
+			if (C[w.i] > cost) {
+				C[w.i] = cost;
+				Q.push(Info(w.i, cost));
+			}
+		}
+	}
+	return C[g];
+}
 ld dijkstra(
 	const Pos& s, const Pos& t,
 	const Event& we, const ld& m,
 	const Polygon& W, const Polygon& E, const Polygon& H) {
-	for (int i = 0; i < szw; i++) while (GW[i].back().t) GW[i].pop_back();
-	for (int i = 0; i < sze; i++) while (GE[i].back().t) GE[i].pop_back();
+	GW[1].clear(); GE[1].clear();
 	Pos w = we.w.p(m), e = we.e.p(m);
 	int sz;
-	if (connectable(w, s, H)) GW[0].push_back(Info(1, (s - w).mag()));
 	sz = W.size();
+	if (connectable(w, s, H)) GW[1].push_back(Info(0, (s - w).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(w, W[i], H)) {
-			ld d = (w - W[i]).mag();
-			GW[1].push_back(Info(i + 2, d, 1));
-			GW[i + 2].push_back(Info(1, d, 1));
-		}
-	if (connectable(e, t, H)) GE[0].push_back(Info(1, (t - e).mag()));
+		if (connectable(w, W[i], H))
+			GW[1].push_back(Info(i + 2, (w - W[i]).mag()));
 	sz = E.size();
+	if (connectable(e, t, H)) GE[1].push_back(Info(0, (t - e).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(e, E[i], H)) {
-			ld d = (e - E[i]).mag();
-			GE[1].push_back(Info(i + 2, d, 1));
-			GE[i + 2].push_back(Info(1, d, 1));
-		}
-	ld dw = dijkstra(GW, 0, 1);
-	ld de = dijkstra(GE, 0, 1);
+		if (connectable(e, E[i], H))
+			GE[1].push_back(Info(i + 2, (e - E[i]).mag()));
+	ld dw = dijkstra(GW, 1, 0, N + 5);
+	ld de = dijkstra(GE, 1, 0, M + 5);
 	return dw + de;
 }
 ld ternary_search(
@@ -491,16 +451,13 @@ ld ternary_search(
 		ld m2 = (lo + hi + hi) / 3;
 		ld d1 = dijkstra(s, t, we, m1, W, E, H);
 		ld d2 = dijkstra(s, t, we, m2, W, E, H);
-		if (d1 < d2) lo = m1;
-		else d2 = m2;
+		if (d1 > d2) lo = m1;
+		else hi = m2;
 	}
 	return (lo + hi) * .5;
 }
 #define BOJ
 #ifdef BOJ
-bool add_node() {
-
-}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -510,51 +467,50 @@ void solve() {
 	//freopen("../../tests/aed/input/ret.txt", "w", stdout);
 	Pos s, t; std::cin >> s >> t;
 	std::cin >> N; Polygon W(N); for (Pos& p : W) std::cin >> p;
-	if (!eq(W.back().y, 0)) std::reverse(W.begin(), W.end());
 	std::cin >> M; Polygon E(M); for (Pos& p : E) std::cin >> p;
+	if (!eq(W.back().y, 0)) std::reverse(W.begin(), W.end());
 	if (!eq(E.back().y, 1000)) std::reverse(E.begin(), E.end());
-	K = N + M; Polygon H = W; for (const Pos& p : E) H.push_back(p);
-	//std::reverse(E.begin(), E.end());
-	ld b = INF;
-	Segs B;
-	Vevent V;
-
-	//connect land
+	Polygon H = W; for (const Pos& p : E) H.push_back(p);
+	Polygon W_ = W; W_.push_back(Pos(0, 1000)); W_.push_back(Pos(0, 0));
+	Polygon E_ = E; E_.push_back(Pos(1000, 0)); E_.push_back(Pos(1000, 1000));
+	ld b = INF, l = INF, d = -1; Segs B; Vevent V;
+	//connect vertice
 	for (int i = 0; i < N; i++) {
 		if (connectable(s, W[i], H)) {
-			ld d = (s - W[i]).mag();
-			GW[0].push_back(Info(i + 2, d, 0));
-			GW[i + 2].push_back(Info(0, d, 0));
-			G[0].push_back(Info(i + 2, d, 0));
-			G[i + 2].push_back(Info(0, d, 0));
+			d = (s - W[i]).mag();
+			GW[0].push_back(Info(i + 2, d));
+			GW[i + 2].push_back(Info(0, d));
+			G[0].push_back(Info(i + 2, d));
+			G[i + 2].push_back(Info(0, d));
 		}
 		for (int j = i + 1; j < N; j++) {
 			if (connectable(W[i], W[j], H)) {
-				ld d = (W[i] - W[j]).mag();
-				GW[i + 2].push_back(Info(j + 2, d, 0));
-				GW[j + 2].push_back(Info(i + 2, d, 0));
-				G[i + 2].push_back(Info(j + 2, d, 0));
-				G[j + 2].push_back(Info(i + 2, d, 0));
+				d = (W[i] - W[j]).mag();
+				GW[i + 2].push_back(Info(j + 2, d));
+				GW[j + 2].push_back(Info(i + 2, d));
+				G[i + 2].push_back(Info(j + 2, d));
+				G[j + 2].push_back(Info(i + 2, d));
 			}
 		}
 	}
 	for (int i = 0; i < M; i++) {
 		if (connectable(t, E[i], H)) {
-			ld d = (t - E[i]).mag();
-			GE[0].push_back(Info(i + 2, d, 0));
-			GE[i + 2].push_back(Info(0, d, 0));
-			GE[1].push_back(Info(N + i + 4, d, 0));
-			GE[N + i + 4].push_back(Info(1, d, 0));
+			d = (t - E[i]).mag();
+			GE[0].push_back(Info(i + 2, d));
+			GE[i + 2].push_back(Info(0, d));
+			G[1].push_back(Info(N + i + 2, d));
+			G[N + i + 2].push_back(Info(1, d));
 		}
 		for (int j = i + 1; j < M; j++) {
 			if (connectable(E[i], E[j], H)) {
-				ld d = (E[i] - E[j]).mag();
-				GE[N + i + 4].push_back(Info(N + j + 4, d, 0));
-				GE[N + j + 4].push_back(Info(N + i + 4, d, 0));
+				d = (E[i] - E[j]).mag();
+				GE[i + 2].push_back(Info(j + 2, d));
+				GE[j + 2].push_back(Info(i + 2, d));
+				G[N + i + 2].push_back(Info(N + j + 2, d));
+				G[N + j + 2].push_back(Info(N + i + 2, d));
 			}
 		}
 	}
-
 	//connect bridge and get events
 	for (int n = 0; n < N; n++) {
 		const Pos& w0 = W[n], w1 = W[(n + 1) % N];
@@ -562,24 +518,28 @@ void solve() {
 		for (int m = 0; m < M; m++) {
 			const Pos& e0 = E[m], e1 = E[(m + 1) % M];
 			Seg e01 = Seg(e0, e1);
-			ld d;
 			d = (w0 - e0).mag();
-			if (connectable(w0, e0, H, 0)) {
-				if (eq(d, b)) B.push_back(Seg(w0, e0));
-				else if (d < b) {
-					B.clear();
-					B.push_back(Seg(w0, e0));
+			if (sign(b - d) >= 0) {
+				if (connectable(w0, e0, H, 0)) {
+					if (eq(b, d)) B.push_back(Seg(w0, e0));
+					else if (b > d) {
+						b = d;
+						B.clear();
+						V.clear();
+						B.push_back(Seg(w0, e0));
+					}
 				}
 			}
 			if (n < N - 1 && between(w0, w1, e0)) {
 				d = std::abs(cross(w0, w1, e0)) / (w0 - w1).mag();
 				if (sign(b - d) >= 0) {
-					Pos v = ~(w1 - w0);
+					Pos v = ~w01.dir;
 					ld x = intersection(w01, Seg(e0, e0 + v), 2);
 					Pos p = w01.p(x);
 					if (connectable(p, e0, H, 0)) {
-						if (eq(d, b)) B.push_back(Seg(p, e0));
-						else if (d < b) {
+						if (eq(b, d)) B.push_back(Seg(p, e0));
+						else if (b > d) {
+							b = d;
 							B.clear();
 							V.clear();
 							B.push_back(Seg(p, e0));
@@ -590,12 +550,13 @@ void solve() {
 			if (m < M - 1 && between(e0, e1, w0)) {
 				d = std::abs(cross(e0, e1, w0)) / (e0 - e1).mag();
 				if (sign(b - d) >= 0) {
-					Pos v = ~(e1 - e0);
+					Pos v = ~e01.dir;
 					ld x = intersection(w01, Seg(w0, w0 + v), 2);
 					Pos p = e01.p(x);
-					if (connectable(p, w0, H, 0)) {
-						if (eq(d, b)) B.push_back(Seg(w0, p));
-						else if (d < b) {
+					if (connectable(w0, p, H, 0)) {
+						if (eq(b, d)) B.push_back(Seg(w0, p));
+						else if (b > d) {
+							b = d;
 							B.clear();
 							V.clear();
 							B.push_back(Seg(w0, p));
@@ -609,8 +570,9 @@ void solve() {
 				if (sign(b - d) >= 0) {
 					Event ev = Event(w01, e01);
 					if (!ev.val()) continue;
-					if (eq(d, b)) V.push_back(ev);
-					else if (d < b) {
+					if (eq(b, d)) V.push_back(ev);
+					else if (b > d) {
+						b = d;
 						B.clear();
 						V.clear();
 						V.push_back(ev);
@@ -619,14 +581,49 @@ void solve() {
 			}
 		}
 	}
-
 	if (B.size()) {
 		int sz = B.size();
-		int iw = N + M + 4, ie = iw + 1;
+		int iw = N + M + 2, ie = iw + 1;
 		for (int b = 0; b < sz; b++) {
+			G[iw].push_back(Info(ie, b));
+			G[ie].push_back(Info(iw, b));
 			Pos w = B[b].s, e = B[b].e;
+			if (connectable(s, w, H)) {
+				d = (s - w).mag();
+				G[0].push_back(Info(iw, d));
+			}
+			for (int i = 0; i < N; i++) {
+				if (connectable(W[i], w, H)) {
+					d = (W[i] - w).mag();
+					G[i + 2].push_back(Info(iw, d));
+					G[iw].push_back(Info(i + 2, d));
+				}
+			}
+			if (connectable(t, e, H)) {
+				d = (t - e).mag();
+				G[1].push_back(Info(ie, d));
+				G[ie].push_back(Info(0, d));
+			}
+			for (int j = 0; j < M; j++) {
+				if (connectable(E[j], e, H)) {
+					d = (E[j] - e).mag();
+					G[N + j + 2].push_back(Info(ie, d));
+					G[ie].push_back(Info(N + j + 2, d));
+				}
+			}
+			iw += 2;
+			ie += 2;
+		}
+		d = dijkstra(G, 0, 1, LEN * LEN);
+		l = std::min(l, d);
+	}
+	if (V.size()) {
+		for (const Event& we : V) {
+			d = ternary_search(s, t, we, W, E, H);
+			l = std::min(l, d);
 		}
 	}
+	std::cout << b << " " << l << "\n";
 	return;
 }
 #else

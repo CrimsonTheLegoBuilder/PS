@@ -547,12 +547,16 @@ void solve() {
 		}
 	}
 
-	//connet bridge and get events
+	//connect bridge and get events
 	for (int n = 0; n < N; n++) {
 		const Pos& w0 = W[n], w1 = W[(n + 1) % N];
 		for (int m = 0; m < M; m++) {
 			const Pos& e0 = E[m], e1 = E[(m + 1) % M];
+			ld d;
+			d = (w0 - e0).mag();
+			if (d < b) {
 
+			}
 		}
 	}
 	return;

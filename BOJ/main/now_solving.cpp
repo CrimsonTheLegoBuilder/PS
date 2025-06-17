@@ -449,7 +449,9 @@ struct Event {
 			e = Seg(e.p(std::min(ehi, hi)), e.p(std::max(elo, lo)));
 		}
 	}
+	bool val() const { return w.s != w.e && e.s != e.e; }
 };
+typedef std::vector<Event> Vevent;
 ld dijkstra(
 	const Pos& s, const Pos& t,
 	const Event& we, const ld& m,
@@ -515,6 +517,7 @@ void solve() {
 	//std::reverse(E.begin(), E.end());
 	ld b = INF;
 	Segs B;
+	Vevent V;
 
 	//connect land
 	for (int i = 0; i < N; i++) {
@@ -568,8 +571,8 @@ void solve() {
 					B.push_back(Seg(w0, e0));
 				}
 			}
-			if (m < M - 1 && between(w0, w1, e0)) {
-				d = cross(w0, w1, e0) / (w0 - w1).mag();
+			if (n < N - 1 && between(w0, w1, e0)) {
+				d = std::abs(cross(w0, w1, e0)) / (w0 - w1).mag();
 				if (sign(b - d) >= 0) {
 					Pos v = ~(w1 - w0);
 					ld x = intersection(w01, Seg(e0, e0 + v), 2);
@@ -578,11 +581,50 @@ void solve() {
 						if (eq(d, b)) B.push_back(Seg(p, e0));
 						else if (d < b) {
 							B.clear();
+							V.clear();
 							B.push_back(Seg(p, e0));
 						}
 					}
 				}
 			}
+			if (m < M - 1 && between(e0, e1, w0)) {
+				d = std::abs(cross(e0, e1, w0)) / (e0 - e1).mag();
+				if (sign(b - d) >= 0) {
+					Pos v = ~(e1 - e0);
+					ld x = intersection(w01, Seg(w0, w0 + v), 2);
+					Pos p = e01.p(x);
+					if (connectable(p, w0, H, 0)) {
+						if (eq(d, b)) B.push_back(Seg(w0, p));
+						else if (d < b) {
+							B.clear();
+							V.clear();
+							B.push_back(Seg(w0, p));
+						}
+					}
+				}
+			}
+			if (n < N - 1 && m < M - 1 &&
+				!ccw(w0, w1, e0, e1) && dot(w0, w1, e0, e1) < 0) {
+				d = std::abs(cross(w0, w1, e0)) / (w0 - w1).mag();
+				if (sign(b - d) >= 0) {
+					Event ev = Event(w01, e01);
+					if (!ev.val()) continue;
+					if (eq(d, b)) V.push_back(ev);
+					else if (d < b) {
+						B.clear();
+						V.clear();
+						V.push_back(ev);
+					}
+				}
+			}
+		}
+	}
+
+	if (B.size()) {
+		int sz = B.size();
+		int iw = N + M + 4, ie = iw + 1;
+		for (int b = 0; b < sz; b++) {
+			Pos w = B[b].s, e = B[b].e;
 		}
 	}
 	return;

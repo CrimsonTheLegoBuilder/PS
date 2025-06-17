@@ -558,11 +558,14 @@ void solve() {
 			const Pos& e0 = E[m], e1 = E[(m + 1) % M];
 			ld d;
 			d = (w0 - e0).mag();
-			if (d < b) {
+			if (eq(d, b)) B.push_back(Seg(w0, e0));
+			else if (d < b) {
 				if (connectable(w0, e0, H, 0)) {
-
+					B.clear();
+					B.push_back(Seg(w0, e0));
 				}
 			}
+			if (m < M - 1 && sign(dot(e0, e1, w0)) < 0 && )
 		}
 	}
 	return;

@@ -378,14 +378,15 @@ bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F =
 	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
 	return 1;
 }
-bool connectable(const Pos& u, const Pos& v, const Polygon& H) {
+bool connectable(const Pos& u, const Pos& v, const Polygon& H, const bool& f = 1) {
 	int sz = H.size();
 	Pos m = (u + v) * .5;
 	for (int i = 0; i < sz; i++) {
 		const Pos& p0 = H[i], p1 = H[(i + 1) % sz];
 		if (intersect(p0, p1, u, v, WEAK)) return 0;
 	}
-	if (inner_check(H, m) == 2) return 0;
+	if (f == 1 && inner_check(H, m) == 2) return 0;
+	if (f == 0 && inner_check(H, m) == 0) return 0;
 	return 1;
 }
 ld C[LEN]; int vp;
@@ -494,6 +495,9 @@ ld ternary_search(
 }
 #define BOJ
 #ifdef BOJ
+bool add_node() {
+
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -555,7 +559,9 @@ void solve() {
 			ld d;
 			d = (w0 - e0).mag();
 			if (d < b) {
+				if (connectable(w0, e0, H, 0)) {
 
+				}
 			}
 		}
 	}

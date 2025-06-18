@@ -6,15 +6,8 @@
 #include <cassert>
 #include <vector>
 #include <queue>
-#include <deque>
-#include <random>
-#include <array>
-#include <tuple>
-#include <complex>
 typedef long long ll;
 typedef long double ld;
-//typedef double ld;
-//typedef __float128 ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
@@ -28,14 +21,6 @@ inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ld sq(const ld& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
 inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
-ld flip(ld lat) {
-	if (zero(lat - PI * .5) || zero(lat + PI * .5)) return 0;
-	if (zero(lat)) return PI * .5;
-	if (lat > 0) return PI * .5 - lat;
-	if (lat < 0) return -(PI * .5) - lat;
-	return INF;
-}
-ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 #define LO x
 #define HI y
@@ -82,18 +67,10 @@ struct Pos {
 	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
 	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
 	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
-	friend std::istream& operator >> (std::istream& is, Pos& p) {
-		int x, y;
-		is >> x >> y;
-		p.x = x; p.y = y;
-		return is;
-	}
-	//friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
+	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y;return is; }
+	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
-bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
-bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
-//bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
@@ -102,46 +79,8 @@ ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d
 ld dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
-ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
-	if (!f) return cross(d1, d2, t) / (d1 - d2).mag();
-	if (sign(projection(d1, d2, d2, t)) <= 0 &&
-		sign(projection(d2, d1, d1, t)) <= 0)
-		return std::abs(cross(d1, d2, t)) / (d1 - d2).mag();
-	return std::min((d1 - t).mag(), (d2 - t).mag());
-}
-bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
-//ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
-bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
-	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
-	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
-}
-ld area(const Polygon& H) {
-	ld A = 0;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
-	return A * .5;
-}
-void norm(Polygon& H, const int& d = 1) {
-	ld A = area(H);
-	if (d == 1 && A < 0) std::reverse(H.begin(), H.end());
-	else if (d == -1 && A > 0) std::reverse(H.begin(), H.end());
-	return;
-}
-int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
-	int cnt = 0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		if (on_seg_strong(cur, nxt, p)) return 1;
-		if (zero(cur.y - nxt.y)) continue;
-		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
-		cnt += ccw(cur, nxt, p) > 0;
-	}
-	return (cnt & 1) * 2;
-}
 int inner_check(const Polygon& H, const Pos& p) {//concave
 	int cnt = 0, sz = H.size();
 	for (int i = 0; i < sz; i++) {
@@ -154,39 +93,6 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 	}
 	return (cnt & 1) * 2;
 }
-int inner_check_bi_search(Pos H[], const int& sz, const Pos& p) {//convex
-	if (!sz) return -1;
-	if (sz == 1) return p == H[0] ? 0 : -1;
-	if (sz == 2) return on_seg_strong(H[0], H[1], p) ? 0 : -1;
-	if (cross(H[0], H[1], p) < 0 || cross(H[0], H[sz - 1], p) > 0) return -1;
-	if (on_seg_strong(H[0], H[1], p) || on_seg_strong(H[0], H[sz - 1], p)) return 0;
-	int s = 0, e = sz - 1, m;
-	while (s + 1 < e) {
-		m = s + e >> 1;
-		if (cross(H[0], H[m], p) >= 0) s = m;
-		else e = m;
-	}
-	if (cross(H[s], H[e], p) > 0) return 1;
-	else if (on_seg_strong(H[s], H[e], p)) return 0;
-	else return -1;
-}
-int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
-	int sz = H.size();
-	if (!sz) return -1;
-	if (sz == 1) return p == H[0] ? 0 : -1;
-	if (sz == 2) return on_seg_strong(H[0], H[1], p) ? 0 : -1;
-	if (cross(H[0], H[1], p) < 0 || cross(H[0], H[sz - 1], p) > 0) return -1;
-	if (on_seg_strong(H[0], H[1], p) || on_seg_strong(H[0], H[sz - 1], p)) return 0;
-	int s = 0, e = sz - 1, m;
-	while (s + 1 < e) {
-		m = s + e >> 1;
-		if (cross(H[0], H[m], p) >= 0) s = m;
-		else e = m;
-	}
-	if (cross(H[s], H[e], p) > 0) return 1;
-	else if (on_seg_strong(H[s], H[e], p)) return 0;
-	else return -1;
-}
 bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
 	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
 	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
@@ -196,81 +102,6 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s1) ||
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
-}
-Polygon graham_scan(Polygon& C) {
-	Polygon H;
-	if (C.size() < 3) {
-		std::sort(C.begin(), C.end());
-		return C;
-	}
-	std::swap(C[0], *min_element(C.begin(), C.end()));
-	std::sort(C.begin() + 1, C.end(), [&](const Pos& p, const Pos& q) -> bool {
-		int ret = ccw(C[0], p, q);
-		if (!ret) return (C[0] - p).Euc() < (C[0] - q).Euc();
-		return ret > 0;
-		}
-	);
-	C.erase(unique(C.begin(), C.end()), C.end());
-	int sz = C.size();
-	for (int i = 0; i < sz; i++) {
-		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
-			H.pop_back();
-		H.push_back(C[i]);
-	}
-	return H;
-}
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	std::sort(C.begin(), C.end());
-	if (C.size() <= 2) { for (const Pos& p : C) H.push_back(p); }
-	else {
-		for (int i = 0; i < C.size(); i++) {
-			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
-		int s = H.size() + 1;
-		for (int i = C.size() - 1; i >= 0; i--) {
-			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
-	}
-	return H;
-}
-ld rotating_calipers(const Polygon& H) {
-	int sz = H.size();
-	if (sz < 2) return 0;
-	if (sz == 2) return (H[0] - H[1]).mag();
-	ld d = -1;
-	for (int i = 0, j = 1; i < sz; i++) {
-		while (ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0)
-			j = (j + 1) % sz, d = std::max(d, (H[i] - H[j]).mag());
-		d = std::max(d, (H[i] - H[j]).mag());
-	}
-	return d;
-}
-Polygon polygon_cut(const Polygon& ps, const Pos& b1, const Pos& b2) {
-	Polygon qs;
-	int n = ps.size();
-	for (int i = 0; i < n; i++) {
-		Pos p1 = ps[i], p2 = ps[(i + 1) % n];
-		int d1 = ccw(b1, b2, p1), d2 = ccw(b1, b2, p2);
-		if (d1 >= 0) qs.push_back(p1);
-		if (d1* d2 < 0) qs.push_back(intersection(p1, p2, b1, b2));
-	}
-	return qs;
-}
-Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
-	int sz = clip.size();
-	std::vector<Pos> ret = C;
-	for (int i = 0; i < sz; i++) {
-		Pos b1 = clip[i], b2 = clip[(i + 1) % sz];
-		ret = polygon_cut(ret, b1, b2);
-	}
-	return ret;
 }
 struct Seg {
 	Pos s, e, dir;
@@ -312,7 +143,6 @@ struct Seg {
 	}
 };
 typedef std::vector<Seg> Segs;
-ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
 ld intersection(const Seg& s1, const Seg& s2, const int& f = 0) {
 	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
 	ld det = (q2 - q1) / (p2 - p1);
@@ -323,53 +153,6 @@ ld intersection(const Seg& s1, const Seg& s2, const int& f = 0) {
 	if (f == 1) return fit(a1, 0, 1);
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
-}
-Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return {};
-	std::vector<Seg> HPI;
-	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
-	return HPI;
-}
-Segs half_plane_intersection(const Segs& P, const Segs& Q) {
-	Segs HP(P.size() + Q.size());
-	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
-	return half_plane_intersection(HP, 0);
-}
-bool half_plane_intersection(Segs& HP, Segs& SHPI, Polygon& PHPI, const int& F = POS, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return 0;
-	if (F == POS) for (int i = 0; i < sz; ++i) PHPI.push_back(intersection_(dq[i], dq[(i + 1) % sz]));
-	else if (F == SEG) for (int i = 0; i < sz; ++i) SHPI.push_back(dq[i]);
-	return 1;
 }
 bool connectable(const Pos& u, const Pos& v, const Polygon& H, const bool& f = 1) {
 	int sz = H.size();
@@ -387,7 +170,6 @@ struct Event {
 	Seg w, e;
 	Event(Seg w_ = Seg(), Seg e_ = Seg()) : w(w_), e(e_) {
 		if (w.s != w.e && e.s != e.e) {
-			ld lo = 0, hi = 1;
 			Pos v = ~w.dir;
 			ld wlo = intersection(w, Seg(e.e, e.e + v), 2);
 			ld whi = intersection(w, Seg(e.s, e.s + v), 2);
@@ -407,10 +189,8 @@ struct Info {
 	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
 };
 ld C[LEN * LEN]; int vp;
-typedef std::vector<Info> Vinfo;
 std::vector<Info> G[LEN * LEN];
 std::vector<Info> GW[LEN], GE[LEN];
-int szw, sze;
 ld dijkstra(const std::vector<Info> G[], const int& v, const int& g, const int& sz) {
 	for (int i = 0; i < sz; i++) C[i] = INF;
 	std::priority_queue<Info> Q; Q.push(Info(v, 0));
@@ -432,19 +212,20 @@ ld dijkstra(const std::vector<Info> G[], const int& v, const int& g, const int& 
 ld dijkstra(
 	const Pos& s, const Pos& t,
 	const Event& we, const ld& m,
-	const Polygon& W, const Polygon& E, const Polygon& H) {
+	const Polygon& W, const Polygon& E,
+	const Polygon& W_, const Polygon& E_) {
 	GW[1].clear(); GE[1].clear();
 	Pos w = we.w.p(m), e = we.e.p(m);
 	int sz;
 	sz = W.size();
-	if (connectable(w, s, H)) GW[1].push_back(Info(0, (s - w).mag()));
+	if (connectable(w, s, W_, 0)) GW[1].push_back(Info(0, (s - w).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(w, W[i], H))
+		if (connectable(w, W[i], W_, 0))
 			GW[1].push_back(Info(i + 2, (w - W[i]).mag()));
 	sz = E.size();
-	if (connectable(e, t, H)) GE[1].push_back(Info(0, (t - e).mag()));
+	if (connectable(e, t, E_, 0)) GE[1].push_back(Info(0, (t - e).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(e, E[i], H))
+		if (connectable(e, E[i], E_, 0))
 			GE[1].push_back(Info(i + 2, (e - E[i]).mag()));
 	ld dw = dijkstra(GW, 1, 0, N + 5);
 	ld de = dijkstra(GE, 1, 0, M + 5);
@@ -453,44 +234,36 @@ ld dijkstra(
 ld ternary_search(
 	const Pos& s, const Pos& t,
 	const Event& we,
-	const Polygon& W, const Polygon& E, const Polygon& H) {
+	const Polygon& W, const Polygon& E,
+	const Polygon& W_, const Polygon& E_) {
 	ld lo = 0, hi = 1;
 	ld m1, m2, d1, d2;
 	int c = CNT;
 	while (c--) {
 		m1 = (lo + lo + hi) / 3;
 		m2 = (lo + hi + hi) / 3;
-		d1 = dijkstra(s, t, we, m1, W, E, H);
-		d2 = dijkstra(s, t, we, m2, W, E, H);
+		d1 = dijkstra(s, t, we, m1, W, E, W_, E_);
+		d2 = dijkstra(s, t, we, m2, W, E, W_, E_);
 		if (d1 > d2) lo = m1;
 		else hi = m2;
 	}
-	ld m = (lo + hi) * .5;
 	return (d1 + d2) * .5;
 }
-#define BOJ
-#ifdef BOJ
 void solve() {
-	//Pos a1 = Pos(520, 345), a2 = Pos(10, 350), a3 = Pos(421, 590), a4 = Pos(990, 580);
-	//std::cout << "DEBUG:: " << cross(a1, a2, a3, a4) << "\n";
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	//freopen("../../tests/aed/input/input0.txt", "r", stdin);
-	//freopen("../../tests/aed/input/ret.txt", "w", stdout);
 	Pos s, t; std::cin >> s >> t;
 	std::cin >> N; Polygon W(N); for (Pos& p : W) std::cin >> p;
 	std::cin >> M; Polygon E(M); for (Pos& p : E) std::cin >> p;
-	if (!eq(W.back().y, 0)) std::reverse(W.begin(), W.end());
-	if (!eq(E.back().y, 1000)) std::reverse(E.begin(), E.end());
-	Polygon H = W; for (const Pos& p : E) H.push_back(p);
+	if (!eq(W.back().y, 1000)) std::reverse(W.begin(), W.end());
+	if (!eq(E.back().y, 0)) std::reverse(E.begin(), E.end());
 	Polygon W_ = W; W_.push_back(Pos(0, 1000)); W_.push_back(Pos(0, 0));
 	Polygon E_ = E; E_.push_back(Pos(1000, 0)); E_.push_back(Pos(1000, 1000));
 	ld b = INF, l = INF, d = -1; Segs B; Events V;
-	//connect vertice
 	for (int i = 0; i < N; i++) {
-		if (connectable(s, W[i], H)) {
+		if (connectable(s, W[i], W_, 0)) {
 			d = (s - W[i]).mag();
 			GW[0].push_back(Info(i + 2, d));
 			GW[i + 2].push_back(Info(0, d));
@@ -498,7 +271,7 @@ void solve() {
 			G[i + 2].push_back(Info(0, d));
 		}
 		for (int j = i + 1; j < N; j++) {
-			if (connectable(W[i], W[j], H)) {
+			if (connectable(W[i], W[j], W_, 0)) {
 				d = (W[i] - W[j]).mag();
 				GW[i + 2].push_back(Info(j + 2, d));
 				GW[j + 2].push_back(Info(i + 2, d));
@@ -508,7 +281,7 @@ void solve() {
 		}
 	}
 	for (int i = 0; i < M; i++) {
-		if (connectable(t, E[i], H)) {
+		if (connectable(t, E[i], E_, 0)) {
 			d = (t - E[i]).mag();
 			GE[0].push_back(Info(i + 2, d));
 			GE[i + 2].push_back(Info(0, d));
@@ -516,7 +289,7 @@ void solve() {
 			G[N + i + 2].push_back(Info(1, d));
 		}
 		for (int j = i + 1; j < M; j++) {
-			if (connectable(E[i], E[j], H)) {
+			if (connectable(E[i], E[j], E_, 0)) {
 				d = (E[i] - E[j]).mag();
 				GE[i + 2].push_back(Info(j + 2, d));
 				GE[j + 2].push_back(Info(i + 2, d));
@@ -525,7 +298,6 @@ void solve() {
 			}
 		}
 	}
-	//connect bridge and get events
 	for (int n = 0; n < N; n++) {
 		const Pos& w0 = W[n], w1 = W[(n + 1) % N];
 		Seg w01 = Seg(w0, w1);
@@ -533,285 +305,96 @@ void solve() {
 			const Pos& e0 = E[m], e1 = E[(m + 1) % M];
 			Seg e01 = Seg(e0, e1);
 			d = (w0 - e0).mag();
-			//if (sign(b - d) >= 0) {
 			if (b >= d) {
 				if (eq(b, d)) B.push_back(Seg(w0, e0));
 				else if (b > d) {
 					b = d;
-					B.clear();
-					V.clear();
-					B.push_back(Seg(w0, e0));
-					//std::cout << "p - p:: " << d << "\n";
+					B.clear(); V.clear(); B.push_back(Seg(w0, e0));
 				}
 			}
 			if (n < N - 1 && between(w0, w1, e0)) {
 				d = std::abs(cross(w0, w1, e0)) / (w0 - w1).mag();
-				//if (sign(b - d) >= 0) {
 				if (b >= d) {
 					Pos v = ~w01.dir;
 					ld x = intersection(w01, Seg(e0, e0 + v), 2);
 					Pos p = w01.p(x);
-					if (eq(b, d)) {
-						//std::cout << "p:: " << p << "\n";
-						//std::cout << "e0:: " << e0 << "\n";
-						//std::cout << "s - p:: " << d << "\n";
-						B.push_back(Seg(p, e0));
-					}
+					if (eq(b, d)) B.push_back(Seg(p, e0));
 					else if (b > d) {
 						b = d;
-						B.clear();
-						V.clear();
-						B.push_back(Seg(p, e0));
-						//std::cout << "p:: " << p << "\n";
-						//std::cout << "e0:: " << e0 << "\n";
-						//std::cout << "s - p:: " << d << "\n";
+						B.clear(); V.clear(); B.push_back(Seg(p, e0));
 					}
 				}
 			}
 			if (m < M - 1 && between(e0, e1, w0)) {
 				d = std::abs(cross(e0, e1, w0)) / (e0 - e1).mag();
-				//if (sign(b - d) >= 0) {
 				if (b >= d) {
 					Pos v = ~e01.dir;
 					ld x = intersection(e01, Seg(w0, w0 + v), 2);
 					Pos p = e01.p(x);
-					if (eq(b, d)) {
-						//std::cout << "w0:: " << w0 << "\n";
-						//std::cout << "p:: " << p << "\n";
-						//std::cout << "p - s:: " << d << "\n";
-						B.push_back(Seg(w0, p));
-					}
+					if (eq(b, d)) B.push_back(Seg(w0, p));
 					else if (b > d) {
 						b = d;
-						B.clear();
-						V.clear();
-						B.push_back(Seg(w0, p));
-						//std::cout << "w0:: " << w0 << "\n";
-						//std::cout << "p:: " << p << "\n";
-						//std::cout << "p - s:: " << d << "\n";
+						B.clear(); V.clear(); B.push_back(Seg(w0, p));
 					}
 				}
 			}
 			if (n < N - 1 && m < M - 1 &&
 				!ccw(w0, w1, e0, e1) && dot(w0, w1, e0, e1) < 0) {
 				d = std::abs(cross(w0, w1, e0)) / (w0 - w1).mag();
-				//if (sign(b - d) >= 0) {
 				if (b >= d) {
 					Event ev = Event(w01, e01);
 					if (!ev.val()) continue;
 					if (eq(b, d)) V.push_back(ev);
 					else if (b > d) {
 						b = d;
-						B.clear();
-						V.clear();
-						V.push_back(ev);
-						//std::cout << "ev.w:: " << ev.w.s << " " << ev.w.e << "\n";
-						//std::cout << "ev.e:: " << ev.e.s << " " << ev.e.e << "\n";
-						//std::cout << "s - s:: " << d << "\n";
+						B.clear(); V.clear(); V.push_back(ev);
 					}
 				}
 			}
 		}
 	}
 	if (B.size()) {
-		//std::cout << "B:: ";
-		//std::cout << B.size() << "\n";
 		int sz = B.size();
 		int iw = N + M + 2, ie = iw + 1;
 		for (int k = 0; k < sz; k++) {
 			Pos w = B[k].s, e = B[k].e;
-			if (!connectable(w, e, H, 0)) continue;
 			G[iw].push_back(Info(ie, 0));
 			G[ie].push_back(Info(iw, 0));
-			if (connectable(s, w, H)) {
-				//std::cout << "good\n";
+			if (connectable(s, w, W_, 0)) {
 				d = (s - w).mag();
 				G[0].push_back(Info(iw, d));
 			}
 			for (int i = 0; i < N; i++) {
-				if (connectable(W[i], w, H)) {
-					//std::cout << "good\n";
+				if (connectable(W[i], w, W_, 0)) {
 					d = (W[i] - w).mag();
 					G[i + 2].push_back(Info(iw, d));
 					G[iw].push_back(Info(i + 2, d));
 				}
 			}
-			if (connectable(t, e, H)) {
-				//std::cout << "good\n";
+			if (connectable(t, e, E_, 0)) {
 				d = (t - e).mag();
 				G[1].push_back(Info(ie, d));
 				G[ie].push_back(Info(1, d));
 			}
 			for (int j = 0; j < M; j++) {
-				if (connectable(E[j], e, H)) {
-					//std::cout << "good\n";
+				if (connectable(E[j], e, E_, 0)) {
 					d = (E[j] - e).mag();
 					G[N + j + 2].push_back(Info(ie, d));
 					G[ie].push_back(Info(N + j + 2, d));
 				}
 			}
-			iw += 2;
-			ie += 2;
+			iw += 2; ie += 2;
 		}
 		d = dijkstra(G, 0, 1, LEN * LEN);
 		l = std::min(l, d);
 	}
-	//std::cout << b << " " << b + l << "\n";
 	if (V.size()) {
-		//std::cout << "V::\n";
 		for (const Event& we : V) {
-			d = ternary_search(s, t, we, W, E, H);
+			d = ternary_search(s, t, we, W, E, W_, E_);
 			l = std::min(l, d);
 		}
 	}
 	std::cout << b << " " << b + l << "\n";
 	return;
 }
-#else
-void solve() {
-	std::cin.tie(0)->sync_with_stdio(0);
-	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(13);
-	int Q = 130;
-	for (int q = 0; q <= Q; q++) {
-		std::string Din = "../../tests/aed/input/input";
-		std::string Dout = "../../tests/aed/output/output";
-		std::string Qin = Din + std::to_string(q) + ".txt";
-		std::string Qout = Dout + std::to_string(q) + ".txt";
-		freopen(Qin.c_str(), "r", stdin);
-		//freopen("../../tests/aed/input/ret.txt", "w", stdout);
-		Pos u;
-		std::cin >> N; Polygon H(N); std::cin >> u;
-		for (Pos& p : H) std::cin >> p; norm(H);
-		Vint I, J;
-		for (int i = 0, i1; i < N; i++) {
-			i1 = (i + 1) % N;
-			Pos p0 = H[i], p1 = H[i1];
-			bool vis;
-			if (!ccw(u, p0, p1)) {
-				if (dot(p0, p1, u) < 0) std::swap(p0, p1);
-				vis = 1;
-				for (int j = 0, j1; j < N; j++) {
-					if (j == i) continue;
-					j1 = (j + 1) % N;
-					Pos q0 = H[j], q1 = H[j1];
-					if (ccw(u, q0, q1) < 0) std::swap(q0, q1);
-					if (intersect(q0, q1, p1, u)) { vis = 0; break; }
-				}
-			}
-			else {
-				if (ccw(u, p0, p1) < 0) std::swap(p0, p1);
-				Seg s1 = Seg(p0, p1);
-				Vrange V;
-				for (int j = 0, j1; j < N; j++) {
-					if (j == i) continue;
-					j1 = (j + 1) % N;
-					Pos q0 = H[j], q1 = H[j1];
-					if (ccw(u, q0, q1) < 0) std::swap(q0, q1);
-					Seg s2 = Seg(q0, q1);
-					Range r = range(s1, s2, u);
-					if (r.s.den != -1) V.push_back(r);
-				}
-				vis = 0;
-				std::sort(V.begin(), V.end());
-				V.push_back(Range(Frac(1), Frac(1)));
-				int sz = V.size();
-				Frac hi = Frac(0);
-				for (const Range& r : V) {
-					if (hi < r.s) { vis = 1; break; }
-					else hi = std::max(hi, r.e);
-				}
-			}
-			if (vis) I.push_back(i + 1);
-		}
-		//std::cout << I.size() << "\n";
-		//for (int i : I) std::cout << i << " ";
-		freopen(Qout.c_str(), "r", stdin);
-		std::cin >> M;
-		J.resize(M); for (int& j : J) std::cin >> j;
-		if (I.size() != M) { std::cout << "fuck::\n"; continue; }
-		bool f = 1;
-		for (int j = 0; j < M; j++) {
-			if (I[j] != J[j]) { f = 0; std::cout << "fuck::\n"; break; }
-		}
-		if (f) std::cout << "good::\n";
-		else std::cout << "fuck::\n";
-	}
-	return;
-}
-#endif
 int main() { solve(); return 0; }//boj13090
-//boj 27712 10239 22635 29691 31392 16068
-
-/*
-
-300 400 700 600
-2
-400 0
-400 1000
-2
-600 0
-600 1000
-
-200 482.842712475
-
-300 500 700 500
-2
-400 0
-400 1000
-3
-600 0
-550 500
-600 1000
-
-300 500 700 500
-3
-400 0
-450 500
-400 1000
-2
-600 0
-600 1000
-
-0 0 1000 0 1000 1000 0 1000
-1 1 999 1
-7
-10 0
-520 345
-10 350
-10 500
-27 514
-473 986
-10 1000
-7
-990 0
-535 13
-965 487
-990 500
-990 580
-421 590
-990 1000
-
-1 999 999 999
-7
-10 0
-579 410
-10 420
-10 500
-35 513
-465 987
-10 1000
-7
-990 0
-527 14
-973 486
-990 500
-990 650
-480 655
-990 1000
-234.178735805652 2229.120915804260
-
-s - p:: 234.178735805651939
-
-*/

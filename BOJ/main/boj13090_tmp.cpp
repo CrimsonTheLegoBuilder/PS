@@ -432,20 +432,19 @@ ld dijkstra(const std::vector<Info> G[], const int& v, const int& g, const int& 
 ld dijkstra(
 	const Pos& s, const Pos& t,
 	const Event& we, const ld& m,
-	const Polygon& W, const Polygon& E,
-	const Polygon& W_, const Polygon& E_) {
+	const Polygon& W, const Polygon& E, const Polygon& H) {
 	GW[1].clear(); GE[1].clear();
 	Pos w = we.w.p(m), e = we.e.p(m);
 	int sz;
 	sz = W.size();
-	if (connectable(w, s, W_, 0)) GW[1].push_back(Info(0, (s - w).mag()));
+	if (connectable(w, s, H)) GW[1].push_back(Info(0, (s - w).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(w, W[i], W_, 0))
+		if (connectable(w, W[i], H))
 			GW[1].push_back(Info(i + 2, (w - W[i]).mag()));
 	sz = E.size();
-	if (connectable(e, t, E_, 0)) GE[1].push_back(Info(0, (t - e).mag()));
+	if (connectable(e, t, H)) GE[1].push_back(Info(0, (t - e).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(e, E[i], E_, 0))
+		if (connectable(e, E[i], H))
 			GE[1].push_back(Info(i + 2, (e - E[i]).mag()));
 	ld dw = dijkstra(GW, 1, 0, N + 5);
 	ld de = dijkstra(GE, 1, 0, M + 5);
@@ -454,16 +453,15 @@ ld dijkstra(
 ld ternary_search(
 	const Pos& s, const Pos& t,
 	const Event& we,
-	const Polygon& W, const Polygon& E,
-	const Polygon& W_, const Polygon& E_) {
+	const Polygon& W, const Polygon& E, const Polygon& H) {
 	ld lo = 0, hi = 1;
 	ld m1, m2, d1, d2;
 	int c = CNT;
 	while (c--) {
 		m1 = (lo + lo + hi) / 3;
 		m2 = (lo + hi + hi) / 3;
-		d1 = dijkstra(s, t, we, m1, W, E, W_, E_);
-		d2 = dijkstra(s, t, we, m2, W, E, W_, E_);
+		d1 = dijkstra(s, t, we, m1, W, E, H);
+		d2 = dijkstra(s, t, we, m2, W, E, H);
 		if (d1 > d2) lo = m1;
 		else hi = m2;
 	}
@@ -484,14 +482,15 @@ void solve() {
 	Pos s, t; std::cin >> s >> t;
 	std::cin >> N; Polygon W(N); for (Pos& p : W) std::cin >> p;
 	std::cin >> M; Polygon E(M); for (Pos& p : E) std::cin >> p;
-	if (!eq(W.back().y, 1000)) std::reverse(W.begin(), W.end());
-	if (!eq(E.back().y, 0)) std::reverse(E.begin(), E.end());
+	if (!eq(W.back().y, 0)) std::reverse(W.begin(), W.end());
+	if (!eq(E.back().y, 1000)) std::reverse(E.begin(), E.end());
+	Polygon H = W; for (const Pos& p : E) H.push_back(p);
 	Polygon W_ = W; W_.push_back(Pos(0, 1000)); W_.push_back(Pos(0, 0));
 	Polygon E_ = E; E_.push_back(Pos(1000, 0)); E_.push_back(Pos(1000, 1000));
 	ld b = INF, l = INF, d = -1; Segs B; Events V;
 	//connect vertice
 	for (int i = 0; i < N; i++) {
-		if (connectable(s, W[i], W_, 0)) {
+		if (connectable(s, W[i], H)) {
 			d = (s - W[i]).mag();
 			GW[0].push_back(Info(i + 2, d));
 			GW[i + 2].push_back(Info(0, d));
@@ -499,7 +498,7 @@ void solve() {
 			G[i + 2].push_back(Info(0, d));
 		}
 		for (int j = i + 1; j < N; j++) {
-			if (connectable(W[i], W[j], W_, 0)) {
+			if (connectable(W[i], W[j], H)) {
 				d = (W[i] - W[j]).mag();
 				GW[i + 2].push_back(Info(j + 2, d));
 				GW[j + 2].push_back(Info(i + 2, d));
@@ -509,7 +508,7 @@ void solve() {
 		}
 	}
 	for (int i = 0; i < M; i++) {
-		if (connectable(t, E[i], E_, 0)) {
+		if (connectable(t, E[i], H)) {
 			d = (t - E[i]).mag();
 			GE[0].push_back(Info(i + 2, d));
 			GE[i + 2].push_back(Info(0, d));
@@ -517,7 +516,7 @@ void solve() {
 			G[N + i + 2].push_back(Info(1, d));
 		}
 		for (int j = i + 1; j < M; j++) {
-			if (connectable(E[i], E[j], E_, 0)) {
+			if (connectable(E[i], E[j], H)) {
 				d = (E[i] - E[j]).mag();
 				GE[i + 2].push_back(Info(j + 2, d));
 				GE[j + 2].push_back(Info(i + 2, d));
@@ -621,30 +620,30 @@ void solve() {
 		int iw = N + M + 2, ie = iw + 1;
 		for (int k = 0; k < sz; k++) {
 			Pos w = B[k].s, e = B[k].e;
-			//if (!connectable(w, e, H, 0)) continue;
+			if (!connectable(w, e, H, 0)) continue;
 			G[iw].push_back(Info(ie, 0));
 			G[ie].push_back(Info(iw, 0));
-			if (connectable(s, w, W_, 0)) {
+			if (connectable(s, w, H)) {
 				//std::cout << "good\n";
 				d = (s - w).mag();
 				G[0].push_back(Info(iw, d));
 			}
 			for (int i = 0; i < N; i++) {
-				if (connectable(W[i], w, W_, 0)) {
+				if (connectable(W[i], w, H)) {
 					//std::cout << "good\n";
 					d = (W[i] - w).mag();
 					G[i + 2].push_back(Info(iw, d));
 					G[iw].push_back(Info(i + 2, d));
 				}
 			}
-			if (connectable(t, e, E_, 0)) {
+			if (connectable(t, e, H)) {
 				//std::cout << "good\n";
 				d = (t - e).mag();
 				G[1].push_back(Info(ie, d));
 				G[ie].push_back(Info(1, d));
 			}
 			for (int j = 0; j < M; j++) {
-				if (connectable(E[j], e, E_, 0)) {
+				if (connectable(E[j], e, H)) {
 					//std::cout << "good\n";
 					d = (E[j] - e).mag();
 					G[N + j + 2].push_back(Info(ie, d));
@@ -661,7 +660,7 @@ void solve() {
 	if (V.size()) {
 		//std::cout << "V::\n";
 		for (const Event& we : V) {
-			d = ternary_search(s, t, we, W, E, W_, E_);
+			d = ternary_search(s, t, we, W, E, H);
 			l = std::min(l, d);
 		}
 	}

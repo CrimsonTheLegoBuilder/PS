@@ -149,7 +149,7 @@ ld intersection(const Seg& s1, const Seg& s2, const int& f = 0) {
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
 }
-bool connectable(const Pos& u, const Pos& v, const Polygon& H, const bool& f = 1) {
+bool connectable(const Pos& u, const Pos& v, const Polygon& H) {
 	int sz = H.size();
 	Pos m = (u + v) * .5;
 	for (int i = 0; i < sz; i++) {
@@ -157,8 +157,7 @@ bool connectable(const Pos& u, const Pos& v, const Polygon& H, const bool& f = 1
 		if (intersect(p0, p1, u, v, WEAK)) return 0;
 		if (on_seg_weak(u, v, p0)) return 0;
 	}
-	if (f == 1 && inner_check(H, m) == 2) return 0;
-	if (f == 0 && inner_check(H, m) == 0) return 0;
+	if (inner_check(H, m) == 0) return 0;
 	return 1;
 }
 struct Event {
@@ -179,8 +178,8 @@ struct Event {
 typedef std::vector<Event> Events;
 struct Info {
 	int i;
-	ld c;
-	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
+	double c;
+	Info(int i_ = 0, double c_ = 0) : i(i_), c(c_) {}
 	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
 };
 ld C[LEN * LEN]; int vp;
@@ -213,14 +212,14 @@ ld dijkstra(
 	Pos w = we.w.p(m), e = we.e.p(m);
 	int sz;
 	sz = W.size();
-	if (connectable(w, s, W_, 0)) GW[1].push_back(Info(0, (s - w).mag()));
+	if (connectable(w, s, W_)) GW[1].push_back(Info(0, (s - w).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(w, W[i], W_, 0))
+		if (connectable(w, W[i], W_))
 			GW[1].push_back(Info(i + 2, (w - W[i]).mag()));
 	sz = E.size();
-	if (connectable(e, t, E_, 0)) GE[1].push_back(Info(0, (t - e).mag()));
+	if (connectable(e, t, E_)) GE[1].push_back(Info(0, (t - e).mag()));
 	for (int i = 0; i < sz; i++)
-		if (connectable(e, E[i], E_, 0))
+		if (connectable(e, E[i], E_))
 			GE[1].push_back(Info(i + 2, (e - E[i]).mag()));
 	ld dw = dijkstra(GW, 1, 0, N + 5);
 	ld de = dijkstra(GE, 1, 0, M + 5);
@@ -258,7 +257,7 @@ void solve() {
 	Polygon E_ = E; E_.push_back(Pos(1000, 0)); E_.push_back(Pos(1000, 1000));
 	ld b = INF, l = INF, d = -1; Segs B; Events V;
 	for (int i = 0; i < N; i++) {
-		if (connectable(s, W[i], W_, 0)) {
+		if (connectable(s, W[i], W_)) {
 			d = (s - W[i]).mag();
 			GW[0].push_back(Info(i + 2, d));
 			GW[i + 2].push_back(Info(0, d));
@@ -266,7 +265,7 @@ void solve() {
 			G[i + 2].push_back(Info(0, d));
 		}
 		for (int j = i + 1; j < N; j++) {
-			if (connectable(W[i], W[j], W_, 0)) {
+			if (connectable(W[i], W[j], W_)) {
 				d = (W[i] - W[j]).mag();
 				GW[i + 2].push_back(Info(j + 2, d));
 				GW[j + 2].push_back(Info(i + 2, d));
@@ -276,7 +275,7 @@ void solve() {
 		}
 	}
 	for (int i = 0; i < M; i++) {
-		if (connectable(t, E[i], E_, 0)) {
+		if (connectable(t, E[i], E_)) {
 			d = (t - E[i]).mag();
 			GE[0].push_back(Info(i + 2, d));
 			GE[i + 2].push_back(Info(0, d));
@@ -284,7 +283,7 @@ void solve() {
 			G[N + i + 2].push_back(Info(1, d));
 		}
 		for (int j = i + 1; j < M; j++) {
-			if (connectable(E[i], E[j], E_, 0)) {
+			if (connectable(E[i], E[j], E_)) {
 				d = (E[i] - E[j]).mag();
 				GE[i + 2].push_back(Info(j + 2, d));
 				GE[j + 2].push_back(Info(i + 2, d));
@@ -355,24 +354,24 @@ void solve() {
 			Pos w = B[k].s, e = B[k].e;
 			G[iw].push_back(Info(ie, 0));
 			G[ie].push_back(Info(iw, 0));
-			if (connectable(s, w, W_, 0)) {
+			if (connectable(s, w, W_)) {
 				d = (s - w).mag();
 				G[0].push_back(Info(iw, d));
 			}
 			for (int i = 0; i < N; i++) {
-				if (connectable(W[i], w, W_, 0)) {
+				if (connectable(W[i], w, W_)) {
 					d = (W[i] - w).mag();
 					G[i + 2].push_back(Info(iw, d));
 					G[iw].push_back(Info(i + 2, d));
 				}
 			}
-			if (connectable(t, e, E_, 0)) {
+			if (connectable(t, e, E_)) {
 				d = (t - e).mag();
 				G[1].push_back(Info(ie, d));
 				G[ie].push_back(Info(1, d));
 			}
 			for (int j = 0; j < M; j++) {
-				if (connectable(E[j], e, E_, 0)) {
+				if (connectable(E[j], e, E_)) {
 					d = (E[j] - e).mag();
 					G[N + j + 2].push_back(Info(ie, d));
 					G[ie].push_back(Info(N + j + 2, d));

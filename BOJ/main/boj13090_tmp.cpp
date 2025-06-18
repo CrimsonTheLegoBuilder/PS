@@ -28,8 +28,6 @@ inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std
 #define STRONG 0
 #define WEAK 1
 
-#define CNT 25
-
 int N, M, K;
 struct Pos {
 	ld x, y;
@@ -232,10 +230,10 @@ ld ternary_search(
 	const Polygon& W_, const Polygon& E_) {
 	ld lo = 0, hi = 1;
 	ld m1, m2, d1, d2;
-	int c = CNT;
+	int c = 15;
 	while (c--) {
-		m1 = (lo + lo + hi) / 3;
-		m2 = (lo + hi + hi) / 3;
+		m1 = (lo + lo + lo + lo + hi + hi + hi) / 7;
+		m2 = (lo + lo + lo + hi + hi + hi + hi) / 7;
 		d1 = dijkstra(s, t, we, m1, W, E, W_, E_);
 		d2 = dijkstra(s, t, we, m2, W, E, W_, E_);
 		if (d1 > d2) lo = m1;

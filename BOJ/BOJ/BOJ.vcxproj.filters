@@ -69,9 +69,6 @@
     <ClCompile Include="..\library\convexhull_dnc.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\lower_convexhull_search.cpp">
-      <Filter>소스 파일\segment_tree</Filter>
-    </ClCompile>
     <ClCompile Include="..\library\segment_tree.cpp">
       <Filter>소스 파일\segment_tree</Filter>
     </ClCompile>
@@ -143,6 +140,12 @@
     </ClCompile>
     <ClCompile Include="..\library\fraction.cpp">
       <Filter>소스 파일\fraction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\checker.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\boj13090_tmp.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

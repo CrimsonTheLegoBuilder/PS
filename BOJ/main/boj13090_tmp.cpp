@@ -25,11 +25,6 @@ inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std
 #define LO x
 #define HI y
 
-#define LINE 1
-#define CIRCLE 2
-#define SEG 3
-#define POS 4
-
 #define STRONG 0
 #define WEAK 1
 

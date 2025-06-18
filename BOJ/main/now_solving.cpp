@@ -391,7 +391,7 @@ struct Event {
 	}
 	bool val() const { return w.s != w.e && e.s != e.e; }
 };
-typedef std::vector<Event> Vevent;
+typedef std::vector<Event> Events;
 struct Info {
 	int i;
 	ld c;
@@ -399,6 +399,7 @@ struct Info {
 	bool operator < (const Info& x) const { return zero(c - x.c) ? i < x.i : c > x.c; }
 };
 ld C[LEN * LEN]; int vp;
+typedef std::vector<Info> Vinfo;
 std::vector<Info> G[LEN * LEN];
 std::vector<Info> GW[LEN], GE[LEN];
 int szw, sze;
@@ -473,7 +474,7 @@ void solve() {
 	Polygon H = W; for (const Pos& p : E) H.push_back(p);
 	Polygon W_ = W; W_.push_back(Pos(0, 1000)); W_.push_back(Pos(0, 0));
 	Polygon E_ = E; E_.push_back(Pos(1000, 0)); E_.push_back(Pos(1000, 1000));
-	ld b = INF, l = INF, d = -1; Segs B; Vevent V;
+	ld b = INF, l = INF, d = -1; Segs B; Events V;
 	//connect vertice
 	for (int i = 0; i < N; i++) {
 		if (connectable(s, W[i], H)) {

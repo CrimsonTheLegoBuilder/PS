@@ -6,8 +6,8 @@
 #include <vector>
 typedef long long ll;
 typedef double ld;
-const ll INF = 1e17;
-const int LEN = 1e5 + 10;
+const ll INF = 1e18;
+const int LEN = 3e4 + 10;
 
 int N, T;
 struct Pos {
@@ -39,7 +39,7 @@ ll rotating_calipers(const int& t) {
 	if (sz == 2) return (H[0] - H[1]).Euc();
 	ll d = 0;
 	for (int i = 0, j = 1; i < sz; i++) {
-		while (cross(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz])) {
+		while (cross(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0) {
 			d = std::max(d, (H[i] - H[j]).Euc());
 			j = (j + 1) % sz;
 		}
@@ -50,8 +50,8 @@ ll rotating_calipers(const int& t) {
 ll ternary_search() {
 	ll s = 0, e = T, d1, d2;
 	while (s + 2 < e) {
-		ll t1 = (s + s + s + s + e + e + e) / 7;
-		ll t2 = (s + s + s + e + e + e + e) / 7;
+		ll t1 = (s + s + e) / 3;
+		ll t2 = (s + e + e) / 3;
 		d1 = rotating_calipers(t1);
 		d2 = rotating_calipers(t2);
 		if (d1 <= d2) e = t2;
@@ -71,7 +71,8 @@ void solve() {
 	std::cout.precision(15);
 	std::cin >> N >> T;
 	for (int i = 0; i < N; i++) std::cin >> P[i].x >> P[i].y >> V[i].x >> V[i].y;
-	std::cout << T << "\n" << ternary_search() << "\n";
+	ll D = ternary_search();
+	std::cout << T << "\n" << D << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj13310

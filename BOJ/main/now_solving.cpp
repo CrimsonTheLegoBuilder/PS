@@ -9,7 +9,7 @@ typedef double ld;
 const ll INF = 1e17;
 const int LEN = 1e5 + 10;
 
-int N;
+int N, T;
 struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
@@ -28,8 +28,6 @@ void init() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(6);
-	std::cin >> N;
-	for (int i = 0; i < N; i++) std::cin >> H[i].x >> H[i].y;
 	return;
 }
 ll rotating_calipers(const int& t) {
@@ -48,6 +46,20 @@ ll rotating_calipers(const int& t) {
 	if (N == 2) {  }
 	return;
 }
+ll ternary_search() {
+	ll s = 0, e = T, d1, d2;
+	while (s + 2 < e) {
+		ll t1 = (s + s + s + s + e + e + e) / 7;
+		ll t2 = (s + s + s + e + e + e + e) / 7;
+		d1 = rotating_calipers(t1);
+		d2 = rotating_calipers(t2);
+		if (d1 <= d2) e = t2;
+		else s = t1;
+	}
+	ll d = INF;
+	for (int t = s; t <= e; t++) d = std::min(d, rotating_calipers(t));
+	return d;
+}
 #define BOJ
 #ifdef BOJ
 void solve() {
@@ -55,7 +67,9 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-
+	std::cin >> N >> T;
+	for (int i = 0; i < N; i++) std::cin >> P[i].x >> P[i].y >> V[i].x >> V[i].y;
+	std::cout << ternary_search() << "\n";
 	return;
 }
 #else

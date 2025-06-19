@@ -345,9 +345,9 @@ void solve() {
 			}
 		}
 	}
+	int iw = N + M + 2, ie = iw + 1;
 	if (B.size()) {
 		int sz = B.size();
-		int iw = N + M + 2, ie = iw + 1;
 		for (int k = 0; k < sz; k++) {
 			Pos w = B[k].s, e = B[k].e;
 			G[iw].push_back(Info(ie, 0));
@@ -377,15 +377,49 @@ void solve() {
 			}
 			iw += 2; ie += 2;
 		}
-		d = dijkstra(G, 0, 1, LEN * LEN);
-		l = std::min(l, d);
+		//d = dijkstra(G, 0, 1, LEN * LEN);
+		//l = std::min(l, d);
 	}
 	if (V.size()) {
 		for (const Event& we : V) {
-			d = ternary_search(s, t, we, W, E, W_, E_);
-			l = std::min(l, d);
+			//d = ternary_search(s, t, we, W, E, W_, E_);
+			//l = std::min(l, d);
+			const Seg& sw = we.w, & se = we.e;
+			for (int n = 0; n <= N; n++) {
+				const Pos& w = n < N ? W[n] : s;
+				if (ccw(sw.s, sw.e, w) <= 0) continue;
+				Pos v = se.s - sw.s;
+				for (int m = 0; m <= M; m++) {
+					const Pos& e = m < M ? E[m] : t;
+					if (ccw(se.s, se.e, e) >= 0) continue;
+					Pos e_ = e - v;
+					Seg we1 = Seg(w, e_);
+					ld x = intersection(sw, we1, 2);
+					Pos pw = sw.p(x);
+					if (x <= 0) pw = sw.s;
+					if (x >= 1) pw = sw.e;
+					Pos pe = pw + v;
+					if (!on_seg_strong(se.s, se.e, pe)) continue;
+					bool fw = connectable(w, pw, W_);
+					bool fe = connectable(e, pe, E_);
+					if (fw && fe) {
+						G[iw].push_back(Info(ie, 0));
+						G[ie].push_back(Info(iw, 0));
+						d = (w - pw).mag();
+						int i = n < N ? n + 2 : 0;
+						G[i].push_back(Info(iw, d));
+						G[iw].push_back(Info(i, d));
+						d = (e - pe).mag();
+						int j = m < M ? N + m + 2 : 1;
+						G[j].push_back(Info(ie, d));
+						G[ie].push_back(Info(j, d));
+						iw += 2; ie += 2;
+					}
+				}
+			}
 		}
 	}
+	d = dijkstra(G, 0, 1, LEN * LEN);
 	std::cout << b << " " << b + l << "\n";
 	return;
 }

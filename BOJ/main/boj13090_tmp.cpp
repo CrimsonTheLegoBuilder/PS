@@ -391,13 +391,16 @@ void solve() {
 					Pos e_ = e - v;
 					Seg we1 = Seg(w, e_);
 					ld x = intersection(sw, we1, 2);
-					if (x < 0 || 1 < x) continue;
 					Pos pw = sw.p(x);
+					if (x <= 0) pw = sw.s;
+					if (x >= 1) pw = sw.e;
 					Pos pe = pw + v;
 					if (!on_seg_strong(se.s, se.e, pe)) continue;
 					bool fw = connectable(w, pw, W_);
 					bool fe = connectable(e, pe, E_);
 					if (fw && fe) {
+						G[iw].push_back(Info(ie, 0));
+						G[ie].push_back(Info(iw, 0));
 						d = (w - pw).mag();
 						int i = n < N ? n + 2 : 0;
 						G[i].push_back(Info(iw, d));

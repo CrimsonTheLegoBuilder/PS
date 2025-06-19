@@ -419,8 +419,9 @@ void solve() {
 			}
 		}
 	}
+	// std::cout << b << " " << b + l << "\n";
 	d = dijkstra(G, 0, 1, LEN * LEN);
-	std::cout << b << " " << b + l << "\n";
+	std::cout << b << " " << b + d << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj13090

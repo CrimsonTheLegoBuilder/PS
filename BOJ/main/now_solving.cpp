@@ -64,6 +64,22 @@ ll ternary_search() {
 	}
 	return d;
 }
+ll bi_search() {
+	ll s = 0, e = T, d1, d2;
+	while (s + 1 < e) {
+		ll t = s + e >> 1;
+		d1 = rotating_calipers(t);
+		d2 = rotating_calipers(t + 1);
+		if (d1 <= d2) e = t;
+		else s = t;
+	}
+	ll d = INF;
+	for (int t = s; t <= e; t++) {
+		ll l = rotating_calipers(t);
+		if (d > l) d = l, T = t;
+	}
+	return d;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -71,7 +87,8 @@ void solve() {
 	std::cout.precision(15);
 	std::cin >> N >> T;
 	for (int i = 0; i < N; i++) std::cin >> P[i].x >> P[i].y >> V[i].x >> V[i].y;
-	ll D = ternary_search();
+	//ll D = ternary_search();
+	ll D = bi_search();
 	std::cout << T << "\n" << D << "\n";
 	return;
 }

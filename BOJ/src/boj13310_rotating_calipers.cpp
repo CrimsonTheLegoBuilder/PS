@@ -78,7 +78,7 @@ ll ternary_search() {
 }
 ll bi_search() {
 	ll s = 0, e = T, d1, d2;
-	while (s + 1 < e) {
+	while (s + 4 < e) {
 		ll t = s + e >> 1;
 		d1 = rotating_calipers(t);
 		d2 = rotating_calipers(t + 1);

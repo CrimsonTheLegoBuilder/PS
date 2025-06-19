@@ -36,17 +36,17 @@ ll rotating_calipers(const int& t) {
 	//}
 	for (int i = 0; i < N; i++) C[i] = P[i] + V[i] * t;
 	std::sort(C, C + N);
-	int S = -1;
+	int S = -1, sz;
 	for (int i = 0; i < N; i++) {
 		while (S > 0 && cross(H[S - 1], H[S], C[i]) <= 0) S--;
 		H[++S] = C[i];
 	} S--;
-	int S1 = S + 1;
+	sz = S + 1;
 	for (int i = N - 1; i >= 0; i--) {
-		while (S > S1 && cross(H[S - 1], H[S], C[i]) <= 0) S--;
+		while (S > sz && cross(H[S - 1], H[S], C[i]) <= 0) S--;
 		H[++S] = C[i];
 	} S--;
-	int sz = S + 1;
+	sz = S + 1;
 	if (sz == 1) return 0;
 	if (sz == 2) return (H[0] - H[1]).Euc();
 	ll d = 0;
@@ -78,7 +78,7 @@ ll ternary_search() {
 }
 ll bi_search() {
 	ll s = 0, e = T, d1, d2;
-	while (s + 1 < e) {
+	while (s + 4 < e) {
 		ll t = s + e >> 1;
 		d1 = rotating_calipers(t);
 		d2 = rotating_calipers(t + 1);

@@ -14,24 +14,16 @@ struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	ll operator * (const Pos& p) const { return { (ll)x * p.x + (ll)y * p.y }; }
+	Pos operator * (const int& n) const { return { x * n, y * n }; }
 	ll operator / (const Pos& p) const { return { (ll)x * p.y - (ll)y * p.x }; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	ld mag() const { return hypot(x, y); }
 } P[LEN], V[LEN], H[LEN];
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
-void init() {
-	std::cin.tie(0)->sync_with_stdio(0);
-	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(6);
-	return;
-}
 ll rotating_calipers(const int& t) {
-	init();
+	for (int i = 0; i < N; i++) H[i] = P[i] + V[i] * t;
 	std::swap(H[0], *std::min_element(H, H + N));
 	std::sort(H + 1, H + N, [&](const Pos& p, const Pos& q) {
 		ll ret = cross(H[0], p, q);
@@ -42,9 +34,18 @@ ll rotating_calipers(const int& t) {
 		while (S >= 1 && cross(H[S - 1], H[S], H[i]) <= 0) S--;
 		H[++S] = H[i];
 	}
-	N = S + 1;
-	if (N == 2) {  }
-	return;
+	int sz = S + 1;
+	if (sz == 1) return 0;
+	if (sz == 2) return (H[0] - H[1]).Euc();
+	ll d = 0;
+	for (int i = 0, j = 1; i < sz; i++) {
+		while (cross(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz])) {
+			d = std::max(d, (H[i] - H[j]).Euc());
+			j = (j + 1) % sz;
+		}
+		d = std::max(d, (H[i] - H[j]).Euc());
+	}
+	return d;
 }
 ll ternary_search() {
 	ll s = 0, e = T, d1, d2;
@@ -57,11 +58,12 @@ ll ternary_search() {
 		else s = t1;
 	}
 	ll d = INF;
-	for (int t = s; t <= e; t++) d = std::min(d, rotating_calipers(t));
+	for (int t = s; t <= e; t++) {
+		ll l = rotating_calipers(t);
+		if (d > l) d = l, T = t;
+	}
 	return d;
 }
-#define BOJ
-#ifdef BOJ
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -69,9 +71,12 @@ void solve() {
 	std::cout.precision(15);
 	std::cin >> N >> T;
 	for (int i = 0; i < N; i++) std::cin >> P[i].x >> P[i].y >> V[i].x >> V[i].y;
-	std::cout << ternary_search() << "\n";
+	std::cout << T << "\n" << ternary_search() << "\n";
 	return;
 }
+int main() { solve(); return 0; }//boj13310
+#define BOJ
+#ifdef BOJ
 #else
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -146,5 +151,5 @@ void solve() {
 	return;
 }
 #endif
-int main() { solve(); return 0; }//boj13090
+//int main() { solve(); return 0; }//boj13090
 //boj 27712 10239 22635 29691 31392 16068

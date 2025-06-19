@@ -384,17 +384,17 @@ void solve() {
 			for (int n = 0; n <= N; n++) {
 				const Pos& w = n < N ? W[n] : s;
 				if (ccw(sw.s, sw.e, w) <= 0) continue;
-				Pos v = sw.s - se.s;
-				for (int m = 0; m < M; m++) {
+				Pos v = se.s - sw.s;
+				for (int m = 0; m <= M; m++) {
 					const Pos& e = m < M ? E[m] : t;
 					if (ccw(se.s, se.e, e) >= 0) continue;
 					Pos e_ = e - v;
 					Seg we1 = Seg(w, e_);
 					ld x = intersection(sw, we1, 2);
-					if (x <= 0 || 1 <= x) continue;
+					if (x < 0 || 1 < x) continue;
 					Pos pw = sw.p(x);
 					Pos pe = pw + v;
-					if (!on_seg_weak(se.s, se.e, pe)) continue;
+					if (!on_seg_strong(se.s, se.e, pe)) continue;
 					bool fw = connectable(w, pw, W_);
 					bool fe = connectable(e, pe, E_);
 					if (fw && fe) {

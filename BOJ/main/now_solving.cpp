@@ -16,7 +16,7 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 const ll INF = 1e17;
-const int LEN = 5e5 + 1;
+const int LEN = 5e5 + 10;
 const ld TOL = 1e-7;
 const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
@@ -151,11 +151,14 @@ Polygon graham_scan(Polygon& C) {
 }
 ld R[LEN];
 int RI[LEN], LI[LEN];
+int RC[LEN], LC[LEN];
 ld RR[LEN], LR[LEN];
 ld yes_O(Polygon& P) {
+	std::cout << "YES::\n";
 	R[0] = 0;
 	for (int i = 0; i < N; i++) {
 		RR[i] = LR[i] = 0;
+		RC[i] = LC[i] = 0;
 		RI[i] = LI[i] = -1;
 	}
 	std::sort(P.begin(), P.end(), [&](const Pos& p, const Pos& q) -> bool { return p / q > 0; });
@@ -167,16 +170,16 @@ ld yes_O(Polygon& P) {
 	}
 	int sz = H.size();
 	for (int i = 0; i < sz; i++) {
+		//std::cout << "H[" << i << "]:: " << H[i] << "\n";
 		P[H[i].i].f = i;
 		R[i + 1] = R[i] + (H[i] - H[(i + 1) % sz]).mag();
 	}
 	Polygon S;
 	int z = 0;
 	ld r = 0;
-	for (int i = 0, i0; i < N; i++) {
-		if (P[i].f != -1) { r = 0; z = i; LI[i] = z; S = { P[i] }; continue; }
-		i0 = (i - 1 + N) % N;
-		LI[i] = z;
+	for (int i = 0; i < N; i++) {
+		if (P[i].f != -1) { r = 0; z = i; LI[i] = P[z].f; S = { P[i] }; continue; }
+		LI[i] = P[z].f;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
 			S.pop_back();
@@ -184,13 +187,13 @@ ld yes_O(Polygon& P) {
 		r += (S.back() - P[i]).mag();
 		LR[i] = r;
 		S.push_back(P[i]);
+		LC[i] = S.size() - 1;
 	}
 	r = 0;
 	S.clear();
-	for (int i = N - 1, i0; i >= 0; i--) {
-		if (P[i].f != -1) { r = 0; z = i; RI[i] = z; S = { P[i] }; continue; }
-		i0 = (i + 1) % N;
-		RI[i] = z;
+	for (int i = N - 1; i >= 0; i--) {
+		if (P[i].f != -1) { r = 0; z = i; RI[i] = P[z].f; S = { P[i] }; continue; }
+		RI[i] = P[z].f;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
 			S.pop_back();
@@ -198,19 +201,38 @@ ld yes_O(Polygon& P) {
 		r += (S.back() - P[i]).mag();
 		RR[i] = r;
 		S.push_back(P[i]);
+		RC[i] = S.size() - 1;
 	}
 	r = 0;
 	ld l0 = P[0].mag(), l1 = P.back().mag();
 	ld r0 = l0, r1 = l1;
+	//for (int i = 0; i < N; i++) std::cout << "R[" << i << "]:: " << R[i] << "\n";
 	for (int i = 0, j = 1; i < N - 1; i++, j++) {
 		r0 = l0, r1 = l1;
-		if (LI[i] != -1) r0 += LR[i];
+		r0 += LR[i];
+		//std::cout << "LR[" << i << "]:: " << LR[i] << "\n";
 		r0 += R[LI[i]] - R[0];
+		//std::cout << "LI[" << i << "]:: " << LI[i] << "\n";
 		r0 += P[i].mag();
-		if (RI[j] != -1) r1 += RR[j];
+		//std::cout << "RR[" << j << "]:: " << RR[j] << "\n";
+		r1 += RR[j];
+		//std::cout << "RI[" << j << "]:: " << RI[j] << "\n";
 		r1 += R[sz - 1] - R[RI[j]];
 		r1 += P[j].mag();
-		r = std::max(r, r0 + r1);
+		//std::cout << "LI[" << 0 << "]:: " << LI[0] << "\n";
+		//std::cout << "RI[" << N - 1 << "]:: " << RI[N - 1] << "\n";
+		//std::cout << "r0:: " << r0 << " ";
+		//std::cout << "r1:: " << r1 << "\n";
+		//std::cout << "LC[" << i << "]:: " << LC[i] << "\n";
+		//std::cout << "RC[" << j << "]:: " << RC[j] << "\n";
+		int cl = LC[i] + LI[i] - LI[0] + 1;
+		int cr = RC[j] + RI[N - 1] - RI[j] + 1;
+		//std::cout << "c:: " << c << "\n";
+		//r = std::max(r, r0 + r1);
+		if (cl > 1 && cr > 1 && cl + cr == N) r = std::max(r, r0 + r1);
+		//std::cout << "r:: " << r << " ";
+		//std::cout << "P[i]:: " << P[i] << " ";
+		//std::cout << "P[j]:: " << P[j] << "\n";
 	}
 	return r;
 }
@@ -218,6 +240,7 @@ ld no_O(Polygon& P, Polygon& H) {
 	R[0] = 0;
 	for (int i = 0; i < N; i++) {
 		RR[i] = LR[i] = 0;
+		RC[i] = LC[i] = 0;
 		RI[i] = LI[i] = -1;
 	}
 	int sz = H.size();
@@ -230,9 +253,8 @@ ld no_O(Polygon& P, Polygon& H) {
 	Polygon S;
 	int z = s;
 	ld r = 0;
-	for (int j = s, i = j % N, i0; j != N + s; j++, i = j % N) {
+	for (int j = s, i = j % N; j != N + s; j++, i = j % N) {
 		if (P[i].f != -1) { r = 0; z = i; LI[i] = z; S = { P[i] }; continue; }
-		i0 = (i - 1 + N) % N;
 		LI[i] = z;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
@@ -241,12 +263,12 @@ ld no_O(Polygon& P, Polygon& H) {
 		r += (S.back() - P[i]).mag();
 		LR[i] = r;
 		S.push_back(P[i]);
+		LC[i] = S.size() - 1;
 	}
 	S.clear();
 	z = s;
-	for (int j = s, i = j % N, i0; j != N + s; j++, i = (i - 1 + N) % N) {
-		if (P[i].f != -1) { r = 0;z = i; RI[i] = z; S = { P[i] }; continue; }
-		i0 = (i + 1) % N;
+	for (int j = s, i = j % N; j != N + s; j++, i = (i - 1 + N) % N) {
+		if (P[i].f != -1) { r = 0; z = i; RI[i] = z; S = { P[i] }; continue; }
 		RI[i] = z;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
@@ -255,23 +277,33 @@ ld no_O(Polygon& P, Polygon& H) {
 		r += (S.back() - P[i]).mag();
 		RR[i] = r;
 		S.push_back(P[i]);
+		RC[i] = S.size() - 1;
 	}
 	r = 0;
 	ld r0 = 0, r1 = 0;
+	auto hf = [&](const Pos& p, const Pos& q) -> bool {
+		ll fc = p * q;
+		ll tq = p / q;
+		return !tq ? fc > 0 : tq > 0;
+		};
 	for (int i = 0, j = 1, i1, j1; i < N; i++) {
-		while (P[i] / P[j] > 0) j = (j + 1) % N;
+		while (hf(P[i], P[j])) j = (j + 1) % N;
 		i1 = (j - 1 + N) % N;
 		j1 = (i - 1 + N) % N;
 		int s, e;
 		s = RI[i]; e = LI[i1];
-		r0 = (s <= e ? R[e] - R[s] : R[sz] - (R[s] - R[e]));
+		r0 = s <= e ? (R[e] - R[s]) : (R[sz] - (R[s] - R[e]));
 		r0 += RR[i] + LR[i1];
 		r0 += P[i].mag() + P[i1].mag();
 		s = RI[j]; e = LI[j1];
-		r1 = (s <= e ? R[e] - R[s] : R[sz] - (R[s] - R[e]));
+		r1 = s <= e ? (R[e] - R[s]) : (R[sz] - (R[s] - R[e]));
 		r1 += RR[j] + LR[j1];
 		r1 += P[j].mag() + P[j1].mag();
-		r = std::max(r, r0 + r1);
+		int cl = LC[i] + RC[i];
+		cl += LI[i] <= LI[i1] ? (LI[i1] - LI[i] + 1) : (sz - (LI[i] - LI[i1]) + 1);
+		int cr = LC[j] + RC[j];
+		cr += RI[j] <= RI[j1] ? (RI[j1] - RI[j] + 1) : (sz - (RI[j] - RI[j1]) + 1);
+		if (cl > 1 && cr > 1 && cl + cr == N) r = std::max(r, r0 + r1);
 	}
 	return r;
 }
@@ -279,14 +311,31 @@ void query() {
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
 	std::sort(P.begin(), P.end(), cmpt);
 	for (int i = 0; i < N; i++) P[i].i = i;
-	for (int i = 0, j = i + 1; i < N - 1; i++, j++) {
-		if (P[i] / P[j] == 0) { std::cout << 0 << "\n"; return; }
-	}
 	Polygon C = P; C.push_back(O);
 	Polygon H = graham_scan(C);
-	bool f = 0;
-	for (const Pos& p : H) if (p == O) { f = 1; break; }
-	std::cout << (f ? yes_O(P) : no_O(P, H)) << "\n";
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) P[H[i].i].f = i;
+	Polygon C_;
+	for (int i = 0; i < N; i++) if (P[i].f == -1) C_.push_back(P[i]);
+	C_.push_back(O);
+	Polygon I = graham_scan(C_);
+	bool f0 = 0, f1 = 0;
+	for (const Pos& p : H) if (p == O) { f0 = 1; break; }
+	for (const Pos& p : I) if (p == O) { f1 = 1; break; }
+	ld r = 0;
+	if (I.size() > 2 && H.size() > 2 && I.size() + H.size() - 2 == N) {
+		std::cout << "fuck::\n";
+		int sz = H.size();
+		for (int i = 0; i < sz; i++) r += (H[i] - H[(i + 1) % sz]).mag();
+		sz = I.size();
+		for (int i = 0; i < sz; i++) r += (I[i] - I[(i + 1) % sz]).mag();
+		std::cout << r << "\n";
+		return;
+	}
+	for (int i = 0, j = i + 1; i < N - 1; i++, j++) {
+		if (P[i] / P[j] == 0) { std::cout << .0 << "\n"; return; }
+	}
+	std::cout << (f0 ? yes_O(P) : no_O(P, H)) << "\n";
 	return;
 }
 void solve() {
@@ -298,6 +347,54 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj31180
+
+/*
+
+5
+4
+0 3
+1 3
+3 1
+3 0
+4
+-4 0
+5 3
+0 -4
+-1 0
+5
+4 4
+5 0
+3 3
+3 2
+-4 2
+5
+1 1
+2 4
+1 4
+0 4
+-1 1
+4
+4 5
+-2 4
+1 4
+-5 -2
+
+2
+4
+-1 -1
+1 1
+1 -1
+-1 1
+5
+-1 -1
+1 1
+1 -1
+-1 1
+0 2
+
+
+*/
+
 #define BOJ
 #ifdef BOJ
 #else

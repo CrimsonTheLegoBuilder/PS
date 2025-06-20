@@ -78,7 +78,7 @@ struct Pos {
 	int x, y;
 	int i, f;
 	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) { i = -1; f = -1; }
+	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) { i = -1; f = 0; }
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -111,7 +111,7 @@ const Pos INVAL = Pos(-1, -1);
 typedef std::vector<Pos> Polygon;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
-//bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
+bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
 bool cmpt(const Pos& p, const Pos& q) {
 	bool f0 = O < p;
 	bool f1 = O < q;
@@ -292,17 +292,27 @@ ll rotating_calipers(const Polygon& H) {
 }
 int RI[LEN], LI[LEN];
 ld RR[LEN], LR[LEN];
+void query() {
+	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
+	std::sort(P.begin(), P.end(), cmpt);
+	for (int i = 0; i < N; i++) P[i].i = i;
+	for (int i = 0, j = i + 1; i < N - 1; i++, j++) {
+		if (P[i] / P[j] == 0) { std::cout << 0 << "\n"; return; }
+	}
+	Polygon H = graham_scan(P);
+	std::sort(P.begin(), P.end(), cmpt);
+	for (const Pos& p : H) P[p.i].f = 1;
+	for (int i = 0; i < N; i++) {
+
+	}
+	return;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
-	std::sort(P.begin(), P.end(), cmpt);
-	for (int i = 0, j = i + 1; i < N - 1; i++, j++) {
-		if (P[i] / P[j] == 0) { std::cout << 0 << "\n"; return; }
-	}
-	for (int i = 0; i < N; i++) {}
+	std::cin >> Q; while (Q--) query();
 	return;
 }
 int main() { solve(); return 0; }//boj13310

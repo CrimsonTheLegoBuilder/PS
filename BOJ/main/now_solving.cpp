@@ -174,7 +174,7 @@ ld yes_O(Polygon& P) {
 	int z = 0;
 	ld r = 0;
 	for (int i = 0, i0; i < N; i++) {
-		if (P[i].f != -1) { z = i; LI[i] = z; S = { P[i] }; continue; }
+		if (P[i].f != -1) { r = 0; z = i; LI[i] = z; S = { P[i] }; continue; }
 		i0 = (i - 1 + N) % N;
 		LI[i] = z;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
@@ -188,7 +188,7 @@ ld yes_O(Polygon& P) {
 	r = 0;
 	S.clear();
 	for (int i = N - 1, i0; i >= 0; i--) {
-		if (P[i].f != -1) { z = i; RI[i] = z; S = { P[i] }; continue; }
+		if (P[i].f != -1) { r = 0; z = i; RI[i] = z; S = { P[i] }; continue; }
 		i0 = (i + 1) % N;
 		RI[i] = z;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
@@ -231,7 +231,7 @@ ld no_O(Polygon& P, Polygon& H) {
 	int z = s;
 	ld r = 0;
 	for (int j = s, i = j % N, i0; j != N + s; j++, i = j % N) {
-		if (P[i].f != -1) { z = i; LI[i] = z; S = { P[i] }; continue; }
+		if (P[i].f != -1) { r = 0; z = i; LI[i] = z; S = { P[i] }; continue; }
 		i0 = (i - 1 + N) % N;
 		LI[i] = z;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
@@ -245,7 +245,7 @@ ld no_O(Polygon& P, Polygon& H) {
 	S.clear();
 	z = s;
 	for (int j = s, i = j % N, i0; j != N + s; j++, i = (i - 1 + N) % N) {
-		if (P[i].f != -1) { z = i; RI[i] = z; S = { P[i] }; continue; }
+		if (P[i].f != -1) { r = 0;z = i; RI[i] = z; S = { P[i] }; continue; }
 		i0 = (i + 1) % N;
 		RI[i] = z;
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {

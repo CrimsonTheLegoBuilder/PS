@@ -8,6 +8,7 @@
 #include <random>
 #include <array>
 #include <tuple>
+#include <deque>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -15,7 +16,7 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 const ll INF = 1e17;
-const int LEN = 1e5 + 1;
+const int LEN = 5e5 + 1;
 const ld TOL = 1e-7;
 const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
@@ -27,34 +28,7 @@ inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ld sq(const ld& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
 inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
-ld flip(ld lat) {
-	if (zero(lat - PI * .5) || zero(lat + PI * .5)) return 0;
-	if (zero(lat)) return PI * .5;
-	if (lat > 0) return PI * .5 - lat;
-	if (lat < 0) return -(PI * .5) - lat;
-	return INF;
-}
-ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-//ll pow_fuck(ll a, ll b) {
-//	ll ret = 1;
-//	while (b) {
-//		if (b & 1) ret = ret * a % MOD;
-//		a = a * a % MOD;
-//		b >>= 1;
-//	}
-//	return ret;
-//}
-//ll powmod(ll a, ll b) {
-//	ll res = 1; a %= MOD;
-//	assert(b >= 0);
-//	for (; b; b >>= 1) {
-//		if (b & 1) res = res * a % MOD;
-//		a = a * a % MOD;
-//	}
-//	return res;
-//}
-struct Info { ll area, l, r; };
 
 #define LO x
 #define HI y
@@ -68,17 +42,12 @@ struct Info { ll area, l, r; };
 //freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
-//Euler characteristic : v - e + f == 1
-//Pick`s Theorem : A = i + b/2 - 1
-
-//2D============================================================================//
-
 int N, M, T, Q;
 struct Pos {
 	int x, y;
 	int i, f;
 	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) { i = -1; f = 0; }
+	Pos(int x_ = 0, int y_ = 0, int i_ = -1, int f_ = -1) : x(x_), y(y_), i(i_), f(f_) {}
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -106,7 +75,7 @@ struct Pos {
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
+}; const Pos O = Pos(0, 0, -1, -1);
 const Pos INVAL = Pos(-1, -1);
 typedef std::vector<Pos> Polygon;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
@@ -141,78 +110,6 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-void get_area_memo(Pos H[], ll memo[], const int& sz) {
-	memo[0] = 0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		memo[i + 1] = cross(Pos(0, 0), cur, nxt) + memo[i];//memo[sz] == convex hull's area
-	}
-	return;
-}
-void get_round_memo(Polygon& H, ld memo[]) {
-	int sz = H.size();
-	memo[0] = .0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		memo[i + 1] = (cur - nxt).mag() + memo[i];//memo[sz] == convex hull's round
-	}
-	return;
-}
-ll area(Pos H[], const int& sz) {
-	ll a = 0;
-	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
-}
-ll area(Polygon& H) {
-	ll a = 0; int sz = H.size();
-	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
-}
-void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
-bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& t) {
-	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
-	return ccw(p0, p1, t) >= 0 && ccw(p1, p2, t) >= 0 && ccw(p2, p0, t) >= 0;
-}
-int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
-	int cnt{ 0 };
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		if (on_seg_strong(cur, nxt, p)) return 1;
-		if (cur.y == nxt.y) continue;
-		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y <= p.y || cur.y > p.y) continue;
-		cnt += ccw(cur, nxt, p) > 0;
-	}
-	return (cnt & 1) * 2;
-}
-int inner_check(const Polygon& H, const Pos& p) {//concave
-	int cnt = 0, sz = H.size();
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		if (on_seg_strong(cur, nxt, p)) return 1;
-		if (cur.y == nxt.y) continue;
-		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y <= p.y || cur.y > p.y) continue;
-		cnt += ccw(cur, nxt, p) > 0;
-	}
-	return (cnt & 1) * 2;
-}
-int inner_check_bi_search(Pos H[], const int& sz, const Pos& p) {//convex
-	if (!sz) return -1;
-	if (sz == 1) return p == H[0] ? 0 : -1;
-	if (sz == 2) return on_seg_strong(H[0], H[1], p) ? 0 : -1;
-	if (cross(H[0], H[1], p) < 0 || cross(H[0], H[sz - 1], p) > 0) return -1;
-	if (on_seg_strong(H[0], H[1], p) || on_seg_strong(H[0], H[sz - 1], p)) return 0;
-	int s = 0, e = sz - 1, m;
-	while (s + 1 < e) {
-		m = s + e >> 1;
-		if (cross(H[0], H[m], p) >= 0) s = m;
-		else e = m;
-	}
-	if (cross(H[s], H[e], p) > 0) return 1;
-	else if (on_seg_strong(H[s], H[e], p)) return 0;
-	else return -1;
-}
 int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
 	int sz = H.size();
 	if (!sz) return -1;
@@ -229,28 +126,6 @@ int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
 	if (cross(H[s], H[e], p) > 0) return 1;
 	else if (on_seg_strong(H[s], H[e], p)) return 0;
 	else return -1;
-}
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	std::sort(C.begin(), C.end());
-	C.erase(unique(C.begin(), C.end()), C.end());
-	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
-	else {
-		for (int i = 0; i < C.size(); i++) {
-			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
-		int s = H.size() + 1;
-		for (int i = C.size() - 1; i >= 0; i--) {
-			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
-	}
-	return H;
 }
 Polygon graham_scan(Polygon& C) {
 	Polygon H;
@@ -274,24 +149,132 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
-ll rotating_calipers(const Polygon& H) {
-	int sz = H.size();
-	if (sz < 3) return -1;
-	auto jaw = [&](const int& i, const int& f) -> ll {
-		return (H[(i + 1) % sz] - H[i]) / (H[(f + 1) % sz] - H[f]);
-		};
-	ll ret = 0;
-	for (int i = 0, j = 1; i < sz; i++) {
-		while (jaw(i, j) > 0) {
-			ret = std::max(ret, (H[i] - H[j]).Euc());
-			j = (j + 1) % sz;
-		}
-		ret = std::max(ret, (H[i] - H[j]).Euc());
-	}
-	return ret;
-}
+ld R[LEN];
 int RI[LEN], LI[LEN];
 ld RR[LEN], LR[LEN];
+ld yes_O(Polygon& P) {
+	R[0] = 0;
+	for (int i = 0; i < N; i++) {
+		RR[i] = LR[i] = 0;
+		RI[i] = LI[i] = -1;
+	}
+	std::sort(P.begin(), P.end(), [&](const Pos& p, const Pos& q) -> bool { return p / q > 0; });
+	for (int i = 0; i < N; i++) P[i].i = i, P[i].f = -1;
+	Polygon H;
+	for (const Pos& p : P) {
+		while (H.size() > 1 && ccw(H[H.size() - 2], H.back(), p) <= 0) H.pop_back();
+		H.push_back(p);
+	}
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		P[H[i].i].f = i;
+		R[i + 1] = R[i] + (H[i] - H[(i + 1) % sz]).mag();
+	}
+	Polygon S;
+	int z = 0;
+	ld r = 0;
+	for (int i = 0, i0; i < N; i++) {
+		if (P[i].f != -1) { z = i; LI[i] = z; S = { P[i] }; continue; }
+		i0 = (i - 1 + N) % N;
+		LI[i] = z;
+		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
+			r -= (S[S.size() - 2] - S.back()).mag();
+			S.pop_back();
+		}
+		r += (S.back() - P[i]).mag();
+		LR[i] = r;
+		S.push_back(P[i]);
+	}
+	r = 0;
+	S.clear();
+	for (int i = N - 1, i0; i >= 0; i--) {
+		if (P[i].f != -1) { z = i; RI[i] = z; S = { P[i] }; continue; }
+		i0 = (i + 1) % N;
+		RI[i] = z;
+		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
+			r -= (S[S.size() - 2] - S.back()).mag();
+			S.pop_back();
+		}
+		r += (S.back() - P[i]).mag();
+		RR[i] = r;
+		S.push_back(P[i]);
+	}
+	r = 0;
+	ld l0 = P[0].mag(), l1 = P.back().mag();
+	ld r0 = l0, r1 = l1;
+	for (int i = 0, j = 1; i < N - 1; i++, j++) {
+		r0 = l0, r1 = l1;
+		if (LI[i] != -1) r0 += LR[i];
+		r0 += R[LI[i]] - R[0];
+		r0 += P[i].mag();
+		if (RI[j] != -1) r1 += RR[j];
+		r1 += R[sz - 1] - R[RI[j]];
+		r1 += P[j].mag();
+		r = std::max(r, r0 + r1);
+	}
+	return r;
+}
+ld no_O(Polygon& P, Polygon& H) {
+	R[0] = 0;
+	for (int i = 0; i < N; i++) {
+		RR[i] = LR[i] = 0;
+		RI[i] = LI[i] = -1;
+	}
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		P[H[i].i].f = i;
+		R[i + 1] = R[i] + (H[i] - H[(i + 1) % sz]).mag();
+	}
+	int s = 0;
+	for (; s < N; s++) if (P[s].f != -1) break;
+	Polygon S;
+	int z = s;
+	ld r = 0;
+	for (int j = s, i = j % N, i0; j != N + s; j++, i = j % N) {
+		if (P[i].f != -1) { z = i; LI[i] = z; S = { P[i] }; continue; }
+		i0 = (i - 1 + N) % N;
+		LI[i] = z;
+		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
+			r -= (S[S.size() - 2] - S.back()).mag();
+			S.pop_back();
+		}
+		r += (S.back() - P[i]).mag();
+		LR[i] = r;
+		S.push_back(P[i]);
+	}
+	S.clear();
+	z = s;
+	for (int j = s, i = j % N, i0; j != N + s; j++, i = (i - 1 + N) % N) {
+		if (P[i].f != -1) { z = i; RI[i] = z; S = { P[i] }; continue; }
+		i0 = (i + 1) % N;
+		RI[i] = z;
+		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
+			r -= (S[S.size() - 2] - S.back()).mag();
+			S.pop_back();
+		}
+		r += (S.back() - P[i]).mag();
+		RR[i] = r;
+		S.push_back(P[i]);
+	}
+	r = 0;
+	ld r0 = 0, r1 = 0;
+	for (int i = 0, j = 1, i1, j1; i < N; i++) {
+		while (P[i] / P[j] > 0) j = (j + 1) % N;
+		i1 = (j - 1 + N) % N;
+		j1 = (i - 1 + N) % N;
+		int s, e;
+		s = RI[i]; e = LI[i1];
+		r0 = (s <= e ? R[e] - R[s] : R[sz] - (R[s] - R[e]));
+		r0 += RR[i] + LR[i1];
+		r0 += P[i].mag() + P[i1].mag();
+		s = RI[j]; e = LI[j1];
+		r1 = (s <= e ? R[e] - R[s] : R[sz] - (R[s] - R[e]));
+		r1 += RR[j] + LR[j1];
+		r1 += P[j].mag() + P[j1].mag();
+		r = std::max(r, r0 + r1);
+	}
+	return r;
+}
 void query() {
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
 	std::sort(P.begin(), P.end(), cmpt);
@@ -299,12 +282,11 @@ void query() {
 	for (int i = 0, j = i + 1; i < N - 1; i++, j++) {
 		if (P[i] / P[j] == 0) { std::cout << 0 << "\n"; return; }
 	}
-	Polygon H = graham_scan(P);
-	std::sort(P.begin(), P.end(), cmpt);
-	for (const Pos& p : H) P[p.i].f = 1;
-	for (int i = 0; i < N; i++) {
-
-	}
+	Polygon C = P; C.push_back(O);
+	Polygon H = graham_scan(C);
+	bool f = 0;
+	for (const Pos& p : H) if (p == O) { f = 1; break; }
+	std::cout << (f ? yes_O(P) : no_O(P, H)) << "\n";
 	return;
 }
 void solve() {
@@ -315,7 +297,7 @@ void solve() {
 	std::cin >> Q; while (Q--) query();
 	return;
 }
-int main() { solve(); return 0; }//boj13310
+int main() { solve(); return 0; }//boj31180
 #define BOJ
 #ifdef BOJ
 #else

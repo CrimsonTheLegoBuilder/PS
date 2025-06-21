@@ -128,7 +128,7 @@ int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
 	else if (on_seg_strong(H[s], H[e], p)) return 0;
 	else return -1;
 }
-Polygon graham_scan(Polygon& C, const int& f = 0) {
+Polygon graham_scan(Polygon& C) {
 	Polygon H;
 	if (C.size() < 3) {
 		std::sort(C.begin(), C.end());
@@ -144,7 +144,7 @@ Polygon graham_scan(Polygon& C, const int& f = 0) {
 	C.erase(unique(C.begin(), C.end()), C.end());
 	int sz = C.size();
 	for (int i = 0; i < sz; i++) {
-		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= f)
+		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
 			H.pop_back();
 		H.push_back(C[i]);
 	}
@@ -158,7 +158,7 @@ ld yes_O(Polygon& P, const ld& r_) {
 	F = 0;
 	//std::cout << "YES::\n";
 	R[0] = 0;
-	for (int i = 0; i < N; i++) {
+	for (int i = 0; i < N + 10; i++) {
 		RR[i] = LR[i] = 0;
 		RC[i] = LC[i] = 0;
 		RI[i] = LI[i] = -1;
@@ -240,7 +240,7 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 	F = 1;
 	//std::cout << "NO::\n";
 	R[0] = 0;
-	for (int i = 0; i < N; i++) {
+	for (int i = 0; i < N + 10; i++) {
 		RR[i] = LR[i] = 0;
 		RC[i] = LC[i] = 0;
 		RI[i] = LI[i] = -1;
@@ -341,20 +341,33 @@ void query() {
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
 	std::sort(P.begin(), P.end(), cmpt);
 	for (int i = 0; i < N; i++) P[i].i = i;
-	bool f0 = 0, f1 = 1;
+	bool f0 = 0, f1 = 0;
 	Polygon C = P; C.push_back(O);
 	Polygon H = graham_scan(C);
-	Polygon H1 = graham_scan(C, -1);
 	for (const Pos& p : H) if (p == O) { f0 = 1; break; }
 	if (f0) {
-		std::sort(P.begin(), P.end(), [&](const Pos& p, const Pos& q) -> bool { return p / q > 0; });
+		std::sort(P.begin(), P.end(), [&](const Pos& p, const Pos& q) -> bool {
+			ll fc = p * q;
+			ll tq = p / q;
+			return !tq ? fc > 0 : tq > 0;
+			});
 		for (int i = N - 2; i >= 0; i--) {
 			if (P[N - 1] / P[i] == 0) { f0 = 0; break; }
 			if (P[N - 1] / P[i]) break;
 		}
+		for (int i = 1; i < N; i++) {
+			if (P[0] / P[i] == 0) { f0 = 0; break; }
+			if (P[0] / P[i]) break;
+		}
+		if (!f0) { std::cout << 0 << "\n"; return; }
+		Polygon S;
+		for (const Pos& p : P) {
+			while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), p) < 0) S.pop_back();
+			S.push_back(p);
+		}
+		if (S.size() + 1 == H.size()) f1 = 1;
 		std::sort(P.begin(), P.end(), cmpt);
 	}
-	f1 = H.size() == H1.size();
 	bool f = 0;
 	for (int i = 0, j = i + 1; i < N - 1; i++, j++)
 		if (P[i] / P[j] == 0) { f = 1; break; }
@@ -383,7 +396,7 @@ void query() {
 		//if (f) { std::cout << r << " FUCK::\n"; return; }
 	}
 	//std::cout << "r:: " << r << "\n";
-	if (f) { std::cout << .0 << "\n"; return; }
+	if (f) { std::cout << 0 << "\n"; return; }
 	for (const Pos& p : H) if (p == O) { f = 1; break; }
 	std::cout << (f ? yes_O(P, r) : no_O(P, H, r)) << "\n";
 	return;

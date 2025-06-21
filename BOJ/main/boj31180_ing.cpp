@@ -43,6 +43,7 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
 int N, M, T, Q;
+bool F;
 struct Pos {
 	int x, y;
 	int i, f;
@@ -127,7 +128,7 @@ int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
 	else if (on_seg_strong(H[s], H[e], p)) return 0;
 	else return -1;
 }
-Polygon graham_scan(Polygon& C, const int& f = 0) {
+Polygon graham_scan(Polygon& C) {
 	Polygon H;
 	if (C.size() < 3) {
 		std::sort(C.begin(), C.end());
@@ -143,7 +144,7 @@ Polygon graham_scan(Polygon& C, const int& f = 0) {
 	C.erase(unique(C.begin(), C.end()), C.end());
 	int sz = C.size();
 	for (int i = 0; i < sz; i++) {
-		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= f)
+		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
 			H.pop_back();
 		H.push_back(C[i]);
 	}
@@ -154,9 +155,10 @@ int RI[LEN], LI[LEN];
 int RC[LEN], LC[LEN];
 ld RR[LEN], LR[LEN];
 ld yes_O(Polygon& P, const ld& r_) {
-	std::cout << "YES::\n";
+	F = 0;
+	//std::cout << "YES::\n";
 	R[0] = 0;
-	for (int i = 0; i < N; i++) {
+	for (int i = 0; i < N + 10; i++) {
 		RR[i] = LR[i] = 0;
 		RC[i] = LC[i] = 0;
 		RI[i] = LI[i] = -1;
@@ -209,13 +211,8 @@ ld yes_O(Polygon& P, const ld& r_) {
 		S.push_back(P[i]);
 		RC[i] = S.size() - 1;
 	}
-	r = 0;
-	if (H.size() + I.size() - 2 == N) {
-		int sz = H.size();
-		for (int i = 0; i < sz; i++) r += (H[i] - H[(i + 1) % sz]).mag();
-		sz = I.size();
-		for (int i = 0; i < sz; i++) r += (I[i] - I[(i + 1) % sz]).mag();
-	}
+	r = r_;
+	//std::cout << "r_:: " << r << "\n";
 	ld l0 = P[0].mag(), l1 = P.back().mag();
 	ld r0 = l0, r1 = l1;
 	for (int i = 0, j = 1; i < N - 1; i++, j++) {
@@ -226,19 +223,24 @@ ld yes_O(Polygon& P, const ld& r_) {
 		r1 += RR[j];
 		r1 += R[sz - 1] - R[RI[j]];
 		r1 += P[j].mag();
-		int c = LC[i] + RC[j];
-		c += LI[i] - LI[0] + 1;
-		c += RI[N - 1] - RI[j] + 1;
 		int cl = LC[i] + LI[i] - LI[0] + 1;
 		int cr = RC[j] + RI[N - 1] - RI[j] + 1;
-		if (cl > 1 && cr > 1 && c == N) r = std::max(r, r0 + r1);
+		//std::cout << "P[" << i << "]:: " << P[i] << " ";
+		//std::cout << "P[" << j << "]:: " << P[j] << "\n";
+		//std::cout << "r0:: " << r0 << " ";
+		//std::cout << "r1:: " << r1 << "\n";
+		//std::cout << "r:: " << r0 + r1 << "\n";
+		//std::cout << "cl:: " << cl << "\n";
+		//std::cout << "cr:: " << cr << "\n";
+		if (cl > 1 && cr > 1 && cr + cl == N) r = std::max(r, r0 + r1);
 	}
 	return r;
 }
 ld no_O(Polygon& P, Polygon& H, const ld& r_) {
-	std::cout << "NO::\n";
+	F = 1;
+	//std::cout << "NO::\n";
 	R[0] = 0;
-	for (int i = 0; i < N; i++) {
+	for (int i = 0; i < N + 10; i++) {
 		RR[i] = LR[i] = 0;
 		RC[i] = LC[i] = 0;
 		RI[i] = LI[i] = -1;
@@ -254,8 +256,9 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 	int z = s;
 	ld r = 0;
 	for (int j = s, i = j % N; j != N + s; j++, i = j % N) {
-		if (P[i].f != -1) { r = 0; z = i; LI[i] = z; S = { P[i] }; continue; }
-		LI[i] = z;
+		if (P[i].f != -1) { r = 0; z = i; LI[i] = P[z].f; S = { P[i] }; continue; }
+		LI[i] = P[z].f;
+		assert(S[0].f != -1);
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
 			S.pop_back();
@@ -266,10 +269,12 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		LC[i] = S.size() - 1;
 	}
 	S.clear();
+	r = 0;
 	z = s;
 	for (int j = s, i = j % N; j != N + s; j++, i = (i - 1 + N) % N) {
-		if (P[i].f != -1) { r = 0; z = i; RI[i] = z; S = { P[i] }; continue; }
-		RI[i] = z;
+		if (P[i].f != -1) { r = 0; z = i; RI[i] = P[z].f; S = { P[i] }; continue; }
+		RI[i] = P[z].f;
+		assert(S[0].f != -1);
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
 			S.pop_back();
@@ -290,6 +295,12 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		while (hf(P[i], P[j])) j = (j + 1) % N;
 		i1 = (j - 1 + N) % N;
 		j1 = (i - 1 + N) % N;
+		if (i == i1) continue;
+		if (j == j1) continue;
+		if (P[i] / P[i1] == 0) continue;
+		if (P[j] / P[j1] == 0) continue;
+		assert(P[i] / P[i1] >= 0);
+		assert(P[j] / P[j1] >= 0);
 		int s, e;
 		s = RI[i]; e = LI[i1];
 		r0 = s <= e ? (R[e] - R[s]) : (R[sz] - (R[s] - R[e]));
@@ -299,7 +310,30 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		r1 = s <= e ? (R[e] - R[s]) : (R[sz] - (R[s] - R[e]));
 		r1 += RR[j] + LR[j1];
 		r1 += P[j].mag() + P[j1].mag();
-		r = std::max(r, r0 + r1);
+		int cl = RC[i] + LC[i1];
+		s = RI[i]; e = LI[i1];
+		cl += s <= e ? e - s + 1 : sz - (s - e - 1);
+		int cr = RC[j] + LC[j1];
+		s = RI[j]; e = LI[j1];
+		cr += s <= e ? e - s + 1 : sz - (s - e - 1);
+		//std::cout << "RC[i]:: " << RC[i] << "\n";
+		//std::cout << "LC[i1]:: "  << LC[i1] << "\n";
+		//std::cout << "RI[i]:: " << RI[i] << "\n";
+		//std::cout << "LI[i1]:: " << LI[i1] << "\n";
+		//std::cout << "RC[j]:: " << RC[j] << "\n";
+		//std::cout << "LC[j1]:: "  << LC[j1] << "\n";
+		//std::cout << "RI[j]:: " << RI[j] << "\n";
+		//std::cout << "LI[j1]:: " << LI[j1] << "\n";
+		//std::cout << "P[" << i << "]:: " << P[i] << " ";
+		//std::cout << "P[" << i1 << "]:: " << P[i1] << "\n";
+		//std::cout << "P[" << j << "]:: " << P[j] << " ";
+		//std::cout << "P[" << j1 << "]:: " << P[j1] << "\n";
+		//std::cout << "r0:: " << r0 << " ";
+		//std::cout << "r1:: " << r1 << "\n";
+		//std::cout << "r:: " << r0 + r1 << "\n";
+		//std::cout << "cl:: " << cl << "\n";
+		//std::cout << "cr:: " << cr << "\n";
+		if (cl > 1 && cr > 1 && cr + cl == N) r = std::max(r, r0 + r1);
 	}
 	return r;
 }
@@ -307,19 +341,33 @@ void query() {
 	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
 	std::sort(P.begin(), P.end(), cmpt);
 	for (int i = 0; i < N; i++) P[i].i = i;
-	bool f0 = 0, f1 = 1;
+	bool f0 = 0, f1 = 0;
 	Polygon C = P; C.push_back(O);
 	Polygon H = graham_scan(C);
-	Polygon H1 = graham_scan(C, -1);
 	for (const Pos& p : H) if (p == O) { f0 = 1; break; }
 	if (f0) {
-		std::sort(P.begin(), P.end(), [&](const Pos& p, const Pos& q) -> bool { return p / q > 0; });
+		std::sort(P.begin(), P.end(), [&](const Pos& p, const Pos& q) -> bool {
+			ll fc = p * q;
+			ll tq = p / q;
+			return !tq ? fc > 0 : tq > 0;
+			});
 		for (int i = N - 2; i >= 0; i--) {
 			if (P[N - 1] / P[i] == 0) { f0 = 0; break; }
 			if (P[N - 1] / P[i]) break;
 		}
+		for (int i = 1; i < N; i++) {
+			if (P[0] / P[i] == 0) { f0 = 0; break; }
+			if (P[0] / P[i]) break;
+		}
+		if (!f0) { std::cout << 0 << "\n"; return; }
+		Polygon S;
+		for (const Pos& p : P) {
+			while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), p) < 0) S.pop_back();
+			S.push_back(p);
+		}
+		if (S.size() + 1 == H.size()) f1 = 1;
+		std::sort(P.begin(), P.end(), cmpt);
 	}
-	f1 = H.size() == H1.size();
 	bool f = 0;
 	for (int i = 0, j = i + 1; i < N - 1; i++, j++)
 		if (P[i] / P[j] == 0) { f = 1; break; }
@@ -331,15 +379,24 @@ void query() {
 		for (int i = 0; i < N; i++) if (P[i].f == -1) C_.push_back(P[i]);
 		Polygon I = graham_scan(C_);
 		//std::cout << "H:: " << H.size() << " I:: " << I.size() << "\n";
-		if (I.size() + H.size() - 2 == N) {
+		if (I.size() > 2 && I.size() + H.size() - 2 == N) {
 			for (int i = 0; i < sz; i++) r += (H[i] - H[(i + 1) % sz]).mag();
 			int sz = I.size();
 			for (int i = 0; i < sz; i++) r += (I[i] - I[(i + 1) % sz]).mag();
 		}
+		//std::cout << "DEBUG::\n";
+		//std::cout << "P::\n";
+		//for (Pos& p : P) std::cout << p << " " << p.i << " " << p.f << "\n";
+		//std::cout << "H::\n";
+		//for (Pos& p : H) std::cout << p << " " << p.i << " " << p.f << "\n";
+		//std::cout << "I::\n";
+		//for (Pos& p : I) std::cout << p << " " << p.i << " " << p.f << "\n";
+		//std::cout << "DEBUG::\n";
 		if (f) { std::cout << r << "\n"; return; }
+		//if (f) { std::cout << r << " FUCK::\n"; return; }
 	}
-	std::cout << "r:: " << r << "\n";
-	if (f) { std::cout << .0 << "\n"; return; }
+	//std::cout << "r:: " << r << "\n";
+	if (f) { std::cout << 0 << "\n"; return; }
 	for (const Pos& p : H) if (p == O) { f = 1; break; }
 	std::cout << (f ? yes_O(P, r) : no_O(P, H, r)) << "\n";
 	return;
@@ -355,6 +412,37 @@ void solve() {
 int main() { solve(); return 0; }//boj31180
 
 /*
+
+1
+8
+2 2
+-2 -2
+2 -2
+-2 2
+3 0
+-3 0
+0 3
+0 -3
+
+1
+10
+-2 -4
+5 2
+7 7
+10 -2
+9 -5
+-5 10
+1 -5
+4 -9
+5 1
+7 -7
+
+1
+4
+4 5
+-2 4
+1 4
+-5 -2
 
 1
 5

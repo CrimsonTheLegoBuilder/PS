@@ -176,12 +176,6 @@ ld yes_O(Polygon& P, const ld& r_) {
 		P[H[i].i].f = i;
 		R[i + 1] = R[i] + (H[i] - H[(i + 1) % sz]).mag();
 	}
-	Polygon C_;
-	for (int i = 0; i < N; i++) if (P[i].f == -1) C_.push_back(P[i]);
-	C_.push_back(O);
-	Polygon I = graham_scan(C_);
-	H.push_back(O);
-	H = graham_scan(H);
 	Polygon S;
 	int z = 0;
 	ld r = 0;
@@ -215,7 +209,7 @@ ld yes_O(Polygon& P, const ld& r_) {
 	//std::cout << "r_:: " << r << "\n";
 	ld l0 = P[0].mag(), l1 = P.back().mag();
 	ld r0 = l0, r1 = l1;
-	for (int i = 0, j = 1; i < N - 1; i++, j++) {
+	for (int i = 1, j = 2; j < N - 1; i++, j++) {
 		r0 = l0, r1 = l1;
 		r0 += LR[i];
 		r0 += R[LI[i]] - R[0];
@@ -236,7 +230,7 @@ ld yes_O(Polygon& P, const ld& r_) {
 	}
 	return r;
 }
-ld no_O(Polygon& P, Polygon& H, const ld& r_) {
+ld no_O(Polygon& P, Polygon& H) {
 	F = 1;
 	//std::cout << "NO::\n";
 	R[0] = 0;
@@ -284,7 +278,7 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		S.push_back(P[i]);
 		RC[i] = S.size() - 1;
 	}
-	r = 0;
+	r = 0.0000003;
 	ld r0 = 0, r1 = 0;
 	auto hf = [&](const Pos& p, const Pos& q) -> bool {
 		ll fc = p * q;
@@ -359,7 +353,7 @@ void query() {
 			if (P[0] / P[i] == 0) { f0 = 0; break; }
 			if (P[0] / P[i]) break;
 		}
-		if (!f0) { std::cout << 0 << "\n"; return; }
+		if (!f0) { std::cout << "0.0000001\n"; return; }
 		Polygon S;
 		for (const Pos& p : P) {
 			while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), p) < 0) S.pop_back();
@@ -370,7 +364,7 @@ void query() {
 	}
 	bool f = 0;
 	for (int i = 0, j = i + 1; i < N - 1; i++, j++)
-		if (P[i] / P[j] == 0) { f = 1; break; }
+		if (P[i] * P[j] > 0 && P[i] / P[j] == 0) { f = 1; break; }
 	ld r = 0;
 	if (f0 && f1) {
 		Polygon C_ = { O };
@@ -396,9 +390,9 @@ void query() {
 		//if (f) { std::cout << r << " FUCK::\n"; return; }
 	}
 	//std::cout << "r:: " << r << "\n";
-	if (f) { std::cout << 0 << "\n"; return; }
+	if (f) { std::cout << "0.0000002\n"; return; }
 	for (const Pos& p : H) if (p == O) { f = 1; break; }
-	std::cout << (f ? yes_O(P, r) : no_O(P, H, r)) << "\n";
+	std::cout << (f ? yes_O(P, r) : no_O(P, H)) << "\n";
 	return;
 }
 void solve() {

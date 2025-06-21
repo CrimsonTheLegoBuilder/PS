@@ -147,5 +147,8 @@
     <ClCompile Include="..\main\boj13090_tmp.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\boj31180_ing.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

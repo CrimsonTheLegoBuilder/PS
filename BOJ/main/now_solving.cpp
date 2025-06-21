@@ -379,7 +379,6 @@ void query() {
 		//std::cout << "I::\n";
 		//for (Pos& p : I) std::cout << p << " " << p.i << " " << p.f << "\n";
 		//std::cout << "DEBUG::\n";
-
 		if (f) { std::cout << r << "\n"; return; }
 		//if (f) { std::cout << r << " FUCK::\n"; return; }
 	}
@@ -400,6 +399,17 @@ void solve() {
 int main() { solve(); return 0; }//boj31180
 
 /*
+
+1
+8
+2 2
+-2 -2
+2 -2
+-2 2
+3 0
+-3 0
+0 3
+0 -3
 
 1
 10

@@ -43,6 +43,7 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
 int N, M, T, Q;
+bool F;
 struct Pos {
 	int x, y;
 	int i, f;
@@ -154,6 +155,7 @@ int RI[LEN], LI[LEN];
 int RC[LEN], LC[LEN];
 ld RR[LEN], LR[LEN];
 ld yes_O(Polygon& P, const ld& r_) {
+	F = 0;
 	//std::cout << "YES::\n";
 	R[0] = 0;
 	for (int i = 0; i < N; i++) {
@@ -235,6 +237,7 @@ ld yes_O(Polygon& P, const ld& r_) {
 	return r;
 }
 ld no_O(Polygon& P, Polygon& H, const ld& r_) {
+	F = 1;
 	//std::cout << "NO::\n";
 	R[0] = 0;
 	for (int i = 0; i < N; i++) {
@@ -253,8 +256,9 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 	int z = s;
 	ld r = 0;
 	for (int j = s, i = j % N; j != N + s; j++, i = j % N) {
-		if (P[i].f != -1) { r = 0; z = i; LI[i] = z; S = { P[i] }; continue; }
-		LI[i] = z;
+		if (P[i].f != -1) { r = 0; z = i; LI[i] = P[z].f; S = { P[i] }; continue; }
+		LI[i] = P[z].f;
+		assert(S[0].f != -1);
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) <= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
 			S.pop_back();
@@ -265,10 +269,12 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		LC[i] = S.size() - 1;
 	}
 	S.clear();
+	r = 0;
 	z = s;
 	for (int j = s, i = j % N; j != N + s; j++, i = (i - 1 + N) % N) {
-		if (P[i].f != -1) { r = 0; z = i; RI[i] = z; S = { P[i] }; continue; }
-		RI[i] = z;
+		if (P[i].f != -1) { r = 0; z = i; RI[i] = P[z].f; S = { P[i] }; continue; }
+		RI[i] = P[z].f;
+		assert(S[0].f != -1);
 		while (S.size() > 1 && ccw(S[S.size() - 2], S.back(), P[i]) >= 0) {
 			r -= (S[S.size() - 2] - S.back()).mag();
 			S.pop_back();
@@ -278,7 +284,7 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		S.push_back(P[i]);
 		RC[i] = S.size() - 1;
 	}
-	r = r_;
+	r = 0;
 	ld r0 = 0, r1 = 0;
 	auto hf = [&](const Pos& p, const Pos& q) -> bool {
 		ll fc = p * q;
@@ -289,6 +295,12 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		while (hf(P[i], P[j])) j = (j + 1) % N;
 		i1 = (j - 1 + N) % N;
 		j1 = (i - 1 + N) % N;
+		if (i == i1) continue;
+		if (j == j1) continue;
+		if (P[i] / P[i1] == 0) continue;
+		if (P[j] / P[j1] == 0) continue;
+		assert(P[i] / P[i1] >= 0);
+		assert(P[j] / P[j1] >= 0);
 		int s, e;
 		s = RI[i]; e = LI[i1];
 		r0 = s <= e ? (R[e] - R[s]) : (R[sz] - (R[s] - R[e]));
@@ -300,10 +312,27 @@ ld no_O(Polygon& P, Polygon& H, const ld& r_) {
 		r1 += P[j].mag() + P[j1].mag();
 		int cl = RC[i] + LC[i1];
 		s = RI[i]; e = LI[i1];
-		cl += s <= e ? e - s + 1: sz - (s - e - 1);
+		cl += s <= e ? e - s + 1 : sz - (s - e - 1);
 		int cr = RC[j] + LC[j1];
 		s = RI[j]; e = LI[j1];
 		cr += s <= e ? e - s + 1 : sz - (s - e - 1);
+		//std::cout << "RC[i]:: " << RC[i] << "\n";
+		//std::cout << "LC[i1]:: "  << LC[i1] << "\n";
+		//std::cout << "RI[i]:: " << RI[i] << "\n";
+		//std::cout << "LI[i1]:: " << LI[i1] << "\n";
+		//std::cout << "RC[j]:: " << RC[j] << "\n";
+		//std::cout << "LC[j1]:: "  << LC[j1] << "\n";
+		//std::cout << "RI[j]:: " << RI[j] << "\n";
+		//std::cout << "LI[j1]:: " << LI[j1] << "\n";
+		//std::cout << "P[" << i << "]:: " << P[i] << " ";
+		//std::cout << "P[" << i1 << "]:: " << P[i1] << "\n";
+		//std::cout << "P[" << j << "]:: " << P[j] << " ";
+		//std::cout << "P[" << j1 << "]:: " << P[j1] << "\n";
+		//std::cout << "r0:: " << r0 << " ";
+		//std::cout << "r1:: " << r1 << "\n";
+		//std::cout << "r:: " << r0 + r1 << "\n";
+		//std::cout << "cl:: " << cl << "\n";
+		//std::cout << "cr:: " << cr << "\n";
 		if (cl > 1 && cr > 1 && cr + cl == N) r = std::max(r, r0 + r1);
 	}
 	return r;

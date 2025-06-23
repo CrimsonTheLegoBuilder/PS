@@ -877,6 +877,14 @@ std::vector<Face> convex_hull_3D(std::vector<Pos3D>& candi) {//incremental const
 	return hull3D;
 }
 
+struct Sphere {
+	int x, y, z, r;
+	Sphere(int x_ = 0, int y_ = 0, int z_ = 0, int r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
+	Sphere operator - (const Sphere& s) const { return Sphere(x - s.x, y - s.y, z - s.z, r + s.r); }
+	ll Euc() const { return (ll)x * x + (ll)y * y + (ll)z * z; }
+	ld dist() const { return std::max(0., sqrt(Euc() - r)); }
+};
+
 //=================================================//
 
 using pi = std::pair<int, int>;

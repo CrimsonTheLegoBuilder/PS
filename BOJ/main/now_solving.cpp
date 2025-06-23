@@ -97,12 +97,7 @@ void query() {
 		if (cnt >= K) e = m;
 		else s = m + 1;
 	}
-	if (s) {
-		V.clear();
-		for (int i = 0; i < N; i++) S[i].r += s - 1;
-		recur(N - 1);
-		for (int i = 0; i < N; i++) S[i].r -= s - 1;
-	}
+	if (s) count(s);
 	Vll ret;
 	for (const Pair& p : V) ret.push_back((S[p.i] - S[p.j]).dist());
 	std::sort(ret.begin(), ret.end());

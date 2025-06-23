@@ -31,7 +31,7 @@ struct Sphere {
 	Sphere operator - (const Sphere& q) const { return Sphere(x - q.x, y - q.y, z - q.z, r + q.r); }
 	Sphere& operator *= (const int& n) { x *= n, y *= n, z *= n, r *= n; return *this; }
 	ll Euc() const { return (ll)x * x + (ll)y * y + (ll)z * z; }
-	ll dist() const { return (ll)std::max(0., sqrt(Euc() - r) * .5); }
+	ll dist() const { return std::max(0ll, (ll)ceil(sqrt(Euc() - r) * .5)); }
 } S[LEN];
 bool meet(const Sphere& p, const Sphere& q) {
 	Sphere z = p - q;

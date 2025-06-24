@@ -20,7 +20,7 @@ inline ll sq(const ll& x) { return x * x; }
 //freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
-#define TM 100'000ll
+#define TM 100'001ll
 
 struct Pair { int i, j; };
 int N, M, K, T, Q;
@@ -43,7 +43,7 @@ std::map<ll, Vint> MP;
 std::vector<Pair> V;
 ll hash(const int& x, const int& y, const int& z) {
 	if (x < 0 || y < 0 || z < 0) return -1;
-	if (x > TM || y > TM || z > TM) return -1;
+	if (x >= TM || y >= TM || z >= TM) return -1;
 	return x * TM * TM + y * TM + z;
 }
 void recur(const int& n) {

@@ -40,7 +40,7 @@ bool meet(const Sphere& p, const Sphere& q) {
 }
 bool meet(const int& i, const int& j) { return meet(S[i], S[j]); }
 //std::map<ll, Vint> MP;
-std::unordered_map<ll, Vint> MP(1 << 20);//해시 충돌과 리해싱 방지. 공간 확보
+std::unordered_map<ll, Vint> MP(1 << 20);//해시 충돌과 리해싱 방지 위해를 미리 공간 확보
 //Vpii V;
 std::vector<Pair> V;
 ll hash(const int& x, const int& y, const int& z) {
@@ -53,7 +53,7 @@ void recur(const int& n) {
 	MP.clear();
 	int d = S[n].r + 1 >> 1;
 	int m = 0;
-	while (S[m].r < d) m++;
+	while (S[m].r < d) m++;//가장 큰 구의 반지름의 절반 크기까지 제한을 건다.
 	d <<= 2;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
 	for (int i = n; i >= 0; i--) {
 		int x = S[i].x / d;

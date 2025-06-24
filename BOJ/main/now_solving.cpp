@@ -21,7 +21,7 @@ inline ll sq(const ll& x) { return x * x; }
 //freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
-#define TM 100001ll
+#define TM 1000001ll
 
 struct Pair { int i, j; };
 int N, M, K, T, Q;

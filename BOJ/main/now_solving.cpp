@@ -57,7 +57,7 @@ void recur(const int& n) {
 	//가장 큰 구의 반지름의 절반 크기까지 제한을 건다.
 	//격자로 나눠도 결국 만나거나 만나지 않는 구체를 판단하는 건 똑같이 이루어지지만
 	//N*r.size()인 복잡도를 N*log(r.size()) 로 줄일 수 있으므로 절반까지 탐색
-	d <<= 2;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
+	d *= 4;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
 	for (int i = n; i >= 0; i--) {
 		int x = S[i].x / d;
 		int y = S[i].y / d;
@@ -83,15 +83,11 @@ void recur(const int& n) {
 	recur(m - 1);
 	return;
 }
-int count(const int& m, const int& d) {
+int count(const int& m) {
 	V.clear();
-	for (int i = 0; i < N; i++) S[i].r += m - d;
-	//지금 탐색 중인 거리보다 1 작게 만든다.
-	//이렇게 만들어주고도 닿지 않은 구체들은 무조건 거리가 멀다는 의미가 된다.
-	//300개를 가까스로 달성한 거리보다 1 작은 거리로 탐색을 하면 무조건 300개보다 작은 쌍을 찾게 되고
-	//나머지 300개까지의 거리는 전부 이분탐색 결과와 같다고 할 수 있다.
+	for (int i = 0; i < N; i++) S[i].r += m;
 	recur(N - 1);
-	for (int i = 0; i < N; i++) S[i].r -= m - d;
+	for (int i = 0; i < N; i++) S[i].r -= m;
 	return V.size();
 }
 void query() {
@@ -105,11 +101,15 @@ void query() {
 	int s = 0, e = 2000000;
 	while (s < e) {
 		int m = s + e >> 1;
-		int cnt = count(m, 0);
+		int cnt = count(m);
 		if (cnt >= K) e = m;
 		else s = m + 1;
 	}
-	if (s) count(s, 1);
+	if (s) count(s - 1);
+	//지금 탐색 중인 거리보다 1 작게 만든다.
+	//이렇게 만들어주고도 닿지 않은 구체들은 무조건 거리가 멀다는 의미가 된다.
+	//300개를 가까스로 달성한 거리보다 1 작은 거리로 탐색을 하면 무조건 300개보다 작은 쌍을 찾게 되고
+	//나머지 300개까지의 거리는 전부 이분탐색 결과와 같다고 할 수 있다.
 	Vll ret;
 	for (const Pair& p : V) ret.push_back((S[p.i] - S[p.j]).dist());
 	std::sort(ret.begin(), ret.end());

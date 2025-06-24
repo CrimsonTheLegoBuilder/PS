@@ -113,9 +113,8 @@ void query() {
 	Vll ret;
 	for (const Pair& p : V) ret.push_back((S[p.i] - S[p.j]).dist());
 	std::sort(ret.begin(), ret.end());
-	int sz = ret.size();
+	int sz = ret.size(); K -= sz;
 	for (const ll& d : ret) std::cout << d << "\n";
-	K -= sz;
 	while (K--) std::cout << s << "\n";
 	return;
 }

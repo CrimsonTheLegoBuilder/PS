@@ -32,7 +32,7 @@ struct Sphere {
 	Sphere operator - (const Sphere& q) const { return Sphere(x - q.x, y - q.y, z - q.z, r + q.r); }
 	Sphere& operator *= (const int& n) { x *= n, y *= n, z *= n, r *= n; return *this; }
 	ll Euc() const { return (ll)x * x + (ll)y * y + (ll)z * z; }
-	ll dist() const { return std::max(0ll, (ll)ceil(sqrt(Euc() - r) * .5)); }
+	ll dist() const { return std::max(0ll, (ll)ceil((sqrt(Euc()) - r) * .5)); }
 } S[LEN];
 bool meet(const Sphere& p, const Sphere& q) {
 	Sphere z = p - q;
@@ -66,7 +66,7 @@ void recur(const int& n) {
 			for (int dy = -1; dy <= 1; dy++) {
 				for (int dz = -1; dz <= 1; dz++) {//주변 27칸을 보겠다
 					ll hs = hash(x + dx, y + dy, z + dz);
-					if (hs < 0) continue;
+					//if (hs < 0) continue;
 					auto it = MP.find(hs);
 					if (it == MP.end()) continue;
 					const Vint& I = it->second;
@@ -102,7 +102,7 @@ void query() {
 		//미리 2배를 키워서 계산을 간단하게 만든다.
 		//이렇게 만들어주면 두 구체의 거리는 이분탐색 결과 나오는 거리를 바로 가져다 쓰면 된다.
 	std::sort(S, S + N);
-	int s = 0, e = 200000;
+	int s = 0, e = 2000000;
 	while (s < e) {
 		int m = s + e >> 1;
 		int cnt = count(m, 0);

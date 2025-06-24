@@ -21,7 +21,7 @@ inline ll sq(const ll& x) { return x * x; }
 //freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
 //freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
 
-#define TM 100'001ll
+#define TM 100001ll
 
 struct Pair { int i, j; };
 int N, M, K, T, Q;
@@ -71,7 +71,7 @@ void recur(const int& n) {
 					if (it == MP.end()) continue;
 					const Vint& I = it->second;
 					for (const int& j : I) {
-						if (meet(i, j)) V.emplace_back(i, j);
+						if (meet(i, j)) V.push_back({ i, j });
 						if (V.size() >= K) return;
 					}
 				}
@@ -83,15 +83,15 @@ void recur(const int& n) {
 	recur(m - 1);
 	return;
 }
-int count(const int& m) {
+int count(const int& m, const int& d) {
 	V.clear();
-	for (int i = 0; i < N; i++) S[i].r += m - 1;
+	for (int i = 0; i < N; i++) S[i].r += m - d;
 	//지금 탐색 중인 거리보다 1 작게 만든다.
 	//이렇게 만들어주고도 닿지 않은 구체들은 무조건 거리가 멀다는 의미가 된다.
 	//300개를 가까스로 달성한 거리보다 1 작은 거리로 탐색을 하면 무조건 300개보다 작은 쌍을 찾게 되고
 	//나머지 300개까지의 거리는 전부 이분탐색 결과와 같다고 할 수 있다.
 	recur(N - 1);
-	for (int i = 0; i < N; i++) S[i].r -= m - 1;
+	for (int i = 0; i < N; i++) S[i].r -= m - d;
 	return V.size();
 }
 void query() {
@@ -102,14 +102,14 @@ void query() {
 		//미리 2배를 키워서 계산을 간단하게 만든다.
 		//이렇게 만들어주면 두 구체의 거리는 이분탐색 결과 나오는 거리를 바로 가져다 쓰면 된다.
 	std::sort(S, S + N);
-	int s = 0, e = 200'000;
+	int s = 0, e = 200000;
 	while (s < e) {
 		int m = s + e >> 1;
-		int cnt = count(m);
+		int cnt = count(m, 0);
 		if (cnt >= K) e = m;
 		else s = m + 1;
 	}
-	if (s) count(s);
+	if (s) count(s, 1);
 	Vll ret;
 	for (const Pair& p : V) ret.push_back((S[p.i] - S[p.j]).dist());
 	std::sort(ret.begin(), ret.end());

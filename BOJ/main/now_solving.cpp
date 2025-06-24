@@ -6,7 +6,6 @@
 #include <cstring>
 #include <cassert>
 #include <vector>
-#include <map>
 #include <unordered_map>
 typedef long long ll;
 //typedef long double ld;
@@ -18,32 +17,27 @@ const int LEN = 1e5 + 10;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline ll sq(const ll& x) { return x * x; }
 
-//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
-//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
-
 #define TM 1000001ll
 
 struct Pair { int i, j; };
 int N, M, K, T, Q;
 struct Sphere {
-	int x, y, z, r;
-	Sphere(int x_ = 0, int y_ = 0, int z_ = 0, int r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
+	ll x, y, z, r;
+	Sphere(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
 	bool operator < (const Sphere& q) const { return r < q.r; }
 	Sphere operator - (const Sphere& q) const { return Sphere(x - q.x, y - q.y, z - q.z, r + q.r); }
-	Sphere& operator *= (const int& n) { x *= n, y *= n, z *= n, r *= n; return *this; }
-	ll Euc() const { return (ll)x * x + (ll)y * y + (ll)z * z; }
-	ll dist() const { return std::max(0ll, (ll)ceil((sqrt(Euc()) - r) * .5)); }
+	Sphere& operator *= (const ll& n) { x *= n, y *= n, z *= n, r *= n; return *this; }
+	ll Euc() const { return x * x + y * y + z * z; }
+	int dist() const { return std::max(0, (int)ceil((sqrt(Euc()) - r) * .5)); }
 } S[LEN];
-bool meet(const Sphere& p, const Sphere& q) {
+inline bool meet(const Sphere& p, const Sphere& q) {
 	Sphere z = p - q;
 	return z.Euc() - sq(z.r) <= 0;
 }
-bool meet(const int& i, const int& j) { return meet(S[i], S[j]); }
-//std::map<ll, Vint> MP;
+inline bool meet(const int& i, const int& j) { return meet(S[i], S[j]); }
 std::unordered_map<ll, Vint> MP(1 << 20);//해시 충돌과 리해싱 방지 위해를 미리 공간 확보
-//Vpii V;
 std::vector<Pair> V;
-ll hash(const int& x, const int& y, const int& z) {
+inline ll hash(const int& x, const int& y, const int& z) {
 	if (x < 0 || y < 0 || z < 0) return -1;
 	if (x >= TM || y >= TM || z >= TM) return -1;
 	return x * TM * TM + y * TM + z;
@@ -57,6 +51,7 @@ void recur(const int& n) {
 	//가장 큰 구의 반지름의 절반 크기까지 제한을 건다.
 	//격자로 나눠도 결국 만나거나 만나지 않는 구체를 판단하는 건 똑같이 이루어지지만
 	//N*r.size()인 복잡도를 N*log(r.size()) 로 줄일 수 있으므로 절반까지 탐색
+	//어느 정도 제한을 다르게 걸 수는 있으나 큰 차이는 없음
 	d <<= 2;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
 	for (int i = n; i >= 0; i--) {
 		int x = S[i].x / d;
@@ -68,8 +63,8 @@ void recur(const int& n) {
 					ll hs = hash(x + dx, y + dy, z + dz);
 					auto it = MP.find(hs);
 					if (it == MP.end()) continue;
-					const Vint& I = it->second;
-					for (const int& j : I) {
+					const Vint& J = it->second;
+					for (const int& j : J) {
 						if (meet(i, j)) V.push_back({ i, j });
 						if (V.size() >= K) return;
 					}
@@ -82,7 +77,7 @@ void recur(const int& n) {
 	recur(m - 1);
 	return;
 }
-int count(const int& m) {
+inline int count(const int& m) {
 	V.clear();
 	for (int i = 0; i < N; i++) S[i].r += m;
 	recur(N - 1);
@@ -92,10 +87,9 @@ int count(const int& m) {
 void query() {
 	std::cin >> N >> K;
 	for (int i = 0; i < N; i++)
-		std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r,
-		S[i] *= 2;
-		//미리 2배를 키워서 계산을 간단하게 만든다.
-		//이렇게 만들어주면 두 구체의 거리는 이분탐색 결과 나오는 거리를 바로 가져다 쓰면 된다.
+		std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r, S[i] *= 2;
+	//미리 2배를 키워서 계산을 간단하게 만든다.
+	//이렇게 만들어주면 두 구체의 거리는 이분탐색 결과 나오는 거리를 바로 가져다 쓰면 된다.
 	std::sort(S, S + N);
 	int s = 0, e = 2000000;
 	while (s < e) {
@@ -109,11 +103,11 @@ void query() {
 	//이렇게 만들어주고도 닿지 않은 구체들은 무조건 거리가 멀다는 의미가 된다.
 	//300개를 가까스로 달성한 거리보다 1 작은 거리로 탐색을 하면 무조건 300개보다 작은 쌍을 찾게 되고
 	//나머지 300개까지의 거리는 전부 이분탐색 결과와 같다고 할 수 있다.
-	Vll ret;
+	Vint ret;
 	for (const Pair& p : V) ret.push_back((S[p.i] - S[p.j]).dist());
 	std::sort(ret.begin(), ret.end());
 	int sz = ret.size(); K -= sz;
-	for (const ll& d : ret) std::cout << d << "\n";
+	for (const int& d : ret) std::cout << d << "\n";
 	while (K--) std::cout << s << "\n";
 	return;
 }

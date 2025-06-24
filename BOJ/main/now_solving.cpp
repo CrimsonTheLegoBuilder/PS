@@ -57,7 +57,7 @@ void recur(const int& n) {
 	//가장 큰 구의 반지름의 절반 크기까지 제한을 건다.
 	//격자로 나눠도 결국 만나거나 만나지 않는 구체를 판단하는 건 똑같이 이루어지지만
 	//N*r.size()인 복잡도를 N*log(r.size()) 로 줄일 수 있으므로 절반까지 탐색
-	d *= 4;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
+	d <<= 2;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
 	for (int i = n; i >= 0; i--) {
 		int x = S[i].x / d;
 		int y = S[i].y / d;
@@ -66,7 +66,6 @@ void recur(const int& n) {
 			for (int dy = -1; dy <= 1; dy++) {
 				for (int dz = -1; dz <= 1; dz++) {//주변 27칸을 보겠다
 					ll hs = hash(x + dx, y + dy, z + dz);
-					//if (hs < 0) continue;
 					auto it = MP.find(hs);
 					if (it == MP.end()) continue;
 					const Vint& I = it->second;
@@ -77,7 +76,7 @@ void recur(const int& n) {
 				}
 			}
 		}
-		if (i >= m) MP[hash(x, y, x)].push_back(i);
+		if (i >= m) MP[hash(x, y, z)].push_back(i);
 		//지금 제한을 걸어둔 반지름보다 크거나 같은 원은 전부 담아둔다.
 	}
 	recur(m - 1);

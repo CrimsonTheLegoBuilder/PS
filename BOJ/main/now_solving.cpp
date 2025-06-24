@@ -7,6 +7,7 @@
 #include <cassert>
 #include <vector>
 #include <map>
+#include <unordered_map>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -38,7 +39,8 @@ bool meet(const Sphere& p, const Sphere& q) {
 	return z.Euc() - sq(z.r) <= 0;
 }
 bool meet(const int& i, const int& j) { return meet(S[i], S[j]); }
-std::map<ll, Vint> MP;
+//std::map<ll, Vint> MP;
+std::unordered_map<ll, Vint> MP(1 << 20);//해시 충돌과 리해싱 방지. 공간 확보
 //Vpii V;
 std::vector<Pair> V;
 ll hash(const int& x, const int& y, const int& z) {
@@ -52,14 +54,14 @@ void recur(const int& n) {
 	int d = S[n].r + 1 >> 1;
 	int m = 0;
 	while (S[m].r < d) m++;
-	d <<= 2;
+	d <<= 2;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
 	for (int i = n; i >= 0; i--) {
 		int x = S[i].x / d;
 		int y = S[i].y / d;
 		int z = S[i].z / d;
-		for (int dx = -1; dx <= 1; dx++) {
+		for (int dx = -1; dx <= 1; dx++) {//grid search
 			for (int dy = -1; dy <= 1; dy++) {
-				for (int dz = -1; dz <= 1; dz++) {
+				for (int dz = -1; dz <= 1; dz++) {//주변 27칸을 보겠다
 					ll hs = hash(x + dx, y + dy, z + dz);
 					if (hs < 0) continue;
 					auto it = MP.find(hs);
@@ -73,13 +75,14 @@ void recur(const int& n) {
 			}
 		}
 		if (i >= m) MP[hash(x, y, x)].push_back(i);
+		//지금 제한을 걸어둔 반지름보다 크거나 같은 원은 전부 담아둔다.
 	}
 	recur(m - 1);
 	return;
 }
 int count(const int& m) {
 	V.clear();
-	for (int i = 0; i < N; i++) S[i].r += m - 1;
+	for (int i = 0; i < N; i++) S[i].r += m - 1;//지금 탐색 중인 거리보다 1 작게 만들어서 보겠다.
 	recur(N - 1);
 	for (int i = 0; i < N; i++) S[i].r -= m - 1;
 	return V.size();
@@ -88,7 +91,7 @@ void query() {
 	std::cin >> N >> K;
 	for (int i = 0; i < N; i++)
 		std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r,
-		S[i] *= 2;
+		S[i] *= 2;//미리 2배를 키워서 계산을 간단하게 만든다.
 	std::sort(S, S + N);
 	int s = 0, e = 200'000;
 	while (s < e) {

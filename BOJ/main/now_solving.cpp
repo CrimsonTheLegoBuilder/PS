@@ -1,4 +1,3 @@
-//refer to jiangly at QOJ
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
@@ -6,7 +5,6 @@
 #include <cstring>
 #include <cassert>
 #include <vector>
-#include <unordered_map>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -21,106 +19,16 @@ inline ll sq(const ll& x) { return x * x; }
 
 struct Pair { int i, j; };
 int N, M, K, T, Q;
-struct Sphere {
-	ll x, y, z, r;
-	Sphere(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
-	bool operator < (const Sphere& q) const { return r < q.r; }
-	Sphere operator - (const Sphere& q) const { return Sphere(x - q.x, y - q.y, z - q.z, r + q.r); }
-	Sphere& operator *= (const ll& n) { x *= n, y *= n, z *= n, r *= n; return *this; }
-	ll Euc() const { return x * x + y * y + z * z; }
-	int dist() const { return std::max(0, (int)ceil((sqrt(Euc()) - r) * .5)); }
-} S[LEN];
-inline bool meet(const Sphere& p, const Sphere& q) {
-	Sphere z = p - q;
-	return z.Euc() - sq(z.r) <= 0;
-}
-inline bool meet(const int& i, const int& j) { return meet(S[i], S[j]); }
-std::unordered_map<ll, Vint> MP(1 << 20);//해시 충돌과 리해싱 방지 위해를 미리 공간 확보
-std::vector<Pair> V;
-inline ll hash(const int& x, const int& y, const int& z) {
-	if (x < 0 || y < 0 || z < 0) return -1;
-	if (x >= TM || y >= TM || z >= TM) return -1;
-	return x * TM * TM + y * TM + z;
-}
-void recur(const int& n) {
-	if (n < 0) return;
-	MP.clear();
-	int d = S[n].r + 1 >> 1;
-	int m = 0;
-	while (S[m].r < d) m++;
-	//가장 큰 구의 반지름의 절반 크기까지 제한을 건다.
-	//격자로 나눠도 결국 만나거나 만나지 않는 구체를 판단하는 건 똑같이 이루어지지만
-	//N*r.size()인 복잡도를 N*log(r.size()) 로 줄일 수 있으므로 절반까지 탐색
-	//어느 정도 제한을 다르게 걸 수는 있으나 큰 차이는 없음
-	d <<= 2;//중점이 지름까지 떨어져 있는 구체까지 탐색하기 위해서
-	for (int i = n; i >= 0; i--) {
-		int x = S[i].x / d;
-		int y = S[i].y / d;
-		int z = S[i].z / d;
-		for (int dx = -1; dx <= 1; dx++) {//grid search
-			for (int dy = -1; dy <= 1; dy++) {
-				for (int dz = -1; dz <= 1; dz++) {//주변 27칸을 보겠다
-					ll hs = hash(x + dx, y + dy, z + dz);
-					auto it = MP.find(hs);
-					if (it == MP.end()) continue;
-					const Vint& J = it->second;
-					for (const int& j : J) {
-						if (meet(i, j)) V.push_back({ i, j });
-						if (V.size() >= K) return;
-					}
-				}
-			}
-		}
-		if (i >= m) MP[hash(x, y, z)].push_back(i);
-		//지금 제한을 걸어둔 반지름보다 크거나 같은 원은 전부 담아둔다.
-	}
-	recur(m - 1);
-	return;
-}
-inline int count(const int& m) {
-	V.clear();
-	for (int i = 0; i < N; i++) S[i].r += m;
-	recur(N - 1);
-	for (int i = 0; i < N; i++) S[i].r -= m;
-	return V.size();
-}
-void query() {
-	std::cin >> N >> K;
-	for (int i = 0; i < N; i++)
-		std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r, S[i] *= 2;
-	//미리 2배를 키워서 계산을 간단하게 만든다.
-	//이렇게 만들어주면 두 구체의 거리는 이분탐색 결과 나오는 거리를 바로 가져다 쓰면 된다.
-	std::sort(S, S + N);
-	int s = 0, e = 2000000;
-	while (s < e) {
-		int m = s + e >> 1;
-		int cnt = count(m);
-		if (cnt >= K) e = m;
-		else s = m + 1;
-	}
-	if (s) count(s - 1);
-	//지금 탐색 중인 거리보다 1 작게 만든다.
-	//이렇게 만들어주고도 닿지 않은 구체들은 무조건 거리가 멀다는 의미가 된다.
-	//300개를 가까스로 달성한 거리보다 1 작은 거리로 탐색을 하면 무조건 300개보다 작은 쌍을 찾게 되고
-	//나머지 300개까지의 거리는 전부 이분탐색 결과와 같다고 할 수 있다.
-	Vint ret;
-	for (const Pair& p : V) ret.push_back((S[p.i] - S[p.j]).dist());
-	std::sort(ret.begin(), ret.end());
-	int sz = ret.size(); K -= sz;
-	for (const int& d : ret) std::cout << d << "\n";
-	while (K--) std::cout << s << "\n";
-	return;
-}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	std::cin >> Q; while (Q--) query();
+
 	return;
 }
 int main() { solve(); return 0; }//boj18592
-//refer to jiangly at QOJ
+//boj 27712 10239 22635 29691 31392 16068
 
 /*
 

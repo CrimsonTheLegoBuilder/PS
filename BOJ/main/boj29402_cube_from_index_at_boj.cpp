@@ -447,20 +447,29 @@ bool check() {
 int check_edge_parity() {
 	int ret = 0;
 	for (int i = 0; i < 8; i++) {//위 아래 8개
-		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면이라면
-			ret ^= ((S[edge_od[i][0]] ^ i ^ 1) & 1) << i;//면 번호가 홀수?
+		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면의 오리엔테이션이 맞지 않다면
+			ret ^= ((S[edge_od[i][0]] ^ i ^ 1) & 1) << i;//옆면의 위치가 정위치 혹은 반대 위치인지 확인
 		}
 		else ret ^= ((S[edge_od[i][1]] ^ i) & 1) << i;
 	}
 	for (int i = 8; i < 12; i++) {//옆 4개
-		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면이라면
+		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//
 			ret ^= ((S[edge_od[i][0]] ^ i) & 1) << i;
 		}
 		else ret ^= ((S[edge_od[i][1]] ^ i ^ 1) & 1) << i;
 	}
 	return ret;
 }
+void prec_phase1() {
+	int x, y, bit;//x: 현재 상태, y: 변할 상태, bit: 선택한 비트
+	int qf = 0, qr = 0;
+	memset(phase1_last, -1, sizeof phase1_last);
+	phase1_last[0] = 0;
+	Q[qf++] = 0;
+	while (qf > qr) {
 
+	}
+}
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 

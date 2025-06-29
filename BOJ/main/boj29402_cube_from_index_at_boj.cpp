@@ -132,7 +132,7 @@ const int side_od[6][12] = {
 *
 * 각 엣지에 면 번호 매칭
 */
-const int edge_p[12][2] = {
+const int edge_od[12][2] = {
 	{  6, 11 },
 	{  4, 20 },
 	{  2, 29 },
@@ -192,7 +192,7 @@ const int color_edge[64] = {
 * 
 * 코너 조각에 면 번호 매칭
 */
-const int corner_p[8][3] = {
+const int corner_od[8][3] = {
 	{ 39, 10, 7 },
 	{ 41, 46, 16 },
 	{ 43, 32, 52 },
@@ -441,6 +441,24 @@ bool check() {
 		for (int j = 0; j < 9; j++)
 			if (S[i * 9 + j] != i + 1) return 0;
 	return 1;
+}
+//엣지 조각의 상태를 비트마스킹하여 정수형으로 반환.
+//1인 엣지는 오리엔테이션이 반대
+int check_edge_parity() {
+	int ret = 0;
+	for (int i = 0; i < 8; i++) {//위 아래 8개
+		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면이라면
+			ret ^= ((S[edge_od[i][0]] ^ i ^ 1) & 1) << i;//면 번호가 홀수?
+		}
+		else ret ^= ((S[edge_od[i][1]] ^ i) & 1) << i;
+	}
+	for (int i = 8; i < 12; i++) {//옆 4개
+		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면이라면
+			ret ^= ((S[edge_od[i][0]] ^ i) & 1) << i;
+		}
+		else ret ^= ((S[edge_od[i][1]] ^ i ^ 1) & 1) << i;
+	}
+	return ret;
 }
 
 void query() {

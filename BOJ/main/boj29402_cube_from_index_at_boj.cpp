@@ -467,8 +467,30 @@ void prec_phase1() {
 	phase1_last[0] = 0;
 	Q[qf++] = 0;
 	while (qf > qr) {
-
+		x = Q[qr++];
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			if (i == 0) y ^= 15;//À­¸é, 00001111
+			else if (i == 5) y ^= 240;//¾Æ·§¸é, 11110000
+			for (int j = 1; j <= 3; j++) {
+				bit = ((y >> oper_edge[i][3]) & 1);
+				for (int k = 3; k >= 1; k--) {
+					y -= (y & (1 << oper_edge[i][k]));
+					y += (((y >> oper_edge[i][k - 1]) & 1) << oper_edge[i][k]);
+				}
+				y -= (y & (1 << oper_edge[i][0]));
+				y += (bit << oper_edge[i][0]);
+				if ((i == 0 || i == 5) && j == 2) continue;
+				if (phase1_last[y] < 0) {
+					Q[qf++] = y;
+					phase1_last[y] = x;
+					phase1_oper[y] = i * 10 + (4 - j);
+					phase1_oper[y] = phase1_dist[x] + 1;
+				}
+			}
+		}
 	}
+	return;
 }
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];

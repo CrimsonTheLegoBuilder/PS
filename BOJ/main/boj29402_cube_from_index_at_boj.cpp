@@ -460,7 +460,11 @@ int check_edge_parity() {
 	}
 	return ret;
 }
-void prec_phase1() {
+/*
+* phase1 전처리
+* bfs로 가능한 형태 전부 탐색하는 것이 목표
+*/
+void prec_phase1() {//bfs?
 	int x, y, bit;//x: 현재 상태, y: 변할 상태, bit: 선택한 비트
 	int qf = 0, qr = 0;
 	memset(phase1_last, -1, sizeof phase1_last);

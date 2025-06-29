@@ -15,7 +15,7 @@ boj의 index 님의 솔루션 코드로 공부해서 제출합니다.
 
 int N;//query num
 int S[54];//현재 큐브의 상태
-int pre[3];//이전 상태를 저장하는 작은 배열
+int pre[6];//이전 상태를 저장하는 작은 배열
 int res[256];//큐브를 돌리는 순서
 int len_count[256];//큐브를 돌린 횟수 각각의 횟수 ?
 ll Q[3342336];//상태 저장용 큐
@@ -378,12 +378,71 @@ const int oper4_edge[12][12] = {
 /* PHASE 4 */
 
 
-void rotate_90(const int& f /* face */) {
+void move_cw(const int& f /* face */) {
+	//옆면 회전
 	pre[0] = S[side_od[f][9]];
 	pre[1] = S[side_od[f][10]];
 	pre[2] = S[side_od[f][11]];
-
+	for (int i = 11; i >= 3; i--) S[side_od[f][i]] = S[side_od[f][i - 3]];
+	for (int i = 0; i < 3; i++) S[side_od[f][i]] = pre[i];
+	//윗면 회전
+	pre[1] = S[f * 9 + 7];
+	pre[2] = S[f * 9 + 8];
+	for (int i = 8; i >= 3; i--) S[f * 9 + i] = S[f * 9 + (i - 2)];
+	S[f * 9 + 1] = pre[1];
+	S[f * 9 + 2] = pre[2];
+	return;
 }
+void move_ccw(const int& f /* face */) {
+	//옆면 회전
+	pre[0] = S[side_od[f][0]];
+	pre[1] = S[side_od[f][1]];
+	pre[2] = S[side_od[f][2]];
+	for (int i = 0; i < 9; i++) S[side_od[f][i]] = S[side_od[f][i + 3]];
+	for (int i = 9; i < 12; i++) S[side_od[f][i]] = pre[i - 9];
+	//윗면 회전
+	pre[1] = S[f * 9 + 1];
+	pre[2] = S[f * 9 + 2];
+	for (int i = 1; i <= 6; i++) S[f * 9 + i] = S[f * 9 + (i + 2)];
+	S[f * 9 + 7] = pre[1];
+	S[f * 9 + 8] = pre[2];
+	return;
+}
+void move_180(const int& f /* face */) {
+	//옆면 회전
+	for (int i = 0; i < 6; i++) std::swap(S[side_od[f][i]], S[side_od[f][i + 6]]);
+	//윗면 회전
+	for (int i = 1; i <= 4; i++) std::swap(S[f * 9 + i], S[f * 9 + (i + 4)]);
+	return;
+}
+void move(const int& o) {
+	assert(0 < o && o < 60);
+	int f = o / 10, p = o % 10;
+	assert(1 <= p && p <= 3);
+	if (p == 1) move_cw(f);
+	if (p == 2) move_180(f);
+	if (p == 3) move_ccw(f);
+	return;
+}
+void solve(const int& len) {
+	for (int i = 0; i < len; i++) move(res[i]);
+	return;
+}
+
+void random25() {
+	for (int i = 0; i < 6; i++)
+		for (int j = 0; j < 9; j++)
+			S[i * 9 + j] = i + 1;
+	for (int i = 0; i < 25; i++) move(rand() % 6 * 10 + rand() % 3 + 1);
+	return;
+}
+bool check() {
+	for (int i = 0; i < 6; i++)
+		for (int j = 0; j < 9; j++)
+			if (S[i * 9 + j] != i + 1) return 0;
+	return 1;
+}
+
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 

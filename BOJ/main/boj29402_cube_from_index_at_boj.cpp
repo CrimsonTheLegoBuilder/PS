@@ -5,6 +5,7 @@
 #include <time.h>
 #include <random>
 #include <vector>
+#include <unordered_map>
 typedef long long ll;
 
 /*
@@ -12,6 +13,12 @@ https://github.com/thregium/practice_baekjoon/blob/main/24000-24999/24902.c
 boj의 index 님의 솔루션 코드로 공부해서 제출합니다.
 */
 
+int N;//query num
+int S[54];//현재 큐브의 상태
+int pre[3];//이전 상태를 저장하는 작은 배열
+int res[256];//큐브를 돌리는 순서
+int len_count[256];//큐브를 돌린 횟수 각각의 횟수 ?
+ll Q[3342336];//상태 저장용 큐
 /*
 *        +------+
 *        | 1 2 3|
@@ -40,6 +47,47 @@ const int tile_od[1 << 6] = {
 	            53, 45, 49,
 	            52, 51, 50
 };
+void debug_print() {
+	std::cout << "DEBUG::\n";
+	for (int i = 0; i < 3; i++) {
+		std::cout << "      ";
+		for (int j = 0; j < 3; j++) {
+			std::cout << S[tile_od[i * 3 + j]] << " ";
+		}
+		std::cout << "\n";
+	}
+	for (int i = 0; i < 3; i++) {
+		std::cout << "      ";
+		for (int j = 0; j < 12; j++) {
+			std::cout << S[tile_od[9 + i * 12 + j]] << " ";
+		}
+		std::cout << "\n";
+	}
+	for (int i = 0; i < 3; i++) {
+		std::cout << "      ";
+		for (int j = 0; j < 3; j++) {
+			std::cout << S[tile_od[45 + i * 3 + j]] << " ";
+		}
+		std::cout << "\n";
+	}
+	std::cout << "DEBUG::\n";
+	return;
+}
+const char M[10] = "UFRBLD";
+void print_sol(int len) {
+	for (int i = 0; i < len; i++) {
+		assert(res[i] > 0 && res[i] < 60);
+		int f = res[i] / 10;
+		int p = res[i] % 10;
+		std::cout << M[f];
+		assert(1 <= p && p <= 3);
+		if (p == 2) std::cout << "2";
+		else if (p == 3) std::cout << "'";
+		std::cout << " ";
+	}
+	std::cout << "\n";
+	return;
+}
 /*
 *      >----------v
 *      | +------+ |
@@ -330,8 +378,12 @@ const int oper4_edge[12][12] = {
 /* PHASE 4 */
 
 
-int N;//query num
-int S[1 << 6];//현재 큐브의 상태
+void rotate_90(const int& f /* face */) {
+	pre[0] = S[side_od[f][9]];
+	pre[1] = S[side_od[f][10]];
+	pre[2] = S[side_od[f][11]];
+
+}
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 

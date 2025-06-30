@@ -19,6 +19,7 @@ int pre[6];//이전 상태를 저장하는 작은 배열
 int res[256];//큐브를 돌리는 순서
 int len_count[256];//큐브를 돌린 횟수 각각의 횟수 ?
 ll Q[3342336];//상태 저장용 큐
+int comb[16][16];//combination
 /*
 *        +------+
 *        | 1 2 3|
@@ -495,6 +496,39 @@ void prec_phase1() {//bfs?
 		}
 	}
 	return;
+}
+//이건 또 뭘까
+int fb_edge_to_perm(int* fb_edge) {
+	int ret = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = (i ? fb_edge[i - 1] + 1 : 0); j < fb_edge[i]; j++) {
+			ret += comb[12 - j - 1][3 - i];
+		}
+	}
+	return ret;
+}
+int get_phase_num_2() {
+	int ret = 0, fb_edge[4], tedge, edgecnt = 0;
+	for (int i = 7; i >= 0; i--) {
+		ret *= 3;
+		for (int j = 0; j < 3; j++) {
+			if (S[corner_od[i][j]] == 3 || S[corner_od[i][j]] == 5) {
+				ret += j;
+				break;
+			}
+		}
+	}
+	ret *= 495;
+	for (int i = 0; i < 12; i++) {
+		tedge = color_edge[S[edge_od[i][0]]] * 8 + S[edge_od[i][1]];
+		assert(tedge >= 0);
+		if (tedge <= 6 && !(tedge & 1)) {
+			fb_edge[edgecnt++] = i;
+		}
+	}
+	assert(edgecnt == 4);
+	ret += fb_edge_to_perm(fb_edge);
+	return ret;
 }
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];

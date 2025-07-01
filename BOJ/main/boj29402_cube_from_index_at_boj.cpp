@@ -530,6 +530,12 @@ int get_phase_num_2() {
 	ret += fb_edge_to_perm(fb_edge);
 	return ret;
 }
+int pack_phase_num_2(ll num) {
+	int fb_edge[4];
+	int ecnt = 0;
+	int corner;
+	int corner_ret = 0;
+}
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 

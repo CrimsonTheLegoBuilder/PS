@@ -11,7 +11,14 @@ typedef long long ll;
 /*
 https://github.com/thregium/practice_baekjoon/blob/main/24000-24999/24902.c
 boj의 index 님의 솔루션 코드로 공부해서 제출합니다.
+Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 */
+
+#define PHASE2S 85
+#define PHASE3S 1077072625834
+#define PHASE4C 16434824
+#define PHASE4E 205163983024656
+//각 숫자의 의미가 뭘까?
 
 int N;//query num
 int S[54];//현재 큐브의 상태
@@ -252,7 +259,7 @@ int phase1_last[4096], phase1_oper[4096], phase1_dist[4096];
 *
 * phase1에서 돌아가는 엣지 조각의 순서
 */
-const int oper1_edge[6][4] = {
+const int phase1_edge_oper[6][4] = {
 	//{ 2,  1, 0,  3 },
 	{ 0,  3, 2,  1 },
 	{ 0,  8, 4, 11 },
@@ -288,7 +295,7 @@ char phase2_oper[3342336];
 * phase2에서 돌아가는 코너 조각의 순서
 * 이건 뭔 순서인지 모르겠다
 */
-const int corner_oper[6][4] = {
+const int phase2_corner_oper[6][4] = {
 	{ 0, 3, 7, 4 },
 	{ 0, 4, 5, 1 },
 	{ 4, 7, 6, 5 },
@@ -315,7 +322,7 @@ const int corner_oper[6][4] = {
 * phase2에서 돌아가는 엣지 조각의 순서
 * phase1과 동일하기 때문에 하나만 있어도 될 듯 함
 */
-const int oper2_edge[6][4] = {
+const int phase2_edge_oper[6][4] = {
 	//{ 2,  1, 0,  3 },
 	{ 0,  3, 2,  1 },
 	{ 0,  8, 4, 11 },
@@ -344,7 +351,7 @@ int phase4_corner_perm[96];
 ll phase4_edge_perm[13824];
 char phase4_corner_vis[96], phase4_edge_vis[13824];
 int phase4_last[1327104];
-char phase4_oper[1327104];
+char phase4_edge_oper[1327104];
 /*
 *        +------+
 *        |   2  |
@@ -443,6 +450,9 @@ bool check() {
 			if (S[i * 9 + j] != i + 1) return 0;
 	return 1;
 }
+
+
+/* PHASE 1 */
 //엣지 조각의 상태를 비트마스킹하여 정수형으로 반환.
 //1인 엣지는 오리엔테이션이 반대
 int check_edge_parity() {
@@ -497,6 +507,10 @@ void prec_phase1() {//bfs?
 	}
 	return;
 }
+/* PHASE 1 */
+
+
+/* PHASE 2 */
 //이건 또 뭘까
 int fb_edge_to_perm(int* fb_edge) {
 	int ret = 0;
@@ -530,12 +544,156 @@ int get_phase_num_2() {
 	ret += fb_edge_to_perm(fb_edge);
 	return ret;
 }
-int pack_phase_num_2(ll num) {
+int pack_phase_num_2(ll lnum) {
 	int fb_edge[4];
 	int ecnt = 0;
 	int corner;
 	int corner_ret = 0;
+	for (int i = 0; i < 12; i++) {
+		if ((lnum >> i) & 1) fb_edge[ecnt++] = i;
+	}
+	assert(ecnt == 4);//뭐가 4개인걸까?
+	corner = lnum >> 16;
+	for (int i = 7; i >= 0; i--) {
+		corner_ret *= 3;
+		corner_ret += ((corner >> (1 << 1)) & 3);
+	}
+	return corner_ret * 495 + fb_edge_to_perm(fb_edge);
 }
+ll phase2_corner_move(ll corner_num, int f) {
+	ll store, cornertrit;//이 변수들은 또 뭘까?
+	if (f == 1 || f == 3) {
+		for (int i = 0; i < 4; i++) {
+			cornertrit = ((corner_num >> (phase2_corner_oper[f][i] << 1)) & 3);
+			corner_num -= cornertrit << (phase2_corner_oper[f][i] << 1);
+			if (i & 1) cornertrit--;//홀수면 1 뺀다
+			else cornertrit++;
+			if (cornertrit >= 3) cornertrit -= 3;
+			else if (cornertrit < 0) cornertrit += 3;
+			corner_num += cornertrit << (phase2_corner_oper[f][i] << 1);
+		}
+	}
+	store = ((corner_num >> (phase2_corner_oper[f][3] << 1)) & 3);//뭔가 두 자리를 남겨놔야했다.
+	for (int i = 3; i >= 1; i--) {
+		corner_num -= (corner_num & (3ll << (phase2_corner_oper[f][i] << 1)));
+		corner_num += (((corner_num >> (phase2_corner_oper[f][i - 1] << 1)) & 3) << (phase2_corner_oper[f][i] << 1));
+	}
+	corner_num -= (corner_num & (3ll << (phase2_corner_oper[f][0] << 1)));
+	corner_num += (store << (phase2_corner_oper[f][0] << 1));
+	return corner_num;
+}
+ll phase2_edge_move(ll edge_num, int f) {
+	ll store;
+	store = ((edge_num >> phase2_edge_oper[f][3]) & 1);
+	for (int i = 3; i >= 1; i--) {
+		edge_num -= (edge_num & (1ll << phase2_edge_oper[f][i]));
+		edge_num += (((edge_num >> phase2_edge_oper[f][i - 1]) & 1) << phase2_edge_oper[f][i]);
+	}
+	edge_num -= (edge_num & (1ll << phase2_edge_oper[f][0]));
+	edge_num += (store << (1ll << phase2_edge_oper[f][0]));
+	return edge_num;
+}
+//페이즈2의 코너 조각부터 전처리한다.
+void prec_phase2_corner() {
+	int qf = 0, qr = 0;
+	ll x = 0, xpk, y, ypk;//x: 현재 상태, y: 바뀔 상태
+	memset(phase2_corner, -1, sizeof phase2_corner);
+	Q[qf++] = x;
+	while (qf > qr) {//bfs
+		x = Q[qr++];
+		xpk = pack_phase_num_2((x << 16) + 15);
+		assert(xpk % 495 == 0);
+		xpk /= 495;
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			for (int j = 0; j < 3; j++) {
+				y = phase2_corner_move(y, i);
+				//if (j != i && (i == 0 || i == 5)) continue;//위아래는 짝수번만 돌릴 수 있음. 첨부 논문 참고
+				ypk = pack_phase_num_2((y << 16) + 15);
+				assert(ypk % 495 == 0);
+				ypk /= 495;
+				assert(0 <= ypk && ypk < 6561);
+				phase2_corner[xpk][i][j] == ypk;
+				if (!phase2_corner_vis[ypk]) {
+					Q[qf++] = y;
+					phase2_corner_vis[ypk] = 1;
+				}
+			}
+		}
+	}
+}
+//페이즈2의 엣지 조각을 전처리한다.
+void prec_phase2_edge() {
+	int qf = 0, qr = 0;
+	ll x = PHASE2S, xpk, y, ypk;//
+	memset(phase2_edge, -1, sizeof phase2_edge);
+	Q[qf++] = x;
+	while (qf > qr) {//bfs
+		x = Q[qr++];
+		xpk = pack_phase_num_2(x);
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			for (int j = 0; j < 3; j++) {
+				y = phase2_edge_move(y, i);
+				//if (j != i && (i == 0 || i == 5)) continue;//위아래는 짝수번만 돌릴 수 있음. 첨부 논문 참고
+				ypk = pack_phase_num_2(y);
+				assert(0 <= ypk && ypk < 495);
+				phase2_edge[xpk][i][j] == ypk;
+				if (!phase2_edge_vis[ypk]) {
+					Q[qf++] = y;
+					phase2_edge_vis[ypk] = 1;
+				}
+			}
+		}
+	}
+}
+//페이즈2 전처리
+void prec_phase2() {
+	ll x, y;//x: 현재 상태, y: 바뀔 상태
+	ll xpk, ypk;//각각을 패킹한 값
+	ll corner, edge;//코너, 엣지 블록의 값
+	ll qf = 0, qr = 0;
+	prec_phase2_corner();
+	prec_phase2_edge();
+	memset(phase2_oper, -1, sizeof phase2_oper);
+	Q[qf++] = pack_phase_num_2(PHASE2S);
+	x = pack_phase_num_2(PHASE2S);
+	phase2_oper[x] = 0;
+	while (qf > qr) {
+		x = Q[qr++];
+		xpk = (x >> 16) * 495 + (x & 65535);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (j != 1 && (i == 0 || i == 5)) continue;//위아래는 짝수번만
+				y = x;
+				corner = (y >> 16);
+				edge = (y & 65535);
+				corner = phase2_corner[corner][i][j];
+				edge = phase2_edge[edge][i][j];
+				y = (corner << 16) + edge;
+				ypk = (y >> 16) * 495 + (y & 65535);
+				assert(ypk >= 0 && ypk < 3247695);
+				if (phase2_oper[ypk] < 0) {
+					phase2_oper[ypk] = i * 10 + (3 - j);
+					phase2_last[ypk] = xpk;
+					Q[qf++] = y;
+				}
+			}
+		}
+	}
+	return;
+}
+/* PHASE 2 */
+
+
+/* PHASE 3 */
+/* PHASE 3 */
+
+
+/* PHASE 4 */
+/* PHASE 4 */
+
+
 void query() {
 	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 

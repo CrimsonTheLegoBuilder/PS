@@ -687,6 +687,58 @@ void prec_phase2() {
 
 
 /* PHASE 3 */
+//?
+void prec_phase3_corner_perm(int cp, int cnt) {
+	if (cnt < 0) {
+		phase3_corner_perm[phase3_corner_perm_cnt++] = cp;//?
+		return;
+	}
+	for (int i = 0; i < 8; i++) {
+		if (phase3_corner_perm_chk[i]) continue;
+		phase3_corner_perm_chk[i] = 1;
+		prec_phase3_corner_perm(cp + (i << (cnt * 3)), cnt - 1);//재귀
+		phase3_corner_perm_chk[i] = 0;
+	}
+	return;
+}
+//코너 조각의 해시값을 구한다
+int get_corner_num_3(int cnum) {
+	int c[3], h = 0;
+	for (int i = 0; i < 3; i++) c[i] = S[corner_od[cnum][i]];
+	std::sort(c, c + 3);
+	h = c[0] * 100 + c[1] * 10 + c[2];
+	if (h == 125) return 0;
+	else if (h == 256) return 1;
+	else if (h == 456) return 2;
+	else if (h == 145) return 3;
+	else if (h == 123) return 4;
+	else if (h == 236) return 5;
+	else if (h == 346) return 6;
+	else if (h == 134) return 7;
+	assert(0);
+	return -1;
+}
+//8진법 형태의 코너 조각 순열을 이분 탐색으로 순열 번호로 바꿈
+int corner_to_perm_3(int c) {
+	int s = 0, e = 40319, m;
+	while (s < e) {
+		m = s + e >> 1;
+		if (phase3_corner_perm[m] >= c) e = m;
+		else s = m + 1;
+	}
+	assert(phase3_corner_perm[s] == c);
+	return s;
+}
+//좌우 엣지 위치의 순서를 바꾼다. 상하 모서리는 제외하고 생각한다.
+int lr_edge_to_perm(int* lr_edge) {
+	int ret = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = (i ? lr_edge[i - 1] + 1 : 0); j < lr_edge[i]; j++) {
+			ret += comb[8 - j - 1][3 - i];
+		}
+	}
+	return ret;
+}
 /* PHASE 3 */
 
 

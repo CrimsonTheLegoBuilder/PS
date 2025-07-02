@@ -908,17 +908,35 @@ int corner_to_perm_4(int c) {
 	return s;
 }
 //8진법 형태의 엣지 순열을 이분 탐색으로 찾는 함수
-int edge_to_perm_4(int c) {
+int edge_to_perm_4(ll ed) {
 	int s = 0, e = 13823, m;
 	while (s < e) {
 		m = s + e >> 1;
-		if (phase4_edge_perm[m] >= c) e = m;
+		if (phase4_edge_perm[m] >= ed) e = m;
 		else s = m + 1;
 	}
-	assert(phase4_edge_perm[s] == c);
+	assert(phase4_edge_perm[s] == ed);
 	return s;
 }
-
+int get_phase_num_4() {
+	ll ret = 0, corn_num = 0, edge_num = 0, tedge;
+	for (int i = 0; i < 8; i++) {
+		corn_num += ((ll)get_corner_num_3(i) << (i * 3ll));
+	}
+	ret = corner_to_perm_4(corn_num);
+	ret *= 13824;
+	for (ll i = 0; i < 12; i++) {
+		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
+		assert(tedge >= 0);
+		edge_num += (tedge << (i << 2));
+	}
+	ret += edge_to_perm_4(edge_num);
+	return ret;
+}
+ll phase4_edge_move(ll edge_num, int f) {
+	ll store = ((edge_num >> (phase2_edge_oper[f][3] << 2)) & 15ll);
+	
+}
 /* PHASE 4 */
 
 

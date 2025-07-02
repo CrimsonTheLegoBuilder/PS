@@ -739,6 +739,17 @@ int lr_edge_to_perm(int* lr_edge) {
 	}
 	return ret;
 }
+int pack_phase_num_3(ll lnum) {
+	int lr_edge[4];
+	ll edge_minus = 0, ecnt = 0, corner, corner_res = 0;
+	for (int i = 0; i < 12; i++) {
+		if (i <= 6 && (~i & 1)) {
+			edge_minus++;
+			continue;
+		}
+		if ((lnum >> i) & 1) lr_edge[ecnt++] = i - edge_minus;
+	}
+}
 /* PHASE 3 */
 
 

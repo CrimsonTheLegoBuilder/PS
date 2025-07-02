@@ -891,11 +891,34 @@ void prec_phase4_edge_perm(ll ep, int cnt) {
 		if (phase4_edge_perm_chk[i]) continue;
 		if (!oper4_edge[i][cnt]) continue;
 		phase4_edge_perm_chk[i] = 1;
-		prec_phase4_edge_perm(ep + (i << (cnt << 2), cnt - 1);
+		prec_phase4_edge_perm(ep + (i << (cnt << 2)), cnt - 1);
 		phase4_edge_perm_chk[i] = 0;
 	}
 	return;
 }
+//8진법 형태의 코너 순열을 이분 탐색으로 찾는 함수
+int corner_to_perm_4(int c) {
+	int s = 0, e = 95, m;
+	while (s < e) {
+		m = s + e >> 1;
+		if (phase4_corner_perm[m] >= c) e = m;
+		else s = m + 1;
+	}
+	assert(phase4_corner_perm[s] == c);
+	return s;
+}
+//8진법 형태의 엣지 순열을 이분 탐색으로 찾는 함수
+int edge_to_perm_4(int c) {
+	int s = 0, e = 13823, m;
+	while (s < e) {
+		m = s + e >> 1;
+		if (phase4_edge_perm[m] >= c) e = m;
+		else s = m + 1;
+	}
+	assert(phase4_edge_perm[s] == c);
+	return s;
+}
+
 /* PHASE 4 */
 
 

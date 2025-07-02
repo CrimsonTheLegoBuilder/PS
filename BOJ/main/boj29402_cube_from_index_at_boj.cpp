@@ -856,12 +856,46 @@ void prec_phase3() {
 	while (qf < qr) {
 		x = Q[qr++];
 		xpk = (x >> 16) * 70 + (x & 65535);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (j != 1 && (i != 2 && i != 4)) continue;//양 옆을 제외하면 짝수번만 돌릴 수 있음
+				y = x;
+				corner = (y >> 16);
+				edge = (y & 65535);
+				corner = phase3_corner[corner][i][j];
+				edge = phase3_edge[edge][i][j];
+				y = (corner << 16) + edge;
+
+				ypk = (y >> 16) * 70 + (y & 65535);
+				assert(ypk >= 0 && ypk < 2822400);
+				if (phase3_oper[ypk] < 0) {
+					phase3_oper[ypk] = i * 10 + (3 - j);
+					phase3_last[ypk] = xpk;
+					Q[qf++] = y;
+				}
+			}
+		}
 	}
+	return;
 }
 /* PHASE 3 */
 
 
 /* PHASE 4 */
+void prec_phase4_edge_perm(ll ep, int cnt) {
+	if (cnt < 0) {
+		phase4_edge_perm[phase4_edge_perm_cnt++] = ep;
+		return;
+	}
+	for (ll i = 0; i < 12; i++) {
+		if (phase4_edge_perm_chk[i]) continue;
+		if (!oper4_edge[i][cnt]) continue;
+		phase4_edge_perm_chk[i] = 1;
+		prec_phase4_edge_perm(ep + (i << (cnt << 2), cnt - 1);
+		phase4_edge_perm_chk[i] = 0;
+	}
+	return;
+}
 /* PHASE 4 */
 
 

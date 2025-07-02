@@ -749,6 +749,114 @@ int pack_phase_num_3(ll lnum) {
 		}
 		if ((lnum >> i) & 1) lr_edge[ecnt++] = i - edge_minus;
 	}
+	assert(ecnt == 4);
+	corner = lnum >> 16;
+	corner_res = corner_to_perm_3(corner);
+	return corner_res * 70 + lr_edge_to_perm(lr_edge);
+}
+//페이즈 3, 4에서 사용 가능한 코너 조각 순열의 이동
+ll phase3_corner_move(ll corner_num, int f) {
+	ll store;
+	store = ((corner_num >> (phase2_corner_oper[f][3] * 3)) & 7);//111
+	for (int i = 3; i >= 1; i--) {
+		corner_num -= (corner_num & (7ll << (phase2_corner_oper[f][i] * 3)));
+		corner_num += (((corner_num >> (phase2_corner_oper[f][i - 1] * 3)) & 7)
+			<< (phase2_corner_oper[f][i] * 3));
+	}
+	corner_num -= (corner_num & (7ll << (phase2_corner_oper[f][0] * 3)));
+	corner_num += (store << (phase2_corner_oper[f][0] * 3));
+	return corner_num;
+}
+//페이즈3의 코너 전처리
+void prec_phase3_corner() {
+	ll qf = 0, qr = 0, x = (PHASE3S >> 16), xpk, y, ypk;
+	memset(phase3_corner, -1, sizeof phase3_corner);
+	Q[qf++] = x;
+	while (qf > qr) {
+		x = Q[qr++];
+		xpk = corner_to_perm_3(x);
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			for (int j = 0; j < 3; j++) {
+				y = phase3_corner_move(y, i);
+				if (j != 1 && (i != 2 && i != 4)) continue;//양 옆을 제외하면 짝수번만 돌릴 수 있음
+				ypk = corner_to_perm_3(y);
+				assert(ypk >= 0 && ypk < 40320);
+				phase3_corner[xpk][i][j] = ypk;
+				if (!phase3_corner_vis[ypk]) {
+					Q[qf++] = y;
+					phase3_corner_vis[ypk] = 1;
+				}
+			}
+		}
+	}
+	return;
+}
+//페이즈3의 엣지 전처리
+void prec_phase3_edge() {
+	ll qf = 0, qr = 0, x = PHASE3S, xpk, y, ypk;
+	memset(phase3_edge, -1, sizeof phase3_edge);
+	Q[qf++] = x;
+	while (qf > qr) {
+		x = Q[qr++];
+		xpk = pack_phase_num_3(x) - 40319 * 70;
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			for (int j = 0; j < 3; j++) {
+				y = phase2_edge_move(y, i);
+				if (j != 1 && (i != 2 && i != 4)) continue;//양 옆을 제외하면 짝수번만 돌릴 수 있음
+				ypk = pack_phase_num_3(y) - 40319 * 70;
+				assert(ypk >= 0 && ypk < 70);
+				phase3_edge[xpk][i][j] = ypk;
+				if (!phase3_edge_vis[ypk]) {
+					Q[qf++] = y;
+					phase3_edge_vis[ypk] = 1;
+				}
+			}
+		}
+	}
+	return;
+}
+void prec_phase3() {
+	ll x, y, xpk, ypk, corner, edge, qf = 0, qr = 0;
+	prec_phase3_corner_perm(0, 7);
+	prec_phase3_corner();
+	prec_phase3_edge();
+	
+	memset(phase3_oper, -1, sizeof phase3_oper);
+	Q[qf++] = ((pack_phase_num_3(PHASE3S) / 70ll) << 16) + pack_phase_num_3(PHASE3S) % 70;
+	x = pack_phase_num_3(PHASE3S);
+	phase3_oper[x] = 0;
+	while (qf > qr) {//도착지의 상태 96가지를 bfs로 찾는다.
+		x = Q[qr++];
+		xpk = (x >> 16) * 70 + (x & 65535);
+		phase3_is_end[xpk] = 1;
+		phase4_corner_perm[qr - 1] = phase3_corner_perm[x >> 16];//페이즈4의 가능한 경우들을 미리 찾아둔다.
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 3; j++) {
+				y = x;
+				corner = (y >> 16);
+				edge = (y * 65535);
+				corner = phase3_corner[corner][i][j];
+				edge = phase3_edge[edge][i][j];
+				y = (corner << 16) + edge;
+				if (j != 1) continue;//짝수번만 돌린다
+				ypk = (y >> 16) * 70 + (y & 65535);
+				assert(ypk >= 0 && ypk < 2822400);
+				if (phase3_oper[ypk] < 0) {
+					phase3_oper[ypk] = 0;
+					phase3_last[ypk] = 0;
+					Q[qf++] = y;
+				}
+			}
+		}
+	}
+	std::sort(phase4_corner_perm, phase4_corner_perm + qr);
+	qr = 0;
+	while (qf < qr) {
+		x = Q[qr++];
+		xpk = (x >> 16) * 70 + (x & 65535);
+	}
 }
 /* PHASE 3 */
 

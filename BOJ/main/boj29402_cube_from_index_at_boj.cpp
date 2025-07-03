@@ -240,6 +240,14 @@ const int oper_edge[6][4] = {
 
 
 /* PHASE 1 */
+/*
+* 페이즈 1
+* 각 모서리 블록의 방향을 바꾼다
+* 위아래 면을 짝수번 돌려서 원래 있어야 하는 상태로 옮길 수 있는 경우로 만든다
+* ZZ공식이랑 비슷한 느낌
+* 사용하는 동작: U, D, F(1, 2, 3), R(1, 2, 3), B(1, 2, 3), L(1, 2, 3)
+* 경우의 수 2,048
+*/
 int phase1_last[4096], phase1_oper[4096], phase1_dist[4096];
 /*
 *      >----------v
@@ -1030,15 +1038,45 @@ void prec_phase4() {
 /* PHASE 4 */
 
 
-void query() {
-	for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
-
-}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
+	int edge_parity, phase2_num, phase3_num, phase4_num, reslen, last, tmp;
+	ll move_cnt = 0;//전체 이동 횟수 합
+	srand(time(NULL));
+	for (int i = 0; i < 16; i++) {
+		for (int j = 0; j < 16; j++) {
+			if (j == 0) comb[i][j] = 1;
+			else if (i == 0) comb[i][j] = 0;
+			else comb[i][j] = comb[i - 1][j] + comb[i - 1][j - 1];
+		}
+	}
+	prec_phase1();
+	prec_phase2();
+	prec_phase3();
+	prec_phase4();
 	std::cin >> N;
-	//
-	while (N--) query();
+	while (N--) {
+		for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
+		reslen = 0;
+		/*
+		* 페이즈 1
+		* 각 모서리 블록의 방향을 바꾼다
+		* 위아래 면을 짝수번 돌려서 원래 있어야 하는 상태로 옮길 수 있는 경우로 만든다
+		* ZZ공식이랑 비슷한 느낌
+		* 사용하는 동작: U, D, F(1, 2, 3), R(1, 2, 3), B(1, 2, 3), L(1, 2, 3)
+		* 경우의 수 2,048
+		*/
+		edge_parity = check_edge_parity();
+		while (edge_parity > 0) {
+			last = edge_parity;
+			res[reslen++] = phase1_oper[edge_parity];
+			edge_parity = phase1_last[edge_parity];
+			move(res[reslen - 1]);
+		}
+		edge_parity = check_edge_parity();
+		assert(!edge_parity);
+	}
+
 }
 int main() { solve(); return 0; }

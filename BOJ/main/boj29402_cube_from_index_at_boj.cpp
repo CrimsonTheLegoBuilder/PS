@@ -747,6 +747,28 @@ int lr_edge_to_perm(int* lr_edge) {
 	}
 	return ret;
 }
+int get_phase_num_3() {
+	int ret = 0, corn_num = 0, lr_edge[4], tedge, edge_minus = 0, edge_cnt = 0;
+	for (int i = 0; i < 8; i++) {
+		corn_num = (get_corner_num_3(i) << (i * 3));
+	}
+	ret = corner_to_perm_3(corn_num);
+	ret *= 70;
+	for (int i = 0; i < 12; i++) {
+		if (i <= 6 && (i & 1)) {
+			edge_minus++;
+			continue;
+		}
+		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
+		assert(tedge >= 0);
+		if (tedge <= 7 && (tedge & 1)) {
+			lr_edge[edge_cnt++] = i - edge_minus;
+		}
+	}
+	assert(edge_cnt == 4);
+	ret += lr_edge_to_perm(lr_edge);
+	return ret;
+}
 int pack_phase_num_3(ll lnum) {
 	int lr_edge[4];
 	ll edge_minus = 0, ecnt = 0, corner, corner_res = 0;
@@ -1064,7 +1086,7 @@ void solve() {
 		* 각 모서리 블록의 방향을 바꾼다
 		* 위아래 면을 짝수번 돌려서 원래 있어야 하는 상태로 옮길 수 있는 경우로 만든다
 		* ZZ공식이랑 비슷한 느낌
-		* 사용하는 동작: U, D, F(1, 2, 3), R(1, 2, 3), B(1, 2, 3), L(1, 2, 3)
+		* 사용하는 동작: U, D, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
 		* 경우의 수 2,048
 		*/
 		edge_parity = check_edge_parity();
@@ -1073,10 +1095,79 @@ void solve() {
 			res[reslen++] = phase1_oper[edge_parity];
 			edge_parity = phase1_last[edge_parity];
 			move(res[reslen - 1]);
+			tmp = check_edge_parity();
+			if (tmp != edge_parity) {
+				std::cout << "FUCK:: 1::\n";
+			}
 		}
 		edge_parity = check_edge_parity();
-		assert(!edge_parity);
+		assert(!edge_parity);//모든 엣지 조각을 원하는 방향으로 이동
+
+		/*
+		* 페이즈 2
+		* 각 꼭짓점의 방향을 바꾸는 동시에
+		* FU, FD, BU, BD 엣지의 위치를 옮김
+		* 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
+		* 경우의 수: 1,082,565가지 (corner 2,187, edge 495)
+		*/
+		phase2_num = get_phase_num_2();
+		while (phase2_num != 54) {
+			last = phase2_num;
+			res[reslen++] = phase2_oper[phase2_num];
+			phase2_num = phase2_last[phase2_num];
+			move(res[reslen - 1]);
+			tmp = get_phase_num_2();
+			if (tmp != phase2_num) {
+				std::cout << "FUCK:: 2::\n";
+			}
+		}
+		phase2_num = get_phase_num_2();
+		assert(phase2_num == 54);//모든 코거 조각이 원하는 방향, 가운데 면 엣지 조각을 가운데로 모았음
+
+		/*
+		* 페이즈 3
+		* 모든 칸의 색상을 원래 색 또는 그 반대 위치 색으로 바꿈
+		* 사용하는 동작: U2, D2, F2, B2, R, R', R2, L, L', L2
+		* 경우의 수: 29,400 * 96 (corner 420 * 96, edge 70)
+		*/
+		phase3_num = get_phase_num_3();
+		while (!phase3_is_end[phase3_num]) {
+			last = phase3_num;
+			res[reslen++] = phase3_oper[phase3_num];
+			phase3_num = phase3_last[phase3_num];
+			move(res[reslen - 1]);
+			tmp = get_phase_num_3();
+			if (tmp != phase3_num) {
+				std::cout << "FUCK:: 3::\n";
+			}
+		}
+		phase3_num = get_phase_num_3();
+		assert(phase3_is_end[phase3_num]);//모든 면의 색이 원하는 위치 혹은 반대 면으로 이동
+		
+		/*
+		* 페이즈 4
+		* 반바퀴 회전만을 사용해 큐브를 맞춤
+		* 사용하는 동작: 모든 면 2회 회전
+		* 경우의 수: 663552 (corner 96 * edge 6912)
+		*/
+		phase4_num = get_phase_num_4();
+		while (phase4_num != 1327103) {
+			last = phase4_num;
+			res[reslen++] = phase4_oper[phase4_num];
+			phase4_num = phase4_last[phase4_num];
+			move(res[reslen - 1]);
+			tmp = get_phase_num_4();
+			if (tmp != phase4_num) {
+				std::cout << "FUCK:: 4::\n";
+			}
+		}
+		assert(check());//complete
+
+		print_sol(reslen);
+		//move_cnt += reslen;
+		//len_count[reslen]++;
 	}
+	return;
 
 }
-int main() { solve(); return 0; }
+int main() { solve(); return 0; }//boj24902 Fewest Moves Challenge

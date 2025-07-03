@@ -351,7 +351,7 @@ int phase4_corner_perm[96];
 ll phase4_edge_perm[13824];
 char phase4_corner_vis[96], phase4_edge_vis[13824];
 int phase4_last[1327104];
-char phase4_edge_oper[1327104];
+char phase4_oper[1327104];
 /*
 *        +------+
 *        |   2  |
@@ -935,7 +935,97 @@ int get_phase_num_4() {
 }
 ll phase4_edge_move(ll edge_num, int f) {
 	ll store = ((edge_num >> (phase2_edge_oper[f][3] << 2)) & 15ll);
-	
+	for (int i = 3; i >= 1; i--) {
+		edge_num -= (edge_num & (15ll << (phase2_edge_oper[f][i] << 2)));
+		edge_num += (((edge_num >> (phase2_edge_oper[f][i - 1] << 2)) & 15ll)
+			<< (phase2_edge_oper[f][i] << 2));
+	}
+	edge_num -= (edge_num & (15ll << (phase2_edge_oper[f][0] << 2)));
+	edge_num += (store << (phase2_edge_oper[f][0] << 2));
+	return edge_num;
+}
+//페이즈4의 코너 전처리
+void prec_phase4_corner() {
+	ll qf = 0, qr = 0, x = PHASE4C, xpk, y, ypk;
+	memset(phase4_edge, -1, sizeof phase4_edge);
+	Q[qf++] = x;
+	while (qf > qr) {
+		x = Q[qr++];
+		xpk = corner_to_perm_4(x);
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			for (int j = 0; j < 3; j++) {
+				y = phase3_corner_move(y, i);
+				if (j != 1) continue;//짝수번만 돌릴 수 있음
+				ypk = corner_to_perm_4(y);
+				assert(ypk >= 0 && ypk < 96);
+				phase4_corner[xpk][i][j] = ypk;
+				if (!phase4_corner_vis[ypk]) {
+					Q[qf++] = y;
+					phase4_corner_vis[ypk] = 1;
+				}
+			}
+		}
+	}
+	return;
+}
+void prec_phase4_edge() {
+	ll qf = 0, qr = 0, x = PHASE4E, xpk, y, ypk;
+	memset(phase4_edge, -1, sizeof phase4_edge);
+	Q[qf++] = x;
+	while (qf > qr) {
+		x = Q[qr++];
+		xpk = edge_to_perm_4(x);
+		for (int i = 0; i < 6; i++) {
+			y = x;
+			for (int j = 0; j < 2; j++) {
+				y = phase4_edge_move(y, i);
+				if (j != 1) continue;//짝수번만 돌릴 수 있음
+				ypk = edge_to_perm_4(y);
+				assert(ypk >= 0 && ypk < 13824);
+				phase4_edge[xpk][i][j] = ypk;
+				if (!phase4_edge_vis[ypk]) {
+					Q[qf++] = y;
+					phase4_edge_vis[ypk] = 1;
+				}
+			}
+		}
+	}
+	return;
+}
+void prec_phase4() {
+	ll qf = 0, qr = 0, x, xpk, y, ypk, corner, edge;
+	prec_phase4_edge_perm(0, 11);
+	prec_phase4_corner();
+	prec_phase4_edge();
+	memset(phase4_oper, -1, sizeof phase4_oper);
+	x = (corner_to_perm_4(PHASE4C) << 16) + edge_to_perm_4(PHASE4E);
+	Q[qf++] = x;
+	phase4_oper[(corner_to_perm_4(PHASE4C) * 13824) + edge_to_perm_4(PHASE4E)] = 0;
+	while (qf > qr) {
+		x = Q[qr++];
+		xpk = (x >> 16) * 13824 + (x & 65535);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 2; j++) {
+				if (j != 1) continue;//짝수번만 돌릴 수 있음
+				y = x;
+				corner = (y >> 16);
+				edge = (y & 65535);
+				corner = phase4_corner[corner][i][j];
+				edge = phase4_edge[edge][i][j];
+				assert(corner >= 0 && corner < 96 && edge >= 0 && edge < 13824);
+				y = (corner << 16) + edge;
+				ypk = (y >> 16) * 13824 + (y & 65535);
+				assert(ypk >= 0 && ypk < 1327104);
+				if (phase4_oper[ypk] < 0) {
+					phase4_oper[ypk] = i + 10 + (3 - j);
+					phase4_last[ypk] = xpk;
+					Q[qf++] = y;
+				}
+			}
+		}
+	}
+	return;
 }
 /* PHASE 4 */
 

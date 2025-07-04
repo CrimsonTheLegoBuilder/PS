@@ -471,7 +471,8 @@ bool check() {
 */
 //엣지 조각의 상태를 비트마스킹하여 정수형으로 반환.
 //1인 엣지는 오리엔테이션이 반대
-int check_edge_parity() {
+//ZZ공식과 비슷하다.
+int check_edge_parity() {//엣지는 무조건 2의 배수로 뒤집힌다는 점에서 착안한 함수
 	int ret = 0;
 	for (int i = 0; i < 8; i++) {//위 아래 8개
 		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면의 오리엔테이션이 맞지 않다면
@@ -480,43 +481,40 @@ int check_edge_parity() {
 		else ret ^= ((S[edge_od[i][1]] ^ i) & 1) << i;//윗면 혹은 아랫면이 맞거나 반대거나 혹은 다른 엣지일 때는 중심 조각이랑 색을 맞춤
 	}
 	for (int i = 8; i < 12; i++) {//옆 4개
-		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//
-			ret ^= ((S[edge_od[i][0]] ^ i) & 1) << i;
+		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//옆면의 오리엔테이션이 맞지 않다면
+			ret ^= ((S[edge_od[i][0]] ^ i) & 1) << i;//윗면이나 아랫면이 1번 면에 있을 때
 		}
-		else ret ^= ((S[edge_od[i][1]] ^ i ^ 1) & 1) << i;
+		else ret ^= ((S[edge_od[i][1]] ^ i ^ 1) & 1) << i;//윗면이나 아랫면이 0번 면에 있을 때
 	}
-	return ret;
+	return ret;//12자리: 엣지의 상태들이 비트마스킹 되어있다
 }
-/*
-* phase1 전처리
-* bfs로 가능한 형태 전부 탐색하는 것이 목표
-*/
+//bfs로 모든 엣지 정렬 과정을 탐색. 경우의 수 2,048: 12C0 + 12C2 + ... + 12C10 + 12C12 
 void prec_phase1() {//bfs?
 	int x, y, bit;//x: 현재 상태, y: 변할 상태, bit: 선택한 비트
 	int qf = 0, qr = 0;
 	memset(phase1_last, -1, sizeof phase1_last);
-	phase1_last[0] = 0;
+	phase1_last[0] = 0;//모든 게 맞춰진 상태
 	Q[qf++] = 0;
 	while (qf > qr) {
 		x = Q[qr++];
 		for (int i = 0; i < 6; i++) {
 			y = x;
-			if (i == 0) y ^= 15;//윗면, 00001111
-			else if (i == 5) y ^= 240;//아랫면, 11110000
+			if (i == 0) y ^= 15;//0 == 윗면, 0000'0000'1111
+			else if (i == 5) y ^= 240;//5 == 아랫면, 0000'1111'0000
 			for (int j = 1; j <= 3; j++) {
-				bit = ((y >> oper_edge[i][3]) & 1);
+				bit = ((y >> oper_edge[i][3]) & 1);//돌리고자 하는 면의 3번째 엣지 홀짝성 보존
 				for (int k = 3; k >= 1; k--) {
-					y -= (y & (1 << oper_edge[i][k]));
-					y += (((y >> oper_edge[i][k - 1]) & 1) << oper_edge[i][k]);
+					y -= (y & (1 << oper_edge[i][k]));//기존에 1이었던 조각은 0으로 만든다
+					y += (((y >> oper_edge[i][k - 1]) & 1) << oper_edge[i][k]);//새롭게 위치할 조각의 위치를 1로 만든다
 				}
 				y -= (y & (1 << oper_edge[i][0]));
 				y += (bit << oper_edge[i][0]);
-				if ((i == 0 || i == 5) && j == 2) continue;
+				if ((i == 0 || i == 5) && j == 2) continue;//윗면, 아랫면의 2회 동작은 하지 않는다
 				if (phase1_last[y] < 0) {
-					Q[qf++] = y;
+					Q[qf++] = y;//큐에 저장
 					phase1_last[y] = x;
-					phase1_oper[y] = i * 10 + (4 - j);
-					phase1_oper[y] = phase1_dist[x] + 1;
+					phase1_oper[y] = i * 10 + (4 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, j는 돌리는 횟수
+					phase1_dist[y] = phase1_dist[x] + 1;//이전 상태보다 1칸 나아간다
 				}
 			}
 		}
@@ -527,7 +525,7 @@ void prec_phase1() {//bfs?
 
 
 /* PHASE 2 */
-//이건 또 뭘까
+//F, B 면의 퍼뮤테이션을 고정해주기 위한 동작
 int fb_edge_to_perm(int* fb_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
@@ -542,13 +540,13 @@ int get_phase_num_2() {
 	for (int i = 7; i >= 0; i--) {
 		ret *= 3;
 		for (int j = 0; j < 3; j++) {
-			if (S[corner_od[i][j]] == 3 || S[corner_od[i][j]] == 5) {
+			if (S[corner_od[i][j]] == 3 || S[corner_od[i][j]] == 5) {//L, R 면 코너 조각들의 위치를 기록
 				ret += j;
 				break;
 			}
 		}
 	}
-	ret *= 495;
+	ret *= 495;//12C4 or 12C8
 	for (int i = 0; i < 12; i++) {
 		tedge = color_edge[S[edge_od[i][0]]] * 8 + S[edge_od[i][1]];
 		assert(tedge >= 0);
@@ -690,7 +688,7 @@ void prec_phase2() {
 				ypk = (y >> 16) * 495 + (y & 65535);
 				assert(ypk >= 0 && ypk < 3247695);
 				if (phase2_oper[ypk] < 0) {
-					phase2_oper[ypk] = i * 10 + (3 - j);
+					phase2_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, j는 돌리는 횟수
 					phase2_last[ypk] = xpk;
 					Q[qf++] = y;
 				}
@@ -1101,7 +1099,7 @@ void solve() {
 		while (edge_parity > 0) {
 			last = edge_parity;
 			res[reslen++] = phase1_oper[edge_parity];
-			edge_parity = phase1_last[edge_parity];
+			edge_parity = phase1_last[edge_parity];//전처리에서 얻은 엣지 정렬 경로를 되짚어간다
 			move(res[reslen - 1]);
 			tmp = check_edge_parity();
 			if (tmp != edge_parity) {

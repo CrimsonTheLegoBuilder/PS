@@ -467,9 +467,9 @@ int check_edge_parity() {
 	int ret = 0;
 	for (int i = 0; i < 8; i++) {//위 아래 8개
 		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//윗면이나 아랫면의 오리엔테이션이 맞지 않다면
-			ret ^= ((S[edge_od[i][0]] ^ i ^ 1) & 1) << i;//옆면의 위치가 정위치 혹은 반대 위치인지 확인
+			ret ^= ((S[edge_od[i][0]] ^ i ^ 1) & 1) << i;//옆이 윗면 혹은 아랫면이 확실하다면 옆면 색이어야 o랑 p를 동시에 맞출 수 있음
 		}
-		else ret ^= ((S[edge_od[i][1]] ^ i) & 1) << i;
+		else ret ^= ((S[edge_od[i][1]] ^ i) & 1) << i;//윗면 혹은 아랫면이 맞거나 반대거나 혹은 다른 엣지일 때는 중심 조각이랑 색을 맞춤
 	}
 	for (int i = 8; i < 12; i++) {//옆 4개
 		if (S[edge_od[i][1]] == 1 || S[edge_od[i][1]] == 6) {//
@@ -1122,7 +1122,7 @@ void solve() {
 			}
 		}
 		phase2_num = get_phase_num_2();
-		assert(phase2_num == 54);//모든 코거 조각이 원하는 방향, 가운데 면 엣지 조각을 가운데로 모았음
+		assert(phase2_num == 54);//모든 코너 조각이 원하는 방향, 가운데 면 엣지 조각을 가운데로 모았음
 
 		/*
 		* 페이즈 3

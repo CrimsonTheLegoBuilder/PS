@@ -301,8 +301,7 @@ char phase2_oper[3342336];
 *        | 2   6|
 *        +------+
 *
-* phase2에서 돌아가는 코너 조각의 순서
-* 이건 뭔 순서인지 모르겠다
+* phase2에서 해당 면을 돌리면 돌아가는 코너 조각의 번호
 */
 const int phase2_corner_oper[6][4] = {
 	{ 0, 3, 7, 4 },
@@ -525,6 +524,13 @@ void prec_phase1() {//bfs?
 
 
 /* PHASE 2 */
+/*
+* 페이즈 2
+* 각 꼭짓점의 방향을 바꾸는 동시에
+* FU, FD, BU, BD 엣지의 위치를 옮김
+* 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
+* 경우의 수: 1,082,565가지 (corner 2,187, edge 495)
+*/
 //F, B 면의 퍼뮤테이션을 고정해주기 위한 동작
 int fb_edge_to_perm(int* fb_edge) {
 	int ret = 0;
@@ -546,7 +552,7 @@ int get_phase_num_2() {
 			}
 		}
 	}
-	ret *= 495;//12C4 or 12C8
+	ret *= 495;
 	for (int i = 0; i < 12; i++) {
 		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
@@ -566,29 +572,29 @@ int pack_phase_num_2(ll lnum) {
 	for (int i = 0; i < 12; i++) {
 		if ((lnum >> i) & 1) fb_edge[ecnt++] = i;
 	}
-	assert(ecnt == 4);//뭐가 4개인걸까?
-	corner = lnum >> 16;
+	assert(ecnt == 4);//4개의 비트를 1로 제공한다. 엣지 4개의 위치가 기록되어있다.
+	corner = lnum >> 16;//코너들에 대한 기록이 있는 부분으로 넘어간다.
 	for (int i = 7; i >= 0; i--) {
 		corner_ret *= 3;
-		corner_ret += ((corner >> (1 << 1)) & 3);
+		corner_ret += ((corner >> (i << 1)) & 3);
 	}
 	return corner_ret * 495 + fb_edge_to_perm(fb_edge);
 }
 ll phase2_corner_move(ll corner_num, int f) {
-	ll store, cornertrit;//이 변수들은 또 뭘까?
-	if (f == 1 || f == 3) {
-		for (int i = 0; i < 4; i++) {
+	ll store, cornertrit;
+	if (f == 1 || f == 3) {//F, B 면이라면
+		for (int i = 0; i < 4; i++) {//코너는 저장된 정보가 2개이기 때문에 해당 번호의 코너 비트는 2배로 움직여야 함
 			cornertrit = ((corner_num >> (phase2_corner_oper[f][i] << 1)) & 3);
 			corner_num -= cornertrit << (phase2_corner_oper[f][i] << 1);
 			if (i & 1) cornertrit--;//홀수면 1 뺀다
 			else cornertrit++;
 			if (cornertrit >= 3) cornertrit -= 3;
 			else if (cornertrit < 0) cornertrit += 3;
-			corner_num += cornertrit << (phase2_corner_oper[f][i] << 1);
+			corner_num += cornertrit << (phase2_corner_oper[f][i] << 1);//코너 조각에 대한 정보를 바꿔서 다시 입력
 		}
 	}
-	store = ((corner_num >> (phase2_corner_oper[f][3] << 1)) & 3);//뭔가 두 자리를 남겨놔야했다.
-	for (int i = 3; i >= 1; i--) {
+	store = ((corner_num >> (phase2_corner_oper[f][3] << 1)) & 3);//보존
+	for (int i = 3; i >= 1; i--) {//회전
 		corner_num -= (corner_num & (3ll << (phase2_corner_oper[f][i] << 1)));
 		corner_num += (((corner_num >> (phase2_corner_oper[f][i - 1] << 1)) & 3) << (phase2_corner_oper[f][i] << 1));
 	}
@@ -604,7 +610,7 @@ ll phase2_edge_move(ll edge_num, int f) {
 		edge_num += (((edge_num >> phase2_edge_oper[f][i - 1]) & 1) << phase2_edge_oper[f][i]);
 	}
 	edge_num -= (edge_num & (1ll << phase2_edge_oper[f][0]));
-	edge_num += (store << (1ll << phase2_edge_oper[f][0]));
+	edge_num += (store << phase2_edge_oper[f][0]);
 	return edge_num;
 }
 //페이즈2의 코너 조각부터 전처리한다.

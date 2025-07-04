@@ -14,11 +14,10 @@ boj의 index 님의 솔루션 코드로 공부해서 제출합니다.
 Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 */
 
-#define PHASE2S 85
-#define PHASE3S 1077072625834
-#define PHASE4C 16434824
-#define PHASE4E 205163983024656
-//각 숫자의 의미가 뭘까?
+#define PHASE2S 85               //0101 0101
+#define PHASE3S 1077072625834    //111 110 101 100 011 010 001 000 0000 0000 1010 1010
+#define PHASE4C 16434824         //111 110 101 100 011 010 001 000
+#define PHASE4E 205163983024656  //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000
 
 int N;//query num
 int S[54];//현재 큐브의 상태
@@ -621,9 +620,9 @@ void prec_phase2_corner() {
 	Q[qf++] = x;
 	while (qf > qr) {//bfs
 		x = Q[qr++];
-		xpk = pack_phase_num_2((x << 16) + 15);
+		xpk = pack_phase_num_2((x << 16) + 15);//8개 코너의 정보를 밀어넣고 1111을 비트마스킹
 		assert(xpk % 495 == 0);
-		xpk /= 495;
+		xpk /= 495;//엣지 정보는 버림
 		for (int i = 0; i < 6; i++) {
 			y = x;
 			for (int j = 0; j < 3; j++) {
@@ -645,7 +644,7 @@ void prec_phase2_corner() {
 //페이즈2의 엣지 조각을 전처리한다.
 void prec_phase2_edge() {
 	int qf = 0, qr = 0;
-	ll x = PHASE2S, xpk, y, ypk;//
+	ll x = PHASE2S, xpk, y, ypk;
 	memset(phase2_edge, -1, sizeof phase2_edge);
 	Q[qf++] = x;
 	while (qf > qr) {//bfs

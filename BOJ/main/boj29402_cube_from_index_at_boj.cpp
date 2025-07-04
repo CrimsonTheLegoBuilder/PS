@@ -156,27 +156,28 @@ const int edge_od[12][2] = {
 };
 /*
 *        +------+
-*        |      |
-*        |      |
-*        |      |
+*        |   1  |
+*        | 1   1|
+*        |   1  |
 * +------+------+------+------+
-* |      |      |      |      |
-* |      |      |      |      |
-* |      |      |      |      |
+* |   5  |   2  |   3  |   4  |
+* | 5   5| 2   2| 3   3| 4   4|
+* |   5  |   2  |   3  |   4  |
 * +------+------+------+------+
-*        |      |
-*        |      |
-*        |      |
+*        |   6  |
+*        | 6   6|
+*        |   6  |
 *        +------+
-* 이건 뭘까?
+*
 * 각 색상 쌍에 대응하는 엣지 조각의 번호를 매칭
 * -1은 대응하는 조각이 없음
-* 색상 쌍은 앞쪽 색 * 8 + 뒤쪽 색
+* 앞쪽 색 * 8 + 뒤쪽 색으로 나오는 값을 각 엣지 조각의 번호와 매칭
+* 예) 1 * 8 + 2 = 10
 */
 const int color_edge[64] = {
 	-1, -1, -1, -1, -1, -1, -1, -1,
 	-1, -1,  0,  1,  2,  3, -1, -1,
-	-1,  0, -1,  0, -1, 11,  4, -1,
+	-1,  0, -1,  8, -1, 11,  4, -1,
 	-1,  1,  8, -1,  9, -1,  5, -1,
 	-1,  2, -1,  9, -1, 10,  6, -1,
 	-1,  3, 11, -1, 10, -1,  7, -1,
@@ -444,7 +445,6 @@ void solve(const int& len) {
 	for (int i = 0; i < len; i++) move(res[i]);
 	return;
 }
-
 void random25() {
 	for (int i = 0; i < 6; i++)
 		for (int j = 0; j < 9; j++)
@@ -536,25 +536,25 @@ int fb_edge_to_perm(int* fb_edge) {
 	return ret;
 }
 int get_phase_num_2() {
-	int ret = 0, fb_edge[4], tedge, edgecnt = 0;
+	int ret = 0, fb_edge[4], tedge, edge_cnt = 0;
 	for (int i = 7; i >= 0; i--) {
-		ret *= 3;
+		ret *= 3;//0, 1, 2 중 하나가 1의 자리에 있으므로 곱해서 자리를 옮긴다.
 		for (int j = 0; j < 3; j++) {
 			if (S[corner_od[i][j]] == 3 || S[corner_od[i][j]] == 5) {//L, R 면 코너 조각들의 위치를 기록
-				ret += j;
+				ret += j;//0, 1, 2 중 하나
 				break;
 			}
 		}
 	}
 	ret *= 495;//12C4 or 12C8
 	for (int i = 0; i < 12; i++) {
-		tedge = color_edge[S[edge_od[i][0]]] * 8 + S[edge_od[i][1]];
+		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
-		if (tedge <= 6 && !(tedge & 1)) {
-			fb_edge[edgecnt++] = i;
+		if (tedge <= 6 && !(tedge & 1)) {//가운데 슬라이스 4조각의 위치를 기록
+			fb_edge[edge_cnt++] = i;
 		}
 	}
-	assert(edgecnt == 4);
+	assert(edge_cnt == 4);//가운데 슬라이스 4조각의 위치가 제대로 기록되었는가?
 	ret += fb_edge_to_perm(fb_edge);
 	return ret;
 }

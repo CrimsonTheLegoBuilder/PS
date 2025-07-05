@@ -928,6 +928,12 @@ void prec_phase3() {
 
 
 /* PHASE 4 */
+/*
+* 페이즈 4
+* 반바퀴 회전만을 사용해 큐브를 맞춤
+* 사용하는 동작: 모든 면 2회 회전
+* 경우의 수: 663552 (corner 96 * edge 6912)
+*/
 void prec_phase4_edge_perm(ll ep, int cnt) {
 	if (cnt < 0) {
 		phase4_edge_perm[phase4_edge_perm_cnt++] = ep;

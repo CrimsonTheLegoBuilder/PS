@@ -525,12 +525,14 @@ void prec_phase1() {//bfs?
 /* PHASE 2 */
 /*
 * 페이즈 2
-* 각 꼭짓점의 방향을 바꾸는 동시에
-* FU, FD, BU, BD 엣지의 위치를 옮김
+* 각 코너 조각의 오리엔테이션을 바꾸는 동시에
+* FU, FD, BU, BD 엣지의 퍼뮤테이션을 맞춤
 * 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
-* 경우의 수: 1,082,565가지 (corner 2,187, edge 495)
+* 경우의 수: 1,082,565가지 (corner 2,187(3^7), edge 495(12C4))
 */
-//F, B 면의 퍼뮤테이션을 고정해주기 위한 동작
+//움직이고자 하는 엣지 조각들을 해싱하는 함수
+//경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
+//Lexicographio Index
 int fb_edge_to_perm(int* fb_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
@@ -543,10 +545,10 @@ int fb_edge_to_perm(int* fb_edge) {
 int get_phase_num_2() {
 	int ret = 0, fb_edge[4], tedge, edge_cnt = 0;
 	for (int i = 7; i >= 0; i--) {
-		ret *= 3;//0, 1, 2 중 하나가 1의 자리에 있으므로 곱해서 자리를 옮긴다.
+		ret *= 3;//0, 1, 2 중 하나가 비트 두 자리에 있으므로 곱해서 자리를 옮긴다.
 		for (int j = 0; j < 3; j++) {
 			if (S[corner_od[i][j]] == 3 || S[corner_od[i][j]] == 5) {//L, R 면 코너 조각들의 위치를 기록
-				ret += j;//0, 1, 2 중 하나
+				ret += j;//0, 1, 2 중 하나, 3개의 숫자는 오리엔테이션을 의미함
 				break;
 			}
 		}
@@ -563,6 +565,8 @@ int get_phase_num_2() {
 	ret += fb_edge_to_perm(fb_edge);
 	return ret;
 }
+//움직이는 과정에서 각 비트 2칸이 코너 조각을 의미하게 할 수도 있지만
+//bfs에서는 경우의 수에 맞게 조각들의 경우를 패킹함
 int pack_phase_num_2(ll lnum) {
 	int fb_edge[4];
 	int ecnt = 0;
@@ -581,11 +585,11 @@ int pack_phase_num_2(ll lnum) {
 }
 ll phase2_corner_move(ll corner_num, int f) {
 	ll store, cornertrit;
-	if (f == 1 || f == 3) {//F, B 면이라면
+	if (f == 1 || f == 3) {//F, B 면이라면 코너 조각의 방향성에 대한 기준이 바뀌기 때문에 4개 조각의 방향에 대한 조작이 필요함
 		for (int i = 0; i < 4; i++) {//코너는 저장된 정보가 2개이기 때문에 해당 번호의 코너 비트는 2배로 움직여야 함
 			cornertrit = ((corner_num >> (phase2_corner_oper[f][i] << 1)) & 3);
 			corner_num -= cornertrit << (phase2_corner_oper[f][i] << 1);
-			if (i & 1) cornertrit--;//홀수면 1 뺀다
+			if (i & 1) cornertrit--;//방향성이 1씩 움직임
 			else cornertrit++;
 			if (cornertrit >= 3) cornertrit -= 3;
 			else if (cornertrit < 0) cornertrit += 3;
@@ -620,7 +624,7 @@ void prec_phase2_corner() {
 	Q[qf++] = x;
 	while (qf > qr) {//bfs
 		x = Q[qr++];
-		xpk = pack_phase_num_2((x << 16) + 15);//8개 코너의 정보를 밀어넣고 1111을 비트마스킹
+		xpk = pack_phase_num_2((x << 16) + 15);//8개 코너의 정보를 밀어넣고 1111을 비트마스킹, 함수 기능 때문에 쓰레기값을 제공
 		assert(xpk % 495 == 0);
 		xpk /= 495;//엣지 정보는 버림
 		for (int i = 0; i < 6; i++) {
@@ -631,7 +635,7 @@ void prec_phase2_corner() {
 				ypk = pack_phase_num_2((y << 16) + 15);
 				assert(ypk % 495 == 0);
 				ypk /= 495;
-				assert(0 <= ypk && ypk < 6561);
+				assert(0 <= ypk && ypk < 6561);//(6561 == 2817 * 3)
 				phase2_corner[xpk][i][j] == ypk;
 				if (!phase2_corner_vis[ypk]) {
 					Q[qf++] = y;
@@ -644,7 +648,7 @@ void prec_phase2_corner() {
 //페이즈2의 엣지 조각을 전처리한다.
 void prec_phase2_edge() {
 	int qf = 0, qr = 0;
-	ll x = PHASE2S, xpk, y, ypk;
+	ll x = PHASE2S, xpk, y, ypk;//가운데 슬라이스 4개 엣지의 상태를 맞추기 위해 초기 상태를 01010101로 비트마스킹 
 	memset(phase2_edge, -1, sizeof phase2_edge);
 	Q[qf++] = x;
 	while (qf > qr) {//bfs
@@ -689,10 +693,10 @@ void prec_phase2() {
 				edge = (y & 65535);
 				corner = phase2_corner[corner][i][j];
 				edge = phase2_edge[edge][i][j];
-				y = (corner << 16) + edge;
-				ypk = (y >> 16) * 495 + (y & 65535);
+				y = (corner << 16) + edge;//엣지와 코너를 조합해서 가지를 뻗어감
+				ypk = (y >> 16) * 495 + (y & 65535);//엣지와 코너를 조합해서 가지를 뻗어감
 				assert(ypk >= 0 && ypk < 3247695);
-				if (phase2_oper[ypk] < 0) {
+				if (phase2_oper[ypk] < 0) {//엣지와 코너를 조합해서 가지를 뻗어감
 					phase2_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, j는 돌리는 횟수
 					phase2_last[ypk] = xpk;
 					Q[qf++] = y;
@@ -1143,7 +1147,7 @@ void solve() {
 				std::cout << "FUCK:: 2::\n";
 			}
 		}
-		phase2_num = get_phase_num_2();
+		phase2_num = get_phase_num_2();//0011 0110
 		assert(phase2_num == 54);//모든 코너 조각이 원하는 방향, 가운데 면 엣지 조각을 가운데로 모았음
 
 		/*

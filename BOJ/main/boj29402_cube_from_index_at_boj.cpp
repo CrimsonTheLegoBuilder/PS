@@ -706,7 +706,12 @@ void prec_phase2() {
 
 
 /* PHASE 3 */
-//?
+/*
+* 페이즈 3
+* 모든 칸의 색상을 원래 색 또는 그 반대 위치 색으로 바꿈
+* 사용하는 동작: U2, D2, F2, B2, R, R', R2, L, L', L2
+* 경우의 수: 29,400 * 96 (corner 420 * 96, edge 70)
+*/
 void prec_phase3_corner_perm(int cp, int cnt) {
 	if (cnt < 0) {
 		phase3_corner_perm[phase3_corner_perm_cnt++] = cp;//?

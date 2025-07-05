@@ -526,7 +526,7 @@ void prec_phase1() {//bfs?
 /*
 * 페이즈 2
 * 각 코너 조각의 오리엔테이션을 바꾸는 동시에
-* FU, FD, BU, BD 엣지의 퍼뮤테이션을 맞춤
+* FU, FD, BU, BD 엣지(R-L 슬라이스)의 퍼뮤테이션을 맞춤
 * 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
 * 경우의 수: 1,082,565가지 (corner 2,187(3^7), edge 495(12C4))
 */
@@ -557,11 +557,11 @@ int get_phase_num_2() {
 	for (int i = 0; i < 12; i++) {
 		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
-		if (tedge <= 6 && !(tedge & 1)) {//가운데 슬라이스 4조각의 위치를 기록
+		if (tedge <= 6 && !(tedge & 1)) {//R-L 슬라이스 4조각의 위치를 기록
 			fb_edge[edge_cnt++] = i;
 		}
 	}
-	assert(edge_cnt == 4);//가운데 슬라이스 4조각의 위치가 제대로 기록되었는가?
+	assert(edge_cnt == 4);//R-L 슬라이스 4조각의 위치가 제대로 기록되었는가?
 	ret += fb_edge_to_perm(fb_edge);
 	return ret;
 }
@@ -648,7 +648,7 @@ void prec_phase2_corner() {
 //페이즈2의 엣지 조각을 전처리한다.
 void prec_phase2_edge() {
 	int qf = 0, qr = 0;
-	ll x = PHASE2S, xpk, y, ypk;//가운데 슬라이스 4개 엣지의 상태를 맞추기 위해 초기 상태를 01010101로 비트마스킹 
+	ll x = PHASE2S, xpk, y, ypk;//R-L 슬라이스 4개 엣지의 상태를 맞추기 위해 초기 상태를 01010101로 비트마스킹 
 	memset(phase2_edge, -1, sizeof phase2_edge);
 	Q[qf++] = x;
 	while (qf > qr) {//bfs
@@ -714,22 +714,23 @@ void prec_phase2() {
 * 페이즈 3
 * 모든 칸의 색상을 원래 색 또는 그 반대 위치 색으로 바꿈
 * 사용하는 동작: U2, D2, F2, B2, R, R', R2, L, L', L2
-* 경우의 수: 29,400 * 96 (corner 420 * 96, edge 70)
+* 경우의 수: 40,320 * 70 (corner 40,320(8!), edge 70(8C4))
 */
+//dfs로 전체 탐색
 void prec_phase3_corner_perm(int cp, int cnt) {
 	if (cnt < 0) {
-		phase3_corner_perm[phase3_corner_perm_cnt++] = cp;//?
+		phase3_corner_perm[phase3_corner_perm_cnt++] = cp;//8!의 경우의 수들을 해시값 크기 순으로 기록
 		return;
 	}
 	for (int i = 0; i < 8; i++) {
 		if (phase3_corner_perm_chk[i]) continue;
 		phase3_corner_perm_chk[i] = 1;
-		prec_phase3_corner_perm(cp + (i << (cnt * 3)), cnt - 1);//재귀
+		prec_phase3_corner_perm(cp + (i << (cnt * 3)), cnt - 1);//코너 조각들의 위치 경우의 수들을 전부  3비트 * 8칸으로 해싱해서 기록
 		phase3_corner_perm_chk[i] = 0;
 	}
 	return;
 }
-//코너 조각의 해시값을 구한다
+//코너 조각의 번호를 구한다
 int get_corner_num_3(int cnum) {
 	int c[3], h = 0;
 	for (int i = 0; i < 3; i++) c[i] = S[corner_od[cnum][i]];
@@ -758,6 +759,9 @@ int corner_to_perm_3(int c) {
 	return s;
 }
 //좌우 엣지 위치의 순서를 바꾼다. 상하 모서리는 제외하고 생각한다.
+//움직이고자 하는 엣지 조각들을 해싱하는 함수
+//경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
+//Lexicographio Index
 int lr_edge_to_perm(int* lr_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
@@ -772,17 +776,17 @@ int get_phase_num_3() {
 	for (int i = 0; i < 8; i++) {
 		corn_num = (get_corner_num_3(i) << (i * 3));
 	}
-	ret = corner_to_perm_3(corn_num);
-	ret *= 70;
+	ret = corner_to_perm_3(corn_num);//퍼뮤테이션 값을 해싱해서 이분 탐색으로 순서를 찾음
+	ret *= 70;//엣지조각 70가지 경우의 수를 띄워놓는다
 	for (int i = 0; i < 12; i++) {
-		if (i <= 6 && (i & 1)) {
+		if (i <= 6 && !(i & 1)) {//페이즈2에서 전부 원하는 위치에 넣는데 성공한 칸
 			edge_minus++;
 			continue;
 		}
 		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
-		if (tedge <= 7 && (tedge & 1)) {
-			lr_edge[edge_cnt++] = i - edge_minus;
+		if (tedge <= 7 && (tedge & 1)) {//F-B 슬라이스 조각의 위치들을 기록
+			lr_edge[edge_cnt++] = i - edge_minus;//R-L 슬라이스 조각을 제외한 조각들의 순서로 기록
 		}
 	}
 	assert(edge_cnt == 4);
@@ -793,11 +797,11 @@ int pack_phase_num_3(ll lnum) {
 	int lr_edge[4];
 	ll edge_minus = 0, ecnt = 0, corner, corner_res = 0;
 	for (int i = 0; i < 12; i++) {
-		if (i <= 6 && (~i & 1)) {
+		if (i <= 6 && !(i & 1)) {
 			edge_minus++;
 			continue;
 		}
-		if ((lnum >> i) & 1) lr_edge[ecnt++] = i - edge_minus;
+		if ((lnum >> i) & 1) lr_edge[ecnt++] = i - edge_minus;//R-L 슬라이스 조각을 제외한 조각들의 순서로 기록
 	}
 	assert(ecnt == 4);
 	corner = lnum >> 16;
@@ -829,7 +833,8 @@ void prec_phase3_corner() {
 			y = x;
 			for (int j = 0; j < 3; j++) {
 				y = phase3_corner_move(y, i);
-				if (j != 1 && (i != 2 && i != 4)) continue;//양 옆을 제외하면 짝수번만 돌릴 수 있음
+				if (j != 1 && (i != 2 && i != 4)) continue;
+				//양 옆을 제외하면 짝수번만 돌릴 수 있음: R-L 슬라이스 퍼뮤테이션과 코너 오리엔테이션의 유지를 위해서 제한
 				ypk = corner_to_perm_3(y);
 				assert(ypk >= 0 && ypk < 40320);
 				phase3_corner[xpk][i][j] = ypk;
@@ -849,12 +854,13 @@ void prec_phase3_edge() {
 	Q[qf++] = x;
 	while (qf > qr) {
 		x = Q[qr++];
-		xpk = pack_phase_num_3(x) - 40319 * 70;
+		xpk = pack_phase_num_3(x) - 40319 * 70;//- 40319 * 70: 코너 조각 해시값을 빼 줌
 		for (int i = 0; i < 6; i++) {
 			y = x;
 			for (int j = 0; j < 3; j++) {
 				y = phase2_edge_move(y, i);
-				if (j != 1 && (i != 2 && i != 4)) continue;//양 옆을 제외하면 짝수번만 돌릴 수 있음
+				if (j != 1 && (i != 2 && i != 4)) continue;
+				//양 옆을 제외하면 짝수번만 돌릴 수 있음: R-L 슬라이스 퍼뮤테이션과 코너 오리엔테이션의 유지를 위해서 제한
 				ypk = pack_phase_num_3(y) - 40319 * 70;
 				assert(ypk >= 0 && ypk < 70);
 				phase3_edge[xpk][i][j] = ypk;
@@ -867,6 +873,7 @@ void prec_phase3_edge() {
 	}
 	return;
 }
+//페이즈3 전처리
 void prec_phase3() {
 	ll x, y, xpk, ypk, corner, edge, qf = 0, qr = 0;
 	prec_phase3_corner_perm(0, 7);

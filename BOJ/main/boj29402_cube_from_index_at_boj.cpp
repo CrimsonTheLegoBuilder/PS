@@ -4,6 +4,7 @@
 #include <cassert>
 #include <time.h>
 #include <random>
+#include <cstring>
 typedef long long ll;
 
 /*
@@ -17,7 +18,7 @@ Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 #define PHASE4C 16434824        //111 110 101 100 011 010 001 000, 8진법 코너 순열
 #define PHASE4E 205163983024656 //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000, 16진법 엣지 순열
 
-#define DEBUG                   //디버깅 토글 
+//#define DEBUG                   //디버깅 토글 
 
 int N;//query num
 int S[54];//현재 큐브의 상태
@@ -43,7 +44,7 @@ int comb[16][16];//combination
 * 
 * 입력의 순서를 구현에 맞게 바꿔주는 배열
 */
-const int tile_od[1 << 6] = {
+const int tile_od[54] = {
 	             1,  2,  3,
 	             8,  0,  4,
 	             7,  6,  5,
@@ -81,7 +82,7 @@ void debug_print() {
 	return;
 }
 const char M[10] = "UFRBLD";
-void print_sol(int len) {
+void print_sol(const int& len) {
 	for (int i = 0; i < len; i++) {
 		assert(res[i] > 0 && res[i] < 60);
 		int f = res[i] / 10;
@@ -262,6 +263,38 @@ const int corner_oper_od[6][4] = {
 	{ 0, 1, 2, 3 },
 	{ 1, 5, 6, 2 }
 };
+/*
+*        +------+
+*        |   2  |
+*        | 3   1|
+*        |   0  |
+* +------+------+------+------+
+* |   3  |   0  |   1  |   2  |
+* |10  11|11   8| 8   9| 9  10|
+* |   7  |   4  |   5  |   6  |
+* +------+------+------+------+
+*        |   4  |
+*        | 7   5|
+*        |   6  |
+*        +------+
+*
+* phase4일 때 엣지 조각의 가능한 상태
+* 퍼뮤테이션이 섞이는 경우의 수?
+*/
+const int oper4_edge[12][12] = {
+	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
+	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
+	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
+	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 }
+};
 
 
 /* PHASE 1 */
@@ -295,38 +328,6 @@ ll phase4_edge_perm[13824];
 char phase4_corner_vis[96], phase4_edge_vis[13824];
 int phase4_last[1327104];
 char phase4_oper[1327104];
-/*
-*        +------+
-*        |   2  |
-*        | 3   1|
-*        |   0  |
-* +------+------+------+------+
-* |   3  |   0  |   1  |   2  |
-* |10  11|11   8| 8   9| 9  10|
-* |   7  |   4  |   5  |   6  |
-* +------+------+------+------+
-*        |   4  |
-*        | 7   5|
-*        |   6  |
-*        +------+
-*
-* phase4일 때 엣지 조각의 가능한 상태
-* 퍼뮤테이션이 섞이는 경우의 수?
-*/
-const int oper4_edge[12][12] = {
-	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
-	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
-	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
-	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
-	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
-	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
-	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
-	{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 }
-};
 /* PHASE 4 */
 
 
@@ -470,7 +471,7 @@ void prec_phase1() {
 //움직이고자 하는 엣지 조각들을 해싱하는 함수
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
 //Lexicographio Index
-int fb_edge_to_perm(int* fb_edge) {
+int fb_edge_to_perm(const int* fb_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
 		for (int j = (i ? fb_edge[i - 1] + 1 : 0); j < fb_edge[i]; j++) {
@@ -520,7 +521,7 @@ int pack_phase_num_2(ll lnum) {
 	}
 	return corner_ret * 495 + fb_edge_to_perm(fb_edge);
 }
-ll phase2_corner_move(ll corner_num, int f) {
+ll phase2_corner_move(ll corner_num, const int& f) {
 	ll store, cornertrit;
 	if (f == 1 || f == 3) {//F, B 면이라면 코너 조각의 방향성에 대한 기준이 바뀌기 때문에 4개 조각의 방향에 대한 조작이 필요함
 		for (int i = 0; i < 4; i++) {//코너는 저장된 정보가 2개이기 때문에 해당 번호의 코너 비트는 2배로 움직여야 함
@@ -536,13 +537,14 @@ ll phase2_corner_move(ll corner_num, int f) {
 	store = ((corner_num >> (corner_oper_od[f][3] << 1)) & 3);//보존
 	for (int i = 3; i >= 1; i--) {//회전
 		corner_num -= (corner_num & (3ll << (corner_oper_od[f][i] << 1)));
-		corner_num += (((corner_num >> (corner_oper_od[f][i - 1] << 1)) & 3) << (corner_oper_od[f][i] << 1));
+		corner_num += (((corner_num >> (corner_oper_od[f][i - 1] << 1)) & 3)
+			<< (corner_oper_od[f][i] << 1));
 	}
 	corner_num -= (corner_num & (3ll << (corner_oper_od[f][0] << 1)));
 	corner_num += (store << (corner_oper_od[f][0] << 1));
 	return corner_num;
 }
-ll phase2_edge_move(ll edge_num, int f) {
+ll phase2_edge_move(ll edge_num, const int& f) {
 	ll store;
 	store = ((edge_num >> edge_oper_od[f][3]) & 1);
 	for (int i = 3; i >= 1; i--) {
@@ -654,7 +656,7 @@ void prec_phase2() {
 * 경우의 수: 40,320 * 70 = 2,822,400 (corner 40,320(8!), edge 70(8C4))
 */
 //dfs로 전체 탐색
-void prec_phase3_corner_perm(int cp /* corner permutation */, int cnt) {
+void prec_phase3_corner_perm(const int& cp /* corner permutation */, const int& cnt) {
 	if (cnt < 0) {
 		phase3_corner_perm[phase3_corner_perm_cnt++] = cp;//8!의 경우의 수들을 해시값 크기 순으로 기록
 		return;
@@ -668,7 +670,7 @@ void prec_phase3_corner_perm(int cp /* corner permutation */, int cnt) {
 	return;
 }
 //코너 조각의 번호를 구한다
-int get_corner_num_3(int cnum) {
+int get_corner_num_3(const int& cnum) {
 	int c[3], h = 0;
 	for (int i = 0; i < 3; i++) c[i] = S[corner_od[cnum][i]];
 	std::sort(c, c + 3);
@@ -685,7 +687,7 @@ int get_corner_num_3(int cnum) {
 	return -1;
 }
 //8진법 형태의 코너 조각 순열을 이분 탐색으로 순열 번호로 바꿈
-int corner_to_perm_3(int c) {
+int corner_to_perm_3(const int& c) {
 	int s = 0, e = 40319, m;
 	while (s < e) {
 		m = s + e >> 1;
@@ -699,7 +701,7 @@ int corner_to_perm_3(int c) {
 //움직이고자 하는 엣지 조각들을 해싱하는 함수
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
 //Lexicographio Index
-int lr_edge_to_perm(int* lr_edge) {
+int lr_edge_to_perm(const int* lr_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
 		for (int j = (i ? lr_edge[i - 1] + 1 : 0); j < lr_edge[i]; j++) {
@@ -711,7 +713,7 @@ int lr_edge_to_perm(int* lr_edge) {
 int get_phase_num_3() {
 	int ret = 0, corn_num = 0, lr_edge[4], tedge, edge_minus = 0, edge_cnt = 0;
 	for (int i = 0; i < 8; i++) {
-		corn_num = (get_corner_num_3(i) << (i * 3));
+		corn_num += (get_corner_num_3(i) << (i * 3));
 	}
 	ret = corner_to_perm_3(corn_num);//퍼뮤테이션 값을 해싱해서 이분 탐색으로 순서를 찾음
 	ret *= 70;//엣지조각 70가지 경우의 수를 띄워놓는다
@@ -746,7 +748,7 @@ int pack_phase_num_3(ll lnum) {
 	return corner_res * 70 + lr_edge_to_perm(lr_edge);
 }
 //페이즈 3, 4에서 사용 가능한 코너 조각 순열의 이동
-ll phase3_corner_move(ll corner_num, int f) {
+ll phase3_corner_move(ll corner_num, const int& f) {
 	ll store;
 	store = ((corner_num >> (corner_oper_od[f][3] * 3)) & 7);//111
 	for (int i = 3; i >= 1; i--) {
@@ -830,7 +832,7 @@ void prec_phase3() {
 			for (int j = 0; j < 3; j++) {
 				y = x;
 				corner = (y >> 16);
-				edge = (y * 65535);
+				edge = (y & 65535);
 				corner = phase3_corner[corner][i][j];//1회 회전
 				edge = phase3_edge[edge][i][j];//1회 회전
 				y = (corner << 16) + edge;//엣지와 코너를 조합해서 가지를 뻗어감
@@ -886,7 +888,7 @@ void prec_phase3() {
 * 반 나누는 이유는 엣지와 코너의 홀짝성 때문에, 코너의 배치가 결정되면 엣지 조각의 경우의 수 일부가 제한됨
 */
 //dfs로 엣지 퍼뮤데이션에 대해 가능한 경우의 수를 크기 순으로 모두 찾는다. 앞선 과정들로 가지치기가 매우 많이 되어있어 크기가 크지 않음.
-void prec_phase4_edge_perm(ll ep /* edge permutation */, int cnt) {
+void prec_phase4_edge_perm(const ll& ep /* edge permutation */, const int& cnt) {
 	if (cnt < 0) {
 		phase4_edge_perm[phase4_edge_perm_cnt++] = ep;
 		return;
@@ -901,7 +903,7 @@ void prec_phase4_edge_perm(ll ep /* edge permutation */, int cnt) {
 	return;
 }
 //8진법 형태의 코너 순열을 이분 탐색으로 찾는 함수
-int corner_to_perm_4(int cr) {
+int corner_to_perm_4(const int& cr) {
 	int s = 0, e = 95, m;
 	while (s < e) {
 		m = s + e >> 1;
@@ -912,7 +914,7 @@ int corner_to_perm_4(int cr) {
 	return s;
 }
 //8진법 형태의 엣지 순열을 이분 탐색으로 찾는 함수
-int edge_to_perm_4(ll ed) {
+int edge_to_perm_4(const ll& ed) {
 	int s = 0, e = 13823, m;
 	while (s < e) {
 		m = s + e >> 1;
@@ -939,7 +941,7 @@ int get_phase_num_4() {
 	return pk;
 }
 //1회 회전할 때 엣지 움직임 기록
-ll phase4_edge_move(ll edge_num, int f) {
+ll phase4_edge_move(ll edge_num, const int& f) {
 	ll store = ((edge_num >> (edge_oper_od[f][3] << 2)) & 15ll);
 	for (int i = 3; i >= 1; i--) {
 		edge_num -= (edge_num & (15ll << (edge_oper_od[f][i] << 2)));
@@ -1063,13 +1065,25 @@ void solve() {
 			else comb[i][j] = comb[i - 1][j] + comb[i - 1][j - 1];
 		}
 	}
-	//std::cout << "preprocess\n";
+#ifdef DEBUG
+	std::cout << "preprocess start\n";
+	prec_phase1();
+	std::cout << "preprocess 1 done\n";
+	prec_phase2();
+	std::cout << "preprocess 2 done\n";
+	prec_phase3();
+	std::cout << "preprocess 3 done\n";
+	prec_phase4();
+	std::cout << "preprocess 4 done\n";
+	std::cin >> N;
+	std::cout << "query start\n";
+#else
 	prec_phase1();
 	prec_phase2();
 	prec_phase3();
 	prec_phase4();
-	//std::cout << "query start\n";
 	std::cin >> N;
+#endif
 	while (N--) {
 		for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 		reslen = 0;

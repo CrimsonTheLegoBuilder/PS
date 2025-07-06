@@ -18,7 +18,7 @@ Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 #define PHASE4C 16434824        //111 110 101 100 011 010 001 000, 8진법 코너 순열
 #define PHASE4E 205163983024656 //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000, 16진법 엣지 순열
 
-//#define DEBUG                   //디버깅 토글 
+#define DEBUG                   //디버깅 토글 
 
 int N;//query num
 int S[54];//현재 큐브의 상태
@@ -317,7 +317,6 @@ void debug_print() {
 		std::cout << "\n";
 	}
 	for (int i = 0; i < 3; i++) {
-		std::cout << "      ";
 		for (int j = 0; j < 12; j++) {
 			std::cout << S[tile_od[9 + i * 12 + j]] << " ";
 		}
@@ -771,7 +770,7 @@ int pack_phase_num_3(ll lnum) {
 //페이즈 3, 4에서 사용 가능한 코너 조각 순열의 이동
 ll phase3_corner_move(ll corner_num, const int& f) {
 	ll store;
-	store = ((corner_num >> (corner_oper_od[f][3] * 3)) & 7);//111
+	store = ((corner_num >> (corner_oper_od[f][3] * 3)) & 7);//8진법
 	for (int i = 3; i >= 1; i--) {
 		corner_num -= (corner_num & (7ll << (corner_oper_od[f][i] * 3)));
 		corner_num += (((corner_num >> (corner_oper_od[f][i - 1] * 3)) & 7)
@@ -1044,7 +1043,7 @@ void prec_phase4() {
 				edge = (y & 65535);
 				corner = phase4_corner[corner][i][j];
 				edge = phase4_edge[edge][i][j];
-				assert(corner >= 0 && corner < 96 && edge >= 0 && edge < 13824);
+				assert(0 <= corner && corner < 96 && 0 <= edge && edge < 13824);
 				y = (corner << 16) + edge;
 				ypk = (y >> 16) * 13824 + (y & 65535);
 				assert(ypk >= 0 && ypk < 1327104);
@@ -1087,6 +1086,10 @@ void solve() {
 		}
 	}
 #ifdef DEBUG
+	init();
+	move_cw(1);
+	move_180(0);
+	debug_print();
 	std::cout << "preprocess start\n";
 	prec_phase1();
 	std::cout << "preprocess 1 done\n";
@@ -1202,8 +1205,13 @@ void solve() {
 		assert(check());//complete
 
 		print_sol(reslen);
-		//move_cnt += reslen;
-		//len_count[reslen]++;
+
+//#ifdef DEBUG
+//		move_cnt += reslen;
+//		len_count[reslen]++;
+//		solve(reslen);
+//		debug_print();
+//#endif
 	}
 	return;
 
@@ -1212,3 +1220,10 @@ void solve() {
 
 
 int main() { solve(); return 0; }//boj24902 Fewest Moves Challenge
+
+
+/*
+
+
+
+*/

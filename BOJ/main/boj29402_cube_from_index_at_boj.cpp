@@ -573,7 +573,7 @@ void prec_phase2_corner() {
 				assert(ypk % 495 == 0);
 				ypk /= 495;
 				assert(0 <= ypk && ypk < 6561);//(6561 == 2817 * 3)
-				phase2_corner[xpk][i][j] == ypk;
+				phase2_corner[xpk][i][j] = ypk;
 				if (!phase2_corner_vis[ypk]) {
 					Q[qf++] = y;
 					phase2_corner_vis[ypk] = 1;
@@ -598,7 +598,7 @@ void prec_phase2_edge() {
 				//if (j != i && (i == 0 || i == 5)) continue;//위아래는 짝수번만 돌릴 수 있음. 첨부 논문 참고
 				ypk = pack_phase_num_2(y);
 				assert(0 <= ypk && ypk < 495);
-				phase2_edge[xpk][i][j] == ypk;
+				phase2_edge[xpk][i][j] = ypk;
 				if (!phase2_edge_vis[ypk]) {
 					Q[qf++] = y;
 					phase2_edge_vis[ypk] = 1;
@@ -1063,10 +1063,12 @@ void solve() {
 			else comb[i][j] = comb[i - 1][j] + comb[i - 1][j - 1];
 		}
 	}
+	//std::cout << "preprocess\n";
 	prec_phase1();
 	prec_phase2();
 	prec_phase3();
 	prec_phase4();
+	//std::cout << "query start\n";
 	std::cin >> N;
 	while (N--) {
 		for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];

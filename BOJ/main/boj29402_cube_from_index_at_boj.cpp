@@ -907,7 +907,8 @@ void prec_phase3() {
 * 엣지 6,912가지: 4! * 4! * 4! / 2, 각 슬라이스의 엣지 퍼뮤테이션 순열들의 곱을 반으로 나눔
 * 반 나누는 이유는 엣지와 코너의 홀짝성 때문에, 코너의 배치가 결정되면 엣지 조각의 경우의 수 일부가 제한됨
 */
-//dfs로 엣지 퍼뮤데이션에 대해 가능한 경우의 수를 크기 순으로 모두 찾는다. 앞선 과정들로 가지치기가 매우 많이 되어있어 크기가 크지 않음.
+//dfs로 엣지 퍼뮤데이션에 대해 가능한 경우의 수를 크기 순으로 모두 찾는다
+//앞선 과정들로 가지치기가 매우 많이 되어있어 크기가 크지 않음
 void prec_phase4_edge_perm(const ll& ep /* edge permutation */, const int& cnt) {
 	if (cnt < 0) {
 		phase4_edge_perm[phase4_edge_perm_cnt++] = ep;
@@ -915,7 +916,7 @@ void prec_phase4_edge_perm(const ll& ep /* edge permutation */, const int& cnt) 
 	}
 	for (ll i = 0; i < 12; i++) {
 		if (phase4_edge_perm_chk[i]) continue;
-		if (!oper4_edge[i][cnt]) continue;//전부 정위치 혹은 반대 위치로 맞춰두었기 때문에 퍼뮤테이션이 홀수번 바뀌는 건 가능하지 않다.
+		if (!oper4_edge[i][cnt]) continue;//각 슬라이스에 해당하는 엣지들은 서로 간만 엮일 수 있음
 		phase4_edge_perm_chk[i] = 1;
 		prec_phase4_edge_perm(ep + (i << (cnt << 2)), cnt - 1);
 		phase4_edge_perm_chk[i] = 0;

@@ -385,6 +385,7 @@ void move_180(const int& f /* face */) {
 	return;
 }
 void move(const int& o /* order */) {
+	std::cout << o << "\n";
 	assert(0 < o && o < 60);
 	int f = o / 10, p = o % 10;
 	assert(1 <= p && p <= 3);
@@ -795,7 +796,7 @@ void prec_phase3_corner() {
 				if (j != 1 && (i != 2 && i != 4)) continue;
 				//양 옆을 제외하면 짝수번만 돌릴 수 있음: R-L 슬라이스 퍼뮤테이션과 코너 오리엔테이션의 유지를 위해서 제한
 				ypk = corner_to_perm_3(y);//8진법 -> 순열 번호
-				assert(ypk >= 0 && ypk < 40320);
+				assert(0 <= ypk && ypk < 40320);
 				phase3_corner[xpk][i][j] = ypk;
 				if (!phase3_corner_vis[ypk]) {
 					Q[qf++] = y;
@@ -821,7 +822,7 @@ void prec_phase3_edge() {
 				if (j != 1 && (i != 2 && i != 4)) continue;
 				//양 옆을 제외하면 짝수번만 돌릴 수 있음: R-L 슬라이스 퍼뮤테이션과 코너 오리엔테이션의 유지를 위해서 제한
 				ypk = pack_phase_num_3(y) - 40319 * 70;//2진법 -> 순열 번호
-				assert(ypk >= 0 && ypk < 70);
+				assert(0 <= ypk && ypk < 70);
 				phase3_edge[xpk][i][j] = ypk;
 				if (!phase3_edge_vis[ypk]) {
 					Q[qf++] = y;
@@ -840,7 +841,7 @@ void prec_phase3() {
 	prec_phase3_edge();
 	memset(phase3_oper, -1, sizeof phase3_oper);
 	tmp = pack_phase_num_3(PHASE3S);
-	Q[qf++] = ((tmp / 70ll) << 16) + tmp % 70;
+	Q[qf++] = ((tmp / 70ll) << 16ll) + tmp % 70;
 	x = tmp;
 	phase3_oper[x] = 0;
 	while (qf > qr) {//페이즈 4의 도착지의 상태 96가지를 bfs로 미리 찾는다.
@@ -858,7 +859,7 @@ void prec_phase3() {
 				y = (corner << 16) + edge;//엣지와 코너를 조합해서 가지를 뻗어감
 				if (j != 1) continue;//우선 짝수번만 돌린다
 				ypk = (y >> 16) * 70 + (y & 65535);//경우의 수 순서로 패킹
-				assert(ypk >= 0 && ypk < 2822400);
+				assert(0 <= ypk && ypk < 2822400);
 				if (phase3_oper[ypk] < 0) {
 					phase3_oper[ypk] = 0;
 					phase3_last[ypk] = 0;
@@ -869,7 +870,7 @@ void prec_phase3() {
 	}
 	std::sort(phase4_corner_perm, phase4_corner_perm + qr);
 	qr = 0;
-	while (qf < qr) {
+	while (qf > qr) {
 		x = Q[qr++];
 		xpk = (x >> 16) * 70 + (x & 65535);
 		for (int i = 0; i < 6; i++) {
@@ -883,7 +884,7 @@ void prec_phase3() {
 				y = (corner << 16) + edge;
 				//짝수번 돌려서 도착할 수 있었던 경우의 수 + 그냥 도착할 수 있는 경우의 수에 대해 가지를 뻗는다
 				ypk = (y >> 16) * 70 + (y & 65535);
-				assert(ypk >= 0 && ypk < 2822400);
+				assert(0 <= ypk && ypk < 2822400);
 				if (phase3_oper[ypk] < 0) {
 					phase3_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, 3 - j는 돌리는 횟수
 					phase3_last[ypk] = xpk;
@@ -1119,6 +1120,9 @@ void solve() {
 		* 사용하는 동작: U, U', D, D', F, F', F2, R, R', R2, L, L', L2, B, B', B2
 		* 경우의 수: 2,048(2^(12 - 1))
 		*/
+#ifdef DEBUG
+		std::cout << "PHASE 1::\n";
+#endif
 		edge_parity = check_edge_parity();
 		while (edge_parity > 0) {
 			last = edge_parity;
@@ -1142,6 +1146,10 @@ void solve() {
 		* 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
 		* 경우의 수: 1,082,565 (corner 2,187(3^(8 - 1)), edge 495(12C4))
 		*/
+#ifdef DEBUG
+		print_sol(reslen);
+		std::cout << "PHASE 2::\n";
+#endif
 		phase2_num = get_phase_num_2();
 		while (phase2_num != 54) {
 			last = phase2_num;
@@ -1164,6 +1172,10 @@ void solve() {
 		* 사용하는 동작: U2, D2, F2, B2, R, R', R2, L, L', L2
 		* 경우의 수: 40,320 * 70 = 2,822,400 (corner 40,320(8!), edge 70(8C4))
 		*/
+#ifdef DEBUG
+		print_sol(reslen);
+		std::cout << "PHASE 3::\n";
+#endif
 		phase3_num = get_phase_num_3();
 		while (!phase3_is_end[phase3_num]) {
 			last = phase3_num;
@@ -1189,6 +1201,10 @@ void solve() {
 		* 엣지 6,912가지: 4! * 4! * 4! / 2, 각 슬라이스의 엣지 퍼뮤테이션 순열들의 곱을 반으로 나눔
 		* 반 나누는 이유는 엣지와 코너의 홀짝성 때문에, 코너의 배치가 결정되면 엣지 조각의 경우의 수 일부가 제한됨
 		*/
+#ifdef DEBUG
+		print_sol(reslen);
+		std::cout << "PHASE 4::\n";
+#endif
 		phase4_num = get_phase_num_4();
 		while (phase4_num != 1327103) {
 			last = phase4_num;
@@ -1206,24 +1222,15 @@ void solve() {
 
 		print_sol(reslen);
 
-//#ifdef DEBUG
-//		move_cnt += reslen;
-//		len_count[reslen]++;
-//		solve(reslen);
-//		debug_print();
-//#endif
+#ifdef DEBUG
+		move_cnt += reslen;
+		len_count[reslen]++;
+		//solve(reslen);
+		debug_print();
+#endif
 	}
 	return;
 
 }
 /* SOLVE */
-
-
 int main() { solve(); return 0; }//boj24902 Fewest Moves Challenge
-
-
-/*
-
-
-
-*/

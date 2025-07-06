@@ -153,8 +153,5 @@
     <ClCompile Include="..\main\KPSC_2025summer_J.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj29402_cube_from_index_at_boj.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

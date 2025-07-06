@@ -308,8 +308,8 @@ char phase4_oper[1327104];
 /* PHASE 4 */
 
 
-void debug_print() {
-	std::cout << "DEBUG::\n";
+void debug_print(const int& p = 0) {
+	std::cout << "DEBUG:: " << p << "::\n";
 	for (int i = 0; i < 3; i++) {
 		std::cout << "      ";
 		for (int j = 0; j < 3; j++) {
@@ -330,7 +330,6 @@ void debug_print() {
 		}
 		std::cout << "\n";
 	}
-	std::cout << "DEBUG::\n";
 	return;
 }
 const char M[10] = "UFRBLD";
@@ -935,7 +934,7 @@ int corner_to_perm_4(const int& cr) {
 	assert(phase4_corner_perm[s] == cr);
 	return s;
 }
-//8진법 형태의 엣지 순열을 이분 탐색으로 찾는 함수
+//16진법 형태의 엣지 순열을 이분 탐색으로 찾는 함수
 int edge_to_perm_4(const ll& ed) {
 	int s = 0, e = 13823, m;
 	while (s < e) {
@@ -1089,6 +1088,7 @@ void solve() {
 		}
 	}
 #ifdef DEBUG
+	int T;
 	std::cout << "preprocess start\n";
 	prec_phase1();
 	std::cout << "preprocess 1 done\n";
@@ -1098,7 +1098,7 @@ void solve() {
 	std::cout << "preprocess 3 done\n";
 	prec_phase4();
 	std::cout << "preprocess 4 done\n";
-	std::cin >> N;
+	std::cin >> N; T = N;
 	std::cout << "query start\n";
 #else
 	prec_phase1();
@@ -1108,7 +1108,12 @@ void solve() {
 	std::cin >> N;
 #endif
 	while (N--) {
+#ifdef DEBUG
+		random25();
+		debug_print(0);
+#else
 		for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
+#endif
 		reslen = 0;
 		/*
 		* 페이즈 1
@@ -1146,7 +1151,7 @@ void solve() {
 		*/
 #ifdef DEBUG
 		print_sol(reslen);
-		debug_print();
+		debug_print(1);
 		std::cout << "PHASE 2::\n";
 #endif
 		phase2_num = get_phase_num_2();
@@ -1173,7 +1178,7 @@ void solve() {
 		*/
 #ifdef DEBUG
 		print_sol(reslen);
-		debug_print();
+		debug_print(2);
 		std::cout << "PHASE 3::\n";
 #endif
 		phase3_num = get_phase_num_3();
@@ -1199,11 +1204,11 @@ void solve() {
 		* 경우의 수: 663,552 (corner 96 * edge 6,912)
 		* 코너 96가지: 8 * 3 * 2, 코너 조각 하나의 위치가 결정되면 연쇄적으로 일부 코너 조각들의 위치가 결정되면서 경우의 수가 줄어듬
 		* 엣지 6,912가지: 4! * 4! * 4! / 2, 각 슬라이스의 엣지 퍼뮤테이션 순열들의 곱을 반으로 나눔
-		* 반 나누는 이유는 엣지와 코너의 홀짝성 때문에, 코너의 배치가 결정되면 엣지 조각의 경우의 수 일부가 제한됨
+		* 2회 동작들만 사용해서 맞출 수 있도록 제한했기 때문에, 마지막에 3개씩 자리를 바꾸는 일이 없어 조각 순열의 일부가 제한됨
 		*/
 #ifdef DEBUG
 		print_sol(reslen);
-		debug_print();
+		debug_print(3);
 		std::cout << "PHASE 4::\n";
 #endif
 		phase4_num = get_phase_num_4();
@@ -1227,9 +1232,15 @@ void solve() {
 		std::cout << "sol.len:: " << reslen << "\n";
 		move_cnt += reslen;
 		len_count[reslen]++;
-		debug_print();
+		debug_print(4);
 #endif
 	}
+#ifdef DEBUG
+	std::cout << "avg:: " << move_cnt * 1. / T << "\n";
+	N = 0;
+	for (int i = 0; i <= 40; i++) N += len_count[i], std::cout << i << ":: " << len_count[i] << "\n";
+	std::cout << "over 40:: " << T - N << "\n";
+#endif
 	return;
 }
 /* SOLVE */

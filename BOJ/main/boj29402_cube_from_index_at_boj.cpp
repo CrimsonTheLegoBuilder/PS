@@ -334,7 +334,7 @@ void debug_print() {
 const char M[10] = "UFRBLD";
 void print_sol(const int& len) {
 	for (int i = 0; i < len; i++) {
-		assert(res[i] > 0 && res[i] < 60);
+		assert(0 < res[i] && res[i] < 60);
 		int f = res[i] / 10;
 		int p = res[i] % 10;
 		std::cout << M[f];
@@ -392,22 +392,26 @@ void move(const int& o /* order */) {
 	if (p == 3) move_ccw(f);
 	return;
 }
-void solve(const int& len) {
-	for (int i = 0; i < len; i++) move(res[i]);
-	return;
-}
-void random25() {
-	for (int i = 0; i < 6; i++)
-		for (int j = 0; j < 9; j++)
-			S[i * 9 + j] = i + 1;
-	for (int i = 0; i < 25; i++) move(rand() % 6 * 10 + rand() % 3 + 1);
-	return;
-}
 bool check() {
 	for (int i = 0; i < 6; i++)
 		for (int j = 0; j < 9; j++)
 			if (S[i * 9 + j] != i + 1) return 0;
 	return 1;
+}
+void init() {
+	for (int i = 0; i < 6; i++)
+		for (int j = 0; j < 9; j++)
+			S[i * 9 + j] = i + 1;
+	return;
+}
+void random25() {
+	init();
+	for (int i = 0; i < 25; i++) move(rand() % 6 * 10 + rand() % 3 + 1);
+	return;
+}
+void solve(const int& len) {
+	for (int i = 0; i < len; i++) move(res[i]);
+	return;
 }
 
 

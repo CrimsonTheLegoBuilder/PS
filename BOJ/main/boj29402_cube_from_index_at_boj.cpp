@@ -10,20 +10,22 @@ typedef long long ll;
 
 /*
 https://github.com/thregium/practice_baekjoon/blob/main/24000-24999/24902.c
-boj의 index 님의 솔루션 코드로 공부해서 제출합니다.
+index 님의 솔루션 코드로 공부해서 제출합니다.
 Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 */
 
-#define PHASE2S 85               //0101 0101
-#define PHASE3S 1077072625834    //111 110 101 100 011 010 001 000 0000 0000 1010 1010
-#define PHASE4C 16434824         //111 110 101 100 011 010 001 000
-#define PHASE4E 205163983024656  //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000
+#define PHASE2S 85              //0101 0101, 2진법 엣지 오리엔테이션
+#define PHASE3S 1077072625834   //111 110 101 100 011 010 001 000 0000 0000 1010 1010, 8진법 코너 순열 + 2진법 엣지 방향
+#define PHASE4C 16434824        //111 110 101 100 011 010 001 000, 8진법 코너 순열
+#define PHASE4E 205163983024656 //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000, 16진법 엣지 순열
+
+#define DEBUG                   //디버깅 토글 
 
 int N;//query num
 int S[54];//현재 큐브의 상태
-int pre[6];//이전 상태를 저장하는 작은 배열
+int pre[3];//이전 상태를 저장하는 작은 배열
 int res[256];//큐브를 돌리는 순서
-int len_count[256];//큐브를 돌린 횟수 각각의 횟수 ?
+int len_count[256];//큐브를 돌린 횟수 각각의 횟수
 ll Q[3342336];//상태 저장용 큐
 int comb[16][16];//combination
 /*
@@ -226,10 +228,9 @@ const int corner_od[8][3] = {
 *        |   6  |
 *        +------+
 *
-* phase1, 2에서 돌아가는 엣지 조각의 순서
+* 해당 면을 돌렸을 때 돌아가는 엣지 조각의 순서
 */
-const int oper_edge[6][4] = {
-	//{ 2,  1, 0,  3 },
+const int edge_oper_od[6][4] = {
 	{ 0,  3, 2,  1 },
 	{ 0,  8, 4, 11 },
 	{ 1,  9, 5,  8 },
@@ -237,53 +238,6 @@ const int oper_edge[6][4] = {
 	{ 3, 11, 7, 10 },
 	{ 4,  5, 6,  7 }
 };
-
-
-/* PHASE 1 */
-/*
-* 페이즈 1
-* 각 모서리 블록의 방향을 바꾼다
-* 위아래 면을 짝수번 돌려서 원래 있어야 하는 상태로 옮길 수 있는 경우로 만든다
-* ZZ공식이랑 비슷한 느낌
-* 사용하는 동작: U, D, F(1, 2, 3), R(1, 2, 3), B(1, 2, 3), L(1, 2, 3)
-* 경우의 수 2,048
-*/
-int phase1_last[4096], phase1_oper[4096], phase1_dist[4096];
-/*
-*      >----------v
-*      | +------+ |
-*      | |   2  | |
-*      | | 3   1| |
-*      *<|   0  |-<
-* +------+------+------+------+
-* |   3  |   0  |   1  |   2  |
-* |10  11|11   8| 8   9| 9  10|
-* |   7  |   4  |   5  |   6  |
-* +------+------+------+------+
-*        |   4  |
-*        | 7   5|
-*        |   6  |
-*        +------+
-*
-* phase1에서 돌아가는 엣지 조각의 순서
-*/
-const int phase1_edge_oper[6][4] = {
-	//{ 2,  1, 0,  3 },
-	{ 0,  3, 2,  1 },
-	{ 0,  8, 4, 11 },
-	{ 1,  9, 5,  8 },
-	{ 2, 10, 6,  9 },
-	{ 3, 11, 7, 10 },
-	{ 4,  5, 6,  7 }
-};
-/* PHASE 1 */
-
-
-/* PHASE 2 */
-int phase2_corner[6561][6][3], phase2_edge[495][6][3];
-char phase2_corner_vis[6561], phase2_edge_vis[495];
-int phase2_last[3342336];
-char phase2_oper[3342336];
 /*
 *      >----------v
 *      | +------+ |
@@ -300,9 +254,9 @@ char phase2_oper[3342336];
 *        | 2   6|
 *        +------+
 *
-* phase2에서 해당 면을 돌리면 돌아가는 코너 조각의 번호
+* 해당 면을 돌리면 돌아가는 코너 조각의 순서
 */
-const int phase2_corner_oper[6][4] = {
+const int corner_oper_od[6][4] = {
 	{ 0, 3, 7, 4 },
 	{ 0, 4, 5, 1 },
 	{ 4, 7, 6, 5 },
@@ -310,34 +264,18 @@ const int phase2_corner_oper[6][4] = {
 	{ 0, 1, 2, 3 },
 	{ 1, 5, 6, 2 }
 };
-/*
-*      >----------v
-*      | +------+ |
-*      | |   2  | |
-*      | | 3   1| |
-*      *<|   0  |-<
-* +------+------+------+------+
-* |   3  |   0  |   1  |   2  |
-* |10  11|11   8| 8   9| 9  10|
-* |   7  |   4  |   5  |   6  |
-* +------+------+------+------+
-*        |   4  |
-*        | 7   5|
-*        |   6  |
-*        +------+
-*
-* phase2에서 돌아가는 엣지 조각의 순서
-* phase1과 동일하기 때문에 하나만 있어도 될 듯 함
-*/
-const int phase2_edge_oper[6][4] = {
-	//{ 2,  1, 0,  3 },
-	{ 0,  3, 2,  1 },
-	{ 0,  8, 4, 11 },
-	{ 1,  9, 5,  8 },
-	{ 2, 10, 6,  9 },
-	{ 3, 11, 7, 10 },
-	{ 4,  5, 6,  7 }
-};
+
+
+/* PHASE 1 */
+int phase1_last[4096], phase1_oper[4096], phase1_dist[4096];
+/* PHASE 1 */
+
+
+/* PHASE 2 */
+int phase2_corner[6561][6][3], phase2_edge[495][6][3];
+char phase2_corner_vis[6561], phase2_edge_vis[495];
+int phase2_last[3342336];
+char phase2_oper[3342336];
 /* PHASE 2 */
 
 
@@ -373,8 +311,9 @@ char phase4_oper[1327104];
 *        | 7   5|
 *        |   6  |
 *        +------+
-* 이건 뭘까?
+*
 * phase4일 때 엣지 조각의 가능한 상태
+* 퍼뮤테이션이 섞이는 경우의 수?
 */
 const int oper4_edge[12][12] = {
 	{ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
@@ -430,7 +369,7 @@ void move_180(const int& f /* face */) {
 	for (int i = 1; i <= 4; i++) std::swap(S[f * 9 + i], S[f * 9 + (i + 4)]);
 	return;
 }
-void move(const int& o) {
+void move(const int& o /* order */) {
 	assert(0 < o && o < 60);
 	int f = o / 10, p = o % 10;
 	assert(1 <= p && p <= 3);
@@ -464,8 +403,8 @@ bool check() {
 * 각 모서리 블록의 방향을 바꾼다
 * 위아래 면을 짝수번 돌려서 원래 있어야 하는 상태로 옮길 수 있는 경우로 만든다
 * ZZ공식이랑 비슷한 느낌
-* 사용하는 동작: U, D, F(1, 2, 3), R(1, 2, 3), B(1, 2, 3), L(1, 2, 3)
-* 경우의 수 2,048
+* 사용하는 동작: U, U', D, D', F, F', F2, R, R', R2, L, L', L2, B, B', B2
+* 경우의 수: 2,048(2^(12 - 1))
 */
 //엣지 조각의 상태를 비트마스킹하여 정수형으로 반환.
 //1인 엣지는 오리엔테이션이 반대
@@ -487,7 +426,7 @@ int check_edge_parity() {//엣지는 무조건 2의 배수로 뒤집힌다는 점에서 착안한 함�
 	return ret;//12자리: 엣지의 상태들이 비트마스킹 되어있다
 }
 //bfs로 모든 엣지 정렬 과정을 탐색. 경우의 수 2,048: 12C0 + 12C2 + ... + 12C10 + 12C12 
-void prec_phase1() {//bfs?
+void prec_phase1() {
 	int x, y, bit;//x: 현재 상태, y: 변할 상태, bit: 선택한 비트
 	int qf = 0, qr = 0;
 	memset(phase1_last, -1, sizeof phase1_last);
@@ -499,19 +438,19 @@ void prec_phase1() {//bfs?
 			y = x;
 			if (i == 0) y ^= 15;//0 == 윗면, 0000'0000'1111
 			else if (i == 5) y ^= 240;//5 == 아랫면, 0000'1111'0000
-			for (int j = 1; j <= 3; j++) {
-				bit = ((y >> oper_edge[i][3]) & 1);//돌리고자 하는 면의 3번째 엣지 홀짝성 보존
+			for (int j = 0; j < 3; j++) {
+				bit = ((y >> edge_oper_od[i][3]) & 1);//돌리고자 하는 면의 3번째 엣지 홀짝성 보존
 				for (int k = 3; k >= 1; k--) {
-					y -= (y & (1 << oper_edge[i][k]));//기존에 1이었던 조각은 0으로 만든다
-					y += (((y >> oper_edge[i][k - 1]) & 1) << oper_edge[i][k]);//새롭게 위치할 조각의 위치를 1로 만든다
+					y -= (y & (1 << edge_oper_od[i][k]));//기존에 1이었던 조각은 0으로 만든다
+					y += (((y >> edge_oper_od[i][k - 1]) & 1) << edge_oper_od[i][k]);//새롭게 위치할 조각의 위치를 1로 만든다
 				}
-				y -= (y & (1 << oper_edge[i][0]));
-				y += (bit << oper_edge[i][0]);
-				if ((i == 0 || i == 5) && j == 2) continue;//윗면, 아랫면의 2회 동작은 하지 않는다
+				y -= (y & (1 << edge_oper_od[i][0]));
+				y += (bit << edge_oper_od[i][0]);
+				if ((i == 0 || i == 5) && j == 1) continue;//윗면, 아랫면의 2회 동작은 하지 않는다
 				if (phase1_last[y] < 0) {
 					Q[qf++] = y;//큐에 저장
 					phase1_last[y] = x;
-					phase1_oper[y] = i * 10 + (4 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, j는 돌리는 횟수
+					phase1_oper[y] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, 3 - j는 돌리는 횟수
 					phase1_dist[y] = phase1_dist[x] + 1;//이전 상태보다 1칸 나아간다
 				}
 			}
@@ -528,7 +467,7 @@ void prec_phase1() {//bfs?
 * 각 코너 조각의 오리엔테이션을 바꾸는 동시에
 * FU, FD, BU, BD 엣지(R-L 슬라이스)의 퍼뮤테이션을 맞춤
 * 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
-* 경우의 수: 1,082,565가지 (corner 2,187(3^7), edge 495(12C4))
+* 경우의 수: 1,082,565 (corner 2,187(3^(8 - 1)), edge 495(12C4))
 */
 //움직이고자 하는 엣지 조각들을 해싱하는 함수
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
@@ -587,36 +526,36 @@ ll phase2_corner_move(ll corner_num, int f) {
 	ll store, cornertrit;
 	if (f == 1 || f == 3) {//F, B 면이라면 코너 조각의 방향성에 대한 기준이 바뀌기 때문에 4개 조각의 방향에 대한 조작이 필요함
 		for (int i = 0; i < 4; i++) {//코너는 저장된 정보가 2개이기 때문에 해당 번호의 코너 비트는 2배로 움직여야 함
-			cornertrit = ((corner_num >> (phase2_corner_oper[f][i] << 1)) & 3);
-			corner_num -= cornertrit << (phase2_corner_oper[f][i] << 1);
+			cornertrit = ((corner_num >> (corner_oper_od[f][i] << 1)) & 3);
+			corner_num -= cornertrit << (corner_oper_od[f][i] << 1);
 			if (i & 1) cornertrit--;//방향성이 1씩 움직임
 			else cornertrit++;
 			if (cornertrit >= 3) cornertrit -= 3;
 			else if (cornertrit < 0) cornertrit += 3;
-			corner_num += cornertrit << (phase2_corner_oper[f][i] << 1);//코너 조각에 대한 정보를 바꿔서 다시 입력
+			corner_num += cornertrit << (corner_oper_od[f][i] << 1);//코너 조각에 대한 정보를 바꿔서 다시 입력
 		}
 	}
-	store = ((corner_num >> (phase2_corner_oper[f][3] << 1)) & 3);//보존
+	store = ((corner_num >> (corner_oper_od[f][3] << 1)) & 3);//보존
 	for (int i = 3; i >= 1; i--) {//회전
-		corner_num -= (corner_num & (3ll << (phase2_corner_oper[f][i] << 1)));
-		corner_num += (((corner_num >> (phase2_corner_oper[f][i - 1] << 1)) & 3) << (phase2_corner_oper[f][i] << 1));
+		corner_num -= (corner_num & (3ll << (corner_oper_od[f][i] << 1)));
+		corner_num += (((corner_num >> (corner_oper_od[f][i - 1] << 1)) & 3) << (corner_oper_od[f][i] << 1));
 	}
-	corner_num -= (corner_num & (3ll << (phase2_corner_oper[f][0] << 1)));
-	corner_num += (store << (phase2_corner_oper[f][0] << 1));
+	corner_num -= (corner_num & (3ll << (corner_oper_od[f][0] << 1)));
+	corner_num += (store << (corner_oper_od[f][0] << 1));
 	return corner_num;
 }
 ll phase2_edge_move(ll edge_num, int f) {
 	ll store;
-	store = ((edge_num >> phase2_edge_oper[f][3]) & 1);
+	store = ((edge_num >> edge_oper_od[f][3]) & 1);
 	for (int i = 3; i >= 1; i--) {
-		edge_num -= (edge_num & (1ll << phase2_edge_oper[f][i]));
-		edge_num += (((edge_num >> phase2_edge_oper[f][i - 1]) & 1) << phase2_edge_oper[f][i]);
+		edge_num -= (edge_num & (1ll << edge_oper_od[f][i]));
+		edge_num += (((edge_num >> edge_oper_od[f][i - 1]) & 1) << edge_oper_od[f][i]);
 	}
-	edge_num -= (edge_num & (1ll << phase2_edge_oper[f][0]));
-	edge_num += (store << phase2_edge_oper[f][0]);
+	edge_num -= (edge_num & (1ll << edge_oper_od[f][0]));
+	edge_num += (store << edge_oper_od[f][0]);
 	return edge_num;
 }
-//페이즈2의 코너 조각부터 전처리한다.
+//페이즈2의 코너 전처리, bfs
 void prec_phase2_corner() {
 	int qf = 0, qr = 0;
 	ll x = 0, xpk, y, ypk;//x: 현재 상태, y: 바뀔 상태
@@ -630,7 +569,7 @@ void prec_phase2_corner() {
 		for (int i = 0; i < 6; i++) {
 			y = x;
 			for (int j = 0; j < 3; j++) {
-				y = phase2_corner_move(y, i);
+				y = phase2_corner_move(y, i);//1회 회전
 				//if (j != i && (i == 0 || i == 5)) continue;//위아래는 짝수번만 돌릴 수 있음. 첨부 논문 참고
 				ypk = pack_phase_num_2((y << 16) + 15);
 				assert(ypk % 495 == 0);
@@ -645,7 +584,7 @@ void prec_phase2_corner() {
 		}
 	}
 }
-//페이즈2의 엣지 조각을 전처리한다.
+//페이즈2의 엣지 전처리, bfs
 void prec_phase2_edge() {
 	int qf = 0, qr = 0;
 	ll x = PHASE2S, xpk, y, ypk;//R-L 슬라이스 4개 엣지의 상태를 맞추기 위해 초기 상태를 01010101로 비트마스킹 
@@ -657,7 +596,7 @@ void prec_phase2_edge() {
 		for (int i = 0; i < 6; i++) {
 			y = x;
 			for (int j = 0; j < 3; j++) {
-				y = phase2_edge_move(y, i);
+				y = phase2_edge_move(y, i);//1회 회전
 				//if (j != i && (i == 0 || i == 5)) continue;//위아래는 짝수번만 돌릴 수 있음. 첨부 논문 참고
 				ypk = pack_phase_num_2(y);
 				assert(0 <= ypk && ypk < 495);
@@ -670,7 +609,7 @@ void prec_phase2_edge() {
 		}
 	}
 }
-//페이즈2 전처리
+//페이즈2 전처리, bfs
 void prec_phase2() {
 	ll x, y;//x: 현재 상태, y: 바뀔 상태
 	ll xpk, ypk;//각각을 패킹한 값
@@ -691,13 +630,13 @@ void prec_phase2() {
 				y = x;
 				corner = (y >> 16);
 				edge = (y & 65535);
-				corner = phase2_corner[corner][i][j];
-				edge = phase2_edge[edge][i][j];
+				corner = phase2_corner[corner][i][j];//1회 회전
+				edge = phase2_edge[edge][i][j];//1회 회전
 				y = (corner << 16) + edge;//엣지와 코너를 조합해서 가지를 뻗어감
 				ypk = (y >> 16) * 495 + (y & 65535);//엣지와 코너를 조합해서 가지를 뻗어감
 				assert(ypk >= 0 && ypk < 3247695);
 				if (phase2_oper[ypk] < 0) {//엣지와 코너를 조합해서 가지를 뻗어감
-					phase2_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, j는 돌리는 횟수
+					phase2_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, 3 - j는 돌리는 횟수
 					phase2_last[ypk] = xpk;
 					Q[qf++] = y;
 				}
@@ -714,10 +653,10 @@ void prec_phase2() {
 * 페이즈 3
 * 모든 칸의 색상을 원래 색 또는 그 반대 위치 색으로 바꿈
 * 사용하는 동작: U2, D2, F2, B2, R, R', R2, L, L', L2
-* 경우의 수: 40,320 * 70 (corner 40,320(8!), edge 70(8C4))
+* 경우의 수: 40,320 * 70 = 2,822,400 (corner 40,320(8!), edge 70(8C4))
 */
 //dfs로 전체 탐색
-void prec_phase3_corner_perm(int cp, int cnt) {
+void prec_phase3_corner_perm(int cp /* corner permutation */, int cnt) {
 	if (cnt < 0) {
 		phase3_corner_perm[phase3_corner_perm_cnt++] = cp;//8!의 경우의 수들을 해시값 크기 순으로 기록
 		return;
@@ -811,31 +750,31 @@ int pack_phase_num_3(ll lnum) {
 //페이즈 3, 4에서 사용 가능한 코너 조각 순열의 이동
 ll phase3_corner_move(ll corner_num, int f) {
 	ll store;
-	store = ((corner_num >> (phase2_corner_oper[f][3] * 3)) & 7);//111
+	store = ((corner_num >> (corner_oper_od[f][3] * 3)) & 7);//111
 	for (int i = 3; i >= 1; i--) {
-		corner_num -= (corner_num & (7ll << (phase2_corner_oper[f][i] * 3)));
-		corner_num += (((corner_num >> (phase2_corner_oper[f][i - 1] * 3)) & 7)
-			<< (phase2_corner_oper[f][i] * 3));
+		corner_num -= (corner_num & (7ll << (corner_oper_od[f][i] * 3)));
+		corner_num += (((corner_num >> (corner_oper_od[f][i - 1] * 3)) & 7)
+			<< (corner_oper_od[f][i] * 3));
 	}
-	corner_num -= (corner_num & (7ll << (phase2_corner_oper[f][0] * 3)));
-	corner_num += (store << (phase2_corner_oper[f][0] * 3));
+	corner_num -= (corner_num & (7ll << (corner_oper_od[f][0] * 3)));
+	corner_num += (store << (corner_oper_od[f][0] * 3));
 	return corner_num;
 }
-//페이즈3의 코너 전처리
+//페이즈3의 코너 전처리, bfs
 void prec_phase3_corner() {
 	ll qf = 0, qr = 0, x = (PHASE3S >> 16), xpk, y, ypk;
 	memset(phase3_corner, -1, sizeof phase3_corner);
 	Q[qf++] = x;
 	while (qf > qr) {
 		x = Q[qr++];
-		xpk = corner_to_perm_3(x);
+		xpk = corner_to_perm_3(x);//8진법 -> 순열 번호
 		for (int i = 0; i < 6; i++) {
 			y = x;
 			for (int j = 0; j < 3; j++) {
-				y = phase3_corner_move(y, i);
+				y = phase3_corner_move(y, i);//1회 회전
 				if (j != 1 && (i != 2 && i != 4)) continue;
 				//양 옆을 제외하면 짝수번만 돌릴 수 있음: R-L 슬라이스 퍼뮤테이션과 코너 오리엔테이션의 유지를 위해서 제한
-				ypk = corner_to_perm_3(y);
+				ypk = corner_to_perm_3(y);//8진법 -> 순열 번호
 				assert(ypk >= 0 && ypk < 40320);
 				phase3_corner[xpk][i][j] = ypk;
 				if (!phase3_corner_vis[ypk]) {
@@ -847,7 +786,7 @@ void prec_phase3_corner() {
 	}
 	return;
 }
-//페이즈3의 엣지 전처리
+//페이즈3의 엣지 전처리, bfs
 void prec_phase3_edge() {
 	ll qf = 0, qr = 0, x = PHASE3S, xpk, y, ypk;
 	memset(phase3_edge, -1, sizeof phase3_edge);
@@ -858,10 +797,10 @@ void prec_phase3_edge() {
 		for (int i = 0; i < 6; i++) {
 			y = x;
 			for (int j = 0; j < 3; j++) {
-				y = phase2_edge_move(y, i);
+				y = phase2_edge_move(y, i);//1회 회전
 				if (j != 1 && (i != 2 && i != 4)) continue;
 				//양 옆을 제외하면 짝수번만 돌릴 수 있음: R-L 슬라이스 퍼뮤테이션과 코너 오리엔테이션의 유지를 위해서 제한
-				ypk = pack_phase_num_3(y) - 40319 * 70;
+				ypk = pack_phase_num_3(y) - 40319 * 70;//2진법 -> 순열 번호
 				assert(ypk >= 0 && ypk < 70);
 				phase3_edge[xpk][i][j] = ypk;
 				if (!phase3_edge_vis[ypk]) {
@@ -873,20 +812,20 @@ void prec_phase3_edge() {
 	}
 	return;
 }
-//페이즈3 전처리
+//페이즈3 전처리, bfs
 void prec_phase3() {
-	ll x, y, xpk, ypk, corner, edge, qf = 0, qr = 0;
-	prec_phase3_corner_perm(0, 7);
+	ll x, y, xpk, ypk, corner, edge, qf = 0, qr = 0, tmp;
+	prec_phase3_corner_perm(0, 7);//코너 조각 8개를 dfs로 전부 섞어서 가지를 뻗어둔다. 섞인 경우의 수는 크기 순으로 정렬된다.
 	prec_phase3_corner();
 	prec_phase3_edge();
-	
 	memset(phase3_oper, -1, sizeof phase3_oper);
-	Q[qf++] = ((pack_phase_num_3(PHASE3S) / 70ll) << 16) + pack_phase_num_3(PHASE3S) % 70;
-	x = pack_phase_num_3(PHASE3S);
+	tmp = pack_phase_num_3(PHASE3S);
+	Q[qf++] = ((tmp / 70ll) << 16) + tmp % 70;
+	x = tmp;
 	phase3_oper[x] = 0;
-	while (qf > qr) {//도착지의 상태 96가지를 bfs로 찾는다.
+	while (qf > qr) {//페이즈 4의 도착지의 상태 96가지를 bfs로 미리 찾는다.
 		x = Q[qr++];
-		xpk = (x >> 16) * 70 + (x & 65535);
+		xpk = (x >> 16) * 70 + (x & 65535);//경우의 수 순서로 패킹
 		phase3_is_end[xpk] = 1;
 		phase4_corner_perm[qr - 1] = phase3_corner_perm[x >> 16];//페이즈4의 가능한 경우들을 미리 찾아둔다.
 		for (int i = 0; i < 6; i++) {
@@ -894,11 +833,11 @@ void prec_phase3() {
 				y = x;
 				corner = (y >> 16);
 				edge = (y * 65535);
-				corner = phase3_corner[corner][i][j];
-				edge = phase3_edge[edge][i][j];
-				y = (corner << 16) + edge;
-				if (j != 1) continue;//짝수번만 돌린다
-				ypk = (y >> 16) * 70 + (y & 65535);
+				corner = phase3_corner[corner][i][j];//1회 회전
+				edge = phase3_edge[edge][i][j];//1회 회전
+				y = (corner << 16) + edge;//엣지와 코너를 조합해서 가지를 뻗어감
+				if (j != 1) continue;//우선 짝수번만 돌린다
+				ypk = (y >> 16) * 70 + (y & 65535);//경우의 수 순서로 패킹
 				assert(ypk >= 0 && ypk < 2822400);
 				if (phase3_oper[ypk] < 0) {
 					phase3_oper[ypk] = 0;
@@ -922,11 +861,11 @@ void prec_phase3() {
 				corner = phase3_corner[corner][i][j];
 				edge = phase3_edge[edge][i][j];
 				y = (corner << 16) + edge;
-
+				//짝수번 돌려서 도착할 수 있었던 경우의 수 + 그냥 도착할 수 있는 경우의 수에 대해 가지를 뻗는다
 				ypk = (y >> 16) * 70 + (y & 65535);
 				assert(ypk >= 0 && ypk < 2822400);
 				if (phase3_oper[ypk] < 0) {
-					phase3_oper[ypk] = i * 10 + (3 - j);
+					phase3_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, 3 - j는 돌리는 횟수
 					phase3_last[ypk] = xpk;
 					Q[qf++] = y;
 				}
@@ -942,17 +881,19 @@ void prec_phase3() {
 /*
 * 페이즈 4
 * 반바퀴 회전만을 사용해 큐브를 맞춤
-* 사용하는 동작: 모든 면 2회 회전
-* 경우의 수: 663552 (corner 96 * edge 6912)
+* 퍼뮤테이션만 남은 상태
+* 사용하는 동작: U2, D2, F2, B2, R2, L2
+* 경우의 수: 663,552 (corner 96 * edge 6,912)
 */
-void prec_phase4_edge_perm(ll ep, int cnt) {
+//dfs로 엣지 퍼뮤데이션에 대해 가능한 경우의 수를 크기 순으로 모두 찾는다. 앞선 과정들로 가지치기가 매우 많이 되어있어 크기가 크지 않음.
+void prec_phase4_edge_perm(ll ep /* edge permutation */, int cnt) {
 	if (cnt < 0) {
 		phase4_edge_perm[phase4_edge_perm_cnt++] = ep;
 		return;
 	}
 	for (ll i = 0; i < 12; i++) {
 		if (phase4_edge_perm_chk[i]) continue;
-		if (!oper4_edge[i][cnt]) continue;
+		if (!oper4_edge[i][cnt]) continue;//전부 정위치 혹은 반대 위치로 맞춰두었기 때문에 퍼뮤테이션이 홀수번 바뀌는 건 가능하지 않다.
 		phase4_edge_perm_chk[i] = 1;
 		prec_phase4_edge_perm(ep + (i << (cnt << 2)), cnt - 1);
 		phase4_edge_perm_chk[i] = 0;
@@ -960,14 +901,14 @@ void prec_phase4_edge_perm(ll ep, int cnt) {
 	return;
 }
 //8진법 형태의 코너 순열을 이분 탐색으로 찾는 함수
-int corner_to_perm_4(int c) {
+int corner_to_perm_4(int cr) {
 	int s = 0, e = 95, m;
 	while (s < e) {
 		m = s + e >> 1;
-		if (phase4_corner_perm[m] >= c) e = m;
+		if (phase4_corner_perm[m] >= cr) e = m;
 		else s = m + 1;
 	}
-	assert(phase4_corner_perm[s] == c);
+	assert(phase4_corner_perm[s] == cr);
 	return s;
 }
 //8진법 형태의 엣지 순열을 이분 탐색으로 찾는 함수
@@ -981,36 +922,38 @@ int edge_to_perm_4(ll ed) {
 	assert(phase4_edge_perm[s] == ed);
 	return s;
 }
+//패킹된 큐브 조각 경우의 수
 int get_phase_num_4() {
-	ll ret = 0, corn_num = 0, edge_num = 0, tedge;
+	ll pk = 0, corn_num = 0, edge_num = 0, tedge;
 	for (int i = 0; i < 8; i++) {
-		corn_num += ((ll)get_corner_num_3(i) << (i * 3ll));
+		corn_num += ((ll)get_corner_num_3(i) << (i * 3));
 	}
-	ret = corner_to_perm_4(corn_num);
-	ret *= 13824;
+	pk = corner_to_perm_4(corn_num);
+	pk *= 13824;
 	for (ll i = 0; i < 12; i++) {
 		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
 		edge_num += (tedge << (i << 2));
 	}
-	ret += edge_to_perm_4(edge_num);
-	return ret;
+	pk += edge_to_perm_4(edge_num);
+	return pk;
 }
+//1회 회전할 때 엣지 움직임 기록
 ll phase4_edge_move(ll edge_num, int f) {
-	ll store = ((edge_num >> (phase2_edge_oper[f][3] << 2)) & 15ll);
+	ll store = ((edge_num >> (edge_oper_od[f][3] << 2)) & 15ll);
 	for (int i = 3; i >= 1; i--) {
-		edge_num -= (edge_num & (15ll << (phase2_edge_oper[f][i] << 2)));
-		edge_num += (((edge_num >> (phase2_edge_oper[f][i - 1] << 2)) & 15ll)
-			<< (phase2_edge_oper[f][i] << 2));
+		edge_num -= (edge_num & (15ll << (edge_oper_od[f][i] << 2)));
+		edge_num += (((edge_num >> (edge_oper_od[f][i - 1] << 2)) & 15ll)
+			<< (edge_oper_od[f][i] << 2));
 	}
-	edge_num -= (edge_num & (15ll << (phase2_edge_oper[f][0] << 2)));
-	edge_num += (store << (phase2_edge_oper[f][0] << 2));
+	edge_num -= (edge_num & (15ll << (edge_oper_od[f][0] << 2)));
+	edge_num += (store << (edge_oper_od[f][0] << 2));
 	return edge_num;
 }
 //페이즈4의 코너 전처리
 void prec_phase4_corner() {
 	ll qf = 0, qr = 0, x = PHASE4C, xpk, y, ypk;
-	memset(phase4_edge, -1, sizeof phase4_edge);
+	memset(phase4_corner, -1, sizeof phase4_corner);
 	Q[qf++] = x;
 	while (qf > qr) {
 		x = Q[qr++];
@@ -1032,6 +975,7 @@ void prec_phase4_corner() {
 	}
 	return;
 }
+//페이즈4의 엣지 전처리
 void prec_phase4_edge() {
 	ll qf = 0, qr = 0, x = PHASE4E, xpk, y, ypk;
 	memset(phase4_edge, -1, sizeof phase4_edge);
@@ -1062,9 +1006,10 @@ void prec_phase4() {
 	prec_phase4_corner();
 	prec_phase4_edge();
 	memset(phase4_oper, -1, sizeof phase4_oper);
-	x = (corner_to_perm_4(PHASE4C) << 16) + edge_to_perm_4(PHASE4E);
+	corner = corner_to_perm_4(PHASE4C), edge = edge_to_perm_4(PHASE4E);
+	x = (corner << 16) + edge;//전부 맞춰진 상태 
 	Q[qf++] = x;
-	phase4_oper[(corner_to_perm_4(PHASE4C) * 13824) + edge_to_perm_4(PHASE4E)] = 0;
+	phase4_oper[(corner * 13824) + edge] = 0;
 	while (qf > qr) {
 		x = Q[qr++];
 		xpk = (x >> 16) * 13824 + (x & 65535);
@@ -1081,7 +1026,7 @@ void prec_phase4() {
 				ypk = (y >> 16) * 13824 + (y & 65535);
 				assert(ypk >= 0 && ypk < 1327104);
 				if (phase4_oper[ypk] < 0) {
-					phase4_oper[ypk] = i + 10 + (3 - j);
+					phase4_oper[ypk] = i * 10 + (3 - j);//해당 면을 돌리기 위한 동작, i는 면 번호, 3 - j는 돌리는 횟수
 					phase4_last[ypk] = xpk;
 					Q[qf++] = y;
 				}
@@ -1099,7 +1044,7 @@ void solve() {
 	int edge_parity, phase2_num, phase3_num, phase4_num, reslen, last, tmp;
 	ll move_cnt = 0;//전체 이동 횟수 합
 	srand(time(NULL));
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {//조합들을 전처리
 		for (int j = 0; j < 16; j++) {
 			if (j == 0) comb[i][j] = 1;
 			else if (i == 0) comb[i][j] = 0;
@@ -1112,6 +1057,13 @@ void solve() {
 	prec_phase4();
 	std::cin >> N;
 	while (N--) {
+		/*
+		* 각 페이즈 별로 미리 bfs로 가지를 뻗어놓은 다음
+		* 지금 큐브의 상태로부터 잎의 정보를 계산하고
+		* 잎으로부터 각 페이즈의 뿌리(해당 페이즈에서 원하는 상태)로 되돌아가는 식으로
+		* 큐브를 점진적으로 완성한다
+		*/
+
 		for (int i = 0; i < 54; i++) std::cin >> S[tile_od[i]];
 		reslen = 0;
 		/*
@@ -1119,8 +1071,8 @@ void solve() {
 		* 각 모서리 블록의 방향을 바꾼다
 		* 위아래 면을 짝수번 돌려서 원래 있어야 하는 상태로 옮길 수 있는 경우로 만든다
 		* ZZ공식이랑 비슷한 느낌
-		* 사용하는 동작: U, D, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
-		* 경우의 수 2,048
+		* 사용하는 동작: U, U', D, D', F, F', F2, R, R', R2, L, L', L2, B, B', B2
+		* 경우의 수: 2,048(2^(12 - 1))
 		*/
 		edge_parity = check_edge_parity();
 		while (edge_parity > 0) {
@@ -1128,20 +1080,22 @@ void solve() {
 			res[reslen++] = phase1_oper[edge_parity];
 			edge_parity = phase1_last[edge_parity];//전처리에서 얻은 엣지 정렬 경로를 되짚어간다
 			move(res[reslen - 1]);
+#ifdef DEBUG
 			tmp = check_edge_parity();
 			if (tmp != edge_parity) {
 				std::cout << "FUCK:: 1::\n";
 			}
+#endif
 		}
 		edge_parity = check_edge_parity();
 		assert(!edge_parity);//모든 엣지 조각을 원하는 방향으로 이동
 
 		/*
 		* 페이즈 2
-		* 각 꼭짓점의 방향을 바꾸는 동시에
-		* FU, FD, BU, BD 엣지의 위치를 옮김
+		* 각 코너 조각의 오리엔테이션을 바꾸는 동시에
+		* FU, FD, BU, BD 엣지(R-L 슬라이스)의 퍼뮤테이션을 맞춤
 		* 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
-		* 경우의 수: 1,082,565가지 (corner 2,187, edge 495)
+		* 경우의 수: 1,082,565 (corner 2,187(3^(8 - 1)), edge 495(12C4))
 		*/
 		phase2_num = get_phase_num_2();
 		while (phase2_num != 54) {
@@ -1149,19 +1103,21 @@ void solve() {
 			res[reslen++] = phase2_oper[phase2_num];
 			phase2_num = phase2_last[phase2_num];
 			move(res[reslen - 1]);
+#ifdef DEBUG
 			tmp = get_phase_num_2();
 			if (tmp != phase2_num) {
 				std::cout << "FUCK:: 2::\n";
 			}
+#endif
 		}
 		phase2_num = get_phase_num_2();//0011 0110
-		assert(phase2_num == 54);//모든 코너 조각이 원하는 방향, 가운데 면 엣지 조각을 가운데로 모았음
+		assert(phase2_num == 54);//모든 코너 조각이 원하는 방향, R-L 슬라이스의 엣지 조각을 가운데로 모았음
 
 		/*
 		* 페이즈 3
 		* 모든 칸의 색상을 원래 색 또는 그 반대 위치 색으로 바꿈
 		* 사용하는 동작: U2, D2, F2, B2, R, R', R2, L, L', L2
-		* 경우의 수: 29,400 * 96 (corner 420 * 96, edge 70)
+		* 경우의 수: 40,320 * 70 = 2,822,400 (corner 40,320(8!), edge 70(8C4))
 		*/
 		phase3_num = get_phase_num_3();
 		while (!phase3_is_end[phase3_num]) {
@@ -1169,10 +1125,12 @@ void solve() {
 			res[reslen++] = phase3_oper[phase3_num];
 			phase3_num = phase3_last[phase3_num];
 			move(res[reslen - 1]);
+#ifdef DEBUG
 			tmp = get_phase_num_3();
 			if (tmp != phase3_num) {
 				std::cout << "FUCK:: 3::\n";
 			}
+#endif
 		}
 		phase3_num = get_phase_num_3();
 		assert(phase3_is_end[phase3_num]);//모든 면의 색이 원하는 위치 혹은 반대 면으로 이동
@@ -1180,8 +1138,10 @@ void solve() {
 		/*
 		* 페이즈 4
 		* 반바퀴 회전만을 사용해 큐브를 맞춤
-		* 사용하는 동작: 모든 면 2회 회전
-		* 경우의 수: 663552 (corner 96 * edge 6912)
+		* 사용하는 동작: U2, D2, F2, B2, R2, L2
+		* 경우의 수: 663,552 (corner 96 * edge 6,912)
+		* 코너 96가지: 8 * 3 * 2, 코너 조각 하나의 위치가 결정되면 연쇄적으로 일부 코너 조각들의 위치가 결정되면서 경우의 수가 줄어듬
+		* 엣지 6,912가지: 
 		*/
 		phase4_num = get_phase_num_4();
 		while (phase4_num != 1327103) {
@@ -1189,10 +1149,12 @@ void solve() {
 			res[reslen++] = phase4_oper[phase4_num];
 			phase4_num = phase4_last[phase4_num];
 			move(res[reslen - 1]);
+#ifdef DEBUG
 			tmp = get_phase_num_4();
 			if (tmp != phase4_num) {
 				std::cout << "FUCK:: 4::\n";
 			}
+#endif
 		}
 		assert(check());//complete
 

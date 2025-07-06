@@ -18,7 +18,7 @@ Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 #define PHASE4C 16434824        //111 110 101 100 011 010 001 000, 8진법 코너 순열
 #define PHASE4E 205163983024656 //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000, 16진법 엣지 순열
 
-#define DEBUG                   //디버깅 토글 
+//#define DEBUG                   //디버깅 토글 
 
 int N;//query num
 int S[54];//현재 큐브의 상태
@@ -385,7 +385,6 @@ void move_180(const int& f /* face */) {
 	return;
 }
 void move(const int& o /* order */) {
-	std::cout << o << "\n";
 	assert(0 < o && o < 60);
 	int f = o / 10, p = o % 10;
 	assert(1 <= p && p <= 3);

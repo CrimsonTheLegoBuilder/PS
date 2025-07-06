@@ -1087,10 +1087,6 @@ void solve() {
 		}
 	}
 #ifdef DEBUG
-	init();
-	move_cw(1);
-	move_180(0);
-	debug_print();
 	std::cout << "preprocess start\n";
 	prec_phase1();
 	std::cout << "preprocess 1 done\n";
@@ -1148,6 +1144,7 @@ void solve() {
 		*/
 #ifdef DEBUG
 		print_sol(reslen);
+		debug_print();
 		std::cout << "PHASE 2::\n";
 #endif
 		phase2_num = get_phase_num_2();
@@ -1174,6 +1171,7 @@ void solve() {
 		*/
 #ifdef DEBUG
 		print_sol(reslen);
+		debug_print();
 		std::cout << "PHASE 3::\n";
 #endif
 		phase3_num = get_phase_num_3();
@@ -1191,7 +1189,7 @@ void solve() {
 		}
 		phase3_num = get_phase_num_3();
 		assert(phase3_is_end[phase3_num]);//모든 면의 색이 원하는 위치 혹은 반대 면으로 이동
-		
+
 		/*
 		* 페이즈 4
 		* 반바퀴 회전만을 사용해 큐브를 맞춤
@@ -1203,6 +1201,7 @@ void solve() {
 		*/
 #ifdef DEBUG
 		print_sol(reslen);
+		debug_print();
 		std::cout << "PHASE 4::\n";
 #endif
 		phase4_num = get_phase_num_4();
@@ -1223,14 +1222,41 @@ void solve() {
 		print_sol(reslen);
 
 #ifdef DEBUG
+		std::cout << "sol.len:: " << reslen << "\n";
 		move_cnt += reslen;
 		len_count[reslen]++;
-		//solve(reslen);
 		debug_print();
 #endif
 	}
 	return;
-
 }
 /* SOLVE */
-int main() { solve(); return 0; }//boj24902 Fewest Moves Challenge
+int main() { solve(); return 0; }//boj24902 Fewest Moves Challenge (Thx to index @ BOJ)
+
+/*
+직접 손으로 스크램블하고 디버깅
+
+1
+      6 5 4
+	  3 1 2
+	  3 5 2
+3 6 4 1 2 1 5 3 6 5 6 4
+2 5 4 6 2 4 1 3 2 1 4 6
+4 1 2 3 1 3 2 4 6 5 4 5
+      6 5 1
+	  3 6 5
+	  1 3 2
+B' D R2 F U' R' F U2 B2 L B' D2 R' F' L' D2 R2 F2 U2 R F2 R L2 B2 R2 F2 R2 U2 L2 R2 U2
+
+1
+      6 6 3
+	  6 1 1
+	  3 4 1
+5 2 2 6 5 4 5 4 4 1 3 2
+1 5 3 2 2 5 2 3 4 6 4 3
+6 4 1 2 1 6 3 1 3 2 6 5
+      5 2 4
+	  3 6 5
+	  4 5 1
+U' B' D' U R U' B' D2 L F' R B U2 F' R U2 L' B2 R F2 R' F2 U2 R' L2 B2 U2 L2 F2 U2 L2 F2 U2 R2 F2 U2
+*/

@@ -55,47 +55,6 @@ const int tile_od[54] = {
 	            53, 45, 49,
 	            52, 51, 50
 };
-void debug_print() {
-	std::cout << "DEBUG::\n";
-	for (int i = 0; i < 3; i++) {
-		std::cout << "      ";
-		for (int j = 0; j < 3; j++) {
-			std::cout << S[tile_od[i * 3 + j]] << " ";
-		}
-		std::cout << "\n";
-	}
-	for (int i = 0; i < 3; i++) {
-		std::cout << "      ";
-		for (int j = 0; j < 12; j++) {
-			std::cout << S[tile_od[9 + i * 12 + j]] << " ";
-		}
-		std::cout << "\n";
-	}
-	for (int i = 0; i < 3; i++) {
-		std::cout << "      ";
-		for (int j = 0; j < 3; j++) {
-			std::cout << S[tile_od[45 + i * 3 + j]] << " ";
-		}
-		std::cout << "\n";
-	}
-	std::cout << "DEBUG::\n";
-	return;
-}
-const char M[10] = "UFRBLD";
-void print_sol(const int& len) {
-	for (int i = 0; i < len; i++) {
-		assert(res[i] > 0 && res[i] < 60);
-		int f = res[i] / 10;
-		int p = res[i] % 10;
-		std::cout << M[f];
-		assert(1 <= p && p <= 3);
-		if (p == 2) std::cout << "2";
-		else if (p == 3) std::cout << "'";
-		std::cout << " ";
-	}
-	std::cout << "\n";
-	return;
-}
 /*
 *      >----------v
 *      | +------+ |
@@ -331,6 +290,47 @@ char phase4_oper[1327104];
 /* PHASE 4 */
 
 
+void debug_print() {
+	std::cout << "DEBUG::\n";
+	for (int i = 0; i < 3; i++) {
+		std::cout << "      ";
+		for (int j = 0; j < 3; j++) {
+			std::cout << S[tile_od[i * 3 + j]] << " ";
+		}
+		std::cout << "\n";
+	}
+	for (int i = 0; i < 3; i++) {
+		std::cout << "      ";
+		for (int j = 0; j < 12; j++) {
+			std::cout << S[tile_od[9 + i * 12 + j]] << " ";
+		}
+		std::cout << "\n";
+	}
+	for (int i = 0; i < 3; i++) {
+		std::cout << "      ";
+		for (int j = 0; j < 3; j++) {
+			std::cout << S[tile_od[45 + i * 3 + j]] << " ";
+		}
+		std::cout << "\n";
+	}
+	std::cout << "DEBUG::\n";
+	return;
+}
+const char M[10] = "UFRBLD";
+void print_sol(const int& len) {
+	for (int i = 0; i < len; i++) {
+		assert(res[i] > 0 && res[i] < 60);
+		int f = res[i] / 10;
+		int p = res[i] % 10;
+		std::cout << M[f];
+		assert(1 <= p && p <= 3);
+		if (p == 2) std::cout << "2";
+		else if (p == 3) std::cout << "'";
+		std::cout << " ";
+	}
+	std::cout << "\n";
+	return;
+}
 void move_cw(const int& f /* face */) {
 	//¿·¸é È¸Àü
 	pre[0] = S[side_od[f][9]];

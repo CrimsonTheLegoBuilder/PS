@@ -15,19 +15,23 @@ const int LEN = 1e5 + 10;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline ll sq(const ll& x) { return x * x; }
 
-#define TM 1000001ll
-
-struct Pair { int i, j; };
-int N, M, K, T, Q;
+int N, M, K, T, Q, A, S;
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-
+	std::cin >> T;
+	while (T--) {
+		std::cin >> N;
+		for (int i = 0; i < 25; i++) {
+			if (N & (1 << i)) std::cout << i << " ";
+		}
+		std::cout << "\n";
+	}
 	return;
 }
-int main() { solve(); return 0; }//boj18592
+int main() { solve(); return 0; }
 //boj 27712 10239 22635 29691 31392 16068
 
 /*

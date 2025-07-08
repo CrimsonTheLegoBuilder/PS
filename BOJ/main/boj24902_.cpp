@@ -511,7 +511,7 @@ int rl_edge_hash(const int* rl, int h = 0) {
 	return h;
 }
 int get_phase_num_2() {
-	int ret = 0, fb_edge[4], tedge, edge_cnt = 0;
+	int ret = 0, rl_edge[4], tedge, edge_cnt = 0;
 	for (int i = 7; i >= 0; i--) {
 		ret *= 3;//0, 1, 2 중 하나가 비트 두 자리에 있으므로 곱해서 자리를 옮긴다.
 		for (int j = 0; j < 3; j++) {
@@ -526,12 +526,12 @@ int get_phase_num_2() {
 		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
 		if (tedge <= 6 && !(tedge & 1)) {//R-L 슬라이스 4조각의 위치를 기록
-			fb_edge[edge_cnt++] = i;
+			rl_edge[edge_cnt++] = i;
 		}
 	}
 	assert(edge_cnt == 4);//R-L 슬라이스 4조각의 위치가 제대로 기록되었는가?
-	//ret += rl_edge_to_perm(fb_edge);
-	ret += rl_edge_hash(fb_edge);
+	//ret += rl_edge_to_perm(rl_edge);
+	ret += rl_edge_hash(rl_edge);
 	return ret;
 }
 //움직이는 과정에서 각 비트 2칸이 코너 조각을 의미하게 할 수도 있지만

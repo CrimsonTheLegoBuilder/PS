@@ -16,18 +16,17 @@ inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline ll sq(const ll& x) { return x * x; }
 
 int N, M, K, T, Q, A, S;
+char C[101];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	std::cin >> T;
-	while (T--) {
-		std::cin >> N;
-		for (int i = 0; i < 25; i++) {
-			if (N & (1 << i)) std::cout << i << " ";
-		}
-		std::cout << "\n";
+	std::cin >> C;
+	for (int i = 0; i < 101; i++) {
+		if (C[i] == '\0') break;
+		std::cout << C[i];
+		if (i % 10 == 9) std::cout << "\n";
 	}
 	return;
 }

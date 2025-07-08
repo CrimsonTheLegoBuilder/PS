@@ -729,7 +729,7 @@ int corner_to_perm_3(const int& c) {
 	assert(phase3_corner_perm[s] == c);
 	return s;
 }
-//F-B 슬라이스에사 움직이고자 하는 엣지 조각들을 해싱하는 함수
+//F-B 슬라이스에서 움직이고자 하는 엣지 조각들을 해싱하는 함수
 //U-B 슬라이스는 일단 고려하지 않는다.
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
 //Lexicographio Index
@@ -742,7 +742,7 @@ int fb_edge_to_perm(const int* fb_edge) {
 	}
 	return ret;
 }
-//F-B 슬라이스에사 움직이고자 하는 엣지 조각들을 해싱하는 함수
+//F-B 슬라이스에서 움직이고자 하는 엣지 조각들을 해싱하는 함수
 //U-B 슬라이스는 일단 고려하지 않는다.
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
 //Lexicographio Index

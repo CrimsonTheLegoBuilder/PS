@@ -18,16 +18,16 @@ Thistlethwaite's 4-phase Algorithm(https://www.jaapsch.net/puzzles/thistle.htm)
 #define PHASE4C 16434824        //111 110 101 100 011 010 001 000, 8진법 코너 순열
 #define PHASE4E 205163983024656 //1011 1010 1001 1000 0111 0110 0101 0100 0011 0010 0001 0000, 16진법 엣지 순열
 
-//#define DEBUG                   //디버깅 토글 
+//#define DEBUG                   //디버깅 토글
 
-int N;//query num
-int S[54];//현재 큐브의 상태
-int pre[3];//이전 상태를 저장하는 작은 배열
-int res[256];//큐브를 돌리는 순서
-int len_count[256];//큐브를 돌린 횟수 각각의 횟수
-ll Q[3342336];//상태 저장용 큐
-int comb[16][16];//combination
-
+int N;                 //query num
+int S[54];             //현재 큐브의 상태
+int pre[3];            //이전 상태를 저장하는 작은 배열
+int res[256];          //큐브를 돌리는 순서
+int len_count[256];    //큐브를 돌린 횟수 각각의 횟수
+ll Q[3342336];         //상태 저장용 큐
+int comb[16][16];      //combination
+int comb_memo[17][17]; //combination memoization
 
 /*
 *        +------+
@@ -43,19 +43,19 @@ int comb[16][16];//combination
 *        |534549|
 *        |525150|
 *        +------+
-* 
+*
 * 각 면의 번호에 대해 시계방향으로 윗면 번호들을 매핑
 */
 const int tile_od[54] = {
-	             1,  2,  3,
-	             8,  0,  4,
-	             7,  6,  5,
+				 1,  2,  3,
+				 8,  0,  4,
+				 7,  6,  5,
 	37, 38, 39, 10, 11, 12, 19, 20, 21, 28, 29, 30,
 	44, 36, 40, 17,  9, 13, 26, 18, 22, 35, 27, 31,
 	43, 42, 41, 16, 15, 14, 25, 24, 23, 34, 33, 32,
-	            46, 47, 48,
-	            53, 45, 49,
-	            52, 51, 50
+				46, 47, 48,
+				53, 45, 49,
+				52, 51, 50
 };
 /*
 *      >----------v
@@ -143,7 +143,7 @@ const int edge_od[12][2] = {
 *        | 7   5|
 *        |   6  |
 *        +------+
-* 
+*
 * 각 색상 쌍에 대응하는 엣지 조각의 번호를 매핑
 * -1은 대응하는 조각이 없음
 * 0번 색 * 8 + 1번 색으로 나오는 값을 각 엣지 조각의 번호와 매핑
@@ -174,9 +174,9 @@ const int color_edge[64] = {
 *        |      |
 *        |52  50|
 *        +------+
-* 
+*
 * 코너 조각에 면 번호 매핑
-* R, L면을 0번으로 배치하고 나머지 2개 면은 반시계방향으로 배치 
+* R, L면을 0번으로 배치하고 나머지 2개 면은 반시계방향으로 배치
 */
 const int corner_od[8][3] = {
 	{ 39, 10, 7 },
@@ -488,17 +488,27 @@ void prec_phase1() {
 * 사용하는 동작: U2, D2, F, F', F2, R, R', R2, L, L',L2 , B, B', B2
 * 경우의 수: 1,082,565 (corner 2,187(3^(8 - 1)), edge 495(12C4))
 */
-//움직이고자 하는 엣지 조각들을 해싱하는 함수
+//R-L 슬라이스에서 움직이고자 하는 엣지 조각들을 해싱하는 함수
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
 //Lexicographio Index
-int fb_edge_to_perm(const int* fb_edge) {
+int rl_edge_to_perm(const int* rl_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
-		for (int j = (i ? fb_edge[i - 1] + 1 : 0); j < fb_edge[i]; j++) {
+		for (int j = (i ? rl_edge[i - 1] + 1 : 0); j < rl_edge[i]; j++) {
 			ret += comb[12 - j - 1][3 - i];
 		}
 	}
 	return ret;
+}
+//R-L 슬라이스에서 움직이고자 하는 엣지 조각들을 해싱하는 함수
+//경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
+//Lexicographio Index
+int rl_edge_hash(const int* rl, int h = 0) {
+	h += comb_memo[12][3] - comb_memo[12 - rl[0]][3];
+	h += comb_memo[11 - rl[0]][2] - comb_memo[12 - rl[1]][2];
+	h += comb_memo[11 - rl[1]][1] - comb_memo[12 - rl[2]][1];
+	h += comb_memo[11 - rl[2]][0] - comb_memo[12 - rl[3]][0];
+	return h;
 }
 int get_phase_num_2() {
 	int ret = 0, fb_edge[4], tedge, edge_cnt = 0;
@@ -520,18 +530,19 @@ int get_phase_num_2() {
 		}
 	}
 	assert(edge_cnt == 4);//R-L 슬라이스 4조각의 위치가 제대로 기록되었는가?
-	ret += fb_edge_to_perm(fb_edge);
+	//ret += rl_edge_to_perm(fb_edge);
+	ret += rl_edge_hash(fb_edge);
 	return ret;
 }
 //움직이는 과정에서 각 비트 2칸이 코너 조각을 의미하게 할 수도 있지만
 //bfs에서는 경우의 수에 맞게 조각들의 경우를 패킹함
 int pack_phase_num_2(ll lnum) {
-	int fb_edge[4];
+	int rl_edge[4];
 	int ecnt = 0;
 	int corner;
 	int corner_ret = 0;
 	for (int i = 0; i < 12; i++) {
-		if ((lnum >> i) & 1) fb_edge[ecnt++] = i;
+		if ((lnum >> i) & 1) rl_edge[ecnt++] = i;
 	}
 	assert(ecnt == 4);//4개의 비트를 1로 제공한다. 엣지 4개의 위치가 기록되어있다.
 	corner = lnum >> 16;//코너들에 대한 기록이 있는 부분으로 넘어간다.
@@ -539,7 +550,8 @@ int pack_phase_num_2(ll lnum) {
 		corner_ret *= 3;
 		corner_ret += ((corner >> (i << 1)) & 3);
 	}
-	return corner_ret * 495 + fb_edge_to_perm(fb_edge);
+	//return corner_ret * 495 + rl_edge_to_perm(rl_edge);
+	return corner_ret * 495 + rl_edge_hash(rl_edge);
 }
 ll phase2_corner_move(ll corner_num, const int& f) {
 	ll store, cornertrit;
@@ -717,21 +729,32 @@ int corner_to_perm_3(const int& c) {
 	assert(phase3_corner_perm[s] == c);
 	return s;
 }
-//좌우 엣지 위치의 순서를 바꾼다. 상하 모서리는 제외하고 생각한다.
-//움직이고자 하는 엣지 조각들을 해싱하는 함수
+//F-B 슬라이스에사 움직이고자 하는 엣지 조각들을 해싱하는 함수
+//U-B 슬라이스는 일단 고려하지 않는다.
 //경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
 //Lexicographio Index
-int lr_edge_to_perm(const int* lr_edge) {
+int fb_edge_to_perm(const int* fb_edge) {
 	int ret = 0;
 	for (int i = 0; i < 4; i++) {
-		for (int j = (i ? lr_edge[i - 1] + 1 : 0); j < lr_edge[i]; j++) {
+		for (int j = (i ? fb_edge[i - 1] + 1 : 0); j < fb_edge[i]; j++) {
 			ret += comb[8 - j - 1][3 - i];
 		}
 	}
 	return ret;
 }
+//F-B 슬라이스에사 움직이고자 하는 엣지 조각들을 해싱하는 함수
+//U-B 슬라이스는 일단 고려하지 않는다.
+//경우의 수를 누적해서 해당 4개 조각들을 해싱한다.
+//Lexicographio Index
+int fb_edge_hash(const int* fb, int h = 0) {
+	h += comb_memo[8][3] - comb_memo[8 - fb[0]][3];
+	h += comb_memo[7 - fb[0]][2] - comb_memo[8 - fb[1]][2];
+	h += comb_memo[7 - fb[1]][1] - comb_memo[8 - fb[2]][1];
+	h += comb_memo[7 - fb[2]][0] - comb_memo[8 - fb[3]][0];
+	return h;
+}
 int get_phase_num_3() {
-	int ret = 0, corn_num = 0, lr_edge[4], tedge, edge_minus = 0, edge_cnt = 0;
+	int ret = 0, corn_num = 0, fb_edge[4], tedge, edge_minus = 0, edge_cnt = 0;
 	for (int i = 0; i < 8; i++) {
 		corn_num += (get_corner_num_3(i) << (i * 3));
 	}
@@ -745,27 +768,29 @@ int get_phase_num_3() {
 		tedge = color_edge[S[edge_od[i][0]] * 8 + S[edge_od[i][1]]];
 		assert(tedge >= 0);
 		if (tedge <= 7 && (tedge & 1)) {//F-B 슬라이스 조각의 위치들을 기록
-			lr_edge[edge_cnt++] = i - edge_minus;//R-L 슬라이스 조각을 제외한 조각들의 순서로 기록
+			fb_edge[edge_cnt++] = i - edge_minus;//R-L 슬라이스 조각을 제외한 조각들의 순서로 기록
 		}
 	}
 	assert(edge_cnt == 4);
-	ret += lr_edge_to_perm(lr_edge);
+	//ret += fb_edge_to_perm(fb_edge);
+	ret += fb_edge_hash(fb_edge);
 	return ret;
 }
 int pack_phase_num_3(ll lnum) {
-	int lr_edge[4];
+	int fb_edge[4];
 	ll edge_minus = 0, ecnt = 0, corner, corner_res = 0;
 	for (int i = 0; i < 12; i++) {
 		if (i <= 6 && !(i & 1)) {
 			edge_minus++;
 			continue;
 		}
-		if ((lnum >> i) & 1) lr_edge[ecnt++] = i - edge_minus;//R-L 슬라이스 조각을 제외한 조각들의 순서로 기록
+		if ((lnum >> i) & 1) fb_edge[ecnt++] = i - edge_minus;//R-L 슬라이스 조각을 제외한 조각들의 순서로 기록
 	}
 	assert(ecnt == 4);
 	corner = lnum >> 16;
 	corner_res = corner_to_perm_3(corner);
-	return corner_res * 70 + lr_edge_to_perm(lr_edge);
+	//return corner_res * 70 + fb_edge_to_perm(fb_edge);
+	return corner_res * 70 + fb_edge_hash(fb_edge);
 }
 //페이즈 3, 4에서 사용 가능한 코너 조각 순열의 이동
 ll phase3_corner_move(ll corner_num, const int& f) {
@@ -1068,7 +1093,7 @@ void prec_phase4() {
 * 지금 큐브의 상태로부터 잎의 정보를 계산하고
 * 잎으로부터 각 페이즈의 뿌리(해당 페이즈에서 원하는 상태)로 되돌아가는 식으로
 * 큐브를 점진적으로 완성한다
-* 
+*
 * 컴퓨터는 큐브를 맞추는 그 자체에는 관심이 없지만
 * 각 페이즈 별로 제한을 둔 뒤 어쩔 수 없이 다음 페이즈로 넘어가도록 구성해놓으면
 * bfs로 각 페이즈의 모든 경우의 수를 만들어 놨을 때 탐색 범위를 많이 줄일 수 있음
@@ -1085,6 +1110,11 @@ void solve() {
 			if (j == 0) comb[i][j] = 1;
 			else if (i == 0) comb[i][j] = 0;
 			else comb[i][j] = comb[i - 1][j] + comb[i - 1][j - 1];
+		}
+	}
+	for (int i = 0; i < 16; i++) {
+		for (int j = i; j < 16; j++) {
+			comb_memo[j + 1][i] = comb_memo[j][i] + comb[j][i];
 		}
 	}
 #ifdef DEBUG
@@ -1137,10 +1167,12 @@ void solve() {
 			if (tmp != edge_parity) {
 				std::cout << "FUCK:: 1::\n";
 			}
-#endif
 		}
 		edge_parity = check_edge_parity();
 		assert(!edge_parity);//모든 엣지 조각을 원하는 방향으로 이동
+#else
+		}
+#endif
 
 		/*
 		* 페이즈 2
@@ -1165,10 +1197,12 @@ void solve() {
 			if (tmp != phase2_num) {
 				std::cout << "FUCK:: 2::\n";
 			}
-#endif
 		}
 		phase2_num = get_phase_num_2();//0011 0110
 		assert(phase2_num == 54);//모든 코너 조각이 원하는 방향, R-L 슬라이스의 엣지 조각을 가운데로 모았음
+#else
+		}
+#endif
 
 		/*
 		* 페이즈 3
@@ -1192,10 +1226,12 @@ void solve() {
 			if (tmp != phase3_num) {
 				std::cout << "FUCK:: 3::\n";
 			}
-#endif
 		}
 		phase3_num = get_phase_num_3();
 		assert(phase3_is_end[phase3_num]);//모든 면의 색이 원하는 위치 혹은 반대 면으로 이동
+#else
+		}
+#endif
 
 		/*
 		* 페이즈 4
@@ -1222,9 +1258,11 @@ void solve() {
 			if (tmp != phase4_num) {
 				std::cout << "FUCK:: 4::\n";
 			}
-#endif
 		}
 		assert(check());//complete
+#else
+		}
+#endif
 
 		print_sol(reslen);
 
@@ -1250,25 +1288,25 @@ int main() { solve(); return 0; }//boj24902 Fewest Moves Challenge (Thx to index
 직접 손으로 스크램블하고 디버깅
 
 1
-      6 5 4
+	  6 5 4
 	  3 1 2
 	  3 5 2
 3 6 4 1 2 1 5 3 6 5 6 4
 2 5 4 6 2 4 1 3 2 1 4 6
 4 1 2 3 1 3 2 4 6 5 4 5
-      6 5 1
+	  6 5 1
 	  3 6 5
 	  1 3 2
 B' D R2 F U' R' F U2 B2 L B' D2 R' F' L' D2 R2 F2 U2 R F2 R L2 B2 R2 F2 R2 U2 L2 R2 U2
 
 1
-      6 6 3
+	  6 6 3
 	  6 1 1
 	  3 4 1
 5 2 2 6 5 4 5 4 4 1 3 2
 1 5 3 2 2 5 2 3 4 6 4 3
 6 4 1 2 1 6 3 1 3 2 6 5
-      5 2 4
+	  5 2 4
 	  3 6 5
 	  4 5 1
 U' B' D' U R U' B' D2 L F' R B U2 F' R U2 L' B2 R F2 R' F2 U2 R' L2 B2 U2 L2 F2 U2 L2 F2 U2 R2 F2 U2

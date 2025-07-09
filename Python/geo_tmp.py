@@ -42,6 +42,16 @@ def sub(d1: tuple, d2: tuple) -> tuple:
 
 
 if __name__ == "__main__":
-    n = int(INPUT())
-    h0 = [tuple(*map(int, sys.stdin.readline().strip().split())) for _ in range(n)]
+    n: int = int(INPUT())
+    h0 = [tuple(*map(int, INPUT().strip().split())) for _ in range(n)]
+    H = [h0]
+    b: int = int(INPUT())
+    for i in range(b):
+        m: int = int(INPUT())
+        h = [tuple(*map(int, INPUT().strip().split())) for _ in range(m)]
+        H.append(h)
+    q: int = int(INPUT())
+    for tc in range(1, q + 1):
+        rx, ry, bx, by, gx, gy = map(int, INPUT().strip().split())
+        
     

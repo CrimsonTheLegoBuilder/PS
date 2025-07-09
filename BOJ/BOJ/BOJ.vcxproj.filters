@@ -144,13 +144,10 @@
     <ClCompile Include="..\library\checker.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj13090_tmp.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\boj31180_ing.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\KPSC_2025summer_J.cpp">
+    <ClCompile Include="..\main\boj24902_.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>

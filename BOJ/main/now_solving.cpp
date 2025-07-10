@@ -76,8 +76,9 @@ struct Info { ll area, l, r; };
 int N, M, T, Q;
 struct Pos {
 	int x, y;
+	int h, i;
 	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	Pos(int x_ = 0, int y_ = 0, int h_ = -1, int i_ = -1) : x(x_), y(y_), h(h_), i(i_) {}
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -295,13 +296,16 @@ bool query() {
 	if (!N) return 0;
 	ld t = 0;
 	Pos s, e; std::cin >> s >> e;
-	for (int i = 0; i < N; i++) {
-		P[i].resize(4);
-		for (Pos& p : P[i]) std::cin >> p;
-		norm(P[i]);
+	for (int n = 0; n < N; n++) {
+		P[n].resize(4);
+		for (Pos& p : P[n]) std::cin >> p;
+		norm(P[n]);
+		for (int i = 0; i < 4; i++) P[n][i].h = n, P[n][i].i = i;
 	}
-	for (int i = 1; i < N; i++) {
-
+	for (int n = 1; n < N; n++) {
+		Polygon C = P[0];
+		for (const Pos& p : P[n]) C.push_back(p);
+		Polygon H = graham_scan(C);
 	}
 	return 1;
 }

@@ -300,13 +300,18 @@ bool query() {
 		for (int i = 0; i < 4; i++) P[n][i].h = n, P[n][i].i = i;
 		cen[n] = (P[n][0] + P[n][2]) * .5;
 	}
+	const Polygon& P0 = P[0];
 	for (int n = 1; n < N; n++) {
-		int i = 0, j = 0;
-		for (; i < 4; i++) {
-
-		}
 		int ir, il;
 		int jr, jl;
+		const Polygon& H = P[n];
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				int i0 = (i + 3) % 4, i1 = i, i2 = (i + 1) % 4;
+				int j0 = (j + 3) % 4, j1 = i, j2 = (j + 1) % 4;
+
+			}
+		}
 
 	}
 	return 1;

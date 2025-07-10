@@ -5,22 +5,22 @@
 #include <cstring>
 #include <cassert>
 #include <vector>
+#include <queue>
+#include <deque>
 #include <random>
 #include <array>
 #include <tuple>
+#include <complex>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
-const ll INF = 1e17;
-const int LEN = 1e5 + 1;
+const ld INF = 1e17;
 const ld TOL = 1e-7;
-const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
-inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
-inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+const int LEN = 1e3;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -35,32 +35,22 @@ ld flip(ld lat) {
 	return INF;
 }
 ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
-ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-//ll pow_fuck(ll a, ll b) {
-//	ll ret = 1;
+//ll gcd(ll a, ll b) {
 //	while (b) {
-//		if (b & 1) ret = ret * a % MOD;
-//		a = a * a % MOD;
-//		b >>= 1;
+//		ll tmp = a % b;
+//		a = b;
+//		b = tmp;
 //	}
-//	return ret;
+//	return a;
 //}
-//ll powmod(ll a, ll b) {
-//	ll res = 1; a %= MOD;
-//	assert(b >= 0);
-//	for (; b; b >>= 1) {
-//		if (b & 1) res = res * a % MOD;
-//		a = a * a % MOD;
-//	}
-//	return res;
-//}
-struct Info { ll area, l, r; };
 
 #define LO x
 #define HI y
 
 #define LINE 1
 #define CIRCLE 2
+#define SEG 3
+#define POS 4
 
 #define STRONG 0
 #define WEAK 1
@@ -73,41 +63,42 @@ struct Info { ll area, l, r; };
 
 //2D============================================================================//
 
-int N, M, T, Q;
+int N, M, K, T, Q;
 struct Pos {
-	int x, y;
+	ld x, y;
 	int h, i;
-	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0, int h_ = -1, int i_ = -1) : x(x_), y(y_), h(h_), i(i_) {}
-	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
-	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	bool operator <= (const Pos& p) const { return x == p.x ? y <= p.y : x <= p.x; }
+	Pos(ld x_ = 0, ld y_ = 0, int h_ = 0, int i_ = 0) : x(x_), y(y_), h(h_), i(i_) {}
+	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
+	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	Pos operator * (const int& n) const { return { x * n, y * n }; }
-	Pos operator / (const int& n) const { return { x / n, y / n }; }
-	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
-	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	Pos operator * (const ld& n) const { return { x * n, y * n }; }
+	Pos operator / (const ld& n) const { return { x / n, y / n }; }
+	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
+	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
 	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
 	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
 	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
-	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
-	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
+	Pos& operator *= (const ld& n) { x *= n; y *= n; return *this; }
+	Pos& operator /= (const ld& n) { x /= n; y /= n; return *this; }
 	Pos operator - () const { return { -x, -y }; }
 	Pos operator ~ () const { return { -y, x }; }
 	Pos operator ! () const { return { y, x }; }
-	ll xy() const { return (ll)x * y; }
-	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	int Man() const { return std::abs(x) + std::abs(y); }
-	ld mag() const { return hypot(x, y); }
+	ld xy() const { return x * y; }
+	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
+	ld Euc() const { return x * x + y * y; }
+	ld mag() const { return sqrt(Euc()); }
+	Pos unit() const { return *this / mag(); }
 	ld rad() const { return atan2(y, x); }
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
+	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
+	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
-const Pos INVAL = Pos(-1, -1);
+}; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 Polygon P[LEN];
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
@@ -117,71 +108,53 @@ bool cmpt(const Pos& p, const Pos& q) {
 	bool f0 = O < p;
 	bool f1 = O < q;
 	if (f0 != f1) return f0;
-	ll tq = p / q;
+	ld tq = p / q;
 	return !tq ? p.Euc() < q.Euc() : tq > 0;
 }
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
+ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+ld dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
+bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
-bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
-bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
+ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
+	if (!f) return cross(d1, d2, t) / (d1 - d2).mag();
+	if (sign(projection(d1, d2, d2, t)) <= 0 &&
+		sign(projection(d2, d1, d1, t)) <= 0)
+		return std::abs(cross(d1, d2, t)) / (d1 - d2).mag();
+	return std::min((d1 - t).mag(), (d2 - t).mag());
+}
+bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
-bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
-	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
-	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
-	if (f == WEAK) return f1 && f2;
-	bool f3 = on_seg_strong(s1, s2, d1) ||
-		on_seg_strong(s1, s2, d2) ||
-		on_seg_strong(d1, d2, s1) ||
-		on_seg_strong(d1, d2, s2);
-	return (f1 && f2) || f3;
+Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
+//ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
+	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
+	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
 }
-void get_area_memo(Pos H[], ll memo[], const int& sz) {
-	memo[0] = 0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		memo[i + 1] = cross(Pos(0, 0), cur, nxt) + memo[i];//memo[sz] == convex hull's area
-	}
-	return;
-}
-void get_round_memo(Polygon& H, ld memo[]) {
+ld area(const Polygon& H) {
+	ld A = 0;
 	int sz = H.size();
-	memo[0] = .0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		memo[i + 1] = (cur - nxt).mag() + memo[i];//memo[sz] == convex hull's round
-	}
+	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
+	return A * .5;
+}
+void norm(Polygon& H, const int& d = 1) {
+	ld A = area(H);
+	if (d == 1 && A < 0) std::reverse(H.begin(), H.end());
+	else if (d == -1 && A > 0) std::reverse(H.begin(), H.end());
 	return;
-}
-ll area(Pos H[], const int& sz) {
-	ll a = 0;
-	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
-}
-ll area(Polygon& H) {
-	ll a = 0; int sz = H.size();
-	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
-}
-void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
-bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& t) {
-	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
-	return ccw(p0, p1, t) >= 0 && ccw(p1, p2, t) >= 0 && ccw(p2, p0, t) >= 0;
 }
 int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
-	int cnt{ 0 };
+	int cnt = 0;
 	for (int i = 0; i < sz; i++) {
 		Pos cur = H[i], nxt = H[(i + 1) % sz];
 		if (on_seg_strong(cur, nxt, p)) return 1;
-		if (cur.y == nxt.y) continue;
+		if (zero(cur.y - nxt.y)) continue;
 		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y <= p.y || cur.y > p.y) continue;
+		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
 		cnt += ccw(cur, nxt, p) > 0;
 	}
 	return (cnt & 1) * 2;
@@ -191,9 +164,9 @@ int inner_check(const Polygon& H, const Pos& p) {//concave
 	for (int i = 0; i < sz; i++) {
 		Pos cur = H[i], nxt = H[(i + 1) % sz];
 		if (on_seg_strong(cur, nxt, p)) return 1;
-		if (cur.y == nxt.y) continue;
+		if (zero(cur.y - nxt.y)) continue;
 		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y <= p.y || cur.y > p.y) continue;
+		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
 		cnt += ccw(cur, nxt, p) > 0;
 	}
 	return (cnt & 1) * 2;
@@ -231,27 +204,15 @@ int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
 	else if (on_seg_strong(H[s], H[e], p)) return 0;
 	else return -1;
 }
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	std::sort(C.begin(), C.end());
-	C.erase(unique(C.begin(), C.end()), C.end());
-	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
-	else {
-		for (int i = 0; i < C.size(); i++) {
-			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
-		int s = H.size() + 1;
-		for (int i = C.size() - 1; i >= 0; i--) {
-			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
-	}
-	return H;
+bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
+	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
+	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
+	if (f == WEAK) return f1 && f2;
+	bool f3 = on_seg_strong(s1, s2, d1) ||
+		on_seg_strong(s1, s2, d2) ||
+		on_seg_strong(d1, d2, s1) ||
+		on_seg_strong(d1, d2, s2);
+	return (f1 && f2) || f3;
 }
 Polygon graham_scan(Polygon& C) {
 	Polygon H;
@@ -275,22 +236,6 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
-ll rotating_calipers(const Polygon& H) {
-	int sz = H.size();
-	if (sz < 3) return -1;
-	auto jaw = [&](const int& i, const int& f) -> ll {
-		return (H[(i + 1) % sz] - H[i]) / (H[(f + 1) % sz] - H[f]);
-		};
-	ll ret = 0;
-	for (int i = 0, j = 1; i < sz; i++) {
-		while (jaw(i, j) > 0) {
-			ret = std::max(ret, (H[i] - H[j]).Euc());
-			j = (j + 1) % sz;
-		}
-		ret = std::max(ret, (H[i] - H[j]).Euc());
-	}
-	return ret;
-}
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
@@ -306,6 +251,10 @@ bool query() {
 		Polygon C = P[0];
 		for (const Pos& p : P[n]) C.push_back(p);
 		Polygon H = graham_scan(C);
+		int sz = H.size();
+		for (int i = 0; i < sz; i++) {
+
+		}
 	}
 	return 1;
 }

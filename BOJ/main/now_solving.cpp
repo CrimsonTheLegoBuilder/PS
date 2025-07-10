@@ -30,7 +30,7 @@ void solve() {
 	}
 	return;
 }
-int main() { solve(); return 0; }
+int main() { solve(); return 0; }//11465
 //boj 27712 10239 22635 29691 31392 16068
 
 /*

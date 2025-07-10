@@ -236,6 +236,57 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
+struct Seg {
+	Pos s, e, dir;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
+	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
+	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
+	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
+	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
+	friend Pos intersection_(const Seg& s1, const Seg& s2) {
+		const Pos& p1 = s1.s, & p2 = s1.e;
+		const Pos& q1 = s2.s, & q2 = s2.e;
+		ld a1 = cross(q1, q2, p1);
+		ld a2 = -cross(q1, q2, p2);
+		return (p1 * a2 + p2 * a1) / (a1 + a2);
+	}
+	bool operator < (const Seg& l) const {
+		if (same_dir(*this, l)) return l.inner(s);
+		bool f0 = O < dir;
+		bool f1 = O < l.dir;
+		if (f0 != f1) return f1;
+		return sign(dir / l.dir) > 0;
+	}
+	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
+	Seg operator + (const ld& d) const { Pos v = ~dir.unit(); return Seg(s - v * d, e - v * d); }
+	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
+	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
+	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
+	Seg operator + (const Pos& v) const { return Seg(s + v, e + v); }
+	Seg operator - (const Pos& v) const { return Seg(s - v, e - v); }
+	Seg operator += (const Pos& v) { s += v; e += v; return *this; }
+	Seg operator -= (const Pos& v) { s -= v; e -= v; return *this; }
+	Seg operator * (const ld& d) const { return Seg(s, s + dir * d); }
+	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
+	ld green(const ld& lo = 0, const ld& hi = 1) const {
+		ld d = hi - lo;
+		ld ratio = (lo + hi) * .5;
+		Pos m = p(ratio);
+		return m.y * d * (s.x - e.x);
+	}
+};
+typedef std::vector<Seg> Segs;
+ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
+ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
+	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	if (f == 1) return fit(a1, 0, 1);
+	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	return -1;
+}
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
@@ -252,9 +303,16 @@ bool query() {
 		for (const Pos& p : P[n]) C.push_back(p);
 		Polygon H = graham_scan(C);
 		int sz = H.size();
-		for (int i = 0; i < sz; i++) {
-
+		Pos p0r, p0l;
+		Pos pnr, pnl;
+		for (int i = 0, j; i < sz; i++) {
+			j = (i + 1) % sz;
+			if (H[i].h != H[j].h) {
+				if (H[i].h == 0) p0l = H[i], pnl = H[j];
+				if (H[n].h == 0) p0r = H[j], pnr = H[i];
+			}
 		}
+		Pos m = intersection(p0l, pnr, p0r, pnl);
 	}
 	return 1;
 }

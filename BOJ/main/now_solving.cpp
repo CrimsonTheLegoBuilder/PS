@@ -20,7 +20,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 1e3;
+const int LEN = 1 << 7;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -101,6 +101,7 @@ struct Pos {
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 Polygon P[LEN];
+Pos cen[LEN];
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 //bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
@@ -297,22 +298,16 @@ bool query() {
 		for (Pos& p : P[n]) std::cin >> p;
 		norm(P[n]);
 		for (int i = 0; i < 4; i++) P[n][i].h = n, P[n][i].i = i;
+		cen[n] = (P[n][0] + P[n][2]) * .5;
 	}
 	for (int n = 1; n < N; n++) {
-		Polygon C = P[0];
-		for (const Pos& p : P[n]) C.push_back(p);
-		Polygon H = graham_scan(C);
-		int sz = H.size();
-		Pos p0r, p0l;
-		Pos pnr, pnl;
-		for (int i = 0, j; i < sz; i++) {
-			j = (i + 1) % sz;
-			if (H[i].h != H[j].h) {
-				if (H[i].h == 0) p0l = H[i], pnl = H[j];
-				if (H[n].h == 0) p0r = H[j], pnr = H[i];
-			}
+		int i = 0, j = 0;
+		for (; i < 4; i++) {
+
 		}
-		Pos m = intersection(p0l, pnr, p0r, pnl);
+		int ir, il;
+		int jr, jl;
+
 	}
 	return 1;
 }

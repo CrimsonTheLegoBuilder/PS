@@ -288,6 +288,27 @@ ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
 }
+Pos get_pos(const Pos& l, const Seg& p, const Seg& q) {
+	Pos p1 = p.s, p2 = p.e, q1 = q.s, q2 = q.e;
+	if (ccw(p2, l, p1) < 0) std::swap(p1, p2);
+	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
+		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, 1);
+		else return Pos(0, 0);
+	}
+	Polygon tri = { p1, p2, l };
+	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
+	if (!in1 && !in2) return Pos(0, 0);
+	ld r1 = 0, r2 = 1;
+	if (in1 && in2) {
+		r1 = intersection(p, Seg(l, q1), WEAK);
+		r2 = intersection(p, Seg(l, q2), WEAK);
+	}
+	else if (in1) r1 = intersection(p, Seg(l, q1), WEAK);
+	else if (in2) r2 = intersection(p, Seg(l, q2), WEAK);
+	else r1 = r2 = 0;
+	if (r2 < r1) std::swap(r1, r2);
+	return Pos(r1, r2);
+}
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
@@ -302,17 +323,35 @@ bool query() {
 	}
 	const Polygon& P0 = P[0];
 	for (int n = 1; n < N; n++) {
-		int ir, il;
-		int jr, jl;
+		int ir = -1, il = -1;
+		int jr = -1, jl = -1;
 		const Polygon& H = P[n];
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
 				int i0 = (i + 3) % 4, i1 = i, i2 = (i + 1) % 4;
 				int j0 = (j + 3) % 4, j1 = i, j2 = (j + 1) % 4;
-
+				if (ccw(H[j1], P0[i1], P0[i0]) <= 0
+					&& ccw(H[j1], P0[i1], P0[i2]) <= 0
+					&& ccw(P0[i1], H[j1], H[j0]) <= 0
+					&& ccw(P0[i1], H[j1], H[j2]) <= 0) {
+					il = i1;
+					jr = j1;
+				}
+				if (ccw(H[j1], P0[i1], P0[i0]) >= 0
+					&& ccw(H[j1], P0[i1], P0[i2]) >= 0
+					&& ccw(P0[i1], H[j1], H[j0]) >= 0
+					&& ccw(P0[i1], H[j1], H[j2]) >= 0) {
+					ir = i1;
+					jl = j1;
+				}
 			}
 		}
-
+		assert(ir != -1);
+		assert(il != -1);
+		assert(jr != -1);
+		assert(jl != -1);
+		Pos m = intersection(P0[ir], P0[il], H[jr], H[jl]);
+		Pos inx = get_pos(m, )
 	}
 	return 1;
 }

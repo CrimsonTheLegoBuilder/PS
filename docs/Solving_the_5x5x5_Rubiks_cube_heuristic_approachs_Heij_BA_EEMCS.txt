@@ -1,0 +1,103 @@
+Solving the 5x5x5 Rubik’s cube: heuristic approach
+Xander Heij
+
+Preface
+I have been interested in Rubik’s cubes for several years. And did an attempt to make a 3x3x3 Rubik’s cube solving robot as my final project in secondary school. For my Bachelors Assignment, I continue studying these Rubik’s cubes, but this time a more complex variant: the 5x5x5 Rubik’s cube. There has not been much scientific research done about this cube, although there do exist some efficient methods to solve it, but most known information is from unpublished papers and hobby websites. I will attempt to propose my own heuristic algorithm, to solve a 5x5x5 Rubik’s cube. And I will make an attempt to state something about the correctness and efficiency, in terms of move count, of the proposed heuristic algorithm.
+
+Solving the 5x5x5 Rubik’s cube: heuristic approach
+Xander Heij
+
+July, 2023
+Abstract
+In this paper we present a new heuristic approach to solve the 5x5x5 Rubik’s cube. First the necessary preliminary information is explained, then the permutation group of the 5x5x5 Rubik’s cube is defined, and the 5x5x5 Rubik’s cube is modeled mathematically. The key subsets and subgroups of the permutation group are defined, and the proposed heuristic is formulated. And an attempt is made to state something about the correctness and efficiency of the proposed heuristic algorithm. An attempt is made to compare the proposed heuristic algorithm to an efficient 5x5x5 Rubik’s cube solve algorithm. By modeling the 5x5x5 Rubik’s cube in python, and implementing the proposed algorithm.
+
+Keywords: Rubik’s cube, Permutation Group, Heuristic
+
+1 Introduction & Colloquial problem statement
+The Rubik’s cube is a well known puzzle, and many people are able to solve it. A more complex variant of this puzzle is the 5x5x5 Rubik’s cube, this puzzle is less known. And therefore also less research about it has been done. There exist several methods to solve a regular 3x3x3 Rubik’s cube, some more efficient than others. And there has been determined a hard limit on the maximum required amount of moves to solve a 3x3x3 Rubik’s cube. This is called God’s number [9], and it has been proven that it is 20. There has not yet been determined such a number for the 5x5x5 Rubik’s cube, and a lot less is known about it. There are methods to solve this cube, but a lot of improvement can be made on their efficiency. So the problem left to solve, is to come up with a method to solve the 5x5x5 Rubik’s cube from an arbitrary state, to a solved state where every face exists only of pieces of the same color. And ’solving’ means, finding a list of rotations, called ’moves’, that would turn the cube from the arbitrary state to a ’solved’ state. The challenge is to do this in as few moves as possible. This leads to the following research question:
+
+In what way can a 5x5x5 Rubik’s cube be efficiently solved from an arbitrary state?
+
+The needed preliminary information and notation about the 5x5x5 Rubik’s cube is explained in section 2. The general notation about the parts of the cube, the notation for the moves, and the composition of moves are described. In section 3, the 5x5x5 Rubik’s cube will be modeled by defining a state, the permutation group, the metric to count moves, and the size of a permutation. The problem will be stated again in section 4, but then formally, using on the the introduced notation from section 2 and 3. In the next 2 sections is explained why the proposed algorithm must be a heuristic algorithm, and which subgroups and subsets are needed. The heuristic algorithm is introduced in section 7, and its correctness is discussed in section 8. It has been attempted to analyze whether the proposed algorithm is efficient compared to existing solutions. Which leads to a conclusion, and recommendations for future work.
+
+2 Preliminaries
+ 
+2.1 Rubik’s cubes
+
+A regular 3x3x3 Rubik’s cube is a puzzle existing of 3x3x3 smaller cubes called ’cubies’. The cube has 6 sides, each side is called a ’face’. Each face can be rotated, and after a turn of 0, 90, 180 or 270 degrees, another face can be rotated independently of the previous face. [6]
+
+Each face lies on 3x3 cubies, so for each turn 9 cubies change position. It is easy to see that however the cube would be turned, the cubie in the core, the 3 dimensional center, of the cube will always remain in the same position, therefore physical cubes do not have this core cubie, but only cubies who lie with at least 1 face on the outside of the cube. The cubies that exist on a physical cube are the pieces of that cube. There are 3 different types of pieces, center pieces, edge pieces, and corner pieces. There are 6 center pieces, these lie in the center of a face, and only have 1 visible side. There are 8 corner pieces, each corner lies on the intersection of 3 faces, therefore it has 3 visible sides. There are 12 edge pieces, one in between each pair of corner pieces. Each edge piece lies on the intersection of 2 faces, and has 2 visible sides.
+
+Each visible side of a piece has a different color, the colors are assigned to the pieces in a way that each face of a cube in the solved state (factory state) has the same color. The colors in a solved state are White opposite of Yellow, Orange opposite of Red, Green opposite of Blue. When white is on top and orange is on the left then green is in front. The short notation of these colors is the starting letter (W, Y, O, R, G, B). The visible, colored, faces of a piece are called ’facelets’. The facelets can also be seen as the stickers of a physical Rubik’s cube.
+
+When a face is rotated, the pieces of the Rubik’s cube lying on that face rotate around. This means that the facelets change position, and therefore the colors of the facelets of each face can change. A cube in an arbitrary state is called ’scrambled’, and the process of rotating faces of the cube arbitrarily to mess up the colors is called ’scrambling’. The challenge of a Rubik’s cube is to start with a scrambled cube and to find the rotations to bring the cube back in its original, solved, state, where all facelets of each face have the same color.
+
+A 5x5x5 Rubik’s cube is a more complex variant of the normal, 3x3x3, Rubik’s cube. This cube has 5 layers in each axis that can be turned independently from each other. Each face has both an inner and outer layer. For an NxNxN cube each layer is denoted as Nth outer layer, but a 5x5x5 cube only has an outer layer and a 2nd outer layer, so in this case the 2nd outer layer is called ’inner layer’. See for example the inner layers of the left and right face in Figure 2 with red in front and white on top. All NxNxN cubes larger than a 3x3x3 are called ’big-cubes’.
+
+A 5x5x5 Rubik’s cube has a 3x3 center on each of the 6 faces, each 3x3 center consists of a center, 4 corners and 4 edges. Therefore the following notation will be used:
+• Center-center: The middle of the 3x3 center.
+• Corner-center: A corner center piece.
+• Edge-center: A edge center piece, in between two corner-centers.
+
+An example can be seen in Figure 3. The green facelets on the left side are corner-centers. The orange facelets on the front side are edge-centers. And the yellow center facelet on the up side is the center-center.
+
+2.2 Move notation
+There are multiple ways to denote the turns you can make on a physical Rubik’s cube, but the most commonly used notation is the Singmaster notation [10]. Each face of the cube is named, and a move on that face is called accordingly. The names of the faces are: Left, Right, Front, Back, Up, Down. These names are chosen in a way that each starts with a different letter, these letters are used to describe the moves that turn the faces. For example, a turn of the left side of the cube is called ’L’, a turn of the top side is called ’U’. Each side of a physical cube can be turned either 0, 90, 180, or 270 degrees without blocking another move on another axis.
+
+A single move describes a clockwise turn of 90 degrees of a certain face of the cube. A short form for a turn on a face of 180 degrees is the letter of that face followed by the number ’2’. For example a 180 degree turn of the front side of the cube can be written as F2. A clockwise turn of 270 degrees is equivalent to a counterclockwise turn of 90 degrees, but the latter is more time efficient on a physical cube, and therefore this is always in literature. The notation of a counterclockwise turn of any face is denoted as the letter of that face followed by a prime, or the letter is raised to the power of minus one. Examples of a counterclockwise turn of the right face are: R′ and R−1. In this paper the prime notation is used.
+
+2.2.1 Slice moves
+There are also names for the middle layers of the cube, even though these moves are not strictly necessary. Since a middle layer turn is equivalent to turning both outer layers on the same axis. But these moves will be used later in this paper, so they need to be properly defined. A turn of a middle layer is called a slice turn. A 3x3x3 Rubik’s cube has 3 slices called: Middle, Equator, and Standing. These are the slices that exists on every odd NxNxN Rubik’s. The notation for the other slices of big-cubes will be explained in the next subsection.
+
+An ’M’ move turns the slice between the L and R faces, seen from the L face. This means that M is equal to the two moves L and R’ combined. The ’E’ move turns the slice between the U and D faces, seen from the U face. So E is equal to U and D’ combined. The move S turns the slice between the F and B face, seen from the F face. So S is equal to F and B’ combined. An example of slice moves can be seen in Figure 4.
+
+2.2.2 Big-cube moves
+
+The combination of slice moves and outer moves leads to the following set of single moves that can be performed on a 3x3x3 Rubik’s cube:
+{U, U′, U2, D, D′, D2, L, L′, L2, R, R′,R2, F, F′,F2, B, B′,B2, M, M′,M2,E,E′,E2,S,S′,S2}
+
+But in this paper we are interested in the 5x5x5 cube, this puzzle has more layers that can be turned, the moves that define those turns needs to be defined as well.
+When the number N is put in front of a move which turns a certain face, this face will be turned in the Nth outer layer of the cube. For a move of the outer layer, it is not needed to add the number ’1’ before a move. So for example the move 2L will turn the inner layer of a 5x5x5 Rubik’s cube, while the move L will turn the outer layer. When ’w’, which stands for ’wide’, is added after a move, then the first until Nth outer layer will be turned simultaneously. So for example the move 2Fw turns both the inner and outer front layer of a 5x5x5 Rubik’s cube. The ’w’ is added before a ’2’ or a prime, so the move that describes the turn of both the inner and outer front layer over 180 degrees is denoted as 2Fw2.
+
+2.3 Move composition
+
+A sequence of moves is called an ’algorithm’. The moves in this sequence should be performed from left to right. This is counterintuitive from an algebraic point of view, since moves are elements in a group, and composition is the group operation. Which will be explained in more detail in a later section. Normally composition works from right to left. In for example function composition, g ◦ f = g(f(x)) which means that f needs to be applied first, and the result needs to be applied on g. For moves of a Rubik’s cube it is the opposite. For example F ◦ R describes a front move followed by a right move.
+
+The short notation of p ◦ q is pq where both p and q are moves. Many moves defined above are equal to a composition of other moves. A double turn is equal to the composition of 2 single turns. And a counterclockwise turn is equal to 3 clockwise turns. pp = p2 = p2 and ppp = p3 = p′ for all p ∈ {U, D, L, R, F, B}.
+
+3 Modeling the 5x5x5 Rubik’s Cube
+
+3.1 State and individual facelets of a 5x5x5 Rubik’s cube
+
+The state of a 5x5x5 Rubik’s cube can be denoted by the permutation of its facelets. A 5x5x5 Rubik’s cube has 6 faces with 5x5 facelets, every state of the cube corresponds to a permutation of these facelets. Therefore the state of a 5x5x5 Rubik’s cube is an element of S150, the permutation group on 150 symbols. The 150 facelets can be denoted as a two dimensional coordinate (c, i), where c denotes the color of the facelet, and i denotes the index of the facelet ranging from 0 to 24. So (Y, 12) is the center-center of the yellow face for example. The set of all facelets is be denoted by S.
+
+3.2 The permutation group of the 5x5x5 Rubik’s cube
+
+Not all permutations of the facelets in S150 are reachable states of the 5x5x5 Rubik’s cube,
+due to the mechanical limitations. The set of all possible states is a subset of the state set
+S150. A permutation of the facelets is a possible state if there exists a sequence of moves
+which turns the solved cube in this state. The solved element, where all 25 facelets of each
+face are the same color, is denoted as I. The permutation group of all reachable states can
+be defined in the following way:
+Definition 3.1 G(5) = {ϕ | ϕ : S → S, ϕ = ϕ0 ◦ ϕ1 ◦ · · · ◦ ϕn for which ψi ∈
+{U, 2U, D, 2D, L, 2L, R, 2R, F, 2F, B, 2B}}
+For future reference, the set {U, 2U, D, 2D, L, 2L, R, 2R, F, 2F, B, 2B} is denoted as Gen(G(5)),
+because this set forms the generator of G(5).
+Notice that each element of the group can be viewed as both a permutation of the facelets
+of the cube, and a state of the cube itself. Since each permutation performed on the solved
+state results in a state corresponding to that permutation.
+Since all states can be reached by the composition of single turns, G(5) is generated by
+Gen(G(5)). This is not the smallest generating set of G(5), but it is the most intuitive.
+It is not needed to add the middle slice in the generator since turning the middle slice is
+equivalent to turning all outer and inner slices of the faces on the same axis. But it is
+actually also not needed to add moves for turning 1 of the 6 faces in the generator. This
+has been proven by Roger Penrose, and is written down in the notes about the 3x3x3
+Rubik’s cube by David Singmaster [10].
+3.3 Equivalent states
+The defined group does not completely model a physical cube, since the equivalent pieces
+have not been taken into account. Unlike the 3x3x3 Rubik’s cube for which all pieces
+are unique, does the 5x5x5 Rubik’s cube have similar pieces. The facelets of these pieces
+have the same color and therefore the pieces can’t be differentiated from each other on a
+physical cube. The existence of these equivalent pieces lead to equivalent states. 2 states
+are considered to be equivalent if they look exactly the same on a physical Rubik’s cube,
+which means that the colors of the facelets on each face are the same for both states.

@@ -15,95 +15,38 @@ const int LEN = 1e5 + 10;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline ll sq(const ll& x) { return x * x; }
 
-int N, M, K, T, Q;
-ll A, W, H;
-ld l, v, V;
-char S[LEN];
-void num(char n) {
-	if (n == '0') {
-		std::cout << "0000\n";
-		std::cout << "0  0\n";
-		std::cout << "0  0\n";
-		std::cout << "0  0\n";
-		std::cout << "0000\n";
-	}
-	if (n == '1') {
-		std::cout << "   1\n";
-		std::cout << "   1\n";
-		std::cout << "   1\n";
-		std::cout << "   1\n";
-		std::cout << "   1\n";
-	}
-	if (n == '2') {
-		std::cout << "2222\n";
-		std::cout << "   2\n";
-		std::cout << "2222\n";
-		std::cout << "2\n";
-		std::cout << "2222\n";
-	}
-	if (n == '3') {
-		std::cout << "3333\n";
-		std::cout << "   3\n";
-		std::cout << "3333\n";
-		std::cout << "   3\n";
-		std::cout << "3333\n";
-	}
-	if (n == '4') {
-		std::cout << "4  4\n";
-		std::cout << "4  4\n";
-		std::cout << "4444\n";
-		std::cout << "   4\n";
-		std::cout << "   4\n";
-	}
-	if (n == '5') {
-		std::cout << "5555\n";
-		std::cout << "5\n";
-		std::cout << "5555\n";
-		std::cout << "   5\n";
-		std::cout << "5555\n";
-	}
-	if (n == '6') {
-		std::cout << "6666\n";
-		std::cout << "6\n";
-		std::cout << "6666\n";
-		std::cout << "6  6\n";
-		std::cout << "6666\n";
-	}
-	if (n == '7') {
-		std::cout << "7777\n";
-		std::cout << "   7\n";
-		std::cout << "   7\n";
-		std::cout << "   7\n";
-		std::cout << "   7\n";
-	}
-	if (n == '8') {
-		std::cout << "8888\n";
-		std::cout << "8  8\n";
-		std::cout << "8888\n";
-		std::cout << "8  8\n";
-		std::cout << "8888\n";
-	}
-	if (n == '9') {
-		std::cout << "9999\n";
-		std::cout << "9  9\n";
-		std::cout << "9999\n";
-		std::cout << "   9\n";
-		std::cout << "   9\n";
-	}
-	return;
+int N, M, K, T, Q, C, a, b;
+ll W, H;
+ld l, v, V, G;
+int A(int a) {
+	if (a == 0) return 0;
+	else if (a == 1) return 500;
+	else if (a <= 3) return 300;
+	else if (a <= 6) return 200;
+	else if (a <= 10) return 50;
+	else if (a <= 15) return 30;
+	else if (a <= 21) return 10;
+	return 0;
+}
+int B(int b) {
+	if (b == 0) return 0;
+	else if (b == 1) return 512;
+	else if (b <= 3) return 256;
+	else if (b <= 7) return 128;
+	else if (b <= 15) return 64;
+	else if (b <= 31) return 32;
+	return 0;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(15);
-	std::cin >> S;
-	int i = 0;
-	while (1) {
-		if (S[i] == '\0') break;
-		num(S[i]);
-		std::cout << "\n";
-		i++;
+	std::cout.precision(1);
+	std::cin >> T;
+	while (T--) {
+		std::cin >> a >> b;
+		std::cout << A(a) << " " << B(b) << "\n";
+		std::cout << A(a) * 10000 + B(b) * 10000 << "\n";
 	}
 	return;
 }

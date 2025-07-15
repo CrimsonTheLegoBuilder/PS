@@ -166,7 +166,7 @@ For example, the edge in between the white and blue corner-center representing t
 For each edge, the position and orientation, of the two other edges with the same two colors are completely fixed by this edge. When calculating the the size of L, without loss of generality, can be assumed that the position and orientation of the two outer edges will be determined by the position and orientation of the middle edge. There are 24! possible permutations of the outer edges in the set K. Therefore the size of L is the size of K divided by 24!.
 
 |L| = (1/2 · (8!·3^7) · (12!·2^11))^2 = 1, 870, 735, 787, 256, 481, 225, 707, 817, 046, 900, 736, 000, 000
-This is roughly 1.87 · 10^39, which is 6.20 · 1023 times smaller than |K|
+This is roughly 1.87 · 10^39, which is 6.20 · 10^23 times smaller than |K|
 
 6.3 Description of key subgroups of G(5)
 

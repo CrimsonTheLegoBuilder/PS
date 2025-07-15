@@ -246,11 +246,10 @@ The same argument can be made for solving the edges of the cube in a way that th
 It is important to note that cycling pieces around is not an efficient way to solve a Rubik’s cube, since it requires many moves for a few solved pieces. But it is not unreasonable to assume that this step could be improved by a lot in the future. Just like how reducing the maximum required amount of moves for methods to solve the 3x3x3 Rubik’s cube took many years and many different people.
 
 8.2 Step 3 & 4: Inner and outer 3x3 stage
+
 By solving the edges in step 2, the state of the cube is reduced to an element of L. This
 set is equal to the union of all cosets of G(5)in of elements in G(5)out.
-L =
-S
-g∈G(5)out G(5)in· g
+L = U_(g∈G(5)out)G(5)in· g
 There is a bijective mapping between the states of G(5)in and G(3). Every state is also a permutation, which can be factorized in individual moves. If ϕ : G(3) → G(5)in is the mapping between the two groups, and p ∈ G(3) is permutation which can be factorized in moves from {U, D, L, R, F, B} then ϕ(p) ∈ G(5)in is a permutation which can be factorized in {2Uw, 2Dw, 2Lw, 2Rw, 2Fw, 2Bw}. It has been proven that every state in G(3) can be solved with Kociemba’s Algorithm [9], this implies that every state in G(5)in can be solved as well. This means that every state in L is solvable to a state in G(5)out.
 
 There is a bijective mapping between the states of G(5)out and G(3). Both use the same generator, and the permutation corresponding to the states can be factorized a sequence of moves from the same set. If ψ : G(3) → G(5)out is the mapping between the two groups, and the factorization of p−1 is a solution of p ∈ G(3), then the factorization of ψ(p−1) is a solution ψ(p) ∈ G(5)out. Which implies that every state of G(5)out is solvable with Kociemba’s Algorithm.

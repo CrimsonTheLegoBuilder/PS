@@ -157,7 +157,7 @@ This is roughly 2.83 · 10^74
 The size of K can be combinatorially calculated in similar manner. Making use of the the fact that the configuration of the center pieces is independent from the configuration of the edge and corner pieces. This implies that the size of K is equal to the amount of different configurations of the centers and the outer layer multiplied. The configurations of the centers is equal to |G(3)| since the centers of each valid state in |K| is isomorphic to a state of the 3x3x3 Rubik’s cube. The calculation for |G(5)| uses this same fact of independence. Therefore all possible configurations of the centers can be factored out, and the total can be multiplied by |G(3)| to obtain K. All possible configurations of the centers in G(5) is (24!/4!^6)^2. |G(3)| = 1/2 · (8! · 3^7) · (12! · 2^11). Hence the simplified calculation of the size of K is:
 
 |K| = (1/2 · (8! · 3^7) · (12! · 2^11))^2 · 24! = 1, 160, 695, 029, 268, 457, 213, 215, 565, 706, 414, 469, 047, 562, 082, 490, 211, 368, 960, 000, 000, 000
-This is roughly 1.16 · 1063, which is 2.44 · 1011 times smaller than |G(5)|
+This is roughly 1.16 · 10^63, which is 2.44 · 10^11 times smaller than |G(5)|
 
 The second step of the heuristic will reduce an arbitrary state from subset K to an element of L ⊂ K. The subset L is a subset of K with extra restrictions for the edge pieces. Any state in K is an element of L when all rows of 3 adjacent edges are pieces with the same color and orientation, when the center 3x3x3 representation would have been solved.
 

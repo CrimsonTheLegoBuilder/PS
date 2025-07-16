@@ -5,22 +5,22 @@
 #include <cstring>
 #include <cassert>
 #include <vector>
+#include <queue>
+#include <deque>
 #include <random>
 #include <array>
 #include <tuple>
+#include <complex>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
-const ll INF = 1e17;
-const int LEN = 1e5 + 1;
+const ld INF = 1e17;
 const ld TOL = 1e-7;
-const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
-inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
-inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+const int LEN = 1 << 7;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -35,32 +35,22 @@ ld flip(ld lat) {
 	return INF;
 }
 ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
-ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-//ll pow_fuck(ll a, ll b) {
-//	ll ret = 1;
+//ll gcd(ll a, ll b) {
 //	while (b) {
-//		if (b & 1) ret = ret * a % MOD;
-//		a = a * a % MOD;
-//		b >>= 1;
+//		ll tmp = a % b;
+//		a = b;
+//		b = tmp;
 //	}
-//	return ret;
+//	return a;
 //}
-//ll powmod(ll a, ll b) {
-//	ll res = 1; a %= MOD;
-//	assert(b >= 0);
-//	for (; b; b >>= 1) {
-//		if (b & 1) res = res * a % MOD;
-//		a = a * a % MOD;
-//	}
-//	return res;
-//}
-struct Info { ll area, l, r; };
 
 #define LO x
 #define HI y
 
 #define LINE 1
 #define CIRCLE 2
+#define SEG 3
+#define POS 4
 
 #define STRONG 0
 #define WEAK 1
@@ -73,42 +63,45 @@ struct Info { ll area, l, r; };
 
 //2D============================================================================//
 
-int N, M, Q;
-ll A[LEN], T;
+int N, M, K, T, Q;
 struct Pos {
-	int x, y;
-	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
-	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
-	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	bool operator <= (const Pos& p) const { return x == p.x ? y <= p.y : x <= p.x; }
+	ld x, y;
+	int h, i;
+	Pos(ld x_ = 0, ld y_ = 0, int h_ = 0, int i_ = 0) : x(x_), y(y_), h(h_), i(i_) {}
+	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
+	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	Pos operator * (const int& n) const { return { x * n, y * n }; }
-	Pos operator / (const int& n) const { return { x / n, y / n }; }
-	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
-	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	Pos operator * (const ld& n) const { return { x * n, y * n }; }
+	Pos operator / (const ld& n) const { return { x / n, y / n }; }
+	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
+	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
 	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
 	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
 	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
-	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
-	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
+	Pos& operator *= (const ld& n) { x *= n; y *= n; return *this; }
+	Pos& operator /= (const ld& n) { x /= n; y /= n; return *this; }
 	Pos operator - () const { return { -x, -y }; }
 	Pos operator ~ () const { return { -y, x }; }
 	Pos operator ! () const { return { y, x }; }
-	ll xy() const { return (ll)x * y; }
-	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	int Man() const { return std::abs(x) + std::abs(y); }
-	ld mag() const { return hypot(x, y); }
+	ld xy() const { return x * y; }
+	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
+	ld Euc() const { return x * x + y * y; }
+	ld mag() const { return sqrt(Euc()); }
+	Pos unit() const { return *this / mag(); }
 	ld rad() const { return atan2(y, x); }
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
+	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
+	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
-const Pos INVAL = Pos(-1, -1);
+}; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
+Polygon P[LEN];
+Pos cen[LEN];
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 //bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
@@ -116,21 +109,102 @@ bool cmpt(const Pos& p, const Pos& q) {
 	bool f0 = O < p;
 	bool f1 = O < q;
 	if (f0 != f1) return f0;
-	ll tq = p / q;
+	ld tq = p / q;
 	return !tq ? p.Euc() < q.Euc() : tq > 0;
 }
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
+ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+ld dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
+bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
-bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
-bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
+ld dist(const Pos& d1, const Pos& d2, const Pos& t, bool f = 0) {
+	if (!f) return cross(d1, d2, t) / (d1 - d2).mag();
+	if (sign(projection(d1, d2, d2, t)) <= 0 &&
+		sign(projection(d2, d1, d1, t)) <= 0)
+		return std::abs(cross(d1, d2, t)) / (d1 - d2).mag();
+	return std::min((d1 - t).mag(), (d2 - t).mag());
+}
+bool collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
+Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
+//ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
+	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
+	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
+}
+ld area(const Polygon& H) {
+	ld A = 0;
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
+	return A * .5;
+}
+void norm(Polygon& H, const int& d = 1) {
+	ld A = area(H);
+	if (d == 1 && A < 0) std::reverse(H.begin(), H.end());
+	else if (d == -1 && A > 0) std::reverse(H.begin(), H.end());
+	return;
+}
+int inner_check(Pos H[], const int& sz, const Pos& p) {//concave
+	int cnt = 0;
+	for (int i = 0; i < sz; i++) {
+		Pos cur = H[i], nxt = H[(i + 1) % sz];
+		if (on_seg_strong(cur, nxt, p)) return 1;
+		if (zero(cur.y - nxt.y)) continue;
+		if (nxt.y < cur.y) std::swap(cur, nxt);
+		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
+		cnt += ccw(cur, nxt, p) > 0;
+	}
+	return (cnt & 1) * 2;
+}
+int inner_check(const Polygon& H, const Pos& p) {//concave
+	int cnt = 0, sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		Pos cur = H[i], nxt = H[(i + 1) % sz];
+		if (on_seg_strong(cur, nxt, p)) return 1;
+		if (zero(cur.y - nxt.y)) continue;
+		if (nxt.y < cur.y) std::swap(cur, nxt);
+		if (nxt.y - TOL < p.y || cur.y > p.y) continue;
+		cnt += ccw(cur, nxt, p) > 0;
+	}
+	return (cnt & 1) * 2;
+}
+int inner_check_bi_search(Pos H[], const int& sz, const Pos& p) {//convex
+	if (!sz) return -1;
+	if (sz == 1) return p == H[0] ? 0 : -1;
+	if (sz == 2) return on_seg_strong(H[0], H[1], p) ? 0 : -1;
+	if (cross(H[0], H[1], p) < 0 || cross(H[0], H[sz - 1], p) > 0) return -1;
+	if (on_seg_strong(H[0], H[1], p) || on_seg_strong(H[0], H[sz - 1], p)) return 0;
+	int s = 0, e = sz - 1, m;
+	while (s + 1 < e) {
+		m = s + e >> 1;
+		if (cross(H[0], H[m], p) >= 0) s = m;
+		else e = m;
+	}
+	if (cross(H[s], H[e], p) > 0) return 1;
+	else if (on_seg_strong(H[s], H[e], p)) return 0;
+	else return -1;
+}
+int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
+	int sz = H.size();
+	if (!sz) return -1;
+	if (sz == 1) return p == H[0] ? 0 : -1;
+	if (sz == 2) return on_seg_strong(H[0], H[1], p) ? 0 : -1;
+	if (cross(H[0], H[1], p) < 0 || cross(H[0], H[sz - 1], p) > 0) return -1;
+	if (on_seg_strong(H[0], H[1], p) || on_seg_strong(H[0], H[sz - 1], p)) return 0;
+	int s = 0, e = sz - 1, m;
+	while (s + 1 < e) {
+		m = s + e >> 1;
+		if (cross(H[0], H[m], p) >= 0) s = m;
+		else e = m;
+	}
+	if (cross(H[s], H[e], p) > 0) return 1;
+	else if (on_seg_strong(H[s], H[e], p)) return 0;
+	else return -1;
+}
 bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
 	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
 	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
@@ -141,171 +215,152 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-void get_area_memo(Pos H[], ll memo[], const int& sz) {
-	memo[0] = 0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		memo[i + 1] = cross(Pos(0, 0), cur, nxt) + memo[i];//memo[sz] == convex hull's area
+Polygon graham_scan(Polygon& C) {
+	Polygon H;
+	if (C.size() < 3) {
+		std::sort(C.begin(), C.end());
+		return C;
 	}
-	return;
-}
-void get_round_memo(Polygon& H, ld memo[]) {
-	int sz = H.size();
-	memo[0] = .0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		memo[i + 1] = (cur - nxt).mag() + memo[i];//memo[sz] == convex hull's round
-	}
-	return;
-}
-ll area(Pos H[], const int& sz) {
-	ll a = 0;
-	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
-}
-ll area(Polygon& H) {
-	ll a = 0; int sz = H.size();
-	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
-	return a;
-}
-void norm(Polygon& H) { if (area(H) < 0) std::reverse(H.begin(), H.end()); }
-bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& t) {
-	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
-	return ccw(p0, p1, t) >= 0 && ccw(p1, p2, t) >= 0 && ccw(p2, p0, t) >= 0;
-}
-struct Pdd {
-	ld x, y;
-	Pdd(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
-	Pdd operator + (const Pdd& p) const { return { x + p.x, y + p.y }; }
-	Pdd operator - (const Pdd& p) const { return { x - p.x, y - p.y }; }
-	Pdd operator * (const ld& n) const { return { x * n, y * n }; }
-	Pdd operator / (const ld& n) const { return { x / n, y / n }; }
-	ld operator * (const Pdd& p) const { return x * p.x + y * p.y; }
-	ld operator / (const Pdd& p) const { return x * p.y - y * p.x; }
-	Pdd operator ^ (const Pdd& p) const { return { x * p.x, y * p.y }; }
-	Pdd& operator += (const Pdd& p) { x += p.x; y += p.y; return *this; }
-	Pdd& operator -= (const Pdd& p) { x -= p.x; y -= p.y; return *this; }
-	Pdd& operator *= (const ld& n) { x *= n; y *= n; return *this; }
-	Pdd& operator /= (const ld& n) { x /= n; y /= n; return *this; }
-	Pos operator - () const { return { -x, -y }; }
-	Pos operator ~ () const { return { -y, x }; }
-	Pdd operator ! () const { return { y, x }; }
-	ld xy() const { return x * y; }
-	Pdd rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
-	ld Euc() const { return x * x + y * y; }
-	ld mag() const { return sqrt(Euc()); }
-	Pdd unit() const { return *this / mag(); }
-	ld rad() const { return atan2(y, x); }
-	friend ld rad(const Pdd& p1, const Pdd& p2) { return atan2l(p1 / p2, p1 * p2); }
-	friend std::istream& operator >> (std::istream& is, Pdd& p) { is >> p.x >> p.y; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Pdd& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = { 0, 0 };
-typedef std::vector<Pdd> Vpdd;
-Pdd conv(const Pos& p) { return Pdd(p.x, p.y); }
-ld cross(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return (d2 - d1) / (d3 - d2); }
-ld cross(const Pdd& d1, const Pdd& d2, const Pdd& d3, const Pdd& d4) { return (d2 - d1) / (d4 - d3); }
-int ccw(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return sign(cross(d1, d2, d3)); }
-int ccw(const Pdd& d1, const Pdd& d2, const Pdd& d3, const Pdd& d4) { return sign(cross(d1, d2, d3, d4)); }
-ld dot(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return (d2 - d1) * (d3 - d2); }
-ld dot(const Pdd& d1, const Pdd& d2, const Pdd& d3, const Pdd& d4) { return (d2 - d1) * (d4 - d3); }
-bool on_seg_strong(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
-bool on_seg_weak(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
-Pdd intersection(const Pdd& p1, const Pdd& p2, const Pdd& q1, const Pdd& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
-ld rad(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return rad(d2 - d1, d3 - d1); }
-Pdd centroid(const Vpdd& H) {
-	Pdd cen = Pdd(0, 0);
-	ld a = 0;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) {
-		ld a0 = H[i] / H[(i + 1) % sz];
-		cen += (H[i] + H[(i + 1) % sz]) * a0;
-		a += a0;
-	}
-	a *= .5;
-	cen /= 6;
-	if (!zero(a)) cen /= a;
-	return cen;
-}
-ld ternary_search(const Pdd& c, const Pdd& I0, const Pdd& I1, const Pdd& J0, const Pdd& J1, const ld& t = 0) {
-	ld l = INF;
-	int cnt = 50;
-	ld s = 0, e = rad(c, J0, J1);
-	Pdd v = J0 - c;
-	auto dist = [&](const ld& t) -> ld {
-		Pdd v1 = v.rot(norm(s + t));
-		Pdd I_ = intersection(c, v1, I0, I1);
-		Pdd J_ = intersection(c, v1, J0, J1);
-		return (I_ - J_).mag();
-		};
-	while (cnt--) {
-		ld t1 = (s + s + e) / 3;
-		ld t2 = (s + e + e) / 3;
-		ld l1 = dist(t1);
-		ld l2 = dist(t2);
-		l = std::min({ l, l1, l2 });
-		if (l1 < l2) e = t2;
-		else s = t1;
-	}
-	return l;
-}
-void query() {
-	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p;
-	Vpdd P; for (Pos& p : H) P.push_back(conv(p));
-	A[0] = 0;
-	for (int i = 0; i < N; i++) A[i + 1] = A[i] + H[i] / H[(i + 1) % N];
-	Pdd c = centroid(P);
-	ld sh = INF, lg = -1;
-	auto area_ = [&](const int& i, const int& j) -> ll {
-		if (i <= j) return A[j] - A[i] + H[j] / H[i];
-		ll a = A[i] - A[j] + H[i] / H[j];
-		return A[N] - a;
-		};
-	for (int i = 0, j = 1; i < N; i++) {
-		while (i != (j + 1) % N && (area_(i, (j + 1) % N) << 1) <= A[N])
-			j = (j + 1) % N;
-		int j1 = (j + 1) % N;
-
-		Pdd I0 = conv(H[i]), J0 = conv(H[j]), J1 = conv(H[j1]);
-		Pdd inx = intersection(c, I0, J0, J1);
-		ld l0 = (inx - I0).mag();
-		sh = std::min(sh, l0);
-		lg = std::max(lg, l0);
-
-		ll a0 = area_(i, j) << 1;
-
-		Pdd I1 = conv(H[(i + 1) % N]);
-		Pdd I_ = intersection(I0, I1, J1, c);
-		Pdd J_ = intersection(J0, J1, I0, c);
-		ld l1 = ternary_search(c, I0, I_, J_, J1);
-		sh = std::min(sh, l1);
-		lg = std::max(lg, l1);
-
-		I1 = conv(H[(i - 1 + N) % N]);
-		if (A[N] != a0) {
-			I_ = intersection(I1, I0, J0, c);
-			ld l2 = ternary_search(c, I_, I0, J0, J_);
-			sh = std::min(sh, l2);
-			lg = std::max(lg, l2);
+	std::swap(C[0], *min_element(C.begin(), C.end()));
+	std::sort(C.begin() + 1, C.end(), [&](const Pos& p, const Pos& q) -> bool {
+		int ret = ccw(C[0], p, q);
+		if (!ret) return (C[0] - p).Euc() < (C[0] - q).Euc();
+		return ret > 0;
 		}
-		else {
-			J1 = J0;
-			J0 = conv(H[(j - 1 + N) % N]);
-			I_ = intersection(I1, I0, J0, c);
-			J_ = intersection(J0, J1, I0, c);
-			ld l2 = ternary_search(c, I_, I0, J0, J_);
-			sh = std::min(sh, l2);
-			lg = std::max(lg, l2);
-		}
+	);
+	C.erase(unique(C.begin(), C.end()), C.end());
+	int sz = C.size();
+	for (int i = 0; i < sz; i++) {
+		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
+			H.pop_back();
+		H.push_back(C[i]);
 	}
-	std::cout << sh << " " << lg << "\n";
-	return;
+	return H;
+}
+struct Seg {
+	Pos s, e, dir;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
+	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
+	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
+	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
+	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
+	friend Pos intersection_(const Seg& s1, const Seg& s2) {
+		const Pos& p1 = s1.s, & p2 = s1.e;
+		const Pos& q1 = s2.s, & q2 = s2.e;
+		ld a1 = cross(q1, q2, p1);
+		ld a2 = -cross(q1, q2, p2);
+		return (p1 * a2 + p2 * a1) / (a1 + a2);
+	}
+	bool operator < (const Seg& l) const {
+		if (same_dir(*this, l)) return l.inner(s);
+		bool f0 = O < dir;
+		bool f1 = O < l.dir;
+		if (f0 != f1) return f1;
+		return sign(dir / l.dir) > 0;
+	}
+	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
+	Seg operator + (const ld& d) const { Pos v = ~dir.unit(); return Seg(s - v * d, e - v * d); }
+	Seg operator - (const ld& d) const { Pos v = ~dir.unit(); return Seg(s + v * d, e + v * d); }
+	Seg operator += (const ld& d) { Pos v = ~dir.unit(); s -= v * d; e -= v * d; return *this; }
+	Seg operator -= (const ld& d) { Pos v = ~dir.unit(); s += v * d; e += v * d; return *this; }
+	Seg operator + (const Pos& v) const { return Seg(s + v, e + v); }
+	Seg operator - (const Pos& v) const { return Seg(s - v, e - v); }
+	Seg operator += (const Pos& v) { s += v; e += v; return *this; }
+	Seg operator -= (const Pos& v) { s -= v; e -= v; return *this; }
+	Seg operator * (const ld& d) const { return Seg(s, s + dir * d); }
+	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
+	ld green(const ld& lo = 0, const ld& hi = 1) const {
+		ld d = hi - lo;
+		ld ratio = (lo + hi) * .5;
+		Pos m = p(ratio);
+		return m.y * d * (s.x - e.x);
+	}
+};
+typedef std::vector<Seg> Segs;
+ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
+ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
+	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	if (f == 1) return fit(a1, 0, 1);
+	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	return -1;
+}
+Pos get_pos(const Pos& l, const Seg& p, const Seg& q) {
+	Pos p1 = p.s, p2 = p.e, q1 = q.s, q2 = q.e;
+	if (ccw(p2, l, p1) < 0) std::swap(p1, p2);
+	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
+		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, 1);
+		else return Pos(0, 0);
+	}
+	Polygon tri = { p1, p2, l };
+	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
+	if (!in1 && !in2) return Pos(0, 0);
+	ld r1 = 0, r2 = 1;
+	if (in1 && in2) {
+		r1 = intersection(p, Seg(l, q1), WEAK);
+		r2 = intersection(p, Seg(l, q2), WEAK);
+	}
+	else if (in1) r1 = intersection(p, Seg(l, q1), WEAK);
+	else if (in2) r2 = intersection(p, Seg(l, q2), WEAK);
+	else r1 = r2 = 0;
+	if (r2 < r1) std::swap(r1, r2);
+	return Pos(r1, r2);
+}
+bool query() {
+	std::cin >> N;
+	if (!N) return 0;
+	ld t = 0;
+	Pos s, e; std::cin >> s >> e;
+	for (int n = 0; n < N; n++) {
+		P[n].resize(4);
+		for (Pos& p : P[n]) std::cin >> p;
+		norm(P[n]);
+		for (int i = 0; i < 4; i++) P[n][i].h = n, P[n][i].i = i;
+		cen[n] = (P[n][0] + P[n][2]) * .5;
+	}
+	const Polygon& P0 = P[0];
+	for (int n = 1; n < N; n++) {
+		int ir = -1, il = -1;
+		int jr = -1, jl = -1;
+		const Polygon& H = P[n];
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				int i0 = (i + 3) % 4, i1 = i, i2 = (i + 1) % 4;
+				int j0 = (j + 3) % 4, j1 = i, j2 = (j + 1) % 4;
+				if (ccw(H[j1], P0[i1], P0[i0]) <= 0
+					&& ccw(H[j1], P0[i1], P0[i2]) <= 0
+					&& ccw(P0[i1], H[j1], H[j0]) <= 0
+					&& ccw(P0[i1], H[j1], H[j2]) <= 0) {
+					il = i1;
+					jr = j1;
+				}
+				if (ccw(H[j1], P0[i1], P0[i0]) >= 0
+					&& ccw(H[j1], P0[i1], P0[i2]) >= 0
+					&& ccw(P0[i1], H[j1], H[j0]) >= 0
+					&& ccw(P0[i1], H[j1], H[j2]) >= 0) {
+					ir = i1;
+					jl = j1;
+				}
+			}
+		}
+		assert(ir != -1);
+		assert(il != -1);
+		assert(jr != -1);
+		assert(jl != -1);
+		Pos m = intersection(P0[ir], P0[il], H[jr], H[jl]);
+		Pos inx = get_pos(m, )
+	}
+	return 1;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	std::cin >> Q; while (Q--) query();
+	while (query());
 	return;
 }
 int main() { solve(); return 0; }//11465

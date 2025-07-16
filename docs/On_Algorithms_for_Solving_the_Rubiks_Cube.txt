@@ -1,0 +1,55 @@
+On Algorithms for Solving the Rubiks Cube
+
+Ahmad Kaleem and Ahsan Kaleem
+
+In this paper, we present a novel algorithm and its three variations for solving the Rubik’s cube more efﬁciently. This algorithm
+can be used to solve the complete n × n × n cube in O(n^2/log(n)) moves. This algorithm can also be useful in certain cases for
+speedcubers. We will prove that our algorithm always works and then perform a basic analysis on the algorithm to determine its algorithmic complexity of O(n^2). Finally, we further optimize this complexity to O(n^2/log(n)).
+
+I.  INTRODUCTION
+
+An n × n × n Rubik’s cube is composed of n3 cubies (1 × 1 × 1 cubes) each of which is located at a position (i, j, k) where i, j, k ∈ {0, 1, ..., n − 1}. Each cubie in a Rubik’s cube has a color on a face where there are a total of six faces on the cube with six unique colors. The six faces can be denoted by up, down, right, left, front and back which represents the position of the face with respect to the viewing angle. If the cube is placed right in front of you, the face right in front of you will be the front face and so on. A Rubik’s cube is solved when every cubie on each face is the same color as the rest of the cubies on that same face (i.e. each face is the same color). A slice on a Rubik’s cube is a set of cubies with a common x, y or z coordinate. A legal move consists of rotating one slice of the Rubik’s cube 90 degrees in either direction. A cubie cluster is a set of cubies on the cube such that any sequence of legal moves preserves the contents of the cluster (i.e. any cubie originally in the cluster always remains in the cluster while any cubie not in some cluster can never come to that speciﬁc cluster). There are 3 types of cubies on a Rubik’s cube: center cubies, edge cubies and corner cubies. A corner cubie is a cubie on the corner of a cube which has 3 different visible faces with three colors. An edge cubie is a cubie on the intersection of two faces of the cube and thus has two visible colors. Finally a center cubie is one in the center of the cube which is on only one face and thus has only one visible face. To refer to a speciﬁc corner cubie we use three letters which refer to the three faces on which this piece is located. As an example UFR refers to the corner cubie located at the intersection of the up, front and right face. To refer to a edge cubie, we use the two faces which it is on and the slice which it is on. For example, UFVi refers to the cubie on the up and front and the ith vertical slice. This also corresponds to the notation for moves which are mentioned below. To refer to a single center cubie, we use one face letter and two slices. For example FVi Hj refers to the cubie on the front face and the intersection of the ith vertical and jth horizontal slice. We also deﬁne the notation we will be using. Regular Rubik’s cube notation for face moves with letters representing each face is used along with more general notation in terms of slices is used. Both notations are shown more clearly in Fig. 1 and Fig. 2 below.
+
+A. Case 1 (Face Moves)
+In the ﬁrst case of our algorithm we use only face moves. We claim that the algorithm U R' D R U' R' D' R swaps three corner cubies while applying the identity permutation to all other cubie. More speciﬁcally, the corners DFL, UBR and UFR are swapped in that order i.e. DFL goes to UBR, UBR goes to UFR and UFR goes to DFL while all other cubies remain unaffected. It can also be represented by the permutation cycle: (DFL UBR UFR). This can be seen more clearly in Fig. 3.
+
+Proof. We clearly do not need to consider the cubies which are not affected by any of the U , R or D type moves since they will remain unaffected throughout the algorithm. We thus start by considering the three corner cubies to show that they are indeed cycled as desired. First consider the corner DFL. The ﬁrst move which affects it is D which moves it to DFR. Then R takes it to UFR, U 0  takes it to UBR, R  brings it back to UFR and then ﬁnally R takes it to UBR. Next, consider the corner UBR. It ﬁrst goes to UFR with a U move, then to DFR with R , DBR with D then back to DFR with a R, back to DBR with R , to DFR with a D  and then ﬁnally to UFR with an R. Finally consider the corner UFR as the algorithm is applied. It ﬁrst goes to UFL with a U move, then back to UFR with U , down to DFR with an R  and then ﬁnally to DFL with a D . We now prove that no other cubies are affected. Since in the algorithm, each move has its inverse present exactly once (e.g. for the U a U 0  move exists), the net effect on the remaining cubies is that of the identity move. It can be manually veriﬁed that each of the cubies other than DFL, UBR and UFR which are affected by at least one of the moves will be brought back to their original locations by the algorithm since each move will be canceled by its inverse. Since the size of the cube does not affect the algorithm (as only face moves are used) this algorithm will hold true for any n × n × n cube by testing on any one size such as a 3 × 3 × 3 which we have veriﬁed.
+
+B. Case 2 (Inner Layers)
+
+In the second case, we extend our algorithm to use inner layers. More speciﬁcally, we claim that the general algorithm
+H
+CW
+0
+o V CW
+CCW
+x         oH
+n−1
+o V CCW
+CCW
+x             oH
+0
+o V CW
+CW
+x         oH
+n−1
+o V CCW
+x             permutes three cubies while applying the identity
+permutation to the rest of the cubies. Here x can be any number from 0 to n − 1. In other words, any vertical layer can be rotated throughout the algorithm as long as it remains the same throughout. This time the cubies which are cycled are DLDn−x−1 , URDx and UFV . The permutation cycle is (DLDn−x−1 URDx UFVx ). So if x = n − 2, the cubies which
+x
+are permuted are edge cubies to the left by one piece relative to DFL, UBR and UFR. For simplicity in the proof below, we refer to these cubies as DFL , UBR  and UFR  respectively.
+Proof. We will only consider the cases when x is not equal to 0 or n − 1 since in this case all the moves are face moves which we have already considered in the Case 1. We ﬁrst prove that the cubies which are permuted are indeed permuted in such a way. First consider cubie DFL . It is unaffected by the ﬁrst two moves, then it goes to the front face, then the top,
+0
+0
+0
+0
+then to the top-right which is UBR  in this case and then remains there. Next consider the cubie UBR . It ﬁrst comes to the
+0
+0
+front face, then to the bottom, then to the right, then remains unaffected for the next three moves, then comes to the front
+and then to UFR  where it ends up. Finally consider the cubie UFR . It ﬁrst goes to the left face, then remains unaffected
+0
+0
+for the next three moves, then back to the front face, then to the bottom and then to DFL  where it ends up. Next we prove
+0
+that all other cubies are unaffected by this algorithm. Clearly the ones which are not moved at all by any of those moves are unaffected.

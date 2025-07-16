@@ -173,7 +173,6 @@ bool inner_check(Pos p0, Pos p1, Pos p2, const Pos& t) {
 	if (ccw(p0, p1, p2) < 0) std::swap(p1, p2);
 	return ccw(p0, p1, t) >= 0 && ccw(p1, p2, t) >= 0 && ccw(p2, p0, t) >= 0;
 }
-
 struct Pdd {
 	ld x, y;
 	Pdd(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
@@ -198,34 +197,108 @@ struct Pdd {
 	Pdd unit() const { return *this / mag(); }
 	ld rad() const { return atan2(y, x); }
 	friend ld rad(const Pdd& p1, const Pdd& p2) { return atan2l(p1 / p2, p1 * p2); }
-
 	friend std::istream& operator >> (std::istream& is, Pdd& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pdd& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pdd> Vpdd;
+Pdd conv(const Pos& p) { return Pdd(p.x, p.y); }
+ld cross(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return (d2 - d1) / (d3 - d2); }
+ld cross(const Pdd& d1, const Pdd& d2, const Pdd& d3, const Pdd& d4) { return (d2 - d1) / (d4 - d3); }
+int ccw(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return sign(cross(d1, d2, d3)); }
+int ccw(const Pdd& d1, const Pdd& d2, const Pdd& d3, const Pdd& d4) { return sign(cross(d1, d2, d3, d4)); }
+ld dot(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return (d2 - d1) * (d3 - d2); }
+ld dot(const Pdd& d1, const Pdd& d2, const Pdd& d3, const Pdd& d4) { return (d2 - d1) * (d4 - d3); }
+bool on_seg_strong(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) >= 0; }
+bool on_seg_weak(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return !ccw(d1, d2, d3) && sign(dot(d1, d3, d2)) > 0; }
+Pdd intersection(const Pdd& p1, const Pdd& p2, const Pdd& q1, const Pdd& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
+ld rad(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return rad(d2 - d1, d3 - d1); }
 Pdd centroid(const Vpdd& H) {
 	Pdd cen = Pdd(0, 0);
-	ld A = 0;
+	ld a = 0;
 	int sz = H.size();
 	for (int i = 0; i < sz; i++) {
-		ld a = H[i] / H[(i + 1) % sz];
-		cen += (H[i] + H[(i + 1) % sz]) * a;
-		A += a;
+		ld a0 = H[i] / H[(i + 1) % sz];
+		cen += (H[i] + H[(i + 1) % sz]) * a0;
+		a += a0;
 	}
-	A *= .5;
+	a *= .5;
 	cen /= 6;
-	if (!zero(A)) cen /= A;
+	if (!zero(a)) cen /= a;
 	return cen;
 }
-
+ld ternary_search(const Pdd& c, const Pdd& I0, const Pdd& I1, const Pdd& J0, const Pdd& J1, const ld& t = 0) {
+	ld l = INF;
+	int cnt = 50;
+	ld s = 0, e = rad(c, J0, J1);
+	Pdd v = J0 - c;
+	auto dist = [&](const ld& t) -> ld {
+		Pdd v1 = v.rot(norm(s + t));
+		Pdd I_ = intersection(c, v1, I0, I1);
+		Pdd J_ = intersection(c, v1, J0, J1);
+		return (I_ - J_).mag();
+		};
+	while (cnt--) {
+		ld t1 = (s + s + e) / 3;
+		ld t2 = (s + e + e) / 3;
+		ld l1 = dist(t1);
+		ld l2 = dist(t2);
+		l = std::min({ l, l1, l2 });
+		if (l1 < l2) e = t2;
+		else s = t1;
+	}
+	return l;
+}
 void query() {
 	std::cin >> N; Polygon H(N); for (Pos& p : H) std::cin >> p;
+	Vpdd P; for (Pos& p : H) P.push_back(conv(p));
+	A[0] = 0;
 	for (int i = 0; i < N; i++) A[i + 1] = A[i] + H[i] / H[(i + 1) % N];
-	//Pdd c = centroid(H);
+	Pdd c = centroid(P);
 	ld sh = INF, lg = -1;
-	for (int i = 0; i < N; i++) {
+	auto area_ = [&](const int& i, const int& j) -> ll {
+		if (i <= j) return A[j] - A[i] + H[j] / H[i];
+		ll a = A[i] - A[j] + H[i] / H[j];
+		return A[N] - a;
+		};
+	for (int i = 0, j = 1; i < N; i++) {
+		while (i != (j + 1) % N && (area_(i, (j + 1) % N) << 1) <= A[N])
+			j = (j + 1) % N;
+		int j1 = (j + 1) % N;
 
+		Pdd I0 = conv(H[i]), J0 = conv(H[j]), J1 = conv(H[j1]);
+		Pdd inx = intersection(c, I0, J0, J1);
+		ld l0 = (inx - I0).mag();
+		sh = std::min(sh, l0);
+		lg = std::max(lg, l0);
+
+		ll a0 = area_(i, j) << 1;
+
+		Pdd I1 = conv(H[(i + 1) % N]);
+		Pdd I_ = intersection(I0, I1, J1, c);
+		Pdd J_ = intersection(J0, J1, I0, c);
+		ld l1 = ternary_search(c, I0, I_, J_, J1);
+		sh = std::min(sh, l1);
+		lg = std::max(lg, l1);
+
+		I1 = conv(H[(i - 1 + N) % N]);
+		if (A[N] != a0) {
+			I_ = intersection(I1, I0, J0, c);
+			ld l2 = ternary_search(c, I_, I0, J0, J_);
+			sh = std::min(sh, l2);
+			lg = std::max(lg, l2);
+		}
+		else {
+			J1 = J0;
+			J0 = conv(H[(j - 1 + N) % N]);
+			I_ = intersection(I1, I0, J0, c);
+			J_ = intersection(J0, J1, I0, c);
+			ld l2 = ternary_search(c, I_, I0, J0, J_);
+			sh = std::min(sh, l2);
+			lg = std::max(lg, l2);
+		}
 	}
+	std::cout << sh << " " << lg << "\n";
+	return;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

@@ -289,16 +289,16 @@ Polygon sutherland_hodgman(const Polygon& C, const Polygon& clip) {
 }
 Pos centroid(const Polygon& H) {
 	Pos cen = Pos(0, 0);
-	ld A = 0;
+	ld a = 0;
 	int sz = H.size();
 	for (int i = 0; i < sz; i++) {
-		ld a = H[i] / H[(i + 1) % sz];
-		cen += (H[i] + H[(i + 1) % sz]) * a;
-		A += a;
+		ld tq = H[i] / H[(i + 1) % sz];
+		cen += (H[i] + H[(i + 1) % sz]) * tq;
+		a += tq;
 	}
-	A *= .5;
+	a *= .5;
 	cen /= 6;
-	if (!zero(A)) cen /= A;
+	if (!zero(a)) cen /= a;
 	return cen;
 }
 

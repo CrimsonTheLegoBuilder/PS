@@ -147,9 +147,6 @@
     <ClCompile Include="..\library\polygon_divide.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj11465_geo_sweeping.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
-    </ClCompile>
     <ClCompile Include="..\library\_geometry_int.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>

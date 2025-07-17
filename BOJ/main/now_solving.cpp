@@ -322,6 +322,7 @@ bool query() {
 		cen[n] = (P[n][0] + P[n][2]) * .5;
 	}
 	const Polygon& P0 = P[0];
+	Polygon R;
 	for (int n = 1; n < N; n++) {
 		int ir = -1, il = -1;
 		int jr = -1, jl = -1;
@@ -350,9 +351,20 @@ bool query() {
 		assert(il != -1);
 		assert(jr != -1);
 		assert(jl != -1);
-		Pos m = intersection(P0[ir], P0[il], H[jr], H[jl]);
-		Pos inx = get_pos(m, )
+		Pos m = intersection(P0[ir], H[jl], H[jr], P0[il]);
+		Pos JR = H[jr];
+		Pos JL = H[jl];
+		Pos inx = get_pos(m, Seg(s, e), Seg(JR, JL));
+		if (!eq(inx.x, inx.y)) R.push_back(inx);
 	}
+	ld hi = 0;
+	ld ratio = 0;
+	std::sort(R.begin(), R.end());
+	for (const Pos& r : R) {
+		if (r.LO > hi) ratio += (r.LO - hi), hi = r.HI;
+		else hi = std::max(hi, r.HI); 
+	}
+	std::cout << (s - e).mag() * ratio << "\n";
 	return 1;
 }
 void solve() {

@@ -18,38 +18,8 @@ Proof. We clearly do not need to consider the cubies which are not affected by a
 B. Case 2 (Inner Layers)
 
 In the second case, we extend our algorithm to use inner layers. More speciﬁcally, we claim that the general algorithm
-H
-CW
-0
-o V CW
-CCW
-x         oH
-n−1
-o V CCW
-CCW
-x             oH
-0
-o V CW
-CW
-x         oH
-n−1
-o V CCW
-x             permutes three cubies while applying the identity
-permutation to the rest of the cubies. Here x can be any number from 0 to n − 1. In other words, any vertical layer can be rotated throughout the algorithm as long as it remains the same throughout. This time the cubies which are cycled are DLDn−x−1 , URDx and UFV . The permutation cycle is (DLDn−x−1 URDx UFVx ). So if x = n − 2, the cubies which
-x
-are permuted are edge cubies to the left by one piece relative to DFL, UBR and UFR. For simplicity in the proof below, we refer to these cubies as DFL , UBR  and UFR  respectively.
-Proof. We will only consider the cases when x is not equal to 0 or n − 1 since in this case all the moves are face moves which we have already considered in the Case 1. We ﬁrst prove that the cubies which are permuted are indeed permuted in such a way. First consider cubie DFL . It is unaffected by the ﬁrst two moves, then it goes to the front face, then the top,
-0
-0
-0
-0
-then to the top-right which is UBR  in this case and then remains there. Next consider the cubie UBR . It ﬁrst comes to the
-0
-0
-front face, then to the bottom, then to the right, then remains unaffected for the next three moves, then comes to the front
-and then to UFR  where it ends up. Finally consider the cubie UFR . It ﬁrst goes to the left face, then remains unaffected
-0
-0
-for the next three moves, then back to the front face, then to the bottom and then to DFL  where it ends up. Next we prove
-0
-that all other cubies are unaffected by this algorithm. Clearly the ones which are not moved at all by any of those moves are unaffected.
+H_0^CW o V_x^CW o H_(n - 1)^CCW o V_x^CCW o H_0^CCW o V_x^CW o H_(n - 1)^CW o V_x^CCW permutes three cubies while applying the identity permutation to the rest of the cubies. Here x can be any number from 0 to n − 1. In other words, any vertical layer can be rotated throughout the algorithm as long as it remains the same throughout. This time the cubies which are cycled are DLDn−x−1 , URDx and UFV . The permutation cycle is (DLDn−x−1 URDx UFVx ). So if x = n − 2, the cubies which x are permuted are edge cubies to the left by one piece relative to DFL, UBR and UFR. For simplicity in the proof below, we refer to these cubies as DFL , UBR  and UFR  respectively.
+
+Proof. We will only consider the cases when x is not equal to 0 or n − 1 since in this case all the moves are face moves which we have already considered in the Case 1. We ﬁrst prove that the cubies which are permuted are indeed permuted in such a way. First consider cubie DFL . It is unaffected by the ﬁrst two moves, then it goes to the front face, then the top, then to the top-right which is UBR  in this case and then remains there. Next consider the cubie UBR . It ﬁrst comes to the front face, then to the bottom, then to the right, then remains unaffected for the next three moves, then comes to the front and then to UFR  where it ends up. Finally consider the cubie UFR . It ﬁrst goes to the left face, then remains unaffected for the next three moves, then back to the front face, then to the bottom and then to DFL  where it ends up. Next we prove that all other cubies are unaffected by this algorithm. Clearly the ones which are not moved at all by any of those moves are unaffected.
+
+We thus consider the cubies which are affected by at least one of the moves. First consider a cubie which is affected by only one type of move (e.g. the center pieces). Since the algorithm has an inverse move present for every move, the net effect of applying the algorithm will be the identity permutation since only one type of move ever affects it and that type of move gets reversed by its inverse which is present as we showed in case 1. For example if a cubie is only affected by Vx  moves, the algorithm becomes V_x^CW o V_x^CCW o V_x^CW o V_x^CCW o, V_x^CW o V_x^CCW or  V_x^CCW o V_x^CW which are all equal to the identity permutation since the moves are canceled out by their inverse.

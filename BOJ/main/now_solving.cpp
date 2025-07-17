@@ -285,8 +285,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	freopen("../../tests/train.in", "r", stdin);
-	freopen("../../tests/train.txt", "w", stdout);
+	//freopen("../../tests/train.in", "r", stdin);
+	//freopen("../../tests/train.txt", "w", stdout);
 	while (query());
 	return;
 }

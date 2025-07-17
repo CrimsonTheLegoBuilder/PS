@@ -354,7 +354,7 @@ bool query() {
 		Pos m = intersection(P0[ir], H[jl], H[jr], P0[il]);
 		Pos JR = H[jr];
 		Pos JL = H[jl];
-		Pos inx = get_pos(m, Seg(s, e), Seg(JR, JL));
+		Pos inx = get_pos(m, Seg(s, e), Seg(JL, JR));
 		if (!eq(inx.x, inx.y)) R.push_back(inx);
 	}
 	ld hi = 0;

@@ -1,2 +1,3 @@
-a = input()
-print(a if a[0] == '"' and a[-1] == '"' else "CE")
+n, m, k = map(int, input().split())
+t = m * k
+print(m + t)

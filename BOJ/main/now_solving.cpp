@@ -9,12 +9,19 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 
-int N, M;
+int Q, N, M, P, a, b, s, t;
 int main() { 
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
-	for (int _ = 0; _ < 4; _++) std::cin >> N, M += N;
-	if (M <= 1500) std::cout << "Yes\n";
-	else std::cout << "No\n";
+	std::cout << std::fixed;
+	std::cout.precision(2);
+	std::cin >> M >> a >> b;
+	a--; b--;
+	t = 0;
+	while (a != b) {
+		a++; t++;
+		a = a % M;
+	}
+	std::cout << t << "\n";
 	return 0;
 }

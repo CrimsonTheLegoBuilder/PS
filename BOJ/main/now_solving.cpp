@@ -10,7 +10,7 @@ typedef long long ll;
 typedef double ld;
 
 int Q, N, M, Y, K, P, C, L, T;
-ll a, d, c, g, b, s, t, x, y, w1, h1, w2, h2;
+ll a, d, c, g, b, s, t, x, y, w, l, h;
 int q1, q2, q3, q4, q0;
 char B[1001];
 int main() { 
@@ -18,10 +18,11 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> w1 >> h1 >> w2 >> h2;
-	T = 0;
-	T += h1 + h2;
-	T += std::max(w1, w2);
-	std::cout << (T << 1) + 4 << "\n";
+	std::cin >> w >> l >> h;
+	if (w < l) std::swap(w, l);
+	bool f = 1;
+	if (l < h + h) f = 0;
+	if (w > l + l) f = 0;
+	std::cout << (f ? "good\n" : "bad\n");
 	return 0;
 }

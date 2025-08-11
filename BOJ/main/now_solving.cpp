@@ -9,17 +9,18 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 
-int Q, N, M, Y, K, P, C, L, T, n, m, k, wc, hc, ws, hs;
-ll a, d, c, g, b, s, t, x, y, w, l, h, p, q;
-int q1, q2, q3, q4, q0;
+int Q, N, M, K;
+int q1, q2, q3, q4, q0, n[3];
 char B[1001];
 int main() { 
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	ll vk, jk, vl, jl, vh, dh, jh;
-	std::cin >> vk >> jk >> vl >> jl >> vh >> dh >> jh;
-	std::cout << (vk * jk + vl * jl) * vh * dh * jh << "\n";
+	std::cin >> n[0] >> n[1] >> n[2];
+	std::sort(n, n + 3);
+	if (n[0] + n[1] == n[2]) std::cout << "1\n";
+	else if (n[0] * n[1] == n[2]) std::cout << "2\n";
+	else std::cout << "3\n";
 	return 0;
 }

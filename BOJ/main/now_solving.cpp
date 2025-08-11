@@ -9,7 +9,7 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 
-int Q, N, M, Y, K, P, C, L, T, n, m, k;
+int Q, N, M, Y, K, P, C, L, T, n, m, k, wc, hc, ws, hs;
 ll a, d, c, g, b, s, t, x, y, w, l, h, p, q;
 int q1, q2, q3, q4, q0;
 char B[1001];
@@ -18,9 +18,8 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> a >> b >> c;
-	n = b - a;
-	m = c - b;
-	std::cout << std::max(std::max(n, m) - 1, 0) << "\n";
+	ll vk, jk, vl, jl, vh, dh, jh;
+	std::cin >> vk >> jk >> vl >> jl >> vh >> dh >> jh;
+	std::cout << (vk * jk + vl * jl) * vh * dh * jh << "\n";
 	return 0;
 }

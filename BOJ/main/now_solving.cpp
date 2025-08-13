@@ -18,14 +18,11 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N >> B;
-	for (int i = 0; i < N; i++) {
-		if (B[i] == 'N') H++;
-		if (B[i] == 'S') H--;
-		if (B[i] == 'E') W++;
-		if (B[i] == 'W') W--;
-
-	}
-	std::cout << std::abs(W) + std::abs(H) << "\n";
+	std::cin >> N;
+	N--;
+	M = N / 8;
+	K = N % 8;
+	std::cout << char(97 + K);
+	std::cout << M + 1 << "\n";
 	return 0;
 }

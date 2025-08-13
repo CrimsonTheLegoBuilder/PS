@@ -18,11 +18,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	N--;
-	M = N / 8;
-	K = N % 8;
-	std::cout << char(97 + K);
-	std::cout << M + 1 << "\n";
+	std::cin >> N >> K >> a >> b;
+	W = (N - 1) * a;
+	T = (K - 1 + N - 1) * b;
+	std::cout << T << " " << W << "\n";
 	return 0;
 }

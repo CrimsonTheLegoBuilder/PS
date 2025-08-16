@@ -10,8 +10,7 @@ typedef long long ll;
 typedef double ld;
 
 int Q, N, M, K, a, b, c, T, W, H, s, o;
-int q1, q2, q3, q4, q0, n[3], g, p ,t, A, I;
-char B[2001][2001];
+int q1, q2, q3, q4, q0, n[3], g, p ,t, A, B, C, D, P, I;
 int ret[2001];
 std::string S;
 int main() { 
@@ -19,41 +18,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N >> M;
-	ret[1] = 0;
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < M; j++) {
-			std::cin >> B[i][j];
-			if (B[i][j] == 'X') ret[1]++;
-		}
-	}
-	for (int k = 1; k < std::min(N, M); k++) {
-		//std::cout << "k:: " << k << "\n";
-		for (int i = 0; i < N - k; i++) {
-			for (int j = 0; j < M - k; j++) {
-				bool f = 1;
-				for (int l = 0; l <= k; l++) {
-					if (B[i + l][j + l] != 'X') f = 0;
-				}
-				if (f) {
-					int f0 = 1;
-					for (int n = i; n <= i + k; n++) {
-						for (int m = j; m <= j + k; m++) {
-							if (n - i == m - j) continue;
-							if (B[n][m] != '.') {
-								f0 = 0;
-								break;
-							}
-						}
-						if (!f0) break;
-					}
-					if (f0) ret[k + 1]++;
-				}
-			}
-		}
-	}
-	for (int i = 1; i <= std::min(N, M); i++) {
-		std::cout << ret[i] << "\n";
-	}
+	std::cin >> A >> B >> C >> D >> P;
+	a = A * P;
+	b = B + (std::max(0, P - C)) * D;
+	std::cout << std::min(a, b) << "\n";
 	return 0;
 }

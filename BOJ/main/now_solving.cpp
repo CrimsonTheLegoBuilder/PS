@@ -10,17 +10,25 @@ typedef long long ll;
 typedef double ld;
 
 int Q, N, M, K, a, b, c, T, W, H, L, s, o;
-int q1, q2, q3, q4, q0, n[3], g, p ,t, A, B, C, D, P, I;
+int q1, q2, q3, q4, q0, n[3], g,t, A, B, C, D, P, I;
 int F[2001];
+ld p, p0, X, Y;
 std::string S;
-int main() { 
+int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(2);
-	std::cin >> W >> H >> N >> A >> B;
-	if (W < A || H < B) { std::cout << "-1\n"; return 0; }
-	T = (W / A) * (H / B);
-	std::cout << (N / T) + (!(N % T) ? 0 : 1) << "\n";
+	std::cout.precision(13);
+	std::cin >> N;
+	ll Q = 1;
+	for (int _ = 0; _ <= 30; _++) {
+		if (N == Q) {
+			std::cout << "1\n";
+			return 0;
+		}
+		Q <<= 1;
+		//std::cout << Q << "\n";
+	}
+	std::cout << "0\n";
 	return 0;
 }

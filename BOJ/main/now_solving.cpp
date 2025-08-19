@@ -20,18 +20,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> A >> B >> C;
-	F[0] = A;
-	F[1] = B;
-	F[2] = C;
-	F[3] = A * B;
-	F[4] = B * C;
-	F[5] = C * A;
-	F[6] = A * B * C;
-	std::sort(F, F + 7);
-	for (int i = 6; i > -1; i--) {
-		if (F[i] & 1) { std::cout << F[i] << "\n"; return 0; }
-	}
-	std::cout << F[6] << "\n";
+	std::cin >> N;
+	if (N == 1 || N == 2) std::cout << 4 << "\n";
+	else if (N & 1) std::cout << N + 1;
+	else std::cout << N << "\n";
 	return 0;
 }

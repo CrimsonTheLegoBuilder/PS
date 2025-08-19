@@ -20,9 +20,16 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	if (N == 1 || N == 2) std::cout << 4 << "\n";
-	else if (N & 1) std::cout << N + 1;
-	else std::cout << N << "\n";
+	std::cin >> a >> b;
+	T = 1;
+	A = 0;
+	B = 0;
+	for (int i = 1; i <= a; i++) A += i;
+	for (int i = a + 1; i <= b + 1; i++) {
+		T *= A;
+		T %= 14579;
+		A += i;
+	}
+	std::cout << T << "\n";
 	return 0;
 }

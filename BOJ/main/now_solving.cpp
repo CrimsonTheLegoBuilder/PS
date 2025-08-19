@@ -20,16 +20,14 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> a >> b;
-	T = 1;
-	A = 0;
-	B = 0;
-	for (int i = 1; i <= a; i++) A += i;
-	for (int i = a + 1; i <= b + 1; i++) {
-		T *= A;
-		T %= 14579;
-		A += i;
+	std::cin >> N;
+	F[1] = 1;
+	while (N--) {
+		std::cin >> a >> b;
+		std::swap(F[a], F[b]);
 	}
-	std::cout << T << "\n";
+	for (int i = 1; i <= 3; i++) {
+		if (F[i]) std::cout << i << "\n";
+	}
 	return 0;
 }

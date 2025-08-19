@@ -11,8 +11,9 @@ typedef double ld;
 const ld PI = acos(-1);
 
 int Q, N, M, K, a, b, c, T, W, H, L, s, o;
-int q1, q2, q3, q4, q0, A, B, C, D, E, P, S, I;
+int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 int F[8];
+char S[15];
 //ld p, p0, X, Y, D, A, B, F;
 //std::string S;
 int main() {
@@ -20,14 +21,16 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	F[1] = 1;
+	N = 5;
+	T = 1;
 	while (N--) {
-		std::cin >> a >> b;
-		std::swap(F[a], F[b]);
+		std::cin >> S;
+		for (int i = 0; i <= 10; i++) {
+			if (S[i + 2] == '\0') break;
+			if (S[i] == 'F' && S[i + 1] == 'B' && S[i + 2] == 'I') std::cout << T << " ", M++;
+		}
+		T++;
 	}
-	for (int i = 1; i <= 3; i++) {
-		if (F[i]) std::cout << i << "\n";
-	}
+	if (!M) std::cout << "HE GOT AWAY!\n";
 	return 0;
 }

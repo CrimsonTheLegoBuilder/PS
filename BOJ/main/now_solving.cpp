@@ -20,17 +20,14 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(2);
-	N = 5;
-	T = 1;
+	std::cout.precision(4);
+	std::cin >> N;
+	ld t = 0;
 	while (N--) {
-		std::cin >> S;
-		for (int i = 0; i <= 10; i++) {
-			if (S[i + 2] == '\0') break;
-			if (S[i] == 'F' && S[i + 1] == 'B' && S[i + 2] == 'I') std::cout << T << " ", M++;
-		}
-		T++;
+		ld q, y;
+		std::cin >> q >> y;
+		t += q * y;
 	}
-	if (!M) std::cout << "HE GOT AWAY!\n";
+	std::cout << t << "\n";
 	return 0;
 }

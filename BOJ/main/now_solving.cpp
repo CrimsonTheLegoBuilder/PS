@@ -13,7 +13,7 @@ const ld PI = acos(-1);
 const ll MOD = 998244353;
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, s, o;
-int q1, q2, q3, q4, q0, A[100], B[100], C, D, E, P, I;
+int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 int F[5];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
@@ -30,12 +30,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	if (N > 198) { std::cout << "0\n"; return 0; }
-	for (int i = 0; i <= std::min(99, N); i++) {
-		K = N - i;
-		if (K < 100) T++;
+	while (1) {
+		std::cin >> A >> B >> C >> D;
+		if (!A && !B && !C && !D) break;
+		if (!A) std::cout << D / (B * C) << " " << B << " " << C << " " << D << "\n";
+		if (!B) std::cout << A << " " << D / (A * C) << " " << C << " " << D << "\n";
+		if (!C) std::cout << A << " " << B << " " << D / (A * B) << " " << D << "\n";
+		if (!D) std::cout << A << " " << B << " " << C << " " << A * B * C << "\n";
 	}
-	std::cout << T << "\n";
 	return 0;
 }

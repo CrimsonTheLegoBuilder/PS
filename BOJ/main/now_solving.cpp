@@ -30,8 +30,17 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N >> M >> K;
-	N -= M * K;
-	std::cout << std::max(N, 0) << " " << N + M - 1 << "\n";
+	std::cin >> N;
+	while (1) {
+		M = N;
+		T = 0;
+		while (M) {
+			T += M % 10;
+			M /= 10;
+		}
+		if (!(N % T)) break;
+		N++;
+	}
+	std::cout << N << "\n";
  	return 0;
 }

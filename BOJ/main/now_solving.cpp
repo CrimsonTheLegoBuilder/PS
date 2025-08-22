@@ -30,10 +30,8 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> A >> B;
-	N = ((-A) - sqrt(A * A - B));
-	M = ((-A) + sqrt(A * A - B));
-	if (N == M) std::cout << N << "\n";
-	else std::cout << N << " " << M << "\n";
+	std::cin >> N >> M >> K;
+	N -= M * K;
+	std::cout << std::max(N, 0) << " " << N + M - 1 << "\n";
  	return 0;
 }

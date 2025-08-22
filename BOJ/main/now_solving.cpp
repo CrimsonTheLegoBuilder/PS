@@ -13,7 +13,7 @@ const ld PI = acos(-1);
 const ll MOD = 998244353;
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, s, o;
-int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
+int q1, q2, q3, q4, q0, A[100], B[100], C[100], D, E, P, I;
 int F[105];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
@@ -30,9 +30,19 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> A >> B >> C;
-	if (!A) std::cout << C * C - B << "\n";
-	if (!B) std::cout << C * C - A << "\n";
-	if (!C) std::cout << (int)(sqrt(A + B) + 1e-6) << "\n";	
+	std::cin >> Q;
+	while (Q--) {
+		std::cin >> M;
+		for (int i = 0; i < M; i++) {
+			std::cin >> A[i] >> B[i] >> C[i];
+		}
+		std::cin >> a >> b >> c;
+		T = 0;
+		for (int i = 0; i < M; i++) {
+			int t = A[i] * a - B[i] * b + C[i] * c;
+			if (t > 0) T += t;
+		}
+		std::cout << T << "\n";
+	}
  	return 0;
 }

@@ -30,17 +30,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	while (1) {
-		M = N;
-		T = 0;
-		while (M) {
-			T += M % 10;
-			M /= 10;
-		}
-		if (!(N % T)) break;
-		N++;
-	}
-	std::cout << N << "\n";
+	std::cin >> A >> B >> C;
+	if (!A) std::cout << C * C - B << "\n";
+	if (!B) std::cout << C * C - A << "\n";
+	if (!C) std::cout << (int)(sqrt(A + B) + 1e-6) << "\n";	
  	return 0;
 }

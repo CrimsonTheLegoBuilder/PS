@@ -14,7 +14,7 @@ const ll MOD = 998244353;
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, s, o;
 int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
-int F[5];
+int F[105];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
 std::string S[101];
@@ -30,13 +30,10 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	while (1) {
-		std::cin >> A >> B >> C >> D;
-		if (!A && !B && !C && !D) break;
-		if (!A) std::cout << D / (B * C) << " " << B << " " << C << " " << D << "\n";
-		if (!B) std::cout << A << " " << D / (A * C) << " " << C << " " << D << "\n";
-		if (!C) std::cout << A << " " << B << " " << D / (A * B) << " " << D << "\n";
-		if (!D) std::cout << A << " " << B << " " << C << " " << A * B * C << "\n";
-	}
-	return 0;
+	std::cin >> A >> B;
+	N = ((-A) - sqrt(A * A - B));
+	M = ((-A) + sqrt(A * A - B));
+	if (N == M) std::cout << N << "\n";
+	else std::cout << N << " " << M << "\n";
+ 	return 0;
 }

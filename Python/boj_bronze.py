@@ -1,15 +1,10 @@
-A, B, C = map(int, input().split())
-assert A <= B <= C
-D = (A + B + C) // 3
-assert D * 3 == A + B + C
-T = 0
-if D == B:
-    T = (C - D) * 2
-elif D < B:
-    T = B - D
-    T += (C - D) * 2
-elif D > B:
-    T = D - B
-    C -= T
-    T += (C - D) * 2
-print(T)
+Y, M, D = map(int, input().split('-'))
+N = int(input())
+D += N
+if D > 30:
+    M += 1
+    D -= 30
+if M > 12:
+    Y += 1
+    M -= 12
+print(f"{Y}-{M:02}-{D:02}")

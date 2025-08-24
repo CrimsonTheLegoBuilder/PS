@@ -1,10 +1,20 @@
-Y, M, D = map(int, input().split('-'))
 N = int(input())
-D += N
-if D > 30:
-    M += 1
-    D -= 30
-if M > 12:
-    Y += 1
-    M -= 12
-print(f"{Y}-{M:02}-{D:02}")
+for i in range(N):
+    print(f"Case {i + 1}: ", end='')
+    S = input()
+    parts = S.split()
+    a = int(parts[0])
+    b = int(parts[2])
+    c = int(parts[4])
+    if '+' in S:
+        d = a + b
+        if d == c:
+            print("YES")
+        else:
+            print("NO")
+    else:
+        d = a - b
+        if d == c:
+            print("YES")
+        else:
+            print("NO")

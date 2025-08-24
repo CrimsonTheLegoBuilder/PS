@@ -31,13 +31,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(1);
+	ll N, T, K;
 	std::cin >> N;
-	while (N--) {
-		std::cin >> M;
-		K = M % 10;
-		M /= 10;
-		T += pow_mod(M, K);
-	}
-	std::cout << T << "\n";
+	while (N--) std::cin >> K, T += K;
+	std::cout << (!(T % 3) ? "yes\n" : "no\n");
  	return 0;
 }

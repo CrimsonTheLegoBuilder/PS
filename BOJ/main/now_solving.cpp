@@ -10,14 +10,15 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 const ld PI = acos(-1);
-const ll MOD = 998244353;
+const ll MOD = 1e9 + 7;
 
-int Q, N, M, K, a, b, c, d, T, W, H, L, R, s, o;
-int q1, q2, q3, q4, q0, A[100], B[100], C[100], D, E, P, I;
+int Q, N, M, K, a, b, c, d, T, W, H, L, R, o;
+int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 int F[105];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-std::string S[101];
+//std::string S;
+int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
 	ll h = pow_mod(N, K / 2);
@@ -29,20 +30,14 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(2);
-	std::cin >> Q;
-	while (Q--) {
+	std::cout.precision(1);
+	std::cin >> N;
+	while (N--) {
 		std::cin >> M;
-		for (int i = 0; i < M; i++) {
-			std::cin >> A[i] >> B[i] >> C[i];
-		}
-		std::cin >> a >> b >> c;
-		T = 0;
-		for (int i = 0; i < M; i++) {
-			int t = A[i] * a - B[i] * b + C[i] * c;
-			if (t > 0) T += t;
-		}
-		std::cout << T << "\n";
+		K = M % 10;
+		M /= 10;
+		T += pow_mod(M, K);
 	}
+	std::cout << T << "\n";
  	return 0;
 }

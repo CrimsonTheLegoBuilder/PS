@@ -12,7 +12,7 @@ typedef double ld;
 const ld PI = acos(-1);
 const ll MOD = 1e9 + 7;
 
-int Q, N, M, K, a, b, c, d, T, W, H, L, R, o;
+int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 int F[105];
 int X;
@@ -30,10 +30,12 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(1);
-	ll N, T, K;
+	std::cout.precision(10);
 	std::cin >> N;
-	while (N--) std::cin >> K, T += K;
-	std::cout << (!(T % 3) ? "yes\n" : "no\n");
+	for (int i = 1; i <= N; i++) {
+		std::cin >> H >> B >> K;
+		T += std::max(B - H, 0) * K;
+	}
+	std::cout << T << "\n";
  	return 0;
 }

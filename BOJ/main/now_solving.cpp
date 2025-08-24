@@ -17,8 +17,8 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 int F[105];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-//std::string S;
-int S;
+std::string S;
+//int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
 	ll h = pow_mod(N, K / 2);
@@ -31,10 +31,11 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(10);
-	std::cin >> N;
-	for (int i = 1; i <= N; i++) {
-		std::cin >> H >> B >> K;
-		T += std::max(B - H, 0) * K;
+	std::cin >> A >> B;
+	ll T = 1;
+	A -= 2;
+	for (int i = 1; i <= B; i++) {
+		T += A * i + 1;
 	}
 	std::cout << T << "\n";
  	return 0;

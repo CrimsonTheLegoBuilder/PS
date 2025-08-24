@@ -14,7 +14,7 @@ const ll MOD = 1e9 + 7;
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
-int F[105];
+ll F[1000005];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
 std::string S;
@@ -31,12 +31,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(10);
-	std::cin >> A >> B;
-	ll T = 1;
-	A -= 2;
-	for (int i = 1; i <= B; i++) {
-		T += A * i + 1;
+	std::cin >> N;
+	while (N--) {
+		std::cin >> a >> b;
+		if (a == b) A += a, B += b;
+		if (a > b) A += a + b;
+		if (a < b) B += a + b;
 	}
-	std::cout << T << "\n";
+	std::cout << A << " " << B << "\n";
  	return 0;
 }

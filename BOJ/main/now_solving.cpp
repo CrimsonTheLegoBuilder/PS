@@ -33,9 +33,23 @@ int main() {
 	std::cout.precision(1);
 	std::cin >> T;
 	while (T--) {
-		std::cin >> P >> Q;
-		ld f = 1. / P + 1. / Q;
-		std::cout << "f = " << 1. / f << "\n";
+		ll a, b, c;
+		ll u, v, w;
+		std::cin >> F[0] >> F[1] >> F[2];
+		std::sort(F, F + 3);
+		a = F[0];
+		b = F[1];
+		c = F[2];
+		std::cin >> F[0] >> F[1] >> F[2];
+		std::sort(F, F + 3);
+		u = F[0];
+		v = F[1];
+		w = F[2];
+		if (a != u || b != v || c != w) std::cout << "NO\n";
+		else {
+			if (c * c == a * a + b * b) std::cout << "YES\n";
+			else std::cout << "NO\n";
+		}
 	}
 	return 0;
 }

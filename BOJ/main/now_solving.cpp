@@ -31,13 +31,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(10);
-	std::cin >> N;
-	while (N--) {
-		std::cin >> a >> b;
-		if (a == b) A += a, B += b;
-		if (a > b) A += a + b;
-		if (a < b) B += a + b;
-	}
-	std::cout << A << " " << B << "\n";
+	ld X, Y;
+	std::cin >> N >> X;
+	Y = N * (100 - X) / 100.;
+	std::cout << (N / Y - 1) * 100 << "\n";
  	return 0;
 }

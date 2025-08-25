@@ -31,9 +31,17 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(10);
-	ld X, Y;
-	std::cin >> N >> X;
-	Y = N * (100 - X) / 100.;
-	std::cout << (N / Y - 1) * 100 << "\n";
+	std::cin >> N;
+	T = 0;
+	for (int i = 0; i < N; i++) {
+		std::cin >> S;
+		for (int j = 0; j < 13; j++) {
+			if (S[j] == 'A') T += 4;
+			if (S[j] == 'K') T += 3;
+			if (S[j] == 'Q') T += 2;
+			if (S[j] == 'J') T += 1;
+		}
+	}
+	std::cout << T << "\n";
  	return 0;
 }

@@ -1,20 +1,13 @@
-N = int(input())
-for i in range(N):
-    print(f"Case {i + 1}: ", end='')
-    S = input()
-    parts = S.split()
-    a = int(parts[0])
-    b = int(parts[2])
-    c = int(parts[4])
-    if '+' in S:
-        d = a + b
-        if d == c:
-            print("YES")
-        else:
-            print("NO")
-    else:
-        d = a - b
-        if d == c:
-            print("YES")
-        else:
-            print("NO")
+while 1:
+    try:
+        N = list(map(int, input().split()))
+        for i in range(len(N)):
+            k = N[i]
+            if i > 0:
+                k *= N[i - 1]
+            if i < len(N) - 1:
+                k *= N[i + 1]
+            print(k, end=' ')
+        # print()
+    except EOFError:
+        break

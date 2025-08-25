@@ -30,10 +30,12 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(10);
-	std::cin >> N;
-	for (int i = 0; i < 31; i++) {
-		if ((1 << i) & N) std::cout << i << " ";
+	std::cout.precision(1);
+	std::cin >> T;
+	while (T--) {
+		std::cin >> P >> Q;
+		ld f = 1. / P + 1. / Q;
+		std::cout << "f = " << 1. / f << "\n";
 	}
- 	return 0;
+	return 0;
 }

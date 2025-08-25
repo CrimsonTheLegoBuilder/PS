@@ -31,15 +31,15 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(1);
-	std::cin >> T;
-	ll J = 0, j = 0, m = 0;
-	while (T--) {
-		std::cin >> S >> N;
-		if (S == "J") j++, J += N;
-		if (S == "M") m++, M += N;
+	ll x0, y0, x1, y1, k;
+	std::cin >> N >> k >> x0 >> y0;
+	T = 0;
+	k = k * k;
+	for (int i = 0; i < N; i++) {
+		std::cin >> x1 >> y1;
+		ll D = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
+		if (D > k) T++;
 	}
-	if (J * m == M * j) std::cout << "V\n";
-	else if (J * m > M * j) std::cout << "J\n";
-	//else if (J * m < M * j) std::cout << "M\n";
+	std::cout << T << "\n";
 	return 0;
 }

@@ -32,16 +32,8 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(10);
 	std::cin >> N;
-	T = 0;
-	for (int i = 0; i < N; i++) {
-		std::cin >> S;
-		for (int j = 0; j < 13; j++) {
-			if (S[j] == 'A') T += 4;
-			if (S[j] == 'K') T += 3;
-			if (S[j] == 'Q') T += 2;
-			if (S[j] == 'J') T += 1;
-		}
+	for (int i = 0; i < 31; i++) {
+		if ((1 << i) & N) std::cout << i << " ";
 	}
-	std::cout << T << "\n";
  	return 0;
 }

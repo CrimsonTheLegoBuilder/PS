@@ -33,22 +33,25 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(2);
-	while (1) {
-		std::cin >> N;
-		if (!N) break;
-		if (N <= 5) { std::cout << N << " DEFICIENT\n"; continue; }
-		M = sqrt(N) + 1;
-		T = 1;
-		//std::cout << "M:: " << M << "\n";
-		for (int i = 2; i < M; i++) {
-			if (!(N % i) && i != (N / i)) T += i, T += N / i;
-			else if (!(N % i)) T += i;
-		}
-		//std::cout << "N:: " << N << " T:: " << T << "\n";
-		if (N == T) std::cout << "PERFECT\n";
-		else if (N < T) std::cout << "ABUNDANT\n";
-		else std::cout << "DEFICIENT\n";
+	std::cout.precision(12);
+	std::cin >> Q;
+	int I[7] = { 2, 3, 4, 5, 6, 7, 2 };
+	T = 0;
+	for (int i = 0; i < 7; i++) {
+		T += (Q % 10) * I[i];
+		Q /= 10;
 	}
+	//N = T % 11;
+	if (N == 0) std::cout << "J\n";
+	if (N == 1) std::cout << "A\n";
+	if (N == 2) std::cout << "B\n";
+	if (N == 3) std::cout << "C\n";
+	if (N == 4) std::cout << "D\n";
+	if (N == 5) std::cout << "E\n";
+	if (N == 6) std::cout << "F\n";
+	if (N == 7) std::cout << "G\n";
+	if (N == 8) std::cout << "H\n";
+	if (N == 9) std::cout << "I\n";
+	if (N == 10) std::cout << "Z\n";
 	return 0;
 }

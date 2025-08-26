@@ -34,17 +34,21 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	std::cin >> N;
-	T = 0;
-	int t = 0;
-	P = 0;
-	for (int i = 0; i < N; i++) {
-		std::cin >> A >> B;
-		if (B) {
-			T = std::max(T, A - P);
-			P = A;
+	while (1) {
+		std::cin >> N;
+		if (!N) break;
+		if (N <= 5) { std::cout << N << " DEFICIENT\n"; continue; }
+		M = sqrt(N) + 1;
+		T = 1;
+		//std::cout << "M:: " << M << "\n";
+		for (int i = 2; i < M; i++) {
+			if (!(N % i) && i != (N / i)) T += i, T += N / i;
+			else if (!(N % i)) T += i;
 		}
+		//std::cout << "N:: " << N << " T:: " << T << "\n";
+		if (N == T) std::cout << "PERFECT\n";
+		else if (N < T) std::cout << "ABUNDANT\n";
+		else std::cout << "DEFICIENT\n";
 	}
-	std::cout << T << "\n";
 	return 0;
 }

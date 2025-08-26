@@ -31,13 +31,9 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	ld p[3]; std::cin >> p[0] >> p[1] >> p[2];
-	std::sort(p, p + 3);
-	std::cin >> A >> B >> C;
-	ld p1 = (p[0] + p[1] + p[2]) * A / 100.;
-	if (B > C) std::swap(B, C);
-	ld p2 = p[1] * B / 100. + p[2] * C / 100.;
-	if (p1 > p2) std::cout << "one " << p1 << "\n";
-	else std::cout << "two " << p2 << "\n";
+	int f;
+	std::cin >> R >> f;
+	f %= (R + R);
+	//std::cout << (f * 2 > R ? "down\n" : "up\n");
 	return 0;
 }

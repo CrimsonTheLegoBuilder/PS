@@ -30,12 +30,15 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(1);
-	std::cin >> S >> S0;
-	T = 1;
-	for (int i = 0; i < 4; i++) {
-		if (S[i] != S0[i]) T *= 2;
+	std::cout.precision(3);
+	std::cin >> N;
+	while (N--) {
+		ld a, b, c;
+		std::cin >> a >> b >> c;
+		ld a1 = (-b + sqrt(b * b - 4 * a * c)) / (2 * a);
+		ld a2 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
+		if (a1 < a2) std::swap(a1, a2);
+		std::cout << a1 << " " << a2 << "\n";
 	}
-	std::cout << T << "\n";
 	return 0;
 }

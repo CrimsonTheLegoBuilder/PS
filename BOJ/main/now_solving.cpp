@@ -30,15 +30,14 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(3);
-	std::cin >> N;
-	while (N--) {
-		ld a, b, c;
-		std::cin >> a >> b >> c;
-		ld a1 = (-b + sqrt(b * b - 4 * a * c)) / (2 * a);
-		ld a2 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
-		if (a1 < a2) std::swap(a1, a2);
-		std::cout << a1 << " " << a2 << "\n";
-	}
+	std::cout.precision(2);
+	ld p[3]; std::cin >> p[0] >> p[1] >> p[2];
+	std::sort(p, p + 3);
+	std::cin >> A >> B >> C;
+	ld p1 = (p[0] + p[1] + p[2]) * A / 100.;
+	if (B > C) std::swap(B, C);
+	ld p2 = p[1] * B / 100. + p[2] * C / 100.;
+	if (p1 > p2) std::cout << "one " << p1 << "\n";
+	else std::cout << "two " << p2 << "\n";
 	return 0;
 }

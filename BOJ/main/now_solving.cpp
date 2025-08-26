@@ -7,18 +7,21 @@
 #include <cassert>
 #include <vector>
 typedef long long ll;
-//typedef long double ld;
-typedef double ld;
+typedef long double ld;
+//typedef double ld;
 const ld PI = acos(-1);
+const ld TOL = 1e-9;
 const ll MOD = 1e9 + 7;
+inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
+bool eq(const ld& x, const ld& y) { return !sign(x - y); }
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 ll F[1000005];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-std::string S, S0;
-//int S;
+//std::string S, S0;
+int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
 	ll h = pow_mod(N, K / 2);
@@ -31,9 +34,17 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(2);
-	int f;
-	std::cin >> R >> f;
-	f %= (R + R);
-	//std::cout << (f * 2 > R ? "down\n" : "up\n");
+	std::cin >> N;
+	T = 0;
+	int t = 0;
+	P = 0;
+	for (int i = 0; i < N; i++) {
+		std::cin >> A >> B;
+		if (B) {
+			T = std::max(T, A - P);
+			P = A;
+		}
+	}
+	std::cout << T << "\n";
 	return 0;
 }

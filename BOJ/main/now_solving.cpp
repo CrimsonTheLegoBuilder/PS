@@ -34,13 +34,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(12);
-	std::cin >> M >> K;
-	T = 0;
-	for (int i = 0; i < K; i++) {
-		std::cin >> N;
-		T += N;
-	}
-	N = T / M;
-	std::cout << N + (T % M ? 1 : 0) << "\n";
+	std::cin >> N >> T;
+	std::cin >> M;
+	ld x, y;
+	std::cin >> x >> y;
+	N -= M;
+	x *= 60;
+	y *= 60;
+	std::cout << std::max(0, int((M / x + N / y) + .5 - T)) << "\n";
 	return 0;
 }

@@ -22,8 +22,8 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 ll F[1000005];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-//std::string S, S0;
-int S;
+std::string S, S0;
+//int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
 	ll h = pow_mod(N, K / 2);
@@ -35,21 +35,16 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(12);
-	std::cin >> N >> C;
-	T = 0;
-	for (int i = 0; i < N; i++) {
-		scanf("%d:%d", &M, &S);
-		T += M * 60 + S;
+	std::cout.precision(3);
+	std::cin >> N;
+	ld v = 0;
+	while (N--) {
+		ld r, h;
+		std::cin >> S >> r;
+		if (S == "C") std::cin >> h, v = std::max(r * r * 3.14159 * h * 1 / 3, v);
+		if (S == "L") std::cin >> h, v = std::max(r * r * 3.14159 * h, v);
+		if (S == "S") v = std::max(r * r * r * 3.14159 * 4 / 3, v);
 	}
-	//std::cout << T << "\n";
-	T -= (N - 1) * C;
-	H = T / 3600;
-	T %= 3660;
-	M = T / 60;
-	S = T % 60;
-	std::cout << (H < 10 ? "0" : "") << H << ":";
-	std::cout << (M < 10 ? "0" : "") << M << ":";
-	std::cout << (S < 10 ? "0" : "") << S << "\n";
+	std::cout << v << "\n";
 	return 0;
 }

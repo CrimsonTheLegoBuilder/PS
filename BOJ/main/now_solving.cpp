@@ -6,6 +6,7 @@
 #include <string>
 #include <cassert>
 #include <vector>
+#include <stdio.h>
 typedef long long ll;
 typedef long double ld;
 //typedef double ld;
@@ -14,6 +15,7 @@ const ld TOL = 1e-9;
 const ll MOD = 1e9 + 7;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 bool eq(const ld& x, const ld& y) { return !sign(x - y); }
+ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
@@ -34,13 +36,20 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(12);
-	std::cin >> N >> T;
-	std::cin >> M;
-	ld x, y;
-	std::cin >> x >> y;
-	N -= M;
-	x *= 60;
-	y *= 60;
-	std::cout << std::max(0, int((M / x + N / y) + .5 - T)) << "\n";
+	std::cin >> N >> C;
+	T = 0;
+	for (int i = 0; i < N; i++) {
+		scanf("%d:%d", &M, &S);
+		T += M * 60 + S;
+	}
+	//std::cout << T << "\n";
+	T -= (N - 1) * C;
+	H = T / 3600;
+	T %= 3660;
+	M = T / 60;
+	S = T % 60;
+	std::cout << (H < 10 ? "0" : "") << H << ":";
+	std::cout << (M < 10 ? "0" : "") << M << ":";
+	std::cout << (S < 10 ? "0" : "") << S << "\n";
 	return 0;
 }

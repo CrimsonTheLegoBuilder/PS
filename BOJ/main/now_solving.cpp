@@ -34,24 +34,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(12);
-	std::cin >> Q;
-	int I[7] = { 2, 3, 4, 5, 6, 7, 2 };
+	std::cin >> M >> K;
 	T = 0;
-	for (int i = 0; i < 7; i++) {
-		T += (Q % 10) * I[i];
-		Q /= 10;
+	for (int i = 0; i < K; i++) {
+		std::cin >> N;
+		T += N;
 	}
-	//N = T % 11;
-	if (N == 0) std::cout << "J\n";
-	if (N == 1) std::cout << "A\n";
-	if (N == 2) std::cout << "B\n";
-	if (N == 3) std::cout << "C\n";
-	if (N == 4) std::cout << "D\n";
-	if (N == 5) std::cout << "E\n";
-	if (N == 6) std::cout << "F\n";
-	if (N == 7) std::cout << "G\n";
-	if (N == 8) std::cout << "H\n";
-	if (N == 9) std::cout << "I\n";
-	if (N == 10) std::cout << "Z\n";
+	N = T / M;
+	std::cout << N + (T % M ? 1 : 0) << "\n";
 	return 0;
 }

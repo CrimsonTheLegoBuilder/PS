@@ -36,13 +36,14 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(3);
-	std::cin >> W >> N;
-	ll t = 0;
-	while (N--) {
-		ll w, l;
-		std::cin >> w >> l;
-		t += w * l;
+	std::cin >> N >> C;
+	for (int i = 0; i < N; i++) std::cin >> F[i];
+	T = 0;
+	for (int i = 1; i <= C; i++) {
+		for (int j = 0; j < N; j++) {
+			if (!(i % F[j])) { T++; break; }
+		}
 	}
-	std::cout << t / W << "\n";
+	std::cout << T << "\n";
 	return 0;
 }

@@ -37,14 +37,20 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(3);
 	std::cin >> N;
-	ld v = 0;
 	while (N--) {
-		ld r, h;
-		std::cin >> S >> r;
-		if (S == "C") std::cin >> h, v = std::max(r * r * 3.14159 * h * 1 / 3, v);
-		if (S == "L") std::cin >> h, v = std::max(r * r * 3.14159 * h, v);
-		if (S == "S") v = std::max(r * r * r * 3.14159 * 4 / 3, v);
+		ll s;
+		std::cin >> s;
+		ll T1 = (s % 1000) * 10;
+		ll T = 0;
+		while (s) {
+			T += s % 10;
+			s /= 10;
+		}
+		ll T2 = T + T1;
+		//std::cout << T2 << "\n";
+		if (T2 > 9999) T2 %= 10000;
+		else if (T2 <= 999) T2 += 1000;
+		printf("%04lld\n", T2);
 	}
-	std::cout << v << "\n";
 	return 0;
 }

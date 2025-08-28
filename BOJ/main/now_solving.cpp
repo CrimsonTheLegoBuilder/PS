@@ -36,16 +36,16 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	ll X, Y;
-	std::cin >> A >> B >> C >> X >> Y;
-	N = A * X + B * Y;
-	M = std::min(X, Y) * 2 * C +
-		(X - std::min(X, Y)) * A +
-		(Y - std::min(X, Y)) * B;
-	K = std::max(X, Y) * 2 * C;
-	//std::cout << "N:: " << N << "\n";
-	//std::cout << "M:: " << M << "\n";
-	//std::cout << "K:: " << K << "\n";
-	//std::cout << std::min({ N, M, K }) << "\n";
+	std::cin >> N;
+	M = 1;
+	while (N--) {
+		std::cin >> A;
+		std::cout << "Case " << M << ":\n"; M++;
+		for (int i = 1; i <= 6; i++) {
+			if (A - i > 6) continue;
+			if (A - i < i) continue;
+			std::cout << "(" << i << "," << A - i << ")\n";
+		}
+	}
 	return 0;
 }

@@ -36,14 +36,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(3);
-	P = 0;
-	while (1) {
-		std::cin >> N;
-		if (N == 99999) break;
-		K = N % 1000;
-		D = (N / 1000) % 10 + N / 10000;
-		if (D) P = D & 1;
-		std::cout << (P & 1 ? "left " : "right ") << K << "\n";
+	std::cin >> W >> N;
+	ll t = 0;
+	while (N--) {
+		ll w, l;
+		std::cin >> w >> l;
+		t += w * l;
 	}
+	std::cout << t / W << "\n";
 	return 0;
 }

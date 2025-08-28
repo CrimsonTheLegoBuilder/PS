@@ -36,14 +36,15 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(3);
-	std::cin >> N >> C;
-	for (int i = 0; i < N; i++) std::cin >> F[i];
-	T = 0;
-	for (int i = 1; i <= C; i++) {
-		for (int j = 0; j < N; j++) {
-			if (!(i % F[j])) { T++; break; }
-		}
+	std::cin >> T;
+	while (T--) {
+		std::cin >> N;
+		M = N * N;
+		if (N < 10) M %= 10;
+		else if (N < 100) M %= 100;
+		else if (N < 1000) M %= 1000;
+		else if (N == 1000) M %= 10000;
+		std::cout << (N == M ? "YES\n" : "NO\n");
 	}
-	std::cout << T << "\n";
 	return 0;
 }

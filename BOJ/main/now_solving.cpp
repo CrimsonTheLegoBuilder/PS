@@ -35,11 +35,17 @@ int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(3);
-	std::cin >> M;
-	for (int i = 0; i < M; i++) {
-		std::cin >> a >> b >> V;
-
-	}
+	std::cout.precision(9);
+	ll X, Y;
+	std::cin >> A >> B >> C >> X >> Y;
+	N = A * X + B * Y;
+	M = std::min(X, Y) * 2 * C +
+		(X - std::min(X, Y)) * A +
+		(Y - std::min(X, Y)) * B;
+	K = std::max(X, Y) * 2 * C;
+	//std::cout << "N:: " << N << "\n";
+	//std::cout << "M:: " << M << "\n";
+	//std::cout << "K:: " << K << "\n";
+	//std::cout << std::min({ N, M, K }) << "\n";
 	return 0;
 }

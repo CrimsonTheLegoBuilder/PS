@@ -36,21 +36,14 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(3);
-	std::cin >> N;
-	while (N--) {
-		ll s;
-		std::cin >> s;
-		ll T1 = (s % 1000) * 10;
-		ll T = 0;
-		while (s) {
-			T += s % 10;
-			s /= 10;
-		}
-		ll T2 = T + T1;
-		//std::cout << T2 << "\n";
-		if (T2 > 9999) T2 %= 10000;
-		else if (T2 <= 999) T2 += 1000;
-		printf("%04lld\n", T2);
+	P = 0;
+	while (1) {
+		std::cin >> N;
+		if (N == 99999) break;
+		K = N % 1000;
+		D = (N / 1000) % 10 + N / 10000;
+		if (D) P = D & 1;
+		std::cout << (P & 1 ? "left " : "right ") << K << "\n";
 	}
 	return 0;
 }

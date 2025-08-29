@@ -36,15 +36,24 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N;
-	M = 1;
-	while (N--) {
-		std::cin >> A;
-		std::cout << "Case " << M << ":\n"; M++;
-		for (int i = 1; i <= 6; i++) {
-			if (A - i > 6) continue;
-			if (A - i < i) continue;
-			std::cout << "(" << i << "," << A - i << ")\n";
+	ld L[305];
+	memset(L, 0, sizeof L);
+	L[1] = 0.5;
+	D = 2;
+	for (int i = 2; i <= 300; i++) {
+		D++;
+		L[i] = L[i - 1] + (1. / D);
+		//std::cout << L[i] << "\n";
+	}
+	while (1) {
+		ld l;
+		std::cin >> l;
+		if (l < 0.00001) break;
+		for (int i = 0; i <= 300; i++) {
+			if (L[i] <= l && l <= L[i + 1]) {
+				std::cout << i + 1 << " card(s)\n";
+				break;
+			}
 		}
 	}
 	return 0;

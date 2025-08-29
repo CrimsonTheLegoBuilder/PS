@@ -36,25 +36,17 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	ld L[305];
-	memset(L, 0, sizeof L);
-	L[1] = 0.5;
-	D = 2;
-	for (int i = 2; i <= 300; i++) {
-		D++;
-		L[i] = L[i - 1] + (1. / D);
-		//std::cout << L[i] << "\n";
-	}
-	while (1) {
-		ld l;
-		std::cin >> l;
-		if (l < 0.00001) break;
-		for (int i = 0; i <= 300; i++) {
-			if (L[i] <= l && l <= L[i + 1]) {
-				std::cout << i + 1 << " card(s)\n";
-				break;
-			}
+	int x0, y0, x, y, x1 = 0, y1 = 0;
+	std::cin >> x0 >> y0 >> N;
+	D = 1e9;
+	while (N--) {
+		std::cin >> x >> y;
+		int d = std::abs(x - x0) + std::abs(y - y0);
+		if (d < D) {
+			D = d;
+			x1 = x, y1 = y;
 		}
 	}
+	std::cout << x1 << " " << y1 << "\n";
 	return 0;
 }

@@ -19,7 +19,7 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
-ll F[1000005];
+int F[105];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
 //std::string S, S0;
@@ -36,10 +36,18 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	F[0] = 0; F[1] = 1; F[2] = 1;
-	for (int i = 3; i <= 50; i++) {
-		F[i] = F[i - 1] + F[i - 2];
+	std::cin >> T;
+	while (T--) {
+		std::cin >> N;
+		memset(F, 0, sizeof F);
+		for (int i = 2; i <= N; i++) {
+			for (int j = i; j <= N; j += i) {
+				F[j] ^= 1;
+			}
+		}
+		M = 0;
+		for (int i = 1; i <= N; i++) M += F[i];
+		std::cout << N - M << "\n";
 	}
-	std::cin >> N; std::cout << F[N] << "\n";
 	return 0;
 }

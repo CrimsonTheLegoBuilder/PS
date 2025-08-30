@@ -22,8 +22,8 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
 ll F[1000005];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-std::string S, S0;
-//int S;
+//std::string S, S0;
+int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
 	ll h = pow_mod(N, K / 2);
@@ -31,35 +31,15 @@ ll pow_mod(ll N, int K) {
 	if (K & 1) ret = (ret * N) % MOD;
 	return ret % MOD;
 }
-template <class Int>
-std::string with_commas(Int x) {
-	bool neg = x < 0;
-	unsigned long long u = neg ? (unsigned long long)(-1 - x) + 1 : (unsigned long long)x;
-	std::string s;
-	int cnt = 0;
-	do {
-		s.push_back(char('0' + (u % 10)));
-		u /= 10;
-		if (++cnt == 3 && u) { s.push_back(','); cnt = 0; }
-	} while (u);
-	if (neg) s.push_back('-');
-	reverse(s.begin(), s.end());
-	return s;
-}
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> T;
-	while (T--) {
-		std::cin >> N >> K >> H;
-		int t = N * (K - H + (H * 2));
-		if (K - H > 140) {
-			t = 140 * N + std::max(0, K - H - 140) * 3 * N / 2 + H * 2 * N;
-		}
-		//std::cout << t << "\n";
-		std::cout << with_commas(t) << "\n";
+	F[0] = 0; F[1] = 1; F[2] = 1;
+	for (int i = 3; i <= 50; i++) {
+		F[i] = F[i - 1] + F[i - 2];
 	}
+	std::cin >> N; std::cout << F[N] << "\n";
 	return 0;
 }

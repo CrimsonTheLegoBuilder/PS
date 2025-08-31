@@ -36,18 +36,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> T;
-	while (T--) {
-		std::cin >> N;
-		for (int i = 0; i < N; i++) std::cin >> F[i];
-		bool f = 1;
-		for (int i = 1; i < N; i++) {
-			if (F[i - 1] * 2 > F[i]) { f = 0; break; }
-		}
-		std::cout << "Denominations:";
-		for (int i = 0; i < N; i++) std::cout << " " << F[i];
-		std::cout << "\n" << (f ? "Good " : "Bad ");
-		std::cout << "coin denominations!\n\n";
+	while (1) {
+		std::cin >> N >> M;
+		if (!N && !M) break;
+		if (N + M == 13) { std::cout << "Never speak again.\n"; continue; }
+		else if (N == M) { std::cout << "Undecided.\n"; continue; }
+		else if (N > M) { std::cout << "To the convention.\n"; continue; }
+		else if (N < M) { std::cout << "Left beehind.\n"; continue; }
 	}
 	return 0;
 }

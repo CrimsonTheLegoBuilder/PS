@@ -36,14 +36,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N;
-	T = 0;
-	for (int i = 1; i <= N; i++) {
-		for (int j = i; j <= N; j++) {
-			if (i * j > N) break;
-			T++;
-		}
+	std::cin >> T;
+	while (T--) {
+		std::cin >> N;
+		for (int i = 0; i < N; i++) std::cin >> F[i];
+		std::sort(F, F + N);
+		int s = F[0], e = F[N - 1];
+		std::cout << (e - s) * 2 << "\n";
 	}
-	std::cout << T << "\n";
 	return 0;
 }

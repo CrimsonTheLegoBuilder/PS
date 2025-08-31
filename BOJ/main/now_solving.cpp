@@ -36,7 +36,18 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	ll N; std::cin >> N;
-	std::cout << (N * (N - 1) * (N - 2) * (N - 3) * (N - 4)) / 120;
+	std::cin >> T;
+	while (T--) {
+		std::cin >> N;
+		for (int i = 0; i < N; i++) std::cin >> F[i];
+		bool f = 1;
+		for (int i = 1; i < N; i++) {
+			if (F[i - 1] * 2 > F[i]) { f = 0; break; }
+		}
+		std::cout << "Denominations:";
+		for (int i = 0; i < N; i++) std::cout << " " << F[i];
+		std::cout << "\n" << (f ? "Good " : "Bad ");
+		std::cout << "coin denominations!\n\n";
+	}
 	return 0;
 }

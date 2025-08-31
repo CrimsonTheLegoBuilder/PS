@@ -37,13 +37,13 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(9);
 	std::cin >> N;
-	for (int i = 1; i <= N; i++) std::cin >> F[i];
 	T = 0;
 	for (int i = 1; i <= N; i++) {
-		A = F[i] * i;
-		A -= T;
-		std::cout << A << " ";
-		T += A;
+		for (int j = i; j <= N; j++) {
+			if (i * j > N) break;
+			T++;
+		}
 	}
+	std::cout << T << "\n";
 	return 0;
 }

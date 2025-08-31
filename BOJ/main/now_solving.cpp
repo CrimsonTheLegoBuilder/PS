@@ -18,8 +18,8 @@ bool eq(const ld& x, const ld& y) { return !sign(x - y); }
 ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
-int q1, q2, q3, q4, q0, A, B, C, D, E, P, I;
-int F[105];
+int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
+int F[100];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
 //std::string S, S0;
@@ -36,14 +36,17 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	int e, f;
-	std::cin >> e >> f >> c;
-	T = e + f;
+	std::cin >> A >> B;
 	N = 0;
-	while (T / c) {
-		N += T / c;
-		T = T / c + T % c;
+	while (A && B) {
+		F[N] = A % 10 + B % 10;
+		A /= 10;
+		B /= 10;
+		N++;
 	}
-	std::cout << N << "\n";
+	if (A) F[N] = A;
+	else if (B) F[N] = B;
+	else N--;
+	for (int i = N; i >= 0; i--) std::cout << F[i];
 	return 0;
 }

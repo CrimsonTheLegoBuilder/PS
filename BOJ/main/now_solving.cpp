@@ -36,17 +36,15 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> A >> B;
-	N = 0;
-	while (A && B) {
-		F[N] = A % 10 + B % 10;
-		A /= 10;
-		B /= 10;
-		N++;
+	std::cin >> N;
+	T = 0;
+	S = 1;
+	while (N) {
+		N -= S;
+		if (N < 0) break;
+		T++;
+		S += 4 * T;
 	}
-	if (A) F[N] = A;
-	else if (B) F[N] = B;
-	else N--;
-	for (int i = N; i >= 0; i--) std::cout << F[i];
+	std::cout << T << "\n";
 	return 0;
 }

@@ -36,18 +36,14 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> T;
-	while (T--) {
-		std::cin >> N;
-		memset(F, 0, sizeof F);
-		for (int i = 2; i <= N; i++) {
-			for (int j = i; j <= N; j += i) {
-				F[j] ^= 1;
-			}
-		}
-		M = 0;
-		for (int i = 1; i <= N; i++) M += F[i];
-		std::cout << N - M << "\n";
+	std::cin >> N;
+	for (int i = 1; i <= N; i++) std::cin >> F[i];
+	T = 0;
+	for (int i = 1; i <= N; i++) {
+		A = F[i] * i;
+		A -= T;
+		std::cout << A << " ";
+		T += A;
 	}
 	return 0;
 }

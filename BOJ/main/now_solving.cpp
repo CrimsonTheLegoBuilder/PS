@@ -36,15 +36,7 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N;
-	T = 0;
-	S = 1;
-	while (N) {
-		N -= S;
-		if (N < 0) break;
-		T++;
-		S += 4 * T;
-	}
-	std::cout << T << "\n";
+	ll N; std::cin >> N;
+	std::cout << (N * (N - 1) * (N - 2) * (N - 3) * (N - 4)) / 120;
 	return 0;
 }

@@ -22,8 +22,8 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
 int F[100];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-//std::string S, S0;
-int S;
+std::string S, S0;
+//int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
 	ll h = pow_mod(N, K / 2);
@@ -36,13 +36,17 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	while (1) {
-		std::cin >> N >> M;
-		if (!N && !M) break;
-		if (N + M == 13) { std::cout << "Never speak again.\n"; continue; }
-		else if (N == M) { std::cout << "Undecided.\n"; continue; }
-		else if (N > M) { std::cout << "To the convention.\n"; continue; }
-		else if (N < M) { std::cout << "Left beehind.\n"; continue; }
+	std::cin >> S;
+	for (int i = 0; i < 4; i++) {
+		if (S[i] == 'E') std::cout << 'I';
+		if (S[i] == 'I') std::cout << 'E';
+		if (S[i] == 'S') std::cout << 'N';
+		if (S[i] == 'N') std::cout << 'S';
+		if (S[i] == 'T') std::cout << 'F';
+		if (S[i] == 'F') std::cout << 'T';
+		if (S[i] == 'J') std::cout << 'P';
+		if (S[i] == 'P') std::cout << 'J';
 	}
+	std::cout << "\n";
 	return 0;
 }

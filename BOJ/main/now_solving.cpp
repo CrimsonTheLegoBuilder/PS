@@ -36,17 +36,13 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> S;
-	for (int i = 0; i < 4; i++) {
-		if (S[i] == 'E') std::cout << 'I';
-		if (S[i] == 'I') std::cout << 'E';
-		if (S[i] == 'S') std::cout << 'N';
-		if (S[i] == 'N') std::cout << 'S';
-		if (S[i] == 'T') std::cout << 'F';
-		if (S[i] == 'F') std::cout << 'T';
-		if (S[i] == 'J') std::cout << 'P';
-		if (S[i] == 'P') std::cout << 'J';
+	std::cin >> N >> K >> P;
+	T = 0;
+	for (int i = 0; i < N; i++) {
+		int t = 0;
+		for (int j = 0; j < K; j++) std::cin >> M, t += M;
+		T += t >= P;
 	}
-	std::cout << "\n";
+	std::cout << T << "\n";
 	return 0;
 }

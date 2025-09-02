@@ -22,7 +22,7 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
 int F[100];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-std::string S[105], S0[105];
+std::string S, S0[105];
 //int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
@@ -36,15 +36,14 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N >> M;
-	for (int i = 0; i < N; i++) std::cin >> S[i];
-	for (int i = 0; i < N; i++) std::cin >> S0[i];
+	std::cin >> N;
 	T = 0;
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < M; j++) {
-			if (S[i][j] == S0[i][j]) T++;
+	while (N--) {
+		std::cin >> S;
+		if (S == "anj") {
+			T = 1; break;
 		}
 	}
-	std::cout << T << "\n";
+	std::cout << "뭐야" << (T ? ";\n" : "?\n");
 	return 0;
 }

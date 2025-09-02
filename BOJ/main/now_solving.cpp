@@ -19,7 +19,7 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
-int F[100];
+int F[133];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
 std::string S, S0[105];
@@ -37,13 +37,13 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(9);
 	std::cin >> N;
-	T = 0;
-	while (N--) {
-		std::cin >> S;
-		if (S == "anj") {
-			T = 1; break;
-		}
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	std::getline(std::cin, S);
+	for (int i = 0; i < N; i++) {
+		if (97 <= S[i + 0] && S[i + 0] <= 122) F[S[i] + 0]++;
 	}
-	std::cout << "뭐야" << (T ? ";\n" : "?\n");
+	T = 0;
+	for (int i = 97; i <= 122; i++) T = std::max(T, F[i]);
+	std::cout << T << "\n";
 	return 0;
 }

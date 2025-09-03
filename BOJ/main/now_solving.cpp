@@ -37,13 +37,15 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(9);
 	std::cin >> N;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	std::getline(std::cin, S);
-	for (int i = 0; i < N; i++) {
-		if (97 <= S[i + 0] && S[i + 0] <= 122) F[S[i] + 0]++;
+	std::cin >> A;
+	B = 0, C = 0;
+	for (int i = 1; i < N; i++) {
+		std::cin >> M;
+		if (A < M) B = 1;
+		if (A > M) C = 1;
 	}
-	T = 0;
-	for (int i = 97; i <= 122; i++) T = std::max(T, F[i]);
-	std::cout << T << "\n";
+	if (B && !C) std::cout << "ez\n";
+	else if (!B && C) std::cout << "hard\n";
+	else std::cout << "?\n";
 	return 0;
 }

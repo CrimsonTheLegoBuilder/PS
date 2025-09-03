@@ -22,7 +22,7 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
 int F[133];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-std::string S, S0[105];
+std::string S[10005], S0[10005];
 //int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
@@ -37,15 +37,10 @@ int main() {
 	std::cout << std::fixed;
 	std::cout.precision(9);
 	std::cin >> N;
-	std::cin >> A;
-	B = 0, C = 0;
-	for (int i = 1; i < N; i++) {
-		std::cin >> M;
-		if (A < M) B = 1;
-		if (A > M) C = 1;
-	}
-	if (B && !C) std::cout << "ez\n";
-	else if (!B && C) std::cout << "hard\n";
-	else std::cout << "?\n";
+	for (int i = 0; i < N; i++) std::cin >> S[i];
+	for (int i = 0; i < N; i++) std::cin >> S0[i];
+	T = 0;
+	for (int i = 0; i < N; i++) T += S[i] == S0[i];
+	std::cout << T << "\n";
 	return 0;
 }

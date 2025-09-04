@@ -20,7 +20,7 @@ ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
 int Q, N, M, K, a, b, c, d, T, W, H, L, R, o, V;
 int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
-int F[133];
+int F[100];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
 std::string S, S0;
@@ -37,20 +37,8 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N;
-	for (int i = 1; i <= N; i++) {
-		int J = 0;
-		M = 0;
-		for (int _ = 0; _ < 10; _++) {
-			std::cin >> K; std::cout << K << " ";
-			if (K == 17) J++;
-			if (K == 18) M++;
-		}
-		std::cout << "\n";
-		if (J && M) std::cout << "both\n\n";
-		else if (J) std::cout << "zack\n\n";
-		else if (M) std::cout << "mack\n\n";
-		else std::cout << "none\n\n";
-	}
+	std::cin >> S;
+	for (int i = 0; i < 25; i++) F[S[i] + 0]++;
+	for (int i = 65; i <= 90; i++) if (!F[i]) std::cout << char(i) << "\n";
 	return 0;
 }

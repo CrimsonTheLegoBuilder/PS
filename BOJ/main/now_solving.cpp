@@ -23,7 +23,7 @@ int q1, q2, q3, q4, q0, A, B, C, D, E, O, P, I;
 int F[133];
 int X;
 //ld p, p0, X, Y, D, A, B, F;
-std::string S;
+std::string S, S0;
 //int S;
 ll pow_mod(ll N, int K) {
 	if (!K) return 1;
@@ -37,9 +37,20 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> S; N = S.size();
-	if (N > 4 && S[N - 5] == 'd' && S[N - 4] == 'r' && S[N - 3] == 'i' && S[N - 2] == 'i' && S[N - 1] == 'p')
-		std::cout << "cute\n";
-	else std::cout << "not cute\n";
+	std::cin >> N;
+	for (int i = 1; i <= N; i++) {
+		int J = 0;
+		M = 0;
+		for (int _ = 0; _ < 10; _++) {
+			std::cin >> K; std::cout << K << " ";
+			if (K == 17) J++;
+			if (K == 18) M++;
+		}
+		std::cout << "\n";
+		if (J && M) std::cout << "both\n\n";
+		else if (J) std::cout << "zack\n\n";
+		else if (M) std::cout << "mack\n\n";
+		else std::cout << "none\n\n";
+	}
 	return 0;
 }

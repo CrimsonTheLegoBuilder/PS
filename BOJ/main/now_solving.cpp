@@ -37,8 +37,12 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> S;
-	for (int i = 0; i < 25; i++) F[S[i] + 0]++;
-	for (int i = 65; i <= 90; i++) if (!F[i]) std::cout << char(i) << "\n";
+	std::cin >> N; std::cin >> P;
+	T = 1;
+	for (int i = 0; i < N - 1; i++) {
+		std::cin >> M;
+		if (P <= M) T++;
+		P = M;
+	}std::cout << T << "\n";
 	return 0;
 }

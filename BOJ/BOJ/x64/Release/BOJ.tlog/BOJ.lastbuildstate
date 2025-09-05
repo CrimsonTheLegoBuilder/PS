@@ -1,2 +1,2 @@
-PlatformToolSet=v143:VCToolArchitecture=Native64Bit:VCToolsVersion=14.39.33519:TargetPlatformVersion=10.0.22621.0:
-Release|x64|C:\Users\user\Desktop\repository\PS\BOJ\|
+PlatformToolSet=ClangCL:VCToolArchitecture=Native64Bit:VCToolsVersion=14.44.35207:TargetPlatformVersion=10.0.26100.0:
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64|19.1.5|Release|x64|D:\PS\PS\BOJ\|

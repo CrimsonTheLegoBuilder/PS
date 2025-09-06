@@ -41,7 +41,7 @@ int main() {
 	T = 1;
 	for (int i = 0; i < N - 1; i++) {
 		std::cin >> M;
-		if (P <= M) T++;
+		if (P <= M) T++;                          
 		P = M;
 	}std::cout << T << "\n";
 	return 0;

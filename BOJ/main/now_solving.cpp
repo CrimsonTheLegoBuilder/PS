@@ -37,12 +37,11 @@ int main() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N; std::cin >> P;
-	T = 1;
-	for (int i = 0; i < N - 1; i++) {
-		std::cin >> M;
-		if (P <= M) T++;                          
-		P = M;
-	}std::cout << T << "\n";
+	std::cin >> N;
+	ll V = pow_mod(N, MOD - 2);
+	std::vector<ll> inv(N + 1, 1);
+	for (ll i = 2; i <= N; i++) {
+		inv[i] = MOD - (MOD / i) * inv[MOD % i] & MOD;
+	}
 	return 0;
 }

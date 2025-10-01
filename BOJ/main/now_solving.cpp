@@ -40,6 +40,14 @@ inline ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return
 //	return gcd(w, z);
 //}
 
+//Struct Pos { int x, y, i }
+//Struct Pdd - 보로노이 다이어그램 제작에만 쓰임
+//Class or Struct Delaunay trianlges :: 재홍이가 접근할 일 없도록 구성
+//Class or Struct KDtree - Tree, Pos :: 재홍이가 접근할 일 없도록 구성
+//입력 및 전처리는 전부 기하모듈에서 일어나야하는데 후에 하는 접근은 전부 다른 자료구조들에서 행해짐
+//전처리를 전부 끝내놓고 나면 기하모듈에 접근할 일 없도록 해야함
+//Class or Struct Query - int t, Pos s, Pos e, int u, int p :: 타입, 점 2개, 부모별 번호. 순례끝점 위치는 KDtree 조회 후 i 에 번호 기록
+
 int N, M, T, Q, Q1, Q2;
 Vint DT[LEN];//delaunay triangle
 std::string name[LEN];
@@ -169,49 +177,49 @@ Pos circumcenter(const Pos& p1, const Pos& p2, const Pos& p3) {
 		(d.x * cl - e.x * bl) * 0.5 / det);
 	return p1 + radius;
 }
-struct Circle {
-	Pos c;
-	ld r;
-	Circle(Pos C = Pos(0, 0), ld R = 0) : c(C), r(R) {}
-	bool operator == (const Circle& C) const { return c == C.c && std::abs(r - C.r) < TOL; }
-	bool operator != (const Circle& C) const { return !(*this == C); }
-	bool operator < (const Circle& q) const {
-		ld dist = (c - q.c).mag();
-		return r < q.r && dist + r < q.r + TOL;
-	}
-	bool operator > (const Pos& p) const { return r > (c - p).mag(); }
-	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
-	bool operator < (const Pos& p) const { return r < (c - p).mag(); }
-	Circle operator + (const Circle& C) const { return { c + C.c, r + C.r }; }
-	Circle operator - (const Circle& C) const { return { c - C.c, r - C.r }; }
-	ld H(const ld& th) const { return sin(th) * c.x + cos(th) * c.y + r; }//coord trans | check right
-	ld A() const { return 1. * r * r * PI; }
-	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
-} INVAL = { { 0, 0 }, (std::numeric_limits<ld>::max)() };
-Circle enclose_circle(const Pos& u, const Pos& v, const Pos& w) {
-	if (!ccw(u, v, w)) return INVAL;
-	Pos m1 = (u + v) * .5, v1 = ~(v - u);
-	Pos m2 = (u + w) * .5, v2 = ~(w - u);
-	Pos c = intersection(m1, m1 + v1, m2, m2 + v2);
-	return Circle(c, (u - c).mag());
-}
-Circle circumcircle(const Pos& p1, const Pos& p2, const Pos& p3) {
-	Pos d = p2 - p1;
-	Pos e = p3 - p1;
-	const ld bl = d.Euc();
-	const ld cl = e.Euc();
-	const ld det = d / e;
-	Pos radius((e.y * bl - d.y * cl) * 0.5 / det,
-		(d.x * cl - e.x * bl) * 0.5 / det);
-	Pos c;
-	ld r;
-	if ((bl > 0.0 || bl < 0.0) && (cl > 0.0 || cl < 0.0) &&
-		(det > 0.0 || det < 0.0))
-		c = p1 + radius, r = radius.Euc();
-	else c = Pos(INF, INF), r = std::numeric_limits<ld>::max();
-	return Circle(c, r);
-}
+//struct Circle {
+//	Pos c;
+//	ld r;
+//	Circle(Pos C = Pos(0, 0), ld R = 0) : c(C), r(R) {}
+//	bool operator == (const Circle& C) const { return c == C.c && std::abs(r - C.r) < TOL; }
+//	bool operator != (const Circle& C) const { return !(*this == C); }
+//	bool operator < (const Circle& q) const {
+//		ld dist = (c - q.c).mag();
+//		return r < q.r && dist + r < q.r + TOL;
+//	}
+//	bool operator > (const Pos& p) const { return r > (c - p).mag(); }
+//	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
+//	bool operator < (const Pos& p) const { return r < (c - p).mag(); }
+//	Circle operator + (const Circle& C) const { return { c + C.c, r + C.r }; }
+//	Circle operator - (const Circle& C) const { return { c - C.c, r - C.r }; }
+//	ld H(const ld& th) const { return sin(th) * c.x + cos(th) * c.y + r; }//coord trans | check right
+//	ld A() const { return 1. * r * r * PI; }
+//	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
+//	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
+//} INVAL = { { 0, 0 }, (std::numeric_limits<ld>::max)() };
+//Circle enclose_circle(const Pos& u, const Pos& v, const Pos& w) {
+//	if (!ccw(u, v, w)) return INVAL;
+//	Pos m1 = (u + v) * .5, v1 = ~(v - u);
+//	Pos m2 = (u + w) * .5, v2 = ~(w - u);
+//	Pos c = intersection(m1, m1 + v1, m2, m2 + v2);
+//	return Circle(c, (u - c).mag());
+//}
+//Circle circumcircle(const Pos& p1, const Pos& p2, const Pos& p3) {
+//	Pos d = p2 - p1;
+//	Pos e = p3 - p1;
+//	const ld bl = d.Euc();
+//	const ld cl = e.Euc();
+//	const ld det = d / e;
+//	Pos radius((e.y * bl - d.y * cl) * 0.5 / det,
+//		(d.x * cl - e.x * bl) * 0.5 / det);
+//	Pos c;
+//	ld r;
+//	if ((bl > 0.0 || bl < 0.0) && (cl > 0.0 || cl < 0.0) &&
+//		(det > 0.0 || det < 0.0))
+//		c = p1 + radius, r = radius.Euc();
+//	else c = Pos(INF, INF), r = std::numeric_limits<ld>::max();
+//	return Circle(c, r);
+//}
 bool in_circle(const Pos& a, const Pos& b, const Pos& c, const Pos& p) {
 	const Pos d = a - p;
 	const Pos e = b - p;
@@ -626,12 +634,12 @@ private:
 
 /* KD-TREE */
 Pii pos[LEN];
-struct Node {
+struct KDNode {
 	Pii p;//mid point
 	bool spl;//dx < dy ?
 	int sx, ex, sy, ey;
-	Node(Pii P = Pii(0, 0), bool SPL = 0, int SX = 0, int EX = 0, int SY = 0, int EY = 0) :
-		p(P), spl(SPL), sx(SX), ex(EX), sy(SY), ey(EY) {
+	KDNode(Pii p_ = Pii(0, 0), bool spl_ = 0, int sx_ = 0, int ex_ = 0, int sy_ = 0, int ey_ = 0) :
+		p(p_), spl(spl_), sx(sx_), ex(ex_), sy(sy_), ey(ey_) {
 	}
 } kdtree[LEN << 2];//segment tree
 bool V[LEN << 2];//visited
@@ -651,7 +659,7 @@ void init(int s = 0, int e = N - 1, int n = 1) {//divide & conquer
 	if (kdtree[n].spl) std::sort(pos + s, pos + e + 1, cmpy);//if dy is dominant, sort by y
 	else std::sort(pos + s, pos + e + 1, cmpx);//if dx is dominant, sort by x
 	V[n] = 1;
-	kdtree[n] = Node(pos[m], kdtree[n].spl, MINX, MAXX, MINY, MAXY);
+	kdtree[n] = KDNode(pos[m], kdtree[n].spl, MINX, MAXX, MINY, MAXY);
 	if (s <= m - 1) init(s, m - 1, n << 1);
 	if (m + 1 <= e) init(m + 1, e, n << 1 | 1);
 	return;
@@ -709,16 +717,9 @@ struct Query {
 		else { std::cin >> q.u >> q.p; }
 		return is;
 	}
-} qry[LEN];
+} qry[LEN << 1];
 /* QUERY */
 
-//Struct Pos { int x, y, i }
-//Struct Pdd - 보로노이 다이어그램 제작에만 쓰임
-//Class or Struct Delaunay trianlges :: 재홍이가 접근할 일 없도록 구성
-//Class or Struct KDtree - Tree, Pos :: 재홍이가 접근할 일 없도록 구성
-//입력 및 전처리는 전부 기하모듈에서 일어나야하는데 후에 하는 접근은 전부 다른 자료구조들에서 행해짐
-//전처리를 전부 끝내놓고 나면 기하모듈에 접근할 일 없도록 해야함
-//Class or Struct Query - int t, Pos s, Pos e, int u, int p :: 타입, 점 2개, 부모별 번호. 순례끝점 위치는 KDtree 조회 후 i 에 번호 기록
 /* MAIN */
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -741,7 +742,7 @@ void solve() {
 	init();
 	/* KD TREE INIT */
 
-	/* VORONOI DIAGRAM & PRIM INIT */
+	/* DELAUNAY & PRIM INIT */
 	Polygon C;
 	for (Pii& p : star) C.push_back(conv(p));
 	Delaunator DTR(C);
@@ -761,14 +762,14 @@ void solve() {
 		}
 	}
 	//mst - PRIM
-	/* VORONOI DIAGRAM & PRIM INIT */
+	/* DELAUNAY & PRIM INIT */
 
 	/* QUERY INPUT & VD CELL SEARCH */
 	for (int q = 0; q < Q; q++) {
 		std::cin >> qry[q];
 		if (qry[q].t == 1) {
-			int i = search(qry[q].s).x;
-			int j = search(qry[q].e).x;
+			int i = search(qry[q].s).IDX;
+			int j = search(qry[q].e).IDX;
 			qry[q].u = i; qry[q].p = j;
 		}
 	}

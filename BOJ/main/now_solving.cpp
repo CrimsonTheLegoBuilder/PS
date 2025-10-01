@@ -699,6 +699,7 @@ Pos search(const Pii& q, ll X = LINF, int n = 1) {//divide & conquer | refer to 
 			if (V[n << 1] && sqr(kdtree[n << 1].ex - q.x) < S) D = search(q, S, n << 1);
 		}
 	}
+	if (D.DIST < S) { i = D.IDX, S = D.DIST; }
 	return Pos(i, S);
 }
 /* KD-TREE */

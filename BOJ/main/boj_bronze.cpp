@@ -37,17 +37,13 @@ int B(int b) {
 	else if (b <= 31) return 32;
 	return 0;
 }
+const ll LINF = 1e18;
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(1);
-	std::cin >> T;
-	while (T--) {
-		std::cin >> a >> b;
-		std::cout << A(a) << " " << B(b) << "\n";
-		std::cout << A(a) * 10000 + B(b) * 10000 << "\n";
-	}
+	std::cout << LINF << "\n";
 	return;
 }
 int main() { solve(); return 0; }

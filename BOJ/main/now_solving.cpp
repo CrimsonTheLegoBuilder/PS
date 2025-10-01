@@ -28,9 +28,11 @@ typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
+const ll LINF = 1e18;
 const ld TOL = 1e-5;
 const ld PI = acos(-1);
-const int LEN = 3005;
+const int LEN = 9e4;
+inline ll sqr(const int& a) { return (ll)a * a; }
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
@@ -50,15 +52,11 @@ inline ll gcd(ll x, ll y, ll z) {
 
 tested in range -1e6 < x, y < 1e6;
 Delaunator - https://github.com/abellgithub/delaunator-cpp/blob/master/include/delaunator.cpp
-modify : jinhwanlazy
-I'm : stupid
 
 */
 
-int N, M, T, Q;
-ll X_, Y_, Z_;
-ld R_, D;
-bool LF;//line flag
+int N, M, T, Q, Q1, Q2;
+
 struct Pii {
 	ll x, y; int i;
 	Pii(ll x_ = 0, ll y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
@@ -117,6 +115,7 @@ std::vector<Pii> graham_scan(std::vector<Pii>& C) {
 	}
 	return H;
 }
+
 struct Pos {
 	ld x, y; int i;
 	Pos(ld x_ = 0, ld y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
@@ -727,25 +726,6 @@ Pii conv(const Pos& p) {
 	ll y = round(p.y);
 	return Pii(x, y);
 }
-//Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
-//	ld a1 = cross(q1, q2, p1);
-//	ld a2 = -cross(q1, q2, p2);
-//	return (p1 * a2 + p2 * a1) / (a1 + a2);
-//}
-void update_XYZ(const Linear& u, const Linear& v) {
-	Pii p1 = conv(u[0] * 2);
-	Pii p2 = conv(u[1] * 2);
-	Pii q1 = conv(v[0] * 2);
-	Pii q2 = conv(v[1] * 2);
-	ll a1 = cross(q1, q2, p1);
-	ll a2 = -cross(q1, q2, p2);
-	ll det = (a1 + a2);
-	Pii inx = p1 * a2 + p2 * a1;
-	X_ = inx.x;
-	Y_ = inx.y;
-	Z_ = det * 2;
-	return;
-}
 
 struct Seg {
 	Pos s, e, dir;
@@ -789,6 +769,7 @@ ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
 }
+//std::vector<Pos> half_plane_intersection(std::vector<Linear>& HP) {
 Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
 	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
 		return w.inner(intersection_(u, v));
@@ -810,197 +791,12 @@ Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
 	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
 	return HPI;
 }
-Segs half_plane_intersection(const Segs& P, const Segs& Q) {
-	//Segs HP;
-	//int sz;
-	//sz = P.size();
-	//for (int i = 0; i < sz; i++) HP.push_back(P[i]);
-	//sz = Q.size();
-	//for (int i = 0; i < sz; i++) HP.push_back(Q[i]);
-	Segs HP(P.size() + Q.size());
-	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
-	return half_plane_intersection(HP, 0);
-}
-Segs cell(std::vector<Pos>& C, const int& idx, const int f = 1) {
-	int sz = C.size();
-	ld mx = 1e9;
-	Segs HP = {
-		Seg(Pos(-mx, -mx), Pos(mx, -mx)),
-		Seg(Pos(mx, -mx), Pos(mx, mx)),
-		Seg(Pos(mx, mx), Pos(-mx, mx)),
-		Seg(Pos(-mx, mx), Pos(-mx, -mx))
-	};
-	for (int i = 0; i < sz; i++) {
-		if (i == idx) continue;
-		Pos v = ~(C[i] - C[idx]);
-		v *= f;
-		Pos m = (C[i] + C[idx]) * .5;
-		HP.push_back(Seg(m, m + v));
-	}
-	return half_plane_intersection(HP);
-}
-void update_XYZ(const Seg& u, const Seg& v) {
-	Pii p1 = conv(u.s * 2);
-	Pii p2 = conv(u.e * 2);
-	Pii q1 = conv(v.s * 2);
-	Pii q2 = conv(v.e * 2);
-	ll a1 = cross(q1, q2, p1);
-	ll a2 = -cross(q1, q2, p2);
-	ll det = (a1 + a2);
-	Pii inx = p1 * a2 + p2 * a1;
-	X_ = inx.x;
-	Y_ = inx.y;
-	Z_ = det * 2;
-	return;
-}
-
-Vint DT[LEN], NG;
-std::vector<Seg> VDP[LEN];
-std::vector<Seg> VDN[LEN];
-void solve() {
-	std::cin.tie(0)->sync_with_stdio(0);
-	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(10);
-	std::cin >> N;
-	Vpii Cii(N);
-	for (int i = 0; i < N; i++) { std::cin >> Cii[i], Cii[i].i = i; }
-	if (N == 1) { std::cout << "0\nL 1 0 " << Cii[0].x << "\n"; return; }
-	Vpii P_ = Cii;
-	D = 1e27;
-	LF = 1;//line flag
-	//line
-	Vpii H = graham_scan(P_);
-	if (H.size() == 2) {
-		Pii s = H[0], e = H[1];
-		Pii vec = e - s;
-		X_ = -vec.y;
-		Y_ = vec.x;
-		Pos v = ~conv(vec);
-		Pos m = (conv(s) + conv(e)) * .5;
-		Z_ = round(v * m);
-		std::cout << "0\nL " << X_ << " " << Y_ << " " << Z_ << "\n";
-		return;
-	}
-	int sz = H.size();
-	auto jaw_check = [&](const int& i, const int& j) -> bool {
-		return ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0;
-		};
-	for (int i = 0, j = 1; i < sz; i++) {
-		while (jaw_check(i, j)) j = (j + 1) % sz;
-		ld d = cross(H[i], H[(i + 1) % sz], H[j]) / (H[i] - H[(i + 1) % sz]).mag();
-		d *= .5;
-		if (D > d) {
-			D = d;
-			Pii s = H[i], e = H[(i + 1) % sz];
-			Pii vec = e - s;
-			X_ = -vec.y;
-			Y_ = vec.x;
-			Pos v = ~conv(vec);
-			Pos m = (conv(s) + conv(H[j])) * .5;
-			Z_ = round(v * m);
-		}
-	}
-	//circle
-	//std::cout << "circle::\n";
-	Polygon C;
-	for (Pii& p : Cii) C.push_back(conv(p));
-	Delaunator DTR(C);
-	for (int i = 0; i < DTR.triangles_.size(); i += 3) {
-		const int& a = DTR.points_[DTR.triangles_[i]].i;
-		const int& b = DTR.points_[DTR.triangles_[i + 1]].i;
-		const int& c = DTR.points_[DTR.triangles_[i + 2]].i;
-		DT[a].push_back(b); DT[a].push_back(c);
-		DT[b].push_back(a); DT[b].push_back(c);
-		DT[c].push_back(a); DT[c].push_back(b);
-	}
-	for (int c = 0; c < N; c++) {
-		Vint& I = DT[c];
-		std::sort(I.begin(), I.end());
-		I.erase(unique(I.begin(), I.end()), I.end());
-		Pii sd = Cii[c];//seed
-		ld mx = 1e9;
-		Segs HP = {
-			Seg(Pos(-mx, -mx), Pos(mx, -mx)),
-			Seg(Pos(mx, -mx), Pos(mx, mx)),
-			Seg(Pos(mx, mx), Pos(-mx, mx)),
-			Seg(Pos(-mx, mx), Pos(-mx, -mx))
-		};
-		for (const int& i : I) {
-			Pii p = Cii[i];
-			Pii vec = p - sd;
-			ll g = gcd(std::abs(vec.x), std::abs(vec.y));
-			vec /= g;
-			Pos v = ~conv(vec);
-			Pos s = conv(sd), e = conv(p);
-			//Pos v = ~(e - s);
-			Pos m = (s + e) * .5;
-			HP.push_back(Seg(m, m + v));
-		}
-		Segs hpi = half_plane_intersection(HP);
-		//std::cout << "hpi_p.sz:: " << hpi.size() << "\n";
-		if (hpi.size() < 3) continue;
-		VDP[c] = hpi;
-	}
-	for (const Pii& q : H) {
-		int c = q.i;
-		Segs hpi = cell(C, q.i, -1);
-		//std::cout << "hpi_n.sz:: " << hpi.size() << "\n";
-		if (hpi.size() < 3) continue;
-		VDN[c] = hpi;
-		NG.push_back(q.i);
-	}
-	for (int pv = 0; pv < N; pv++) {
-		if (!VDP[pv].size()) continue;
-		Pii p_ = Cii[pv];
-		Pos sdp = C[pv];//seed
-		for (const int& ng : NG) {
-			if (!VDN[ng].size()) continue;
-			Segs inx = half_plane_intersection(VDP[pv], VDN[ng]);
-			int sz = inx.size();
-			if (sz < 3) continue;
-			Pos sdn = C[ng];//seed
-			for (int i = 0; i < sz; i++) {
-				int j = (i + 1) % sz;
-				const Seg& l0 = inx[i];
-				const Seg& l1 = inx[j];
-				//std::cout << "l[0]:: " << l0[0] << " ";
-				//std::cout << "l[1]:: " << l0[1] << "\n";
-				//std::cout << "l[0]:: " << l1[0] << " ";
-				//std::cout << "l[1]:: " << l1[1] << "\n";
-				if (!ccw(l0.s, l0.e, l1.s, l1.e)) continue;
-				Pos ix = intersection_(l0, l1);
-				ld dn = (sdn - ix).mag();
-				ld dp = (sdp - ix).mag();
-				ld d = dn - dp;
-				d *= .5;
-				if (D > d) {
-					D = d;
-					R_ = (dn + dp) * .5;
-					update_XYZ(l0, l1);
-					LF = 0;
-				}
-			}
-		}
-	}
-	//result
-	if (zero(D)) D = +0;
-	if (zero(R_)) R_ = +0;
-	ll g = gcd(X_, Y_, Z_);
-	X_ /= g; Y_ /= g; Z_ /= g;
-	if (LF) std::cout << D << "\nL " << X_ << " " << Y_ << " " << Z_ << "\n";
-	else std::cout << D << "\nC " << X_ << " " << Y_ << " " << Z_ << " " << R_ << "\n";
-	return;
-}
 
 
-
-const int INF = 1e9;
-const ll LINF = 1e18;
-ll sqr(const int& a) { return (ll)a * a; }
+Vint DT[LEN];
+Polygon VD[LEN];
 Pii pos[LEN];
-const Pii Oii = Pii(0, 0);
-std::vector<Pii> C, H;
+
 struct Node {
 	Pii p;//mid point
 	bool spl;//dx < dy ?
@@ -1062,17 +858,102 @@ ll search(const Pii& t, ll X = LINF, int n = 1) {//divide & conquer | refer to k
 	}
 	return std::min(S, A);
 }
+
+struct Query {
+	int t;
+	//bool t;
+	Pii s, e;
+	int u, p;
+	Query(int t_ = 0, Pii s_ = Pii(), Pii e_ = Pii(), int u_ = 0, int p_ = 0) : 
+		t(t_), s(s_), e(e_), u(u_), p(p_) {}
+	friend std::istream& operator >> (std::istream& is, Query& q) {
+		is >> q.t;
+		if (q.t == 1) { std::cin >> q.s >> q.e; }
+		else { std::cin >> q.u >> q.p; }
+		return is;
+	}
+} qry[LEN];
+
+std::string name[LEN];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
-	std::cin >> Q;
-	while (Q--) {
-		std::cin >> N;
-		memset(V, 0, sizeof V);
-		for (int i = 0; i < N; i++) std::cin >> pos[i], pos[i].i = i;
-		init();
-		std::sort(pos, pos + N, cmpi);
-		for (int i = 0; i < N; i++) std::cout << search(pos[i]) << "\n";
+	std::cout << std::fixed;
+	std::cout.precision(13);
+
+
+	/* INPUT & GRAPH INIT */
+	std::cin >> N >> Q1 >> Q2; Q = Q1 + Q2;
+
+	Vpii star(N);
+	for (int i = 0; i < N; i++) {
+		std::cin >> star[i] >> name[i];
+		star[i].i = i;
+		pos[i] = star[i];
 	}
-	return;
+	/* INPUT & GRAPH INIT */
+
+
+	/* VORONOI DIAGRAM & PRIM INIT */
+	Polygon C;
+	for (Pii& p : star) C.push_back(conv(p));
+	Delaunator DTR(C);
+	for (int i = 0; i < DTR.triangles_.size(); i += 3) {
+		const int& a = DTR.points_[DTR.triangles_[i]].i;
+		const int& b = DTR.points_[DTR.triangles_[i + 1]].i;
+		const int& c = DTR.points_[DTR.triangles_[i + 2]].i;
+		DT[a].push_back(b); DT[a].push_back(c);
+		DT[b].push_back(a); DT[b].push_back(c);
+		DT[c].push_back(a); DT[c].push_back(b);
+	}
+	for (int c = 0; c < N; c++) {
+		Vint& I = DT[c];
+		std::sort(I.begin(), I.end());
+		I.erase(unique(I.begin(), I.end()), I.end());
+		Pii sd = star[c];//seed
+		ld mx = 1e7;
+		Segs HP = {
+			Seg(Pos(-mx, -mx), Pos(mx, -mx)),
+			Seg(Pos(mx, -mx), Pos(mx, mx)),
+			Seg(Pos(mx, mx), Pos(-mx, mx)),
+			Seg(Pos(-mx, mx), Pos(-mx, -mx))
+		};
+		for (const int& i : I) {
+			Pii p = star[i];
+			Pii vec = p - sd;
+			ll g = gcd(std::abs(vec.x), std::abs(vec.y));
+			vec /= g;
+			Pos v = ~conv(vec);
+			Pos s = conv(sd), e = conv(p);
+			//Pos v = ~(e - s);
+			Pos m = (s + e) * .5;
+			HP.push_back(Seg(m, m + v));
+		}
+		Segs hpi = half_plane_intersection(HP);
+		if (hpi.size() < 3) continue;
+	}
+	//prim
+	/* VORONOI DIAGRAM & PRIM INIT */
+
+
+	/* KD TREE INIT */
+	memset(V, 0, sizeof V);
+	init();
+	/* KD TREE INIT */
+
+
+	/* QUERY INPUT & VD CELL SEARCH */
+	for (int q = 0; q < Q; q++) {
+		std::cin >> qry[q];
+		if (qry[q].t == 1) {
+			int i = search(qry[q].s);
+			int j = search(qry[q].e);
+			qry[q].u = i; qry[q].p = j;
+		}
+	}
+	/* QUERY INPUT & VD CELL SEARCH */
+
+
+
 }
+int main() { solve(); return 0; }

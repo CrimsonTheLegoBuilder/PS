@@ -20,7 +20,7 @@ typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
-const ll LINF = 1e18;
+const ll LINF = 1e17;
 const ld TOL = 1e-9;
 const ld PI = acos(-1);
 const int LEN = 9e4;
@@ -666,12 +666,13 @@ void init(int s = 0, int e = N - 1, int n = 1) {//divide & conquer
 }
 #define IDX x
 #define DIST y
-Pos search(const Pii& q, ll X = LINF, int n = 1) {//divide & conquer | refer to koosaga
-	ll S = LINF; Pos D;
+Pii search(const Pii& q, ll X = LINF, int n = 1) {//divide & conquer | refer to koosaga
+	ll S = LINF; Pii D = Pii(-1, LINF);
 	int i = -1;
 	if (q != kdtree[n].p) {
 		ll A = (q - kdtree[n].p).Euc();
-		if (A < S) { i = kdtree[n].p.i, S = A; }
+		if (A < X) { i = kdtree[n].p.i, S = A; }
+		else S = X;
 	}
 	if (kdtree[n].spl) {//if dy is dominant
 		if (!cmpy(kdtree[n].p, q)) {//p.y >= t.y
@@ -700,7 +701,7 @@ Pos search(const Pii& q, ll X = LINF, int n = 1) {//divide & conquer | refer to 
 		}
 	}
 	if (D.DIST < S) { i = D.IDX, S = D.DIST; }
-	return Pos(i, S);
+	return Pii(i, S);
 }
 /* KD-TREE */
 

@@ -20,7 +20,7 @@ typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
-const ll LINF = 1e17;
+const ll LINF = 1e18;
 const ld TOL = 1e-9;
 const ld PI = acos(-1);
 const int LEN = 9e4;

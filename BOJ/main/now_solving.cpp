@@ -1,12 +1,4 @@
-﻿//Struct Pos { int x, y, i }
-//Struct Pdd - 보로노이 다이어그램 제작에만 쓰임
-//Class or Struct voronoi diagram - Seed, Cell :: 재홍이가 접근할 일 없도록 구성
-//Class or Struct KDtree - Tree, Pos :: 재홍이가 접근할 일 없도록 구성
-//입력 및 전처리는 전부 기하모듈에서 일어나야하는데 후에 하는 접근은 전부 다른 자료구조들에서 행해짐
-//전처리를 전부 끝내놓고 나면 기하모듈에 접근할 일 없도록 해야함
-//Class or Struct Query - int t, Pos s, Pos e, int u, int p :: 타입, 점 2개, 부모별 번호. 순례끝점 위치는 KDtree 조회 후 i 에 번호 기록
-
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -21,15 +13,15 @@
 #include <complex>
 #include <numeric>
 typedef long long ll;
-//typedef long double ld;
-typedef double ld;
+typedef long double ld;
+//typedef double ld;
 typedef std::vector<int> Vint;
 typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
 const ll LINF = 1e18;
-const ld TOL = 1e-5;
+const ld TOL = 1e-9;
 const ld PI = acos(-1);
 const int LEN = 9e4;
 inline ll sqr(const int& a) { return (ll)a * a; }
@@ -42,21 +34,17 @@ inline ll sq(const ll& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
 inline ld fit(const ld& x, const ld& lo = 0, const ld& hi = 1) { return std::min(hi, std::max(lo, x)); }
 inline ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-inline ll gcd(ll x, ll y, ll z) {
-	x = std::abs(x); y = std::abs(y); z = std::abs(z);
-	ll w = gcd(x, y);
-	return gcd(w, z);
-}
-
-/*
-
-tested in range -1e6 < x, y < 1e6;
-Delaunator - https://github.com/abellgithub/delaunator-cpp/blob/master/include/delaunator.cpp
-
-*/
+//inline ll gcd(ll x, ll y, ll z) {
+//	x = std::abs(x); y = std::abs(y); z = std::abs(z);
+//	ll w = gcd(x, y);
+//	return gcd(w, z);
+//}
 
 int N, M, T, Q, Q1, Q2;
+Vint DT[LEN];//delaunay triangle
+std::string name[LEN];
 
+/* GEOMETRY STRUCT */
 struct Pii {
 	ll x, y; int i;
 	Pii(ll x_ = 0, ll y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
@@ -93,29 +81,15 @@ ll dot(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) * (d3 - d
 ll dot(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pii& d1, const Pii& d2, const Pii& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return sign(cross(d1, d2, d3, d4)); }
-std::vector<Pii> graham_scan(std::vector<Pii>& C) {
-	std::vector<Pii> H;
-	if (C.size() < 3) {
-		std::sort(C.begin(), C.end());
-		return C;
-	}
-	std::swap(C[0], *min_element(C.begin(), C.end()));
-	std::sort(C.begin() + 1, C.end(), [&](const Pii& p, const Pii& q) -> bool {
-		int ret = ccw(C[0], p, q);
-		if (!ret) return (C[0] - p).Euc() < (C[0] - q).Euc();
-		return ret > 0;
-		}
-	);
-	C.erase(unique(C.begin(), C.end()), C.end());
-	int sz = C.size();
-	for (int i = 0; i < sz; i++) {
-		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
-			H.pop_back();
-		H.push_back(C[i]);
-	}
-	return H;
-}
+/* GEOMETRY STRUCT */
 
+/* DELAUNAY TRIANGULATION */
+/*
+
+tested in range -1e6 < x, y < 1e6;
+Delaunator - https://github.com/abellgithub/delaunator-cpp/blob/master/include/delaunator.cpp
+
+*/
 struct Pos {
 	ld x, y; int i;
 	Pos(ld x_ = 0, ld y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
@@ -156,6 +130,7 @@ struct Pos {
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
 Pos conv(const Pii& p) { return Pos(p.x, p.y, p.i); }
+Pii conv(const Pos& p) { ll x = round(p.x); ll y = round(p.y); return Pii(x, y); }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
@@ -647,156 +622,10 @@ private:
 		}
 	}
 };
-struct Linear {//ps[0] -> ps[1] ::
-	Pos ps[2];
-	Pos dir_;
-	const Pos& operator [] (const int& i) const { return ps[i]; }
-	const Pos& dir() const { return dir_; }
-	Linear(Pos a = Pos(0, 0), Pos b = Pos(0, 0)) {
-		ps[0] = a;
-		ps[1] = b;
-		//dir_ = (ps[1] - ps[0]).unit();
-		dir_ = (ps[1] - ps[0]);
-	}
-	bool include(const Pos& p) const { return sign(dir_ / (p - ps[0])) > 0; }
-	friend bool parallel(const Linear& l0, const Linear& l1) { return zero(l0.dir() / l1.dir()); }
-	friend bool same_dir(const Linear& l0, const Linear& l1) { return parallel(l0, l1) && l0.dir() * l1.dir() > 0; }
-	bool operator < (const Linear& l0) const {
-		if (same_dir(*this, l0)) return l0.include(ps[0]);
-		else return cmpq(this->dir(), l0.dir());
-	}
-};
-typedef std::vector<Linear> VHP;
-Pos intersection(const Linear& l1, const Linear& l2) { return intersection(l1[0], l1[1], l2[0], l2[1]); }
-void init(std::vector<Linear>& HP, const ld& mx = 5e9) {
-	HP.push_back(Linear(Pos(-mx, -mx), Pos(mx, -mx)));
-	HP.push_back(Linear(Pos(mx, -mx), Pos(mx, mx)));
-	HP.push_back(Linear(Pos(mx, mx), Pos(-mx, mx)));
-	HP.push_back(Linear(Pos(-mx, mx), Pos(-mx, -mx)));
-	return;
-}
-//std::vector<Pos> half_plane_intersection(std::vector<Linear>& HP) {
-std::vector<Linear> half_plane_intersection(std::vector<Linear>& HP) {
-	auto check = [&](Linear& u, Linear& v, Linear& w) -> bool {
-		return w.include(intersection(u, v));
-		};
-	std::sort(HP.begin(), HP.end());
-	std::deque<Linear> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return {};
-	std::vector<Linear> HPI;
-	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
-	return HPI;
-	//std::vector<Pos> HPI;
-	//for (int i = 0; i < sz; ++i) HPI.push_back(intersection(dq[i], dq[(i + 1) % sz]));
-	//return HPI;
-}
-std::vector<Linear> half_plane_intersection(VHP& P, VHP& Q) {
-	std::vector<Linear> HP;
-	int sz;
-	sz = P.size();
-	for (int i = 0; i < sz; i++) HP.push_back(P[i]);
-	sz = Q.size();
-	for (int i = 0; i < sz; i++) HP.push_back(Q[i]);
-	return half_plane_intersection(HP);
-}
-std::vector<Linear> get_cell(std::vector<Pos>& C, const int& idx, const int f = 1) {
-	int sz = C.size();
-	std::vector<Linear> HP; init(HP);
-	for (int i = 0; i < sz; i++) {
-		if (i == idx) continue;
-		Pos v = ~(C[i] - C[idx]);
-		v *= f;
-		Pos m = (C[i] + C[idx]) * .5;
-		HP.push_back(Linear(m, m + v));
-	}
-	return half_plane_intersection(HP);
-}
-Pii conv(const Pos& p) {
-	ll x = round(p.x);
-	ll y = round(p.y);
-	return Pii(x, y);
-}
+/* DELAUNAY TRIANGULATION */
 
-struct Seg {
-	Pos s, e, dir;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
-	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
-	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
-	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
-	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
-	friend Pos intersection_(const Seg& s1, const Seg& s2) {
-		const Pos& p1 = s1.s, & p2 = s1.e;
-		const Pos& q1 = s2.s, & q2 = s2.e;
-		ld a1 = cross(q1, q2, p1);
-		ld a2 = -cross(q1, q2, p2);
-		return (p1 * a2 + p2 * a1) / (a1 + a2);
-	}
-	bool operator < (const Seg& l) const {
-		if (same_dir(*this, l)) return l.inner(s);
-		bool f0 = O < dir;
-		bool f1 = O < l.dir;
-		if (f0 != f1) return f1;
-		return sign(dir / l.dir) > 0;
-	}
-	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
-	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
-	ld green(const ld& lo = 0, const ld& hi = 1) const {
-		ld d = hi - lo;
-		ld ratio = (lo + hi) * .5;
-		Pos m = p(ratio);
-		return m.y * d * (s.x - e.x);
-	}
-};
-typedef std::vector<Seg> Segs;
-ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
-	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
-	ld det = (q2 - q1) / (p2 - p1);
-	if (zero(det)) return -1;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (f == 1) return fit(a1, 0, 1);
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
-}
-//std::vector<Pos> half_plane_intersection(std::vector<Linear>& HP) {
-Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return {};
-	std::vector<Seg> HPI;
-	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
-	return HPI;
-}
-
-
-Vint DT[LEN];
-Polygon VD[LEN];
+/* KD-TREE */
 Pii pos[LEN];
-
 struct Node {
 	Pii p;//mid point
 	bool spl;//dx < dy ?
@@ -804,7 +633,7 @@ struct Node {
 	Node(Pii P = Pii(0, 0), bool SPL = 0, int SX = 0, int EX = 0, int SY = 0, int EY = 0) :
 		p(P), spl(SPL), sx(SX), ex(EX), sy(SY), ey(EY) {
 	}
-} tree[LEN << 2];//segment tree
+} kdtree[LEN << 2];//segment tree
 bool V[LEN << 2];//visited
 bool cmpx(const Pii& p, const Pii& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pii& p, const Pii& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
@@ -818,47 +647,55 @@ void init(int s = 0, int e = N - 1, int n = 1) {//divide & conquer
 		MINX = std::min(MINX, pos[i].x);
 		MINY = std::min(MINY, pos[i].y);
 	}
-	tree[n].spl = (MAXX - MINX) < (MAXY - MINY);//slope cmp :: dx < dy
-	if (tree[n].spl) std::sort(pos + s, pos + e + 1, cmpy);//if dy is dominant, sort by y
+	kdtree[n].spl = (MAXX - MINX) < (MAXY - MINY);//slope cmp :: dx < dy
+	if (kdtree[n].spl) std::sort(pos + s, pos + e + 1, cmpy);//if dy is dominant, sort by y
 	else std::sort(pos + s, pos + e + 1, cmpx);//if dx is dominant, sort by x
 	V[n] = 1;
-	tree[n] = Node(pos[m], tree[n].spl, MINX, MAXX, MINY, MAXY);
+	kdtree[n] = Node(pos[m], kdtree[n].spl, MINX, MAXX, MINY, MAXY);
 	if (s <= m - 1) init(s, m - 1, n << 1);
 	if (m + 1 <= e) init(m + 1, e, n << 1 | 1);
 	return;
 }
-ll search(const Pii& t, ll X = LINF, int n = 1) {//divide & conquer | refer to koosaga
-	ll S = LINF, A = LINF;
-	if (t != tree[n].p) S = std::min(X, (t - tree[n].p).Euc());
-	if (tree[n].spl) {//if dy is dominant
-		if (!cmpy(tree[n].p, t)) {//p.y >= t.y
-			if (V[n << 1]) A = search(t, S, n << 1);//L search
-			S = std::min(S, A);
-			if (V[n << 1 | 1] && sqr(tree[n << 1 | 1].sy - t.y) < S) A = search(t, S, n << 1 | 1);
+#define IDX x
+#define DIST y
+Pos search(const Pii& q, ll X = LINF, int n = 1) {//divide & conquer | refer to koosaga
+	ll S = LINF; Pos D;
+	int i = -1;
+	if (q != kdtree[n].p) {
+		ll A = (q - kdtree[n].p).Euc();
+		if (A < S) { i = kdtree[n].p.i, S = A; }
+	}
+	if (kdtree[n].spl) {//if dy is dominant
+		if (!cmpy(kdtree[n].p, q)) {//p.y >= t.y
+			if (V[n << 1]) D = search(q, S, n << 1);//L search
+			if (D.DIST < S) { i = D.IDX, S = D.DIST; }
+			if (V[n << 1 | 1] && sqr(kdtree[n << 1 | 1].sy - q.y) < S) D = search(q, S, n << 1 | 1);
 			//if R < MIN, execute R search
 		}
 		else {//p.y < t.y
-			if (V[n << 1 | 1]) A = search(t, S, n << 1 | 1);//R search
-			S = std::min(S, A);
-			if (V[n << 1] && sqr(tree[n << 1].ey - t.y) < S) A = search(t, S, n << 1);
+			if (V[n << 1 | 1]) D = search(q, S, n << 1 | 1);//R search
+			if (D.DIST < S) { i = D.IDX, S = D.DIST; }
+			if (V[n << 1] && sqr(kdtree[n << 1].ey - q.y) < S) D = search(q, S, n << 1);
 			//if L < MIN, execute L search
 		}
 	}
 	else {//if dx is dominant
-		if (!cmpx(tree[n].p, t)) {//p.x >= t.x
-			if (V[n << 1]) A = search(t, S, n << 1);
-			S = std::min(S, A);
-			if (V[n << 1 | 1] && sqr(tree[n << 1 | 1].sx - t.x) < S) A = search(t, S, n << 1 | 1);
+		if (!cmpx(kdtree[n].p, q)) {//p.x >= t.x
+			if (V[n << 1]) D = search(q, S, n << 1);
+			if (D.DIST < S) { i = D.IDX, S = D.DIST; }
+			if (V[n << 1 | 1] && sqr(kdtree[n << 1 | 1].sx - q.x) < S) D = search(q, S, n << 1 | 1);
 		}
 		else {//p.x < t.x
-			if (V[n << 1 | 1]) A = search(t, S, n << 1 | 1);
-			S = std::min(S, A);
-			if (V[n << 1] && sqr(tree[n << 1].ex - t.x) < S) A = search(t, S, n << 1);
+			if (V[n << 1 | 1]) D = search(q, S, n << 1 | 1);
+			if (D.DIST < S) { i = D.IDX, S = D.DIST; }
+			if (V[n << 1] && sqr(kdtree[n << 1].ex - q.x) < S) D = search(q, S, n << 1);
 		}
 	}
-	return std::min(S, A);
+	return Pos(i, S);
 }
+/* KD-TREE */
 
+/* QUERY */
 struct Query {
 	int t;
 	//bool t;
@@ -873,26 +710,36 @@ struct Query {
 		return is;
 	}
 } qry[LEN];
+/* QUERY */
 
-std::string name[LEN];
+//Struct Pos { int x, y, i }
+//Struct Pdd - 보로노이 다이어그램 제작에만 쓰임
+//Class or Struct Delaunay trianlges :: 재홍이가 접근할 일 없도록 구성
+//Class or Struct KDtree - Tree, Pos :: 재홍이가 접근할 일 없도록 구성
+//입력 및 전처리는 전부 기하모듈에서 일어나야하는데 후에 하는 접근은 전부 다른 자료구조들에서 행해짐
+//전처리를 전부 끝내놓고 나면 기하모듈에 접근할 일 없도록 해야함
+//Class or Struct Query - int t, Pos s, Pos e, int u, int p :: 타입, 점 2개, 부모별 번호. 순례끝점 위치는 KDtree 조회 후 i 에 번호 기록
+/* MAIN */
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
 
-
-	/* INPUT & GRAPH INIT */
+	/* INPUT */
 	std::cin >> N >> Q1 >> Q2; Q = Q1 + Q2;
-
 	Vpii star(N);
 	for (int i = 0; i < N; i++) {
 		std::cin >> star[i] >> name[i];
 		star[i].i = i;
 		pos[i] = star[i];
 	}
-	/* INPUT & GRAPH INIT */
+	/* INPUT */
 
+	/* KD TREE INIT */
+	memset(V, 0, sizeof V);
+	init();
+	/* KD TREE INIT */
 
 	/* VORONOI DIAGRAM & PRIM INIT */
 	Polygon C;
@@ -906,48 +753,22 @@ void solve() {
 		DT[b].push_back(a); DT[b].push_back(c);
 		DT[c].push_back(a); DT[c].push_back(b);
 	}
-	for (int c = 0; c < N; c++) {
-		Vint& I = DT[c];
-		std::sort(I.begin(), I.end());
-		I.erase(unique(I.begin(), I.end()), I.end());
-		Pii sd = star[c];//seed
-		ld mx = 1e7;
-		Segs HP = {
-			Seg(Pos(-mx, -mx), Pos(mx, -mx)),
-			Seg(Pos(mx, -mx), Pos(mx, mx)),
-			Seg(Pos(mx, mx), Pos(-mx, mx)),
-			Seg(Pos(-mx, mx), Pos(-mx, -mx))
-		};
-		for (const int& i : I) {
-			Pii p = star[i];
-			Pii vec = p - sd;
-			ll g = gcd(std::abs(vec.x), std::abs(vec.y));
-			vec /= g;
-			Pos v = ~conv(vec);
-			Pos s = conv(sd), e = conv(p);
-			//Pos v = ~(e - s);
-			Pos m = (s + e) * .5;
-			HP.push_back(Seg(m, m + v));
+	for (int i = 0; i < N; i++) {
+		for (const int& j : DT[i]) {
+			//compare name - LCP
+			//name[i] ? name[j]
+			//connect node i - j
 		}
-		Segs hpi = half_plane_intersection(HP);
-		if (hpi.size() < 3) continue;
 	}
-	//prim
+	//mst - PRIM
 	/* VORONOI DIAGRAM & PRIM INIT */
-
-
-	/* KD TREE INIT */
-	memset(V, 0, sizeof V);
-	init();
-	/* KD TREE INIT */
-
 
 	/* QUERY INPUT & VD CELL SEARCH */
 	for (int q = 0; q < Q; q++) {
 		std::cin >> qry[q];
 		if (qry[q].t == 1) {
-			int i = search(qry[q].s);
-			int j = search(qry[q].e);
+			int i = search(qry[q].s).x;
+			int j = search(qry[q].e).x;
 			qry[q].u = i; qry[q].p = j;
 		}
 	}
@@ -956,4 +777,5 @@ void solve() {
 
 
 }
-int main() { solve(); return 0; }
+int main() { solve(); return 0; }//boj18349 The Creation
+/* MAIN */

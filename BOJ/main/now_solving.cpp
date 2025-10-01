@@ -53,6 +53,7 @@ Vint DT[LEN];//delaunay triangle
 std::string name[LEN];
 
 /* GEOMETRY STRUCT */
+/* COORD */
 struct Pii {
 	ll x, y; int i;
 	Pii(ll x_ = 0, ll y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
@@ -89,7 +90,7 @@ ll dot(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) * (d3 - d
 ll dot(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pii& d1, const Pii& d2, const Pii& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return sign(cross(d1, d2, d3, d4)); }
-/* GEOMETRY STRUCT */
+/* COORD */
 
 /* DELAUNAY TRIANGULATION */
 /*
@@ -704,6 +705,7 @@ Pii search(const Pii& q, ll X = LINF, int n = 1) {//divide & conquer | refer to 
 	return Pii(i, S);
 }
 /* KD-TREE */
+/* GEOMETRY STRUCT */
 
 /* QUERY */
 struct Query {
@@ -721,6 +723,12 @@ struct Query {
 	}
 } qry[LEN << 1];
 /* QUERY */
+
+/* LCP */
+/* LCP */
+
+/* GRAPH */
+/* GRAPH */
 
 /* MAIN */
 void solve() {

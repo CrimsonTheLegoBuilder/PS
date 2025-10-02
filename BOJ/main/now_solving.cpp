@@ -724,11 +724,40 @@ struct Query {
 } qry[LEN << 1];
 /* QUERY */
 
-/* LCP */
-/* LCP */
+/* GRAPH */
+struct Info {
+	int i;
+	ll c;
+	bool f;
+	Info(int i_ = 0, ll c_ = 0) : i(i_), c(c_) {}
+	bool operator < (const Info& x) const { return c > x.c; }
+};
+std::vector<Info> G[LEN];
+std::priority_queue<Info> PQ;
+Vpii con;
+int MST[LEN];
+ll prim(int i) {
+	ll cost = 0;
+	con.clear();
+	memset(MST, -1, sizeof MST);
+	PQ.push(Info(i, 0));
+	while (PQ.size()) {
+		Info v = PQ.top(); PQ.pop();
+		if (~MST[v.i]) continue;
+		MST[v.i] = 1;
+		for (const Info& w : G[v.i]) {
+			if (!~MST[w.i]) {
+				PQ.push(Info(w.i, w.c));
+				con.push_back(Pii(v.i, w.i));
+			}
+		}
+	}
+	return 1;
+}
+/* GRAPH */
 
-/* GRAPH */
-/* GRAPH */
+/* LCP */
+/* LCP */
 
 /* MAIN */
 void solve() {
@@ -752,7 +781,7 @@ void solve() {
 	init();
 	/* KD TREE INIT */
 
-	/* DELAUNAY & PRIM INIT */
+	/* DELAUNAY & PRIM */
 	Polygon C;
 	for (Pii& p : star) C.push_back(conv(p));
 	Delaunator DTR(C);
@@ -767,12 +796,13 @@ void solve() {
 	for (int i = 0; i < N; i++) {
 		for (const int& j : DT[i]) {
 			//compare name - LCP
-			//name[i] ? name[j]
-			//connect node i - j
+			ll c = 1;/* name[i] ? name[j] */
+			G[i].push_back(Info(j, c));
+			G[j].push_back(Info(i, c));
 		}
 	}
-	//mst - PRIM
-	/* DELAUNAY & PRIM INIT */
+	prim(0);
+	/* DELAUNAY & PRIM */
 
 	/* QUERY INPUT & VD CELL SEARCH */
 	for (int q = 0; q < Q; q++) {

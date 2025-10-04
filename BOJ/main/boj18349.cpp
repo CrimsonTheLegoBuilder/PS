@@ -1,4 +1,4 @@
-ï»¿#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -578,6 +578,77 @@ private:
 		}
 	}
 };
+struct Seg {
+	Pos s, e;
+	int i;
+	Pos dir;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1) : s(s_), e(e_), i(i_) { dir = e - s; }
+	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
+	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
+	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
+	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
+	friend Pos intersection_(const Seg& s1, const Seg& s2) {
+		const Pos& p1 = s1.s, & p2 = s1.e;
+		const Pos& q1 = s2.s, & q2 = s2.e;
+		ld a1 = cross(q1, q2, p1);
+		ld a2 = -cross(q1, q2, p2);
+		return (p1 * a2 + p2 * a1) / (a1 + a2);
+	}
+	bool operator < (const Seg& l) const {
+		if (same_dir(*this, l)) return l.inner(s);
+		bool f0 = O < dir;
+		bool f1 = O < l.dir;
+		if (f0 != f1) return f1;
+		return sign(dir / l.dir) > 0;
+	}
+	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
+	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
+	ld green(const ld& lo = 0, const ld& hi = 1) const {
+		ld d = hi - lo;
+		ld ratio = (lo + hi) * .5;
+		Pos m = p(ratio);
+		return m.y * d * (s.x - e.x);
+	}
+};
+typedef std::vector<Seg> Segs;
+ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
+ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
+	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
+	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
+	if (f == 1) return fit(a1, 0, 1);
+	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	return -1;
+}
+//Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
+Seg bisector(const Pos& p, const Pos& q, const int& i) {
+	Pos m = (p + q) * .5;
+	Pos v = ~(q - p);
+	return Seg(m, m + v, i);
+}
+Vint half_plane_intersection(Segs& HP, const bool& srt = 1) {
+	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
+		return w.inner(intersection_(u, v));
+		};
+	if (srt) std::sort(HP.begin(), HP.end());
+	std::deque<Seg> dq;
+	int sz = HP.size();
+	for (int i = 0; i < sz; ++i) {
+		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
+		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
+		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
+		dq.push_back(HP[i]);
+	}
+	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
+	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
+	sz = dq.size();
+	if (sz < 3) return {};
+	Vint HPI;
+	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i].i);
+	return HPI;
+}
 /* DELAUNAY TRIANGULATION */
 
 /* KD-TREE */
@@ -807,10 +878,10 @@ private:
 public:
 	SegmentTree(const std::vector<int>& data);
 
-	// ì  ì—…ë°ì´íŠ¸: index ìœ„ì¹˜ì˜ ê°’ì„ valueë¡œ ë³€ê²½
+	// Á¡ ¾÷µ¥ÀÌÆ®: index À§Ä¡ÀÇ °ªÀ» value·Î º¯°æ
 	void update(int index, int value);
 
-	// êµ¬ê°„ ìµœì†Œê°’ ì¿¼ë¦¬: [l, r)
+	// ±¸°£ ÃÖ¼Ò°ª Äõ¸®: [l, r)
 	int query(int l, int r);
 };
 
@@ -828,14 +899,14 @@ void manber_myers(const std::string& s);
 void get_lcp(const std::string& s);
 int C_slow(int i, int j) {
 	std::string S = name[i] + "#" + name[j];
-	str_len = S.length();
+	N = S.length();
 
 	manber_myers(S);
 	get_lcp(S);
 
 	int ret = -1;
 	int max_len = -1;
-	for (int k = 1; k < str_len; ++k) {
+	for (int k = 1; k < N; ++k) {
 		if ((SA[k] < name[i].length()) == (SA[k - 1] < name[i].length())) continue;
 		if (LCP[k] > max_len) {
 			ret = SA[k - 1];
@@ -884,12 +955,12 @@ void solve() {
 #ifdef __DEBUG_MODE__
 	std::cout << "make MST tree!\n";
 #endif
-//	Polygon poly;
-//	for (Pii& p : star) poly.push_back(conv(p));
-//
-//#ifdef __DEBUG_MODE__
-//	std::cout << "	Delaunay!\n";
-//#endif
+	Polygon poly;
+	for (Pii& p : star) poly.push_back(conv(p));
+
+#ifdef __DEBUG_MODE__
+	std::cout << "	Delaunay!\n";
+#endif
 //	Delaunator DTR(poly);
 //	for (int i = 0; i < DTR.triangles_.size(); i += 3) {
 //		const int& a = DTR.points_[DTR.triangles_[i]].i;
@@ -910,11 +981,18 @@ void solve() {
 //		}
 //	}
 	for (int i = 0; i < N; i++) {
+		Vint I;
+		Segs hp;
 		for (int j = 0; j < N; j++) {
 			if (i == j) continue;
-			ll c = C_slow(i, j);
-			G[i].push_back({ j, c });
-			G[j].push_back({ i, c });
+			hp.push_back(bisector(poly[i], poly[j], j));
+		}
+		I = half_plane_intersection(hp);
+		for (const int& ii : I) {
+			if (i == ii) continue;
+			ll c = C_slow(i, ii);
+			G[i].push_back({ ii, c });
+			G[ii].push_back({ i, c });
 		}
 	}
 #ifdef __DEBUG_MODE__
@@ -968,21 +1046,21 @@ SegmentTree* minTree;
 SegmentTree::SegmentTree(const std::vector<int>& data) {
 	int n = data.size();
 	size = 1;
-	while (size < n) size *= 2; // ë‹¤ìŒ 2ì˜ ì œê³± í¬ê¸°ë¡œ
+	while (size < n) size *= 2; // ´ÙÀ½ 2ÀÇ Á¦°ö Å©±â·Î
 	tree.assign(2 * size, INT_MAX);
 
-	// Leaf ë…¸ë“œ ì´ˆê¸°í™”
+	// Leaf ³ëµå ÃÊ±âÈ­
 	for (int i = 0; i < n; ++i) {
 		tree[size + i] = data[i];
 	}
 
-	// ë‚´ë¶€ ë…¸ë“œ ê³„ì‚°
+	// ³»ºÎ ³ëµå °è»ê
 	for (int i = size - 1; i >= 1; --i) {
 		tree[i] = std::min(tree[2 * i], tree[2 * i + 1]);
 	}
 }
 
-// ì  ì—…ë°ì´íŠ¸: index ìœ„ì¹˜ì˜ ê°’ì„ valueë¡œ ë³€ê²½
+// Á¡ ¾÷µ¥ÀÌÆ®: index À§Ä¡ÀÇ °ªÀ» value·Î º¯°æ
 void SegmentTree::update(int index, int value) {
 	int pos = size + index;
 	tree[pos] = value;
@@ -993,15 +1071,15 @@ void SegmentTree::update(int index, int value) {
 	}
 }
 
-// êµ¬ê°„ ìµœì†Œê°’ ì¿¼ë¦¬: [l, r)
+// ±¸°£ ÃÖ¼Ò°ª Äõ¸®: [l, r)
 int SegmentTree::query(int l, int r) {
 	l += size;
 	r += size;
 	int res = INT_MAX;
 
 	while (l < r) {
-		if (l % 2 == 1) res = std::min(res, tree[l++]); // ì˜¤ë¥¸ìª½ ìì‹
-		if (r % 2 == 1) res = std::min(res, tree[--r]); // ì™¼ìª½ ìì‹
+		if (l % 2 == 1) res = std::min(res, tree[l++]); // ¿À¸¥ÂÊ ÀÚ½Ä
+		if (r % 2 == 1) res = std::min(res, tree[--r]); // ¿ŞÂÊ ÀÚ½Ä
 		l /= 2;
 		r /= 2;
 	}
@@ -1106,24 +1184,24 @@ int naive_query(int i, int j) {
 	if (A.empty() || B.empty()) return -1;
 
 	int ans = 0;
-	int pb = 0; // Bì—ì„œ lower_boundë¥¼ ê°€ë¦¬í‚¤ë„ë¡ ì „ì§„ë§Œ í•˜ëŠ” í¬ì¸í„°
+	int pb = 0; // B¿¡¼­ lower_bound¸¦ °¡¸®Å°µµ·Ï ÀüÁø¸¸ ÇÏ´Â Æ÷ÀÎÅÍ
 
 	auto eval_pair = [&](int l, int r) {
-		if (l == r) return; // ë™ì¼ ë­í¬ë©´ ìŠ¤í‚µ (LCP ì •ì˜ìƒ ìê¸° ìì‹ )
-		int L = std::min(l, r) + 1; // LCP êµ¬ê°„: (min, max] => [min+1, max+1)
+		if (l == r) return; // µ¿ÀÏ ·©Å©¸é ½ºÅµ (LCP Á¤ÀÇ»ó ÀÚ±â ÀÚ½Å)
+		int L = std::min(l, r) + 1; // LCP ±¸°£: (min, max] => [min+1, max+1)
 		int R = std::max(l, r) + 1;
 		int v = minTree->query(L, R);
 		if (v > ans) ans = v;
 		};
 
 	for (int a : A) {
-		// Bì—ì„œ lower_bound(a) ìœ„ì¹˜ê¹Œì§€ pb ì „ì§„
+		// B¿¡¼­ lower_bound(a) À§Ä¡±îÁö pb ÀüÁø
 		while (pb < (int)B.size() && B[pb] < a) ++pb;
 
-		// í›„ë³´ 1: lower_bound ìœ„ì¹˜
+		// ÈÄº¸ 1: lower_bound À§Ä¡
 		if (pb < (int)B.size()) eval_pair(a, B[pb]);
 
-		// í›„ë³´ 2: lower_bound ë°”ë¡œ ì´ì „ (ê°€ê¹Œìš´ ì´ì›ƒ)
+		// ÈÄº¸ 2: lower_bound ¹Ù·Î ÀÌÀü (°¡±î¿î ÀÌ¿ô)
 		if (pb > 0) eval_pair(a, B[pb - 1]);
 	}
 

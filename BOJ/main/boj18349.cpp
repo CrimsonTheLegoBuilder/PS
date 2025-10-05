@@ -23,7 +23,7 @@ const ld INF = 1e18;
 const ll LINF = 1e18;
 const ld TOL = 1e-9;
 const ld PI = acos(-1);
-const int LEN = 9e4;
+const int LEN = 1e5;
 inline ll sqr(const int& a) { return (ll)a * a; }
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
@@ -578,62 +578,48 @@ private:
 		}
 	}
 };
-struct Seg {
-	Pos s, e;
+struct Linear {//ps[0] -> ps[1] ::
+	Pos ps[2];
 	int i;
-	Pos dir;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1) : s(s_), e(e_), i(i_) { dir = e - s; }
-	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
-	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
-	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
-	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
-	friend Pos intersection_(const Seg& s1, const Seg& s2) {
-		const Pos& p1 = s1.s, & p2 = s1.e;
-		const Pos& q1 = s2.s, & q2 = s2.e;
-		ld a1 = cross(q1, q2, p1);
-		ld a2 = -cross(q1, q2, p2);
-		return (p1 * a2 + p2 * a1) / (a1 + a2);
+	Pos dir_;
+	const Pos& operator [] (const int& i) const { return ps[i]; }
+	const Pos& dir() const { return dir_; }
+	Linear(Pos a = Pos(0, 0), Pos b = Pos(0, 0), int i_ = -1) {
+		ps[0] = a;
+		ps[1] = b;
+		i = i_;
+		//dir_ = (ps[1] - ps[0]).unit();
+		dir_ = (ps[1] - ps[0]);
 	}
-	bool operator < (const Seg& l) const {
-		if (same_dir(*this, l)) return l.inner(s);
-		bool f0 = O < dir;
-		bool f1 = O < l.dir;
-		if (f0 != f1) return f1;
-		return sign(dir / l.dir) > 0;
-	}
-	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
-	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
-	ld green(const ld& lo = 0, const ld& hi = 1) const {
-		ld d = hi - lo;
-		ld ratio = (lo + hi) * .5;
-		Pos m = p(ratio);
-		return m.y * d * (s.x - e.x);
+	bool include(const Pos& p) const { return sign(dir_ / (p - ps[0])) > 0; }
+	friend bool parallel(const Linear& l0, const Linear& l1) { return zero(l0.dir() / l1.dir()); }
+	friend bool same_dir(const Linear& l0, const Linear& l1) { return parallel(l0, l1) && l0.dir() * l1.dir() > 0; }
+	bool operator < (const Linear& l0) const {
+		if (same_dir(*this, l0)) return l0.include(ps[0]);
+		else return cmpq(this->dir(), l0.dir());
 	}
 };
-typedef std::vector<Seg> Segs;
-ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
-	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
-	ld det = (q2 - q1) / (p2 - p1);
-	if (zero(det)) return -1;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (f == 1) return fit(a1, 0, 1);
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
+typedef std::vector<Linear> VHP;
+Pos intersection(const Linear& l1, const Linear& l2) { return intersection(l1[0], l1[1], l2[0], l2[1]); }
+void init(std::vector<Linear>& HP, const ld& mx = 5e9) {
+	HP.push_back(Linear(Pos(-mx, -mx), Pos(mx, -mx)));
+	HP.push_back(Linear(Pos(mx, -mx), Pos(mx, mx)));
+	HP.push_back(Linear(Pos(mx, mx), Pos(-mx, mx)));
+	HP.push_back(Linear(Pos(-mx, mx), Pos(-mx, -mx)));
+	return;
 }
-//Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
-Seg bisector(const Pos& p, const Pos& q, const int& i) {
+Linear bisector(const Pos& p, const Pos& q, const int& i) {
 	Pos m = (p + q) * .5;
 	Pos v = ~(q - p);
-	return Seg(m, m + v, i);
+	return Linear(m, m + v, i);
 }
-Vint half_plane_intersection(Segs& HP, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
+Vint half_plane_intersection(std::vector<Linear>& HP) {
+//std::vector<Linear> half_plane_intersection(std::vector<Linear>& HP) {
+	auto check = [&](Linear& u, Linear& v, Linear& w) -> bool {
+		return w.include(intersection(u, v));
 		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
+	std::sort(HP.begin(), HP.end());
+	std::deque<Linear> dq;
 	int sz = HP.size();
 	for (int i = 0; i < sz; ++i) {
 		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
@@ -648,6 +634,9 @@ Vint half_plane_intersection(Segs& HP, const bool& srt = 1) {
 	Vint HPI;
 	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i].i);
 	return HPI;
+	//std::vector<Pos> HPI;
+	//for (int i = 0; i < sz; ++i) HPI.push_back(intersection(dq[i], dq[(i + 1) % sz]));
+	//return HPI;
 }
 /* DELAUNAY TRIANGULATION */
 
@@ -767,8 +756,8 @@ struct Node {
 	Node* l, * r, * p;
 	int s; // size
 	bool f; // flip
-	int v, i;
-	ll max;
+	int i;
+	ll v, max;
 	void update();
 	bool is_root();
 	bool is_left();
@@ -867,9 +856,10 @@ int str_len, SA[SZ], t, g[SZ], tg[SZ], RANK[SZ];
 std::vector<int> LCP;
 
 // points
-int cnt = 0, is_long[CNT], num[BKT], idx[SZ];
+int cnt = 0, long_id[CNT], num[BKT], idx[SZ];
 std::vector<int> points[CNT];
 int cache[BKT][BKT], pre[BKT][SZ];
+
 class SegmentTree {
 private:
 	int size;
@@ -899,14 +889,14 @@ void manber_myers(const std::string& s);
 void get_lcp(const std::string& s);
 int C_slow(int i, int j) {
 	std::string S = name[i] + "#" + name[j];
-	N = S.length();
+	str_len = S.length();
 
 	manber_myers(S);
 	get_lcp(S);
 
 	int ret = -1;
 	int max_len = -1;
-	for (int k = 1; k < N; ++k) {
+	for (int k = 1; k < str_len; ++k) {
 		if ((SA[k] < name[i].length()) == (SA[k - 1] < name[i].length())) continue;
 		if (LCP[k] > max_len) {
 			ret = SA[k - 1];
@@ -972,7 +962,7 @@ void solve() {
 //	}
 //	for (int i = 0; i < N; i++) {
 //		for (const int& j : DT[i]) {
-//			ll c = C_slow(i, j);
+//			ll c = C(i, j);
 //#ifdef __DEBUG_MODE__
 //			std::cout << "edge info: " << i << ' ' << j << ' ' << c << '\n';
 //#endif
@@ -982,7 +972,7 @@ void solve() {
 //	}
 	for (int i = 0; i < N; i++) {
 		Vint I;
-		Segs hp;
+		std::vector<Linear> hp;
 		for (int j = 0; j < N; j++) {
 			if (i == j) continue;
 			hp.push_back(bisector(poly[i], poly[j], j));
@@ -1034,7 +1024,7 @@ void solve() {
 #endif
 			std::cout << lct.query(u, p) << '\n';
 		}
-		if (qry[q].t == 2) lct.change_parent(u, p, C_slow(u, p) * (star[u] - star[p]).Euc());
+		if (qry[q].t == 2) lct.change_parent(u, p, C(u, p) * (star[u] - star[p]).Euc());
 	}
 }
 int main() { solve(); return 0; }//boj18349 The Creation
@@ -1059,8 +1049,6 @@ SegmentTree::SegmentTree(const std::vector<int>& data) {
 		tree[i] = std::min(tree[2 * i], tree[2 * i + 1]);
 	}
 }
-
-// 점 업데이트: index 위치의 값을 value로 변경
 void SegmentTree::update(int index, int value) {
 	int pos = size + index;
 	tree[pos] = value;
@@ -1070,16 +1058,14 @@ void SegmentTree::update(int index, int value) {
 		tree[pos] = std::min(tree[2 * pos], tree[2 * pos + 1]);
 	}
 }
-
-// 구간 최소값 쿼리: [l, r)
 int SegmentTree::query(int l, int r) {
 	l += size;
 	r += size;
 	int res = INT_MAX;
 
 	while (l < r) {
-		if (l % 2 == 1) res = std::min(res, tree[l++]); // 오른쪽 자식
-		if (r % 2 == 1) res = std::min(res, tree[--r]); // 왼쪽 자식
+		if (l % 2 == 1) res = std::min(res, tree[l++]); // right child
+		if (r % 2 == 1) res = std::min(res, tree[--r]); // left child
 		l /= 2;
 		r /= 2;
 	}
@@ -1115,7 +1101,7 @@ void get_lcp(const std::string& s) {
 		int k = RANK[i];
 		if (k) {
 			j = SA[k - 1];
-			while (s[+len] != '#' &&
+			while (s[i + len] != '#' &&
 				s[j + len] != '#' &&
 				s[i + len] == s[j + len]) ++len;
 			LCP[k] = len;
@@ -1131,10 +1117,10 @@ void preprocess(const std::vector<std::string>& data) {
 			idx[S.size() + j] = i + 1;
 		}
 		if (data[i].length() > BKT) {
-			is_long[i + 1] = cnt;
+			long_id[i + 1] = cnt;
 			num[cnt++] = i + 1;
 		}
-		else is_long[i + 1] = -1;
+		else long_id[i + 1] = -1;
 
 		S += data[i] + "#";
 	}
@@ -1142,37 +1128,35 @@ void preprocess(const std::vector<std::string>& data) {
 	manber_myers(S);
 	get_lcp(S);
 
-	// for (int i = 0; i < str_len; ++i) {
-	// 	std::cout << LCP[i] << ' ';
-	// } std::cout << '\n';
-
-	//for (int i = 0; i < str_len; ++i) {
-	//	std::cout << SA[i] << ' ';
-	//	for (int j = 0; j < LCP[i]; ++j) {
-	//		std::cout << S[SA[i] + j];
-	//	} std::cout << '\n';
-	//} std::cout << '\n';
-
 	minTree = new SegmentTree(LCP);
 
-	for (int k = 0, i, j; k < S.length(); ++k) {
+	// initialize cache to 0
+	memset(cache, 0, sizeof cache);
+
+	// last seen SA position for each long string id (0..cnt-1)
+	std::vector<int> last_seen(cnt, -1);
+
+	for (int k = 0, i, j; k < (int)S.length(); ++k) {
 		j = SA[k];
 		if (S[j] == '#') continue;
 		i = idx[j];
 		points[i].push_back(k);
-		if (!is_long[i]) continue;
-		for (int l = 0; l < cnt; ++l) { // TODO: chaching
-			// need to be cached: query with long string and long string
-			// not implemented
+		if (long_id[i] == -1) continue; // short string
+		int lid = long_id[i];
+
+		// update cache with all previously seen long strings
+		for (int t = 0; t < cnt; ++t) {
+			if (last_seen[t] == -1) continue;
+			int L = std::min(k, last_seen[t]) + 1;
+			int R = std::max(k, last_seen[t]) + 1;
+			int v = minTree->query(L, R);
+			if (v > cache[lid][t]) {
+				cache[lid][t] = v;
+				cache[t][lid] = v;
+			}
 		}
+		last_seen[lid] = k;
 	}
-
-	//for (int i = 0; i <= data.size(); ++i) {
-	//	std::cout << "points[" << i << "]: ";
-	//	for (const int& p : points[i]) std::cout << p << ' ';
-	//	std::cout << '\n';
-	//}
-
 }
 
 // two pointer swipping through points[i] and points[j]
@@ -1208,20 +1192,46 @@ int naive_query(int i, int j) {
 	return ans;
 }
 int bound_query(int i, int j) {
-	// two pointer swipping through points[i] and points[j]
-	// but one string is too long to search naively, so do it fast with binary search!
-	std::cout << "bound_query\n";
-	return -1;
+	if (~long_id[i + 1]) std::swap(i, j);
+	const auto& A = points[i + 1]; // short
+	const auto& B = points[j + 1]; // long
+	if (A.empty() || B.empty()) return -1;
+
+	int ans = 0;
+
+	auto eval_pair = [&](int l, int r) {
+		if (l == r) return;                 // 같은 랭크면 스킵
+		int L = std::min(l, r) + 1;         // LCP 구간: (min, max] -> [min+1, max+1)
+		int R = std::max(l, r) + 1;         // SegmentTree는 [l, r) 이므로 그대로 전달
+		int v = minTree->query(L, R);
+		if (v > ans) ans = v;
+		};
+
+	for (int a : A) {
+		auto it = std::lower_bound(B.begin(), B.end(), a);
+
+		// 후보 1: lower_bound 위치
+		if (it != B.end()) eval_pair(a, *it);
+
+		// 후보 2: lower_bound 바로 이전
+		if (it != B.begin()) {
+			int b = *std::prev(it);
+			eval_pair(a, b);
+		}
+
+		if (ans == 0) return 0; // 더 줄어들 일 없음 → 조기 종료
+	}
+
+	return ans;
 }
-int cache_query(int i, int j) {
-	std::cout << "cache query\n";
-	return cache[is_long[i]][is_long[j]];
-}
+int cache_query(int i, int j) { return cache[long_id[i + 1]][long_id[j + 1]]; }
+
 int C(int i, int j) {
-	if (!~is_long[i + 1] && !~is_long[j + 1]) return naive_query(i, j);
-	if (~is_long[i + 1] && ~is_long[j + 1]) return cache_query(i, j);
+	if (!~long_id[i + 1] && !~long_id[j + 1]) return naive_query(i, j);
+	if (~long_id[i + 1] && ~long_id[j + 1]) return cache_query(i, j);
 	return bound_query(i, j);
 }
+
 void Node::update() {
 	s = 1;
 	max = v;

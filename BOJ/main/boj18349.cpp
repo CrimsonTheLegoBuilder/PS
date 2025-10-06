@@ -13,13 +13,13 @@
 #include <complex>
 #include <numeric>
 typedef long long ll;
-typedef long double ld;
-//typedef double ld;
+//typedef long double ld;
+typedef double ld;
 typedef std::vector<int> Vint;
 typedef std::vector<ll> Vll;
 const ld INF = 1e18;
 const ll LINF = 1e18;
-const ld TOL = 1e-9;
+const ld TOL = 1e-7;
 const ld PI = acos(-1);
 const int LEN = 9e4;
 inline ll sqr(const int& a) { return (ll)a * a; }
@@ -32,6 +32,27 @@ inline ll sq(const ll& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
 inline ld fit(const ld& x, const ld& lo = 0, const ld& hi = 1) { return std::min(hi, std::max(lo, x)); }
 inline ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
+
+#include <chrono>
+using clk = std::chrono::steady_clock;
+
+struct TimeGuard {
+	const char* tag;
+	long long limit_ms;
+	clk::time_point st;
+	TimeGuard(const char* tag_, long long limit_ms_)
+		: tag(tag_), limit_ms(limit_ms_), st(clk::now()) {
+	}
+	~TimeGuard() {
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(clk::now() - st).count();
+		if (ms > limit_ms) {
+			fprintf(stderr, "[TimeGuard] %s took %lld ms (> %lld ms)\n", tag, ms, limit_ms);
+			assert(false && "Time limit exceeded inside function");
+		}
+	}
+};
+#define TIME_GUARD(NAME, MS) TimeGuard __tg_##__LINE__{NAME, MS}
+
 
 int N, M, T, Q, Q1, Q2;
 Vint DT[LEN];//delaunay triangle
@@ -655,18 +676,45 @@ namespace Geo {
 }
 using namespace Geo;
 
-int C(int i, int j) {
-	int ret = 0;
-	for (int l = 0; l < name[i].length(); ++l) {
-		for (int r = l; r < name[i].length(); ++r) {
-			int len = r - l + 1;
-			if (name[j].find(name[i].substr(l, len)) != std::string::npos) {
-				ret = std::max(ret, len);
+class SparseTable {
+public:
+	int n;
+	std::vector<int> lg;
+	std::vector<std::vector<int>> st;
+
+	SparseTable() : n(0) {}
+	SparseTable(const std::vector<int>& a) { build(a); }
+
+	void build(const std::vector<int>& a) {
+		n = (int)a.size();
+		if (n == 0) return;
+		lg.assign(n + 1, 0);
+		for (int i = 2; i <= n; ++i) lg[i] = lg[i >> 1] + 1;
+		int K = lg[n] + 1;
+		st.assign(K, std::vector<int>(n));
+		st[0] = a;
+		for (int k = 1; k < K; ++k) {
+			int len = 1 << (k - 1);
+			for (int i = 0; i + (1 << k) <= n; ++i) {
+				st[k][i] = std::min(st[k - 1][i], st[k - 1][i + len]);
 			}
 		}
 	}
-	return ret;
-}
+
+	// query minimum on [l, r) (same semantics as previous SegmentTree)
+	int query(int l, int r) const {
+		if (l >= r) return INT_MAX;
+		int len = r - l;
+		int k = lg[len];
+		return std::min(st[k][l], st[k][r - (1 << k)]);
+	}
+};
+
+// global RMQ instance
+SparseTable* rmq = nullptr;
+
+void preprocess(const std::vector<std::string>&);
+int C(int i, int j);
 
 const int LCT_SZ = 90'001;
 
@@ -711,8 +759,7 @@ struct LinkCutTree {
 
 LinkCutTree lct;
 
-int MST[1001], adj[1001][1001], depth[1001], parent[1001], B[1001], iB[1001];
-ll weight[1001];
+int MST[LEN], B[LEN], iB[LEN];
 struct Edge { int v; ll w; };
 struct Info {
 	int i, p;
@@ -724,7 +771,7 @@ struct Info {
 		return i > x.i;
 	}
 };
-std::vector<Edge> G[1001];
+std::vector<Edge> G[LEN];
 std::priority_queue<Info> PQ;
 
 void prim() {
@@ -761,6 +808,23 @@ void prim() {
 	}
 }
 
+Delaunator build_delaunay(const Polygon& poly) {
+	TIME_GUARD("Delaunay", 1000);
+	Delaunator DTR(poly);
+	return DTR;
+}
+
+void kd_init() {
+	TIME_GUARD("KD-Init", 1000);
+	Geo::init();
+}
+
+int kd_search(const Pii& q) {
+	TIME_GUARD("KD-Search-Batch", 1);
+	return Geo::search(q).IDX;
+}
+
+
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -776,26 +840,7 @@ void solve() {
 		pos[i] = star[i];
 		P[i] = { (ld)star[i].x, (ld)star[i].y };
 	}
-	//for (int i = 0; i < N; i++) {
-	//	ld BND = 1e8;
-	//	VHP hp = {
-	//		Linear({ -BND, -BND }, { BND, -BND }),
-	//		Linear({ BND, -BND }, { BND, BND }),
-	//		Linear({ BND, BND }, { -BND, BND }),
-	//		Linear({ -BND, BND }, { -BND, -BND })
-	//	};
-	//	for (int j = 0; j < N; j++) {
-	//		if (i == j) continue;
-	//		hp.push_back(bisector(P[i], P[j], j));
-	//	}
-	//	Vint res = half_plane_intersection(hp);
-	//	for (const int& j : res) {
-	//		//connect i, j
-	//		if (j == -1) continue;
-	//		G[i].push_back({ j, C(i, j) });
-	//		G[j].push_back({ i, C(i, j) });
-	//	}
-	//}
+	preprocess(name);
 
 	if (N < 3) { assert(0); }
 	else {
@@ -832,6 +877,7 @@ void solve() {
 			for (Pii& p : star) poly.push_back(conv(p));
 
 			Delaunator DTR(poly);
+			//Delaunator DTR = build_delaunay(poly);
 			for (int i = 0; i < DTR.triangles_.size(); i += 3) {
 				const int& a = DTR.points_[DTR.triangles_[i]].i;
 				const int& b = DTR.points_[DTR.triangles_[i + 1]].i;
@@ -840,8 +886,18 @@ void solve() {
 				DT[b].push_back(a); DT[b].push_back(c);
 				DT[c].push_back(a); DT[c].push_back(b);
 			}
-			for (int i = 0; i < N; i++) {
+			// deduplicate neighbor lists produced by triangles (an edge may appear in two adjacent triangles)
+			for (int i = 0; i < N; ++i) {
+				auto& v = DT[i];
+				if (v.empty()) continue;
+				std::sort(v.begin(), v.end());
+				v.erase(std::unique(v.begin(), v.end()), v.end());
+			}
+
+			// insert each undirected edge once (i < j) to avoid duplicates
+			for (int i = 0; i < N; ++i) {
 				for (const int& j : DT[i]) {
+					if (i >= j) continue; // ensure single insertion per undirected edge
 					ll c = C(i, j);
 					G[i].push_back({ j, c });
 					G[j].push_back({ i, c });
@@ -851,7 +907,8 @@ void solve() {
 	}
 	prim();
 	memset(V, 0, sizeof V);
-	init();
+	Geo::init();
+	//kd_init();
 
 	for (int q = 0; q < Q; ++q) {
 		std::cin >> T;
@@ -862,6 +919,8 @@ void solve() {
 			//int ei = get_min_dist_pos(star, e);
 			int si = search(s).IDX;
 			int ei = search(e).IDX;
+			//int si = kd_search(s);
+			//int ei = kd_search(e);
 			assert(si != -1);
 			assert(ei != -1);
 			std::cout << lct.query(si, ei) << '\n';
@@ -878,6 +937,177 @@ void solve() {
 
 int main() { solve(); return 0; }//boj18349 The Creation
 
+const int CNT = 88'889;
+const int S_LEN = 202'021;
+const int SZ = CNT + S_LEN + 10;
+const int BKT = 450;
+
+int str_len, SA[SZ], t, g[SZ], tg[SZ], RANK[SZ];
+std::vector<int> LCP;
+
+// points
+int cnt = 0, long_id[CNT], num[BKT], idx[SZ];
+std::vector<int> points[CNT];
+int cache[BKT][BKT];
+
+bool compare(int x, int y) { return g[x] == g[y] ? g[x + t] < g[y + t] : g[x] < g[y]; }
+void manber_myers(const std::string& s) {
+	t = 1;
+	str_len = s.length();
+	for (int i = 0; i < str_len; ++i) {
+		SA[i] = i; g[i] = s[i] - 'a';
+	}
+	g[str_len] = -256;
+	while (t <= str_len) {
+		std::sort(SA, SA + str_len, compare);
+		tg[SA[0]] = 0;
+
+		for (int i = 1; i < str_len; ++i) {
+			if (compare(SA[i - 1], SA[i])) tg[SA[i]] = tg[SA[i - 1]] + 1;
+			else tg[SA[i]] = tg[SA[i - 1]];
+		}
+		for (int i = 0; i < str_len; ++i) g[i] = tg[i];
+
+		t <<= 1;
+	}
+}
+void get_lcp(const std::string& s) {
+	LCP.resize(str_len + 10);
+	for (int i = 0; i < str_len; ++i) RANK[SA[i]] = i;
+	int len = 0;
+	for (int i = 0, j; i < str_len; ++i) {
+		int k = RANK[i];
+		if (k) {
+			j = SA[k - 1];
+			while (s[i + len] != '#' &&
+				s[j + len] != '#' &&
+				s[i + len] == s[j + len]) ++len;
+			LCP[k] = len;
+			if (len) --len;
+		}
+	}
+}
+
+void preprocess(const std::vector<std::string>& data) {
+	std::string S = "";
+	S.reserve(SZ);
+	for (int i = 0; i < data.size(); ++i) {
+		for (int j = 0; j < data[i].size(); ++j) {
+			idx[S.size() + j] = i + 1;
+		}
+		if (data[i].length() > BKT) {
+			long_id[i + 1] = cnt;
+			num[cnt++] = i + 1;
+		}
+		else long_id[i + 1] = -1;
+
+		S += data[i] + "#";
+	}
+	manber_myers(S);
+	get_lcp(S);
+
+	// initialize RMQ
+	rmq = new SparseTable(LCP);
+
+	// initialize cache to 0
+	memset(cache, 0, sizeof cache);
+
+	// last seen SA position for each long string id (0..cnt-1)
+	std::vector<int> last_seen(cnt, -1);
+
+	for (int k = 0, i, j; k < (int)S.length(); ++k) {
+		j = SA[k];
+		if (S[j] == '#') continue;
+		i = idx[j];
+		points[i].push_back(k);
+		if (long_id[i] == -1) continue; // short string
+		int lid = long_id[i];
+
+		// update cache with all previously seen long strings
+		for (int t = 0; t < cnt; ++t) {
+			if (last_seen[t] == -1) continue;
+			int L = std::min(k, last_seen[t]) + 1;
+			int R = std::max(k, last_seen[t]) + 1;
+			int v = rmq->query(L, R);
+			if (v > cache[lid][t]) {
+				cache[lid][t] = v;
+				cache[t][lid] = v;
+			}
+		}
+		last_seen[lid] = k;
+	}
+}
+
+// two pointer swipping through points[i] and points[j]
+int naive_query(int i, int j) {
+	const auto& A = points[i + 1];
+	const auto& B = points[j + 1];
+
+	// std::cout << "naive query\n";
+	if (A.empty() || B.empty()) return -1;
+
+	int ans = 0;
+	int pb = 0; // B에서 lower_bound를 가리키도록 전진만 하는 포인터
+
+	auto eval_pair = [&](int l, int r) {
+		if (l == r) return; // 동일 랭크면 스킵 (LCP 정의상 자기 자신)
+		int L = std::min(l, r) + 1; // LCP 구간: (min, max] => [min+1, max+1)
+		int R = std::max(l, r) + 1;
+		int v = rmq->query(L, R);
+		if (v > ans) ans = v;
+		};
+
+	for (int a : A) {
+		// B에서 lower_bound(a) 위치까지 pb 전진
+		while (pb < (int)B.size() && B[pb] < a) ++pb;
+
+		// candidate 1: range(a, b)
+		if (pb < (int)B.size()) eval_pair(a, B[pb]);
+
+		// candidate 2: range(a, b-1)
+		if (pb > 0) eval_pair(a, B[pb - 1]);
+	}
+
+	return ans;
+}
+int bound_query(int i, int j) {
+	if (~long_id[i + 1]) std::swap(i, j);
+	const auto& A = points[i + 1]; // short
+	const auto& B = points[j + 1]; // long
+	if (A.empty() || B.empty()) return -1;
+
+	int ans = 0;
+
+	auto eval_pair = [&](int l, int r) {
+		if (l == r) return;                 // 같은 랭크면 스킵
+		int L = std::min(l, r) + 1;         // LCP 구간: (min, max] -> [min+1, max+1)
+		int R = std::max(l, r) + 1;         // SegmentTree는 [l, r) 이므로 그대로 전달
+		int v = rmq->query(L, R);
+		if (v > ans) ans = v;
+		};
+
+	for (int a : A) {
+		auto it = std::lower_bound(B.begin(), B.end(), a);
+
+		// 후보 1: lower_bound 위치
+		if (it != B.end()) eval_pair(a, *it);
+
+		// 후보 2: lower_bound 바로 이전
+		if (it != B.begin()) {
+			int b = *std::prev(it);
+			eval_pair(a, b);
+		}
+	}
+
+	return ans;
+}
+int cache_query(int i, int j) { return cache[long_id[i + 1]][long_id[j + 1]]; }
+
+int C(int i, int j) {
+	if (!~long_id[i + 1] && !~long_id[j + 1]) return naive_query(i, j);
+	if (~long_id[i + 1] && ~long_id[j + 1]) return cache_query(i, j);
+	return bound_query(i, j);
+}
 
 void Node::update() {
 	s = 1;
@@ -969,13 +1199,7 @@ Node* LinkCutTree::get_lca(Node* x, Node* y) {
 	access(x); access(y); splay(x);
 	return x->p ? x->p : x;
 }
-ll  LinkCutTree::query(Node* x, Node* y) {
-	Node* rx = get_root(x);
-	Node* ry = get_root(y);
-	if (rx != ry) {
-		std::cout << "[WARNING] tree is not connected!\n";
-		return -INF;
-	}
+ll LinkCutTree::query(Node* x, Node* y) {
 	Node* l = get_lca(x, y);
 	ll result = -INF;
 

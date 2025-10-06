@@ -153,7 +153,10 @@
     <ClCompile Include="..\library\_geometry_double.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj18349.cpp">
+    <ClCompile Include="..\main\boj18349_LCT_LCP_MST_GEO.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\boj18349_TG.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>

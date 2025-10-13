@@ -7,7 +7,7 @@ int N;
 ll A, B;
 struct Pos { ll x, y; } P[1 << 7];
 Pos dir[4] = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
-bool inner(const Pos& p,const ll& x1, const ll& y1, const ll& x2, const ll& y2) {
+int inner(const Pos& p, const ll& x1, const ll& y1, const ll& x2, const ll& y2) {
 	return (x1 <= p.x && y1 <= p.y && p.x <= x2 && p.y <= y2) ? 1 : 0;
 }
 int main() {
@@ -19,8 +19,8 @@ int main() {
 	int ret = 0;
 	for (int i = 0; i < N; i++) std::cin >> P[i].x >> P[i].y;
 	for (int i = 0; i < N; i++) {
-		int c = 0;
 		for (int d = 0; d < 4; d++) {
+			int c = 0;
 			ll x0 = P[i].x + A * dir[d].x;
 			ll y0 = P[i].y + B * dir[d].y;
 			ll x1 = std::min(P[i].x, x0);
@@ -28,7 +28,7 @@ int main() {
 			ll x2 = std::max(P[i].x, x0);
 			ll y2 = std::max(P[i].y, y0);
 			for (int j = 0; j < N; j++) {
-				c += inner(P[i], x1, y1, x2, y2);
+				c += inner(P[j], x1, y1, x2, y2);
 			}
 			ret = std::max(ret, c);
 		}
@@ -45,16 +45,16 @@ int main() {
 			ll y[2] = { y00, y11 };
 			for (int u = 0; u < 2; u++) {
 				for (int v = 0; v < 2; v++) {
-					int c = 0;
 					for (int d = 0; d < 4; d++) {
+						int c = 0;
 						ll x0 = x[u] + A * dir[d].x;
 						ll y0 = y[v] + B * dir[d].y;
 						ll x1 = std::min(x[u], x0);
 						ll y1 = std::min(y[v], y0);
 						ll x2 = std::max(x[u], x0);
 						ll y2 = std::max(y[v], y0);
-						for (int j = 0; j < N; j++) {
-							c += inner(P[i], x1, y1, x2, y2);
+						for (int k = 0; k < N; k++) {
+							c += inner(P[k], x1, y1, x2, y2);
 						}
 						ret = std::max(ret, c);
 					}

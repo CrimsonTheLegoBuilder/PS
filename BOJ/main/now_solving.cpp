@@ -1,67 +1,176 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <cassert>
+#include <vector>
+#include <random>
+#include <array>
+#include <tuple>
 typedef long long ll;
+//typedef long double ld;
+typedef double ld;
+typedef std::pair<int, int> pi;
+typedef std::vector<int> Vint;
+typedef std::vector<ld> Vld;
+const ll INF = 1e17;
+const int LEN = 1e5 + 1;
+const ld TOL = 1e-7;
+const ll MOD = 1e9 + 7;
+const ld PI = acos(-1);
+inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
+inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
+inline bool zero(const ld& x) { return !sign(x); }
+inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
+inline ld sq(const ld& x) { return x * x; }
+inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
+inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
+ld flip(ld lat) {
+	if (zero(lat - PI * .5) || zero(lat + PI * .5)) return 0;
+	if (zero(lat)) return PI * .5;
+	if (lat > 0) return PI * .5 - lat;
+	if (lat < 0) return -(PI * .5) - lat;
+	return INF;
+}
+ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
+//ll pow_fuck(ll a, ll b) {
+//	ll ret = 1;
+//	while (b) {
+//		if (b & 1) ret = ret * a % MOD;
+//		a = a * a % MOD;
+//		b >>= 1;
+//	}
+//	return ret;
+//}
+//ll powmod(ll a, ll b) {
+//	ll res = 1; a %= MOD;
+//	assert(b >= 0);
+//	for (; b; b >>= 1) {
+//		if (b & 1) res = res * a % MOD;
+//		a = a * a % MOD;
+//	}
+//	return res;
+//}
+struct Info { ll area, l, r; };
 
-int N;
-ll A, B;
-struct Pos { ll x, y; } P[1 << 7];
-Pos dir[4] = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
-int inner(const Pos& p, const ll& x1, const ll& y1, const ll& x2, const ll& y2) {
-	return (x1 <= p.x && y1 <= p.y && p.x <= x2 && p.y <= y2) ? 1 : 0;
+#define LO x
+#define HI y
+
+#define LINE 1
+#define CIRCLE 2
+
+#define STRONG 0
+#define WEAK 1
+
+//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
+//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
+
+//Euler characteristic : v - e + f == 1
+//Pick`s Theorem : A = i + b/2 - 1
+
+//2D============================================================================//
+
+int N, M, T, Q;
+struct Pos {
+	int x, y;
+	//ll x, y;
+	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
+	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
+	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
+	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
+	bool operator <= (const Pos& p) const { return x == p.x ? y <= p.y : x <= p.x; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator * (const int& n) const { return { x * n, y * n }; }
+	Pos operator / (const int& n) const { return { x / n, y / n }; }
+	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
+	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
+	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
+	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
+	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
+	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
+	Pos operator - () const { return { -x, -y }; }
+	Pos operator ~ () const { return { -y, x }; }
+	Pos operator ! () const { return { y, x }; }
+	ll xy() const { return (ll)x * y; }
+	ll Euc() const { return (ll)x * x + (ll)y * y; }
+	int Man() const { return std::abs(x) + std::abs(y); }
+	ld mag() const { return hypot(x, y); }
+	ld rad() const { return atan2(y, x); }
+	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
+}; const Pos O = Pos(0, 0);
+const Pos INVAL = Pos(-1, -1);
+typedef std::vector<Pos> Polygon;
+bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
+bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
+//bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
+bool cmpt(const Pos& p, const Pos& q) {
+	bool f0 = O < p;
+	bool f1 = O < q;
+	if (f0 != f1) return f0;
+	ll tq = p / q;
+	return !tq ? p.Euc() < q.Euc() : tq > 0;
+}
+ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
+ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
+ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
+ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
+bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
+bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
+int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
+bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
+bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
+	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
+	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
+	if (f == WEAK) return f1 && f2;
+	bool f3 = on_seg_strong(s1, s2, d1) ||
+		on_seg_strong(s1, s2, d2) ||
+		on_seg_strong(d1, d2, s1) ||
+		on_seg_strong(d1, d2, s2);
+	return (f1 && f2) || f3;
 }
 int main() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(9);
-	std::cin >> N >> A >> B;
-	int ret = 0;
-	for (int i = 0; i < N; i++) std::cin >> P[i].x >> P[i].y;
-	for (int i = 0; i < N; i++) {
-		for (int d = 0; d < 4; d++) {
-			int c = 0;
-			ll x0 = P[i].x + A * dir[d].x;
-			ll y0 = P[i].y + B * dir[d].y;
-			ll x1 = std::min(P[i].x, x0);
-			ll y1 = std::min(P[i].y, y0);
-			ll x2 = std::max(P[i].x, x0);
-			ll y2 = std::max(P[i].y, y0);
-			for (int j = 0; j < N; j++) {
-				c += inner(P[j], x1, y1, x2, y2);
-			}
-			ret = std::max(ret, c);
-		}
+	Pos s, e;
+	Pos a, b, c, d;
+	int x0, y0, x1, y1;
+	std::cin >> T;
+	while (T--) {
+		std::cin >> s >> e >> x0 >> y0 >> x1 >> y1;
+		a.x = std::min(x0, x1);
+		a.y = std::min(y0, y1);
+		b.x = std::max(x0, x1);
+		b.y = std::min(y0, y1);
+		c.x = std::max(x0, x1);
+		c.y = std::max(y0, y1);
+		d.x = std::min(x0, x1);
+		d.y = std::max(y0, y1);
+		bool f = 0;
+		if (intersect(s, e, a, b)) f = 1;
+		if (intersect(s, e, b, c)) f = 1;
+		if (intersect(s, e, c, d)) f = 1;
+		if (intersect(s, e, d, a)) f = 1;
+		if (ccw(a, b, s) >= 0 &&
+			ccw(b, c, s) >= 0 &&
+			ccw(c, d, s) >= 0 &&
+			ccw(d, a, s) >= 0 &&
+			ccw(a, b, e) >= 0 &&
+			ccw(b, c, e) >= 0 &&
+			ccw(c, d, e) >= 0 &&
+			ccw(d, a, e) >= 0
+			) f = 1;
+		std::cout << (f ? "T\n" : "F\n");
 	}
-	for (int i = 0; i < N; i++) {
-		for (int j = i + 1; j < N; j++) {
-			if (std::abs(P[i].x - P[j].x) > A) continue;
-			if (std::abs(P[i].y - P[j].y) > B) continue;
-			ll x00 = std::min(P[i].x, P[j].x);
-			ll y00 = std::min(P[i].y, P[j].y);
-			ll x11 = std::max(P[i].x, P[j].x);
-			ll y11 = std::max(P[i].y, P[j].y);
-			ll x[2] = { x00, x11 };
-			ll y[2] = { y00, y11 };
-			for (int u = 0; u < 2; u++) {
-				for (int v = 0; v < 2; v++) {
-					for (int d = 0; d < 4; d++) {
-						int c = 0;
-						ll x0 = x[u] + A * dir[d].x;
-						ll y0 = y[v] + B * dir[d].y;
-						ll x1 = std::min(x[u], x0);
-						ll y1 = std::min(y[v], y0);
-						ll x2 = std::max(x[u], x0);
-						ll y2 = std::max(y[v], y0);
-						for (int k = 0; k < N; k++) {
-							c += inner(P[k], x1, y1, x2, y2);
-						}
-						ret = std::max(ret, c);
-					}
-				}
-			}
-		}
-	}
-	std::cout << ret << "\n";
 	return 0;
 }

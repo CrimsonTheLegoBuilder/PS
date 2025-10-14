@@ -206,7 +206,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	Pos J;
-	std::cin >> N >> J >> R;
+	std::cin >> N >> R >> J;
 	for (int i = 0; i < R; i++) {
 		int n; std::cin >> n;
 		Polygon P(n);

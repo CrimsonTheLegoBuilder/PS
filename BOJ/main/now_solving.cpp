@@ -153,15 +153,15 @@ bool inner_check(const Polygon& H, const Pos& q, const Pos& d = Pos(0, 0)) {//co
 	for (int i = 0; i < sz; i++) {
 		const Pos& p1 = H[i], & p2 = H[(i + 1) % sz];
 		if (ccw(p1, p2, q) < 0) return 0;
-		if (on_seg_strong(p1, p2, q) && !eq(d.x, d.y)) {
-			if (sign((p2 - p1) / d) > 0) return 1;
-			else return 0;
-		}
 		if (on_seg_strong(p1, p2, q)) return 2;
 	}
 	return 1;
 }
-Pos shadow(const Pos& l, const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const int& n) {
+Pos shadow(Pos l, Pos p1, Pos p2, Pos q1, Pos q2, const int& n) {
+	if (p1.y == p2.y) { l = ~l, p1 = ~p1, p2 = ~p2, q1 = ~q1, q2 = ~q2; }
+	if (p1.y > p2.y) { l = -l, p1 = -p1, p2 = -p2, q1 = -q1, q2 = -q2; }
+	int diff = p1.y;
+	l.y -= diff, p1.y -= diff, p2.y -= diff, q1.y -= diff, q2.y -= diff;
 	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
 		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, n);
 		else return Pos(-1, -1);
@@ -169,22 +169,38 @@ Pos shadow(const Pos& l, const Pos& p1, const Pos& p2, const Pos& q1, const Pos&
 	Polygon tri = { p1, p2, l };
 	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
 	if (!in1 && !in2) return Pos(-1, -1);
-	ld r1 = 0, r2 = n;
+	ld r1 = 0, r2 = 1;
+	int lo = 0, hi = n;
+	Pos x;
 	if (in1 && in2) {
-		r1 = intersection(p1, p1, l, q1);
+		r1 = intersection(p1, p2, l, q1);
 		r1 *= n;
-		if ()
+		x = Pos(p1.x, (int)r1);
+		if (!ccw(l, q1, x)) lo = x.y;
+		else lo = x.y + 1;
 		r2 = intersection(p1, p2, l, q2);
+		r2 *= n;
+		x = Pos(p1.x, (int)r2);
+		if (!ccw(l, q2, x)) hi = x.y;
+		else hi = x.y - 1;
 	}
 	else if (in1) {
 		r1 = intersection(p1, p2, l, q1);
+		r1 *= n;
+		x = Pos(p1.x, (int)r1);
+		if (!ccw(l, q1, x)) lo = x.y;
+		else lo = x.y + 1;
 	}
 	else if (in2) {
 		r2 = intersection(p1, p2, l, q2);
+		r2 *= n;
+		x = Pos(p1.x, (int)r2);
+		if (!ccw(l, q2, x)) hi = x.y;
+		else hi = x.y - 1;
 	}
-	else r1 = r2 = -1;
-	if (r2 < r1) std::swap(r1, r2);
-	return Pos(r1, r2);
+	else lo = hi = -1;
+	if (hi < lo) std::swap(lo, hi);
+	return Pos(lo, hi);
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -202,12 +218,32 @@ void solve() {
 		}
 		S[i] = s; E[i] = e;
 	}
+	int ret = 0;
 	Polygon B = { Pos(0, 0), Pos(N, 0), Pos(N, N), Pos(0, N) };
 	for (int b = 0; b < 4; b++) {
+		Polygon vp = { Pos(0, 0) };
 		Pos s = B[b], e = B[(b + 1) % 4];
+		bool f = 1;
 		for (int i = 0; i < R; i++) {
-			Pos a = 
+			Pos se = shadow(J, s, e, S[i], E[i], N);
+			if (se.LO == -1) continue;
+			if (se.LO == 0) f = 0;
+			vp.push_back(se);
+			//if (inside(E[i], J, S[i], s)) f = 0;
+		}
+		if (f) ret++;
+		vp.emplace_back(N, N);
+		std::sort(vp.begin(), vp.end());
+		int hi = 0;
+		for (const Pos& r : vp) {
+			if (hi < r.LO) {
+				ret += r.LO - hi - 1;
+				hi = r.HI;
+			}
+			else hi = std::max(hi, r.HI);
 		}
 	}
+	std::cout << ret << "\n";
+	return;
 }
 int main() { solve(); return 0; }

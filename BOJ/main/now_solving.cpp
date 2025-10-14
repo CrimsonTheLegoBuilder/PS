@@ -172,10 +172,16 @@ Pos shadow(const Pos& l, const Pos& p1, const Pos& p2, const Pos& q1, const Pos&
 	ld r1 = 0, r2 = n;
 	if (in1 && in2) {
 		r1 = intersection(p1, p1, l, q1);
+		r1 *= n;
+		if ()
 		r2 = intersection(p1, p2, l, q2);
 	}
-	else if (in1) r1 = intersection(p1, p2, l, q1);
-	else if (in2) r2 = intersection(p1, p2, l, q2);
+	else if (in1) {
+		r1 = intersection(p1, p2, l, q1);
+	}
+	else if (in2) {
+		r2 = intersection(p1, p2, l, q2);
+	}
 	else r1 = r2 = -1;
 	if (r2 < r1) std::swap(r1, r2);
 	return Pos(r1, r2);

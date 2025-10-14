@@ -9,8 +9,8 @@
 #include <array>
 #include <tuple>
 typedef long long ll;
-//typedef long double ld;
-typedef double ld;
+typedef long double ld;
+//typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
@@ -227,9 +227,9 @@ void solve() {
 		for (int i = 0; i < R; i++) {
 			Pos se = shadow(J, s, e, S[i], E[i], N);
 			if (se.LO == -1) continue;
-			if (se.LO == 0) f = 0;
+			//if (se.LO == 0) f = 0;
+			if (inside(E[i], J, S[i], s)) f = 0;
 			vp.push_back(se);
-			//if (inside(E[i], J, S[i], s)) f = 0;
 		}
 		if (f) ret++;
 		vp.emplace_back(N, N);

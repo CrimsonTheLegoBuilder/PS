@@ -57,6 +57,80 @@ int read() {
 	return s > 0 ? x : -x;
 }
 
+#include <unistd.h>
+namespace fast_io {
+	const int BUF_SIZE = 1 << 20;
+	char ibuf[BUF_SIZE];
+	int iptr = 0, left = 0;
+
+	int read_int() {
+		int x = 0, s = 1;
+		bool started = false;
+		for (;;) {
+			if (iptr >= left) {
+				left = read(0, ibuf, sizeof ibuf);
+				iptr = 0;
+			}
+			if (!left) break;
+			char c = ibuf[iptr++];
+			if (c == '-') {
+				s = -1;
+			}
+			else if (c >= '0' && c <= '9') {
+				x = x * 10 + (c - '0');
+				started = true;
+			}
+			else if (started) {
+				break;
+			}
+		}
+		return s > 0 ? x : -x;
+	}
+
+	char obuf[BUF_SIZE];
+	int optr = 0;
+
+	void flush() {
+		if (optr) {
+			write(1, obuf, optr);
+			optr = 0;
+		}
+	}
+
+	struct Flusher {
+		~Flusher() {
+			flush();
+		}
+	} flusher;
+
+	void pc(char c) {
+		if (optr == BUF_SIZE) {
+			flush();
+		}
+		obuf[optr++] = c;
+	}
+
+	void print_int(int x) {
+		if (x == 0) {
+			pc('0');
+			return;
+		}
+		if (x < 0) {
+			pc('-');
+			x = -x;
+		}
+		char temp[10];
+		int idx = 0;
+		while (x) {
+			temp[idx++] = x % 10 + '0';
+			x /= 10;
+		}
+		while (idx--) {
+			pc(temp[idx]);
+		}
+	}
+}
+
 #define LO x
 #define HI y
 

@@ -162,6 +162,8 @@ Pos shadow(Pos l, Pos p1, Pos p2, Pos q1, Pos q2, const int& n) {
 	if (p1.y > p2.y) { l = -l, p1 = -p1, p2 = -p2, q1 = -q1, q2 = -q2; }
 	int diff = p1.y;
 	l.y -= diff, p1.y -= diff, p2.y -= diff, q1.y -= diff, q2.y -= diff;
+	assert(ccw(l, p1, p2) > 0);
+	assert(ccw(l, q1, q2) > 0);
 	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
 		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, n);
 		else return Pos(-1, -1);
@@ -169,37 +171,37 @@ Pos shadow(Pos l, Pos p1, Pos p2, Pos q1, Pos q2, const int& n) {
 	Polygon tri = { p1, p2, l };
 	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
 	if (!in1 && !in2) return Pos(-1, -1);
-	ld r1 = 0, r2 = 1;
+	ld r1 = 0, r2 = n;
 	int lo = 0, hi = n;
 	Pos x;
 	if (in1 && in2) {
 		r1 = intersection(p1, p2, l, q1);
 		r1 *= n;
-		x = Pos(p1.x, (int)r1);
+		x = Pos(p1.x, (int)(r1 + TOL));
 		if (!ccw(l, q1, x)) lo = x.y;
 		else lo = x.y + 1;
 		r2 = intersection(p1, p2, l, q2);
 		r2 *= n;
-		x = Pos(p1.x, (int)r2);
+		x = Pos(p1.x, (int)(r2 + TOL));
 		if (!ccw(l, q2, x)) hi = x.y;
-		else hi = x.y - 1;
+		else hi = x.y;
 	}
 	else if (in1) {
 		r1 = intersection(p1, p2, l, q1);
 		r1 *= n;
-		x = Pos(p1.x, (int)r1);
+		x = Pos(p1.x, (int)(r1 + TOL));
 		if (!ccw(l, q1, x)) lo = x.y;
 		else lo = x.y + 1;
 	}
 	else if (in2) {
 		r2 = intersection(p1, p2, l, q2);
 		r2 *= n;
-		x = Pos(p1.x, (int)r2);
+		x = Pos(p1.x, (int)(r2 + TOL));
 		if (!ccw(l, q2, x)) hi = x.y;
-		else hi = x.y - 1;
+		else hi = x.y;
 	}
 	else lo = hi = -1;
-	if (hi < lo) std::swap(lo, hi);
+	if (lo > hi) lo = hi = -1;
 	return Pos(lo, hi);
 }
 void solve() {

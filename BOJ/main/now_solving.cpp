@@ -164,19 +164,19 @@ bool inner_check(const Polygon& H, const Pos& q, const Pos& d = Pos(0, 0)) {//co
 Pos shadow(const Pos& l, const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const int& n) {
 	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
 		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, n);
-		else return Pos(0, 0);
+		else return Pos(-1, -1);
 	}
 	Polygon tri = { p1, p2, l };
 	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
-	if (!in1 && !in2) return Pos(0, 0);
+	if (!in1 && !in2) return Pos(-1, -1);
 	ld r1 = 0, r2 = n;
 	if (in1 && in2) {
-		r1 = intersection(p, Seg(l, q1), WEAK);
-		r2 = intersection(p, Seg(l, q2), WEAK);
+		r1 = intersection(p1, p1, l, q1);
+		r2 = intersection(p1, p2, l, q2);
 	}
-	else if (in1) r1 = intersection(p, Seg(l, q1), WEAK);
-	else if (in2) r2 = intersection(p, Seg(l, q2), WEAK);
-	else r1 = r2 = 0;
+	else if (in1) r1 = intersection(p1, p2, l, q1);
+	else if (in2) r2 = intersection(p1, p2, l, q2);
+	else r1 = r2 = -1;
 	if (r2 < r1) std::swap(r1, r2);
 	return Pos(r1, r2);
 }

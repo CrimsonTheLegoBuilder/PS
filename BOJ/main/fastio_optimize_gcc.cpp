@@ -1,4 +1,4 @@
-﻿#pragma GCC optimize("Ofast")
+#pragma GCC optimize("Ofast")
 #pragma GCC optimize("unroll-loops")
 #define _CRT_SECURE_NO_WARNINGS
 //#include <iostream>
@@ -67,44 +67,78 @@ int N, Q, R;
 struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	[[gnu::const, gnu::hot]]
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
+	[[gnu::const, gnu::hot]]
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
+	[[gnu::const, gnu::hot]]
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
+	[[gnu::const, gnu::hot]]
 	bool operator <= (const Pos& p) const { return x == p.x ? y <= p.y : x <= p.x; }
+	[[gnu::const, gnu::hot]]
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	[[gnu::const, gnu::hot]]
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	[[gnu::const, gnu::hot]]
 	Pos operator * (const int& n) const { return { x * n, y * n }; }
+	[[gnu::const, gnu::hot]]
 	Pos operator / (const int& n) const { return { x / n, y / n }; }
+	[[gnu::const, gnu::hot]]
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
+	[[gnu::const, gnu::hot]]
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	[[gnu::const, gnu::hot]]
 	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
+	[[gnu::const, gnu::hot]]
 	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
+	[[gnu::const, gnu::hot]]
 	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
+	[[gnu::const, gnu::hot]]
 	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
+	[[gnu::const, gnu::hot]]
 	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
+	[[gnu::const, gnu::hot]]
 	Pos operator - () const { return { -x, -y }; }
+	[[gnu::const, gnu::hot]]
 	Pos operator ~ () const { return { -y, x }; }
+	[[gnu::const, gnu::hot]]
 	Pos operator ! () const { return { y, x }; }
+	[[gnu::const, gnu::hot]]
 	ll xy() const { return (ll)x * y; }
+	[[gnu::const, gnu::hot]]
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
+	[[gnu::const, gnu::hot]]
 	int Man() const { return std::abs(x) + std::abs(y); }
+	[[gnu::const, gnu::hot]]
 	ld mag() const { return hypot(x, y); }
+	[[gnu::const, gnu::hot]]
 	ld rad() const { return atan2(y, x); }
+	[[gnu::const, gnu::hot]]
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	//friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	//friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 } S[LEN], E[LEN]; const Pos O = Pos(0, 0);
 const Pos INVAL = Pos(-1, -1);
 typedef std::vector<Pos> Polygon;
+[[gnu::const, gnu::hot]]
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+[[gnu::const, gnu::hot]]
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
+[[gnu::const, gnu::hot]]
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+[[gnu::const, gnu::hot]]
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
+[[gnu::const, gnu::hot]]
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+[[gnu::const, gnu::hot]]
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
+[[gnu::const, gnu::hot]]
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
+[[gnu::const, gnu::hot]]
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
+[[gnu::const, gnu::hot]]
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
+[[gnu::const, gnu::hot]]
 bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
 	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
 	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
@@ -119,11 +153,13 @@ bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int
 	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
 	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
 }
+[[gnu::const, gnu::hot]]
 ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
 	ld det = (q2 - q1) / (p2 - p1);
 	if (zero(det)) return -1;
 	return ((q2 - q1) / (q1 - p1)) / det;
 }
+[[gnu::const, gnu::hot]]
 bool inner_check(const Polygon& H, const Pos& q, const Pos& d = Pos(0, 0)) {//convex
 	int sz = H.size();
 	for (int i = 0; i < sz; i++) {
@@ -133,6 +169,7 @@ bool inner_check(const Polygon& H, const Pos& q, const Pos& d = Pos(0, 0)) {//co
 	}
 	return 1;
 }
+[[gnu::const, gnu::hot]]
 Pos shadow(Pos l, Pos p1, Pos p2, Pos q1, Pos q2, const int& n) {
 	if (p1.y == p2.y) { l = ~l, p1 = ~p1, p2 = ~p2, q1 = ~q1, q2 = ~q2; }
 	if (p1.y > p2.y) { l = -l, p1 = -p1, p2 = -p2, q1 = -q1, q2 = -q2; }

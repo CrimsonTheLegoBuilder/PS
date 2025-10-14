@@ -31,6 +31,9 @@
     <Filter Include="소스 파일\fraction">
       <UniqueIdentifier>{761aa78d-dca4-4d75-9044-259fbf182fcc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\_tools">
+      <UniqueIdentifier>{d2386d82-3ae1-4c4c-88dd-d0b460439c5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main\boj22367_TLE.cpp">
@@ -135,9 +138,6 @@
     <ClCompile Include="..\library\fraction.cpp">
       <Filter>소스 파일\fraction</Filter>
     </ClCompile>
-    <ClCompile Include="..\library\checker.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\boj31180_ing.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
@@ -158,6 +158,12 @@
     </ClCompile>
     <ClCompile Include="..\main\boj18349_TG.cpp">
       <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\library\checker.cpp">
+      <Filter>소스 파일\_tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\fastio_optimize_gcc.cpp">
+      <Filter>소스 파일\_tools</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -140,6 +140,10 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
+bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
+	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
+	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
+}
 void get_area_memo(Pos H[], ll memo[], const int& sz) {
 	memo[0] = 0;
 	for (int i = 0; i < sz; i++) {

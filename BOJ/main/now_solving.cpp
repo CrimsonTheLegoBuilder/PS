@@ -15,7 +15,7 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 const ll INF = 1e17;
-const int LEN = 1e5 + 1;
+const int LEN = 3e4 + 5;
 const ld TOL = 1e-7;
 const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
@@ -72,7 +72,7 @@ struct Info { ll area, l, r; };
 
 //2D============================================================================//
 
-int N, M, T, Q;
+int N, M, T, Q, R;
 struct Pos {
 	int x, y;
 	//ll x, y;
@@ -104,7 +104,7 @@ struct Pos {
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
+} S[LEN], E[LEN]; const Pos O = Pos(0, 0);
 const Pos INVAL = Pos(-1, -1);
 typedef std::vector<Pos> Polygon;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
@@ -139,38 +139,69 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-int main() {
+bool inside(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q, const int& f = STRONG) {
+	if (ccw(p0, p1, p2) < 0) return ccw(p0, p1, q) >= f || ccw(p1, p2, q) >= f;
+	return ccw(p0, p1, q) >= f && ccw(p1, p2, q) >= f;
+}
+ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	return ((q2 - q1) / (q1 - p1)) / det;
+}
+bool inner_check(const Polygon& H, const Pos& q, const Pos& d = Pos(0, 0)) {//convex
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		const Pos& p1 = H[i], & p2 = H[(i + 1) % sz];
+		if (ccw(p1, p2, q) < 0) return 0;
+		if (on_seg_strong(p1, p2, q) && !eq(d.x, d.y)) {
+			if (sign((p2 - p1) / d) > 0) return 1;
+			else return 0;
+		}
+		if (on_seg_strong(p1, p2, q)) return 2;
+	}
+	return 1;
+}
+Pos shadow(const Pos& l, const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const int& n) {
+	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
+		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, n);
+		else return Pos(0, 0);
+	}
+	Polygon tri = { p1, p2, l };
+	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
+	if (!in1 && !in2) return Pos(0, 0);
+	ld r1 = 0, r2 = n;
+	if (in1 && in2) {
+		r1 = intersection(p, Seg(l, q1), WEAK);
+		r2 = intersection(p, Seg(l, q2), WEAK);
+	}
+	else if (in1) r1 = intersection(p, Seg(l, q1), WEAK);
+	else if (in2) r2 = intersection(p, Seg(l, q2), WEAK);
+	else r1 = r2 = 0;
+	if (r2 < r1) std::swap(r1, r2);
+	return Pos(r1, r2);
+}
+void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
-	Pos s, e;
-	Pos a, b, c, d;
-	int x0, y0, x1, y1;
-	std::cin >> T;
-	while (T--) {
-		std::cin >> s >> e >> x0 >> y0 >> x1 >> y1;
-		a.x = std::min(x0, x1);
-		a.y = std::min(y0, y1);
-		b.x = std::max(x0, x1);
-		b.y = std::min(y0, y1);
-		c.x = std::max(x0, x1);
-		c.y = std::max(y0, y1);
-		d.x = std::min(x0, x1);
-		d.y = std::max(y0, y1);
-		bool f = 0;
-		if (intersect(s, e, a, b)) f = 1;
-		if (intersect(s, e, b, c)) f = 1;
-		if (intersect(s, e, c, d)) f = 1;
-		if (intersect(s, e, d, a)) f = 1;
-		if (ccw(a, b, s) >= 0 &&
-			ccw(b, c, s) >= 0 &&
-			ccw(c, d, s) >= 0 &&
-			ccw(d, a, s) >= 0 &&
-			ccw(a, b, e) >= 0 &&
-			ccw(b, c, e) >= 0 &&
-			ccw(c, d, e) >= 0 &&
-			ccw(d, a, e) >= 0
-			) f = 1;
-		std::cout << (f ? "T\n" : "F\n");
+	Pos J;
+	std::cin >> N >> J >> R;
+	for (int i = 0; i < R; i++) {
+		int n; std::cin >> n;
+		Polygon P(n);
+		for (Pos& p : P) std::cin >> p;
+		Pos s = P[0], e = P[0];
+		for (const Pos& p : P) {
+			if (ccw(J, s, p) < 0) s = p;
+			if (ccw(J, e, p) > 0) e = p;
+		}
+		S[i] = s; E[i] = e;
 	}
-	return 0;
+	Polygon B = { Pos(0, 0), Pos(N, 0), Pos(N, N), Pos(0, N) };
+	for (int b = 0; b < 4; b++) {
+		Pos s = B[b], e = B[(b + 1) % 4];
+		for (int i = 0; i < R; i++) {
+			Pos a = 
+		}
+	}
 }
+int main() { solve(); return 0; }

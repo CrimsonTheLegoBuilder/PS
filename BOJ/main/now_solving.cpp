@@ -9,8 +9,8 @@
 #include <array>
 #include <tuple>
 typedef long long ll;
-typedef long double ld;
-//typedef double ld;
+//typedef long double ld;
+typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
@@ -25,59 +25,17 @@ inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ld sq(const ld& x) { return x * x; }
-inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
-inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
-ld flip(ld lat) {
-	if (zero(lat - PI * .5) || zero(lat + PI * .5)) return 0;
-	if (zero(lat)) return PI * .5;
-	if (lat > 0) return PI * .5 - lat;
-	if (lat < 0) return -(PI * .5) - lat;
-	return INF;
-}
-ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-//ll pow_fuck(ll a, ll b) {
-//	ll ret = 1;
-//	while (b) {
-//		if (b & 1) ret = ret * a % MOD;
-//		a = a * a % MOD;
-//		b >>= 1;
-//	}
-//	return ret;
-//}
-//ll powmod(ll a, ll b) {
-//	ll res = 1; a %= MOD;
-//	assert(b >= 0);
-//	for (; b; b >>= 1) {
-//		if (b & 1) res = res * a % MOD;
-//		a = a * a % MOD;
-//	}
-//	return res;
-//}
-struct Info { ll area, l, r; };
 
 #define LO x
 #define HI y
 
-#define LINE 1
-#define CIRCLE 2
-
 #define STRONG 0
 #define WEAK 1
 
-//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
-//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
-
-//Euler characteristic : v - e + f == 1
-//Pick`s Theorem : A = i + b/2 - 1
-
-//2D============================================================================//
-
-int N, M, T, Q, R;
+int N, Q, R;
 struct Pos {
 	int x, y;
-	//ll x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
-	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -107,16 +65,6 @@ struct Pos {
 } S[LEN], E[LEN]; const Pos O = Pos(0, 0);
 const Pos INVAL = Pos(-1, -1);
 typedef std::vector<Pos> Polygon;
-bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
-bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
-//bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
-bool cmpt(const Pos& p, const Pos& q) {
-	bool f0 = O < p;
-	bool f1 = O < q;
-	if (f0 != f1) return f0;
-	ll tq = p / q;
-	return !tq ? p.Euc() < q.Euc() : tq > 0;
-}
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
@@ -126,9 +74,6 @@ int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sig
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
-bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
-bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
 bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
 	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
 	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
@@ -153,7 +98,7 @@ bool inner_check(const Polygon& H, const Pos& q, const Pos& d = Pos(0, 0)) {//co
 	for (int i = 0; i < sz; i++) {
 		const Pos& p1 = H[i], & p2 = H[(i + 1) % sz];
 		if (ccw(p1, p2, q) < 0) return 0;
-		if (on_seg_strong(p1, p2, q)) return 2;
+		//if (on_seg_strong(p1, p2, q)) return 2;
 	}
 	return 1;
 }
@@ -162,15 +107,15 @@ Pos shadow(Pos l, Pos p1, Pos p2, Pos q1, Pos q2, const int& n) {
 	if (p1.y > p2.y) { l = -l, p1 = -p1, p2 = -p2, q1 = -q1, q2 = -q2; }
 	int diff = p1.y;
 	l.y -= diff, p1.y -= diff, p2.y -= diff, q1.y -= diff, q2.y -= diff;
-	assert(ccw(l, p1, p2) > 0);
-	assert(ccw(l, q1, q2) > 0);
+	//assert(ccw(l, p1, p2) > 0);
+	//assert(ccw(l, q1, q2) > 0);
 	if (!inside(p2, l, p1, q1, WEAK) && !inside(p2, l, p1, q2, WEAK)) {
 		if (intersect(l, p1, q1, q2) && intersect(l, p2, q1, q2)) return Pos(0, n);
-		else return Pos(-1, -1);
+		else return INVAL;
 	}
 	Polygon tri = { p1, p2, l };
 	bool in1 = inner_check(tri, q1), in2 = inner_check(tri, q2);
-	if (!in1 && !in2) return Pos(-1, -1);
+	if (!in1 && !in2) return INVAL;
 	ld r1 = 0, r2 = n;
 	int lo = 0, hi = n;
 	Pos x;
@@ -229,8 +174,8 @@ void solve() {
 		for (int i = 0; i < R; i++) {
 			Pos se = shadow(J, s, e, S[i], E[i], N);
 			if (se.LO == -1) continue;
-			//if (se.LO == 0) f = 0;
-			if (inside(E[i], J, S[i], s)) f = 0;
+			if (se.LO == 0) f = 0;
+			//if (inside(E[i], J, S[i], s)) f = 0;
 			vp.push_back(se);
 		}
 		if (f) ret++;

@@ -96,77 +96,8 @@ ld area(const Polygon& H) {
 	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
 	return A * .5;
 }
-struct Circle {
-	Pos c;
-	ld r;
-	Circle(Pos c_ = Pos(), ld r_ = 0) : c(c_), r(r_) {}
-	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
-	bool operator != (const Circle& q) const { return !(*this == q); }
-	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
-	//bool operator < (const Circle& q) const { return r < q.r && (c - q.c).mag() + r < q.r + TOL; }
-	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq((ll)r + q.r)) >= 0; }
-	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
-	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
-	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
-	ld rad(const Pos& p) const { return (p - c).rad(); }
-	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
-	bool operator < (const Pos& p) const { return sign(r - (c - p).mag()) < 0; }
-	bool operator > (const Pos& p) const { return r > (c - p).mag(); }
-	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
-	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
-} INVAL = { { 0, 0 }, -1 };
-Circle enclose_circle(const Pos& u, const Pos& v) {
-	Pos c = (u + v) * .5;
-	return Circle(c, (c - u).mag());
-}
-Circle enclose_circle(const Pos& u, const Pos& v, const Pos& w) {
-	if (!ccw(u, v, w)) return INVAL;
-	Pos m1 = (u + v) * .5, v1 = ~(v - u);
-	Pos m2 = (u + w) * .5, v2 = ~(w - u);
-	Pos c = intersection(m1, m1 + v1, m2, m2 + v2);
-	return Circle(c, (u - c).mag());
-}
-Circle enclose_circle(std::vector<Pos> R) {
-	if (R.size() == 0) return Circle(O, -1);
-	else if (R.size() == 1) return Circle(R[0], 0);
-	else if (R.size() == 2) return enclose_circle(R[0], R[1]);
-	else return enclose_circle(R[0], R[1], R[2]);
-}
-Circle minimum_enclose_circle(std::vector<Pos> P) {
-	shuffle(P.begin(), P.end(), std::mt19937(0x14004));
-	Circle mec = INVAL;
-	int sz = P.size();
-	for (int i = 0; i < sz; i++) {
-		if (mec.r < -1 || mec < P[i]) {
-			mec = Circle(P[i], 0);
-			for (int j = 0; j <= i; j++) {
-				if (mec < P[j]) {
-					Circle ans = enclose_circle(P[i], P[j]);
-					if (zero(mec.r)) { mec = ans; continue; }
-					Circle l = INVAL, r = INVAL;
-					//Pos vec = P[j] - P[i];
-					for (int k = 0; k <= j; k++) {
-						if (ans < P[k]) {
-							//ld CCW = vec / (P[k] - P[j]);
-							ld CCW = cross(P[i], P[j], P[k]);
-							Circle c = enclose_circle(P[i], P[j], P[k]);
-							if (c.r < 0) continue;
-							//else if (CCW > 0 && (l.r < 0 || (vec / (c.c - P[i])) > (vec / (l.c - P[i])))) l = c;
-							//else if (CCW < 0 && (r.r < 0 || (vec / (c.c - P[i])) < (vec / (r.c - P[i])))) r = c;
-							else if (CCW > 0 && (l.r < 0 || cross(P[i], P[j], c.c) > cross(P[i], P[j], l.c))) l = c;
-							else if (CCW < 0 && (r.r < 0 || cross(P[i], P[j], c.c) < cross(P[i], P[j], r.c))) r = c;
-						}
-					}
-					if (l.r < 0 && r.r < 0) mec = ans;
-					else if (l.r < 0) mec = r;
-					else if (r.r < 0) mec = l;
-					else mec = l.r < r.r ? l : r;
-				}
-			}
-		}
-	}
-	return mec;
+ld vol(const ld& hi, const Polygon& P) {
+
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -175,7 +106,28 @@ void solve() {
 	std::cout.precision(9);
 	std::cin >> N;
 	Polygon P(N);
-	for (Pos& p : P) std::cin >> p;
-	std::cout << minimum_enclose_circle(P) << "\n";
+	ld s = 0, e = INF;
+	ld w = 0;
+	for (Pos& p : P) {
+		ld x, y, z;
+		std::cin >> x >> y >> z;
+		ld x_ = Pos(x, y).mag();
+		p = Pos(x_, z);
+		s = std::max(s, z);
+		w = std::max(w, x_);
+	}
+	P.push_back(Pos(0, s));
+	P.push_back(Pos(w, 0));
+	Polygon S;
+	std::sort(P.rbegin(), P.rend());
+	for (int i = 0; i < P.size(); i++) {
+		while (S.size() > 1 && ccw(S[S.size() - 2], S[S.size() - 1], P[i]) <= 0)
+			S.pop_back();
+		S.push_back(P[i]);
+	}
+	int cnt = 100; while (cnt--) {
+
+	}
+	return;
 }
 int main() { solve(); return 0; }

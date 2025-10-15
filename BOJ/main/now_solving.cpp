@@ -97,7 +97,11 @@ ld area(const Polygon& H) {
 	return A * .5;
 }
 ld vol(const ld& hi, const Polygon& P) {
+	Pos t = P[0];
+	int sz = P.size();
+	for (int i = 1; i < sz; i++) {
 
+	}
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -125,6 +129,8 @@ void solve() {
 			S.pop_back();
 		S.push_back(P[i]);
 	}
+	while (S.size() > 1 && S.back().x == S[S.size() - 2].x) S.pop_back();
+	P = S;
 	int cnt = 100; while (cnt--) {
 
 	}

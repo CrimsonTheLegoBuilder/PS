@@ -147,16 +147,37 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(2);
+	std::cout.precision(9);
 	Vint Z; int z0, z1;
 	std::cin >> N >> z0 >> z1;
-	Polygon P; for (Pos& p : P) {
+	Polygon P(N); for (Pos& p : P) {
 		std::cin >> p >> p.z;
 		Z.push_back(p.z);
 		H[p.z].push_back(p);
 	}
 	std::sort(Z.begin(), Z.end());
 	Z.erase(unique(Z.begin(), Z.end()), Z.end());
+	int sz = Z.size();
+	for (int z = 0; z < sz - 1; z++) {
+		z0 = Z[z], z1 = Z[z + 1];
+		int sz0 = H[z0].size();
+		int sz1 = H[z1].size();
+		for (int h = z0; h < z1; h++) {
+			Polygon C;
+			for (int i = 0; i < sz0; i++) {
+				for (int j = 0; j < sz1; j++) {
+					const Pos& p0 = H[z0][i];
+					const Pos& p1 = H[z1][j];
+					Pos v = (p1 - p0);
+					Pos x = p0 + (v * (ld(h - z0) / (z1 - z0)));
+					C.push_back(x);
+				}
+			}
+			Polygon t = graham_scan(C);
+			std::cout << area(t) << "\n";
+		}
+	}
+	std::cout << area(graham_scan(H[Z.back()])) << "\n";
 	return;
 }
 int main() { solve(); return 0; }

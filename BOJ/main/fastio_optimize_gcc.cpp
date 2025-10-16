@@ -340,6 +340,12 @@ void solve() {
 	}
 	//std::cout << ret << "\n";
 	printf("%d\n", ret);
+	for (i = 0; i < N; i++) {
+		fast_io::print_int(P[i].x + h.x);
+		fast_io::pc(' ');
+		fast_io::print_int(P[i].y + h.y);
+		fast_io::pc('\n');
+	}
 	return;
 }
 int main() { solve(); return 0; }

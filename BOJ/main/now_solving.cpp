@@ -9,11 +9,15 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 const int LEN = 1e5;
+inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+
+#define STRONG 0
+#define WEAK 1
 
 int N;
 struct Pos {
 	int x, y, i;
-	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
+	Pos(int x_ = 0, int y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -27,67 +31,115 @@ struct Pos {
 } s, e;
 typedef std::vector<Pos> Polygon;
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
+bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
+bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
+	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
+	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
+	if (f == WEAK) return f1 && f2;
+	bool f3 = on_seg_strong(s1, s2, d1) ||
+		on_seg_strong(s1, s2, d2) ||
+		on_seg_strong(d1, d2, s1) ||
+		on_seg_strong(d1, d2, s2);
+	return (f1 && f2) || f3;
+}
+Polygon monotone_chain(Polygon& C) {
+	Polygon H;
+	std::sort(C.begin(), C.end());
+	int sz = C.size();
+	if (sz <= 2) return C;
+	bool f = 1;
+	for (int i = 1; i < sz - 1; i++) if (ccw(C[i - 1], C[i], C[i + 1])) { f = 0; break; }
+	if (f) return C;
+	for (int i = 0; i < C.size(); i++) {
+		while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) < 0)
+			H.pop_back();
+		H.push_back(C[i]);
+	}
+	H.pop_back();
+	int s = H.size() + 1;
+	for (int i = C.size() - 1; i >= 0; i--) {
+		while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) < 0)
+			H.pop_back();
+		H.push_back(C[i]);
+	}
+	H.pop_back();
+	return H;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N; Polygon P(N); for (int i = 0; i < N; i++) std::cin >> P[i], P[i].i = i;
+	std::cin >> N; Polygon P(N);
+	for (int i = 0; i < N; i++) std::cin >> P[i], P[i].i = i + 1;
 	std::cin >> s >> e;
-	Polygon U, L;
-	Pos u0 = e, u1 = e, u2 = s, u3 = s;
-	Pos l0 = e, l1 = e, l2 = s, l3 = s;
+	Polygon C = { s, e }, U, L;
 	bool colu = 1, coll = 1;
+	int cu = 0, cl = 0;
 	for (int i = 0; i < N; i++) {
-		ll tq = cross(s, e, P[i]), fc = dot(s, e, P[i]);
-		if (tq > 0 || (tq == 0 && fc > 0)) {
-			U.push_back(P[i]);
+		Pos p = P[i];
+		ll tq = cross(s, e, p), fc = dot(s, e, p);
+		if (tq > 0 || (!tq && fc > 0)) {
+			U.push_back(p);
+			cu++;
 			if (tq) colu = 0;
-			if (dot(s, e, u0) > fc || (dot(s, e, u0) == fc && cross(s, e, u0) < tq)) u0 = P[i];
-			if (dot(s, e, u1) > fc || (dot(s, e, u1) == fc && cross(s, e, u1) > tq)) u1 = P[i];
-			if (dot(s, e, u2) < fc || (dot(s, e, u2) == fc && cross(s, e, u2) > tq)) u2 = P[i];
-			if (dot(s, e, u3) < fc || (dot(s, e, u3) == fc && cross(s, e, u3) < tq)) u3 = P[i];
 		}
-		if (tq < 0 || (tq == 0 && fc < 0)) {
-			L.push_back(P[i]);
+		if (tq < 0 || (!tq && fc < 0)) {
+			p.i *= -1;
+			L.push_back(p);
+			cl++;
 			if (tq) coll = 0;
-			if (dot(s, e, l0) > fc || (dot(s, e, l0) == fc && cross(s, e, l0) > tq)) l0 = P[i];
-			if (dot(s, e, l1) > fc || (dot(s, e, l1) == fc && cross(s, e, l1) < tq)) l1 = P[i];
-			if (dot(s, e, l2) < fc || (dot(s, e, l2) == fc && cross(s, e, l2) < tq)) l2 = P[i];
-			if (dot(s, e, l3) < fc || (dot(s, e, l3) == fc && cross(s, e, l3) > tq)) l3 = P[i];
 		}
+		C.push_back(p);
 	}
-	if (U.empty() || L.empty()) {
+	if (colu && coll) { std::cout << "NO\n"; return; }
+	if (!cu || !cl) {
 		std::sort(P.begin(), P.end());
-		std::cout << "YES\n"; 
+		std::cout << "YES\n";
 		for (int i = 0; i < N - 1; i++) std::cout << P[i].i << " " << P[i + 1].i << "\n";
 		return;
 	}
-	if (colu && coll) { std::cout << "NO\n"; return; }
+	Polygon H = monotone_chain(C);
+	int sz = H.size();
 	Pos u, l;
-	bool ok = 0;
-	int sz;
-	if (cross(l1, u1, s) <= 0) { ok = 1; u = u1; l = l1; }
-	else if (cross(l2, u2, e) >= 0) { ok = 1; u = u2; l = l2; }
-	else if (u0 != u1 && l0 != l1 && cross(l0, u0, s) <= 0 && cross(l0, u0, u1) < 0 && cross(l0, u0, l1) < 0) { ok = 1; u = u0; l = l0; }
-	else if (u3 != u2 && l3 != l2 && cross(l3, u3, e) >= 0 && cross(l3, u3, u2) > 0 && cross(l3, u3, l2) > 0) { ok = 1; u = u3; l = l3; }
-	if (!ok) { std::cout << "NO\n"; return; }
-	sz = U.size();
-	std::cout << "YES\n" << u.i << " " << l.i << "\n";
-	for (int i = 0; i < sz; i++) if (U[i] == u) { std::swap(U[i], u); break; }
+	bool f = 0;
+	//for (const Pos& p : H) std::cout << "H:: " << p.i << "\n";
+	for (int i = 0, j; i < sz; i++) {
+		j = (i + 1) % sz;
+		if (H[i].i * H[j].i < 0) {
+			if (H[i].i > 0) u = H[i], l = H[j];
+			else l = H[i], u = H[j];
+			f = 1;
+			//assert(!intersect(u, l, s, e));
+			break;
+		}
+	}
+	//std::cout << "fuck::\n";
+	if (!f) { std::cout << "NO\n"; return; }
+	//assert(u.i); assert(l.i);
+	//assert(u.i * l.i < 0);
+	for (int i = 0; i < cu; i++) assert(U[i] != u);
+	for (int i = 0; i < cl; i++) assert(L[i] != l);
+	f = 0;
+	for (int i = 0; i < cu; i++) if (U[i] == u) { f = 1; std::swap(U[i], U[0]); break; }
+	//assert(f);
 	std::sort(U.begin() + 1, U.end(), [&](const Pos& p, const Pos& q) -> bool {
-		ll tq = cross(U[0], p, q);
+		ll tq = ccw(U[0], p, q);
 		return !tq ? p.Euc() < q.Euc() : tq > 0;
 		});
-	for (int i = 0; i < sz; i++) std::cout << U[i].i << " " << U[i + 1].i << "\n";
-	sz = L.size();
-	for (int i = 0; i < sz; i++) if (L[i] == l) { std::swap(L[i], l); break; }
+	f = 0;
+	for (int i = 0; i < cl; i++) if (L[i] == l) { f = 1; std::swap(L[i], L[0]); break; }
+	//assert(f); 
 	std::sort(L.begin() + 1, L.end(), [&](const Pos& p, const Pos& q) -> bool {
-		ll tq = cross(L[0], p, q);
+		ll tq = ccw(L[0], p, q);
 		return !tq ? p.Euc() < q.Euc() : tq > 0;
 		});
-	for (int i = 0; i < sz; i++) std::cout << L[i].i << " " << L[i + 1].i << "\n";
+	std::cout << "YES\n";
+	std::cout << u.i << " " << -l.i << "\n";
+	for (int i = 0; i < cu - 1; i++) std::cout << U[i].i << " " << U[i + 1].i << "\n";
+	for (int i = 0; i < cl - 1; i++) std::cout << -L[i].i << " " << -L[i + 1].i << "\n";
 	return;
 }
 int main() { solve(); return 0; }

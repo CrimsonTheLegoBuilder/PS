@@ -9,7 +9,7 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 const int LEN = 1e5;
-inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+inline int sign(ll x) { return x < 0 ? -1 : !!x; }
 
 #define STRONG 0
 #define WEAK 1
@@ -23,8 +23,20 @@ struct Pos {
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
-	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	ll operator * (const Pos& p) const { 
+		assert(std::abs(x) <= 2e9);
+		assert(std::abs(y) <= 2e9);
+		assert(std::abs(p.x) <= 2e9);
+		assert(std::abs(p.y) <= 2e9);
+		return (ll)x * p.x + (ll)y * p.y;
+	}
+	ll operator / (const Pos& p) const {
+		assert(std::abs(x) <= 2e9);
+		assert(std::abs(y) <= 2e9);
+		assert(std::abs(p.x) <= 2e9);
+		assert(std::abs(p.y) <= 2e9);
+		return (ll)x * p.y - (ll)y * p.x;
+	}
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
@@ -112,26 +124,26 @@ void solve() {
 			if (H[i].i > 0) u = H[i], l = H[j];
 			else l = H[i], u = H[j];
 			f = 1;
-			//assert(!intersect(u, l, s, e));
+			assert(!intersect(u, l, s, e));
 			break;
 		}
 	}
 	//std::cout << "fuck::\n";
 	if (!f) { std::cout << "NO\n"; return; }
-	//assert(u.i); assert(l.i);
-	//assert(u.i * l.i < 0);
-	for (int i = 0; i < cu; i++) assert(U[i] != u);
-	for (int i = 0; i < cl; i++) assert(L[i] != l);
+	assert(u.i); assert(l.i);
+	assert(u.i * l.i < 0);
+	//for (int i = 0; i < cu; i++) assert(U[i] != u);
+	//for (int i = 0; i < cl; i++) assert(L[i] != l);
 	f = 0;
 	for (int i = 0; i < cu; i++) if (U[i] == u) { f = 1; std::swap(U[i], U[0]); break; }
-	//assert(f);
+	assert(f);
 	std::sort(U.begin() + 1, U.end(), [&](const Pos& p, const Pos& q) -> bool {
 		ll tq = ccw(U[0], p, q);
 		return !tq ? p.Euc() < q.Euc() : tq > 0;
 		});
 	f = 0;
 	for (int i = 0; i < cl; i++) if (L[i] == l) { f = 1; std::swap(L[i], L[0]); break; }
-	//assert(f); 
+	assert(f); 
 	std::sort(L.begin() + 1, L.end(), [&](const Pos& p, const Pos& q) -> bool {
 		ll tq = ccw(L[0], p, q);
 		return !tq ? p.Euc() < q.Euc() : tq > 0;
@@ -139,7 +151,7 @@ void solve() {
 	std::cout << "YES\n";
 	std::cout << u.i << " " << -l.i << "\n";
 	for (int i = 0; i < cu - 1; i++) std::cout << U[i].i << " " << U[i + 1].i << "\n";
-	for (int i = 0; i < cl - 1; i++) std::cout << -L[i].i << " " << -L[i + 1].i << "\n";
+	//for (int i = 0; i < cl - 1; i++) std::cout << -L[i].i << " " << -L[i + 1].i << "\n";
 	return;
 }
 int main() { solve(); return 0; }

@@ -20,42 +20,6 @@ inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ld sq(const ld& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
-inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
-ld flip(ld lat) {
-	if (zero(lat - PI * .5) || zero(lat + PI * .5)) return 0;
-	if (zero(lat)) return PI * .5;
-	if (lat > 0) return PI * .5 - lat;
-	if (lat < 0) return -(PI * .5) - lat;
-	return INF;
-}
-ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
-//ll gcd(ll a, ll b) {
-//	while (b) {
-//		ll tmp = a % b;
-//		a = b;
-//		b = tmp;
-//	}
-//	return a;
-//}
-
-#define LO x
-#define HI y
-
-#define LINE 1
-#define CIRCLE 2
-#define SEG 3
-#define POS 4
-
-#define STRONG 0
-#define WEAK 1
-
-//freopen("../../../input_data/triathlon_tests/triath.20", "r", stdin);
-//freopen("../../../input_data/triathlon_tests/triathlon_out.txt", "w", stdout);
-
-//Euler characteristic : v - e + f == 1
-//Pick`s Theorem : A = i + b/2 - 1
-
-//2D============================================================================//
 
 int N, M, K, T, Q;
 struct Pos {
@@ -72,39 +36,16 @@ struct Pos {
 	Pos operator / (const ld& n) const { return { x / n, y / n }; }
 	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
 	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
-	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
-	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
-	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
-	Pos& operator *= (const ld& n) { x *= n; y *= n; return *this; }
-	Pos& operator /= (const ld& n) { x /= n; y /= n; return *this; }
 	Pos operator - () const { return { -x, -y }; }
 	Pos operator ~ () const { return { -y, x }; }
-	Pos operator ! () const { return { y, x }; }
-	ld xy() const { return x * y; }
-	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrt(Euc()); }
 	Pos unit() const { return *this / mag(); }
-	ld rad() const { return atan2(y, x); }
-	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
-	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
-	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
-	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = { 0, 0 };
 typedef std::vector<Pos> Polygon;
-bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
-bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 bool cmpz(const Pos& p, const Pos& q) { return p.z < q.z; }
-//bool cmpi(const Pos& p, const Pos& q) { return p.i < q.i; }
-bool cmpt(const Pos& p, const Pos& q) {
-	bool f0 = O < p;
-	bool f1 = O < q;
-	if (f0 != f1) return f0;
-	ld tq = p / q;
-	return !tq ? p.Euc() < q.Euc() : tq > 0;
-}
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
@@ -142,7 +83,6 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
-Polygon H[105];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -150,34 +90,24 @@ void solve() {
 	std::cout.precision(9);
 	Vint Z; int z0, z1;
 	std::cin >> N >> z0 >> z1;
-	Polygon P(N); for (Pos& p : P) {
-		std::cin >> p >> p.z;
-		Z.push_back(p.z);
-		H[p.z].push_back(p);
-	}
-	std::sort(Z.begin(), Z.end());
-	Z.erase(unique(Z.begin(), Z.end()), Z.end());
-	int sz = Z.size();
-	for (int z = 0; z < sz - 1; z++) {
-		z0 = Z[z], z1 = Z[z + 1];
-		int sz0 = H[z0].size();
-		int sz1 = H[z1].size();
-		for (int h = z0; h < z1; h++) {
-			Polygon C;
-			for (int i = 0; i < sz0; i++) {
-				for (int j = 0; j < sz1; j++) {
-					const Pos& p0 = H[z0][i];
-					const Pos& p1 = H[z1][j];
-					Pos v = (p1 - p0);
-					Pos x = p0 + (v * (ld(h - z0) / (z1 - z0)));
-					C.push_back(x);
-				}
+	Polygon P(N); for (Pos& p : P) std::cin >> p >> p.z;
+	std::sort(P.begin(), P.end(), cmpz);
+	for (int z = z0; z <= z1; z++) {
+		Polygon C;
+		for (int i = 0; i < N; i++) {
+			for (int j = i; j < N; j++) {
+				if (P[i].z < z && P[j].z < z) continue;
+				if (P[i].z > z && P[j].z > z) continue;
+				const Pos& p0 = P[i];
+				const Pos& p1 = P[j];
+				if (p0.z == p1.z) { C.push_back(p0); continue; }
+				Pos v = p1 - p0;
+				Pos x = p0 + (v * ld(z - p0.z) / (p1.z - p0.z));
+				C.push_back(x);
 			}
-			Polygon t = graham_scan(C);
-			std::cout << area(t) << "\n";
 		}
+		std::cout << area(graham_scan(C)) << "\n";
 	}
-	std::cout << area(graham_scan(H[Z.back()])) << "\n";
 	return;
 }
 int main() { solve(); return 0; }

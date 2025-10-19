@@ -32,6 +32,11 @@ struct Pos {
 typedef std::vector<Pos> Polygon;
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+ll area(Polygon& H) {
+	ll a = 0; int sz = H.size();
+	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
+	return a;
+}
 Polygon graham_scan(Polygon& C) {
 	Polygon H;
 	if (C.size() < 3) {
@@ -54,6 +59,29 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
+Polygon monotone_chain(Polygon& C) {
+	Polygon H;
+	std::sort(C.begin(), C.end());
+	int sz = C.size();
+	if (sz <= 2) return C;
+	bool f = 1;
+	for (int i = 1; i < sz - 1; i++) if (ccw(C[i - 1], C[i], C[i + 1])) { f = 0; break; }
+	if (f) return C;
+	for (int i = 0; i < C.size(); i++) {
+		while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) < 0)
+			H.pop_back();
+		H.push_back(C[i]);
+	}
+	H.pop_back();
+	int s = H.size() + 1;
+	for (int i = C.size() - 1; i >= 0; i--) {
+		while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) < 0)
+			H.pop_back();
+		H.push_back(C[i]);
+	}
+	H.pop_back();
+	return H;
+}
 bool query() {
 	std::cin >> N;
 	if (!N) return 0;
@@ -63,8 +91,8 @@ bool query() {
 	while (1) {
 		N = P.size();
 		for (int i = 0; i < N; i++) P[i].i = i;
-		Polygon H = graham_scan(P);
-		if (H.size() < 3) break;
+		Polygon H = monotone_chain(P);
+		if (!area(H) || H.size() < 3) break;
 		cnt++;
 		if (H.size() == N) break;
 		std::vector<bool> F(N, 0);

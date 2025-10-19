@@ -71,7 +71,7 @@ void solve() {
 		int p, q, a = 0, b = 0;
 		std::cin >> p >> q >> N;
 		Polygon P(N); for (Pos& p_ : P) std::cin >> p_;
-		norm(P);
+		//norm(P);
 		for (int i = 0; i < N; i++) P[i].i = i;
 		Polygon H = graham_scan(P);
 		int sz = H.size();

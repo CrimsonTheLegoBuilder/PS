@@ -20,6 +20,10 @@ inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ld sq(const ld& x) { return x * x; }
 inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
+//ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
+ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
+
+//Pick`s Theorem : A = i + b/2 - 1
 
 int N, M, K, T, Q, R;
 struct Pos {
@@ -76,6 +80,11 @@ ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * 
 ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
+ll area(const Polygon& H) {
+	ll a = 0; int sz = H.size();
+	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
+	return a;
+}
 Polygon graham_scan(Polygon& C) {
 	Polygon H;
 	if (C.size() < 3) {
@@ -98,33 +107,35 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
-ld rotating_calipers(const Polygon& H) {
+//Pick`s Theorem : A = i + b/2 - 1
+ll pick(const Polygon& H) {
 	int sz = H.size();
-	if (sz < 3) return -1;
-	auto jaw = [&](const int& i, const int& f) -> ll {
-		return (H[(i + 1) % sz] - H[i]) / (H[(f + 1) % sz] - H[f]);
-		};
-	auto w = [&](const int& i, const int& f) -> ld {
-		const Pos& p0 = H[i], & p1 = H[(i + 1) % sz], p2 = H[f];
-		ll tq = cross(p0, p1, p2);
-		return tq / (p1 - p0).mag();
-		};
-	ld ret = INF;
-	for (int i = 0, j = 1; i < sz; i++) {
-		while (jaw(i, j) > 0) {
-			j = (j + 1) % sz;
-		}
-		ret = std::min(ret, w(i, j));
+	if (sz == 1) return 1;
+	if (sz == 2) { Pos v = H[1] - H[0]; return gcd(std::abs(v.x), std::abs(v.y)); }
+	ll b = 0;
+	ll A = area(H);
+	for (int i = 0; i < sz; i++) {
+		const Pos& p0 = H[i], & p1 = H[(i + 1) % sz];
+		Pos v = p1 - p0;
+		//std::cout << "v:: " << v << "\n";
+		ll g = gcd(std::abs(v.x), std::abs(v.y));
+		//std::cout << "gcd:: " << g << "\n";
+		b += g;
 	}
-	return ret;
+	return ((A + 2 - b) >> 1) + b;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N >> R; Polygon P(N); for (Pos& p : P) std::cin >> p;
-	Polygon H = graham_scan(P); std::cout << rotating_calipers(H) << "\n";
+	std::cin >> T; while (T--) {
+		std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
+		Polygon H = graham_scan(P);
+		//std::cout << "N:: " << N << " pick:: " << pick(H) << "\n";
+		//std::cout << (N == pick(H) ? "::1\n" : "::0\n");
+		//std::cout << (N == pick(H) ? "1\n" : "0\n");
+	}
 	return;
 }
 int main() { solve(); return 0; }

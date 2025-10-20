@@ -166,7 +166,7 @@ ll area(Pos H[], const int& sz) {
 	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
 	return a;
 }
-ll area(Polygon& H) {
+ll area(const Polygon& H) {
 	ll a = 0; int sz = H.size();
 	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
 	return a;
@@ -232,6 +232,23 @@ int inner_check_bi_search(const Polygon& H, const Pos& p) {//convex
 	if (cross(H[s], H[e], p) > 0) return 1;
 	else if (on_seg_strong(H[s], H[e], p)) return 0;
 	else return -1;
+}
+//Pick`s Theorem : A = i + b/2 - 1
+ll pick(const Polygon& H) {
+	int sz = H.size();
+	if (sz == 1) return 1;
+	if (sz == 2) { Pos v = H[1] - H[0]; return gcd(std::abs(v.x), std::abs(v.y)); }
+	ll b = 0;
+	ll A = area(H);
+	for (int i = 0; i < sz; i++) {
+		const Pos& p0 = H[i], & p1 = H[(i + 1) % sz];
+		Pos v = p1 - p0;
+		//std::cout << "v:: " << v << "\n";
+		ll g = gcd(std::abs(v.x), std::abs(v.y));
+		//std::cout << "gcd:: " << g << "\n";
+		b += g;
+	}
+	return ((A + 2 - b) >> 1) + b;
 }
 Polygon monotone_chain(Polygon& C) {
 	Polygon H;

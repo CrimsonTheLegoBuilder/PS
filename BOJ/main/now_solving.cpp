@@ -111,7 +111,7 @@ Polygon graham_scan(Polygon& C) {
 ll pick(const Polygon& H) {
 	int sz = H.size();
 	if (sz == 1) return 1;
-	if (sz == 2) { Pos v = H[1] - H[0]; return gcd(std::abs(v.x), std::abs(v.y)); }
+	if (sz == 2) { Pos v = H[1] - H[0]; return gcd(std::abs(v.x), std::abs(v.y)) + 1; }
 	ll b = 0;
 	ll A = area(H);
 	for (int i = 0; i < sz; i++) {

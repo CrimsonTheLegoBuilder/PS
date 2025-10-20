@@ -2,18 +2,15 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include <cstring>
-#include <cassert>
 #include <vector>
 typedef long long ll;
-//typedef long double ld;
 typedef double ld;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 
-int N, M, K, T, Q, R;
+int N;
 struct Pos {
-	int x, y, i, f;
-	Pos(int x_ = 0, int y_ = 0, int i_ = -1, int f_ = 1) : x(x_), y(y_), i(i_), f(f_) {}
+	int x, y, i;
+	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
@@ -21,7 +18,7 @@ struct Pos {
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
+};
 typedef std::vector<Pos> Polygon;
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }

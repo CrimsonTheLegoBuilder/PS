@@ -14,12 +14,14 @@ struct Pos {
 	int x, y, i;
 	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
+	bool operator < (const Pos& p) const { return x == p.x ? y == p.y ? i > p.i : y < p.y : x < p.x; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y, i }; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y, i }; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
-	Pos operator - () const { return { -x, -y }; }
-	Pos operator ~ () const { return { -y, x }; }
+	Pos operator * (const int& n) const { return { x * n, y * n, i }; }
+	Pos operator - () const { return { -x, -y, i }; }
+	Pos operator ~ () const { return { -y, x, i }; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ld mag() const { return sqrtl(Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
@@ -54,45 +56,54 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(13);
+	std::cout.precision(1);
 	std::cin >> T; while (T--) {
 		ld R = 0, r = 0;
 		std::cin >> N; Polygon P(N);
 		for (Pos& p : P) std::cin >> p;
 		std::cin >> M; Polygon S(M);
-		for (int i = 0; i < M; i++) {
-			Pos s;
-			int k, d; std::cin >> k >> d;
-			if (!k) { R += d; continue; }
-			const Pos& u = P[k], & v = P[(k + 1) % N];
-			s = u;
-			if (u.x > v.x) s.x -= d;
-			else if (u.x < v.x) s.x += d;
-			else if (u.y > v.y) s.y -= d;
-			else if (u.y < v.y) s.y += d;
-			s.i = 0;
-			S.push_back(s);
+		for (Pos& s : S) std::cin >> s;
+		std::sort(S.begin(), S.end());
+		int j = 0;
+		for (; j < M; j++) {
+			if (S[j].x != 0) break;
+			R += S[j].y;
 		}
-		M = S.size();
-		assert(N >= 4);
-		if (P[0].x != P[1].x) { for (Pos& p : P) p = ~p; for (Pos& s : S) s = ~s; }
-		if (P[0].x > P[1].x) { for (Pos& p : P) p = -p; for (Pos& s : S) s = -s; }
-		Polygon Q;
-		for (int i = 0; i < N; i++) if (i != 1) Q.push_back(P[i]);
-		for (int i = 0; i < M; i++) Q.push_back(S[i]);
+		//std::cout << "DEBUG::\n";
+		//for (const Pos& s : S) std::cout << "" << s << " " << s.i << "\n";
+		//std::cout << "DEBUG::\n";
+		Polygon Q = { P[0] };
+		for (int i = 1; i < N; i++) {
+			Q.push_back(P[i]);
+			Pos d = P[(i + 1) % N] - P[i];
+			d.x = sign(d.x);
+			d.y = sign(d.y);
+			//std::cout << "j:: " << j << "\n";
+			while (j < M && S[j].x == i) {
+				//std::cout << "	DEBUG::\n";
+				//std::cout << "	S[j]:: " << S[j] << "\n";
+				//std::cout << "	DEBUG::\n";
+				Pos p = P[i] + d * S[j].y;
+				p.i = 0;
+				Q.push_back(p);
+				j++;
+			}
+		}
+		//std::cout << "DEBUG::\n";
+		//for (const Pos& q : Q) std::cout << "" << q << " " << q.i << "\n";
+		//std::cout << "DEBUG::\n";
+		Q.push_back(Q[0]);
+		std::reverse(Q.begin(), Q.end());
+		Q.pop_back();
 		Polygon H;
 		for (const Pos& q : Q) {
 			while (H.size() > 1 && ccw(H[H.size() - 2], H.back(), q) <= 0) {
 				r -= (H[H.size() - 2] - H.back()).mag();
 				H.pop_back();
 			}
-			r += (q - H.back()).mag();
+			if (H.size()) r += (H.back() - q).mag();
+			if (!q.i) R += r;
 			H.push_back(q);
-			if (!q.i) {
-				R += r;
-				H.pop_back();
-				r -= (q - H.back()).mag();
-			}
 		}
 		std::cout << R << "\n";
 	}

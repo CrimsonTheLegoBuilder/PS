@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <cassert>
 typedef long long ll;
 typedef double ld;
 const ld PI = acos(-1);
@@ -17,6 +18,8 @@ struct Pos {
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	Pos operator - () const { return { -x, -y }; }
+	Pos operator ~ () const { return { -y, x }; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ld mag() const { return sqrtl(Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
@@ -56,8 +59,24 @@ void solve() {
 		std::cin >> N; Polygon P(N);
 		for (Pos& p : P) std::cin >> p;
 		std::cin >> M; Polygon S(M);
-		for (Pos& s : S) std::cin >> s;
-		
+		for (Pos& s : S) std::cin >> s, s.i = 0;
+		assert(N >= 4);
+		if (P[0].x != P[1].x) { for (Pos& p : P) p = ~p; for (Pos& s : S) s = ~s; }
+		if (P[0].x > P[1].x) { for (Pos& p : P) p = -p; for (Pos& s : S) s = -s; }
+		Polygon Q;
+		for (int i = 0; i < N; i++) if (i != 1) Q.push_back(P[i]);
+		for (int i = 0; i < M; i++) Q.push_back(S[i]);
+		Polygon H;
+		ld R = 0, r = 0;
+		for (const Pos& q : Q) {
+			while (H.size() > 1 && ccw(H[H.size() - 2], H.back(), q) <= 0) {
+				r -= (H[H.size() - 2] - H.back()).mag();
+				H.pop_back();
+			}
+			r += (q - H.back()).mag();
+			if (q.i != -1) R += r;
+		}
+		std::cout << R << "\n";
 	}
 	return;
 }

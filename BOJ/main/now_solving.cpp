@@ -87,7 +87,12 @@ void solve() {
 				H.pop_back();
 			}
 			r += (q - H.back()).mag();
-			if (!q.i) { R += r; H.pop_back(); }
+			H.push_back(q);
+			if (!q.i) {
+				R += r;
+				H.pop_back();
+				r -= (q - H.back()).mag();
+			}
 		}
 		std::cout << R << "\n";
 	}

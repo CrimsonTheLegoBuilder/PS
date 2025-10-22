@@ -5,17 +5,20 @@
 #include <vector>
 typedef long long ll;
 typedef double ld;
+const ld PI = acos(-1);
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 
-int N;
+int T, N, M;
 struct Pos {
 	int x, y, i;
 	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
+	ld mag() const { return sqrtl(Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 };
@@ -48,22 +51,13 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(9);
-	while (1) {
-		std::cin >> N;
-		if (!N) break;
-		Polygon P(N);
-		for (int i = 0; i < N; i++) std::cin >> P[i], P[i].i = i;
-		Polygon H = graham_scan(P);
-		int sz = H.size();
-		bool f = 1;
-		for (int i = 0, s, e; i < sz; i++) {
-			s = H[i].i, e = H[(i + 1) % sz].i;
-			if ((s + 1) % N == e) continue;
-			if (ccw(P[s], P[e], P[(s + 1) % N])) { f = 0; break; }
-			if (ccw(P[s], P[e], P[(e - 1 + N) % N])) { f = 0; break; }
-		}
-		std::cout << (f ? "Yes\n" : "No\n");
+	std::cout.precision(13);
+	std::cin >> T; while (T--) {
+		std::cin >> N; Polygon P(N);
+		for (Pos& p : P) std::cin >> p;
+		std::cin >> M; Polygon S(M);
+		for (Pos& s : S) std::cin >> s;
+		
 	}
 	return;
 }

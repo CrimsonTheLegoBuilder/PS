@@ -56,10 +56,24 @@ void solve() {
 	std::cout << std::fixed;
 	std::cout.precision(13);
 	std::cin >> T; while (T--) {
+		ld R = 0, r = 0;
 		std::cin >> N; Polygon P(N);
 		for (Pos& p : P) std::cin >> p;
 		std::cin >> M; Polygon S(M);
-		for (Pos& s : S) std::cin >> s, s.i = 0;
+		for (int i = 0; i < M; i++) {
+			Pos s;
+			int k, d; std::cin >> k >> d;
+			if (!k) { R += d; continue; }
+			const Pos& u = P[k], & v = P[(k + 1) % N];
+			s = u;
+			if (u.x > v.x) s.x -= d;
+			else if (u.x < v.x) s.x += d;
+			else if (u.y > v.y) s.y -= d;
+			else if (u.y < v.y) s.y += d;
+			s.i = 0;
+			S.push_back(s);
+		}
+		M = S.size();
 		assert(N >= 4);
 		if (P[0].x != P[1].x) { for (Pos& p : P) p = ~p; for (Pos& s : S) s = ~s; }
 		if (P[0].x > P[1].x) { for (Pos& p : P) p = -p; for (Pos& s : S) s = -s; }
@@ -67,14 +81,13 @@ void solve() {
 		for (int i = 0; i < N; i++) if (i != 1) Q.push_back(P[i]);
 		for (int i = 0; i < M; i++) Q.push_back(S[i]);
 		Polygon H;
-		ld R = 0, r = 0;
 		for (const Pos& q : Q) {
 			while (H.size() > 1 && ccw(H[H.size() - 2], H.back(), q) <= 0) {
 				r -= (H[H.size() - 2] - H.back()).mag();
 				H.pop_back();
 			}
 			r += (q - H.back()).mag();
-			if (q.i != -1) R += r;
+			if (!q.i) { R += r; H.pop_back(); }
 		}
 		std::cout << R << "\n";
 	}

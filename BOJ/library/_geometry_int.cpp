@@ -21,6 +21,8 @@ const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
 inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+inline bool zero(const ll& x) { return !x; }
+inline ll sq(const ll& x) { return x * x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }

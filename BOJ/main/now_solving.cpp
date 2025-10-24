@@ -19,21 +19,10 @@ const int LEN = 1e5 + 1;
 const ld TOL = 1e-7;
 const ll MOD = 1e9 + 7;
 const ld PI = acos(-1);
-inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
-inline bool zero(const ll& x) { return !x; }
+inline int zero(const ll& x) { return !x; }
 
-
-#define LO x
-#define HI y
-
-#define LINE 1
-#define CIRCLE 2
-
-#define STRONG 0
-#define WEAK 1
-
-int N, M, T, Q;
+int N;
 
 struct Pos3D {
 	ll x, y, z;
@@ -86,27 +75,15 @@ ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { ret
 bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return !zero(cross(d1, d2, d3).mag()) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).mag()) && dot(d1, d3, d2) > 0; }
 int ccw(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& norm) { return sign(cross(d1, d2, d3) * norm); }
-ld area(const std::vector<Pos3D>& H, const Pos3D& norm) {
-	if (H.size() < 3) return 0;
-	ll ret = 0;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) {
-		Pos3D cur = H[i], nxt = H[(i + 1) % sz];
-		ret += cross(H[0], cur, nxt) * norm / norm.Euc();
-	}
-	return std::abs(ret * .5);
-}
-bool collinear(const Pos3D& a, const Pos3D& b, const Pos3D& c) { return zero(((b - a) / (c - b)).Euc()); }
-bool coplanar(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return zero(cross(a, b, c) * (p - a)); }
+bool collinear(const Pos3D& a, const Pos3D& b, const Pos3D& c) { return !(((b - a) / (c - b)).Euc()); }
+bool coplanar(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return !(cross(a, b, c) * (p - a)); }
 bool above(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return cross(a, b, c) * (p - a) > 0; }
-int side(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return sign(cross(a, b, c) * (p - a)); }
 int prep(std::vector<Pos3D>& p) {//refer to Koosaga'
 	shuffle(p.begin(), p.end(), std::mt19937(0x14004));
 	int dim = 1;
 	for (int i = 1; i < p.size(); i++) {
 		if (dim == 1) {
-			if (p[0] != p[i])
-				std::swap(p[1], p[i]), ++dim;
+			if (p[0] != p[i]) std::swap(p[1], p[i]), ++dim;
 		}
 		else if (dim == 2) {
 			if (!collinear(p[0], p[1], p[i]))
@@ -117,7 +94,7 @@ int prep(std::vector<Pos3D>& p) {//refer to Koosaga'
 				std::swap(p[3], p[i]), ++dim;
 		}
 	}
-	assert(dim == 4);
+	//assert(dim == 4);
 	return dim;
 }
 struct Face {
@@ -126,16 +103,6 @@ struct Face {
 	Pos3D norm(std::vector<Pos3D>& C) const { return cross(C[v[0]], C[v[1]], C[v[2]]); }
 	Planar P(std::vector<Pos3D>& C) const { return Planar(norm(C), C[v[0]]); }
 };
-ld dist(const std::vector<Pos3D>& C, const Face& F, const Pos3D& p) {
-	Pos3D norm = cross(C[F.v[0]], C[F.v[1]], C[F.v[2]]);
-	ll ret = norm * (p - C[F.v[0]]);
-	return std::abs(ret / (norm.mag()));
-}
-ld get_min_dist(const std::vector<Pos3D>& C, const std::vector<Face>& F, const Pos3D& p) {
-	ld MIN = INF;
-	for (const Face& face : F) MIN = std::min(MIN, dist(C, face, p));
-	return MIN;
-}
 struct Edge {
 	int face_num, edge_num;
 	Edge(int t = 0, int v = 0) : face_num(t), edge_num(v) {}
@@ -186,7 +153,7 @@ std::vector<Face> convex_hull_3D(std::vector<Pos3D>& candi) {//incremental const
 	ad(0, 1, 2), ad(0, 2, 1);
 	if (abv(1, 3)) std::swap(candi[1], candi[2]);
 	for (int i = 0; i < 3; i++) glue({ 0, i }, { 1, 2 - i });
-	for (int i = 3; i < N; i++) visible(abv(1, i), i);//coplanar points go in rvis[0]
+	for (int i = 3; i < sz; i++) visible(abv(1, i), i);//coplanar points go in rvis[0]
 
 	std::vector<int> label(sz, -1);
 	for (int i = 3; i < sz; i++) {//incremental construction
@@ -227,7 +194,9 @@ std::vector<Face> convex_hull_3D(std::vector<Pos3D>& candi) {//incremental const
 	for (int i = 0; i < faces.size(); i++) if (active[i]) hull3D.push_back(faces[i]);
 	return hull3D;
 }
+int side(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return sign(cross(a, b, c) * (p - a)); }
 typedef std::vector<Face> Hull3D;
+int V[100];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -236,40 +205,32 @@ void solve() {
 	std::cin >> N;
 	Polygon3D P(N); for (Pos3D& p : P) std::cin >> p;
 	Hull3D H = convex_hull_3D(P);
-	assert(!col);
-	assert(!cop);
-	assert(N > 3);
-	int ret = 0;
+	assert(!col); assert(!cop); assert(N > 3);
+	int ret = 0, sz = H.size();
 	for (int i = 0; i < N; i++) {
 		const Pos3D& p0 = P[i];
 		for (int j = i + 1; j < N; j++) {
 			const Pos3D& p1 = P[j];
 			for (int k = j + 1; k < N; k++) {
 				const Pos3D& p2 = P[k];
-				int R = 0, L = 0;
-				int r = 0, l = 0;
-				for (const Face& h : H) {
-					int u = 0, d = 0, m = 0;
-					for (int n = 0; n < 3; n++) {
-						int s = side(p0, p1, p2, P[h.v[n]]);
-						if (!s) m++;
-						if (s > 0) u++;
-						if (s < 0) d++;
+				for (int p = 0; p < N; p++) V[p] = side(p0, p1, p2, P[p]) > 0;
+				assert(!V[i]); assert(!V[j]); assert(!V[k]);
+				for (V[i] = 0; V[i] <= 1; V[i]++) {
+					for (V[j] = 0; V[j] <= 1; V[j]++) {
+						for (V[k] = 0; V[k] <= 1; V[k]++) {
+							int tmp = 0;
+							for (const Face& h : H) {
+								int s = V[h.v[0]] + V[h.v[1]] + V[h.v[2]];
+								if (s == 1 || s == 2) tmp++;
+							}
+							ret = std::max(ret, tmp);
+						}
 					}
-					if (u && d) R++, L++;
-					else if (u && m) r++;
-					else if (d && m) l++;
-					else if (u && !m) R++;
-					else if (d && !m) L++;
 				}
-				int U = R + 1;
-				int D = L + 1;
-				ret = std::max(ret, U + D + r + r + l);
-				ret = std::max(ret, U + D + r + l + l);
-				ret = std::max(ret, U + D + r + r + l + l);
 			}
 		}
 	}
-	std::cout << ret << "\n";
+	std::cout << ret + sz + 2 << "\n";
+	return;
 }
 int main() { solve(); return 0; }

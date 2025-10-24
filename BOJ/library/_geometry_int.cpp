@@ -858,7 +858,7 @@ std::vector<Face> convex_hull_3D(std::vector<Pos3D>& candi) {//incremental const
 	ad(0, 1, 2), ad(0, 2, 1);
 	if (abv(1, 3)) std::swap(candi[1], candi[2]);
 	for (int i = 0; i < 3; i++) glue({ 0, i }, { 1, 2 - i });
-	for (int i = 3; i < N; i++) visible(abv(1, i), i);//coplanar points go in rvis[0]
+	for (int i = 3; i < sz; i++) visible(abv(1, i), i);//coplanar points go in rvis[0]
 
 	std::vector<int> label(sz, -1);
 	for (int i = 3; i < sz; i++) {//incremental construction

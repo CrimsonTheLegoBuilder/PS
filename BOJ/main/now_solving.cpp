@@ -69,12 +69,6 @@ const Pos3D Z_axis = { 0, 0, 1 };
 const Pos3D MAXP3D = { INF, INF, INF };
 typedef std::vector<Pos3D> Polygon3D;
 typedef std::vector<Polygon3D> Polyhedron;
-using Face = std::array<int, 3>;
-std::vector<Face> Hull3D;
-struct Edge {
-	int face_num, edge_num;
-	Edge(int t = 0, int v = 0) : face_num(t), edge_num(v) {}
-};
 struct Line3D {
 	Pos3D dir, p0;
 	Line3D(Pos3D d = Pos3D(), Pos3D p = Pos3D()) : dir(d), p0(p) {}
@@ -105,6 +99,7 @@ ld area(const std::vector<Pos3D>& H, const Pos3D& norm) {
 bool collinear(const Pos3D& a, const Pos3D& b, const Pos3D& c) { return zero(((b - a) / (c - b)).Euc()); }
 bool coplanar(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return zero(cross(a, b, c) * (p - a)); }
 bool above(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return cross(a, b, c) * (p - a) > 0; }
+int side(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return sign(cross(a, b, c) * (p - a)); }
 int prep(std::vector<Pos3D>& p) {//refer to Koosaga'
 	shuffle(p.begin(), p.end(), std::mt19937(0x14004));
 	int dim = 1;
@@ -232,6 +227,7 @@ std::vector<Face> convex_hull_3D(std::vector<Pos3D>& candi) {//incremental const
 	for (int i = 0; i < faces.size(); i++) if (active[i]) hull3D.push_back(faces[i]);
 	return hull3D;
 }
+typedef std::vector<Face> Hull3D;
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -239,4 +235,41 @@ void solve() {
 	std::cout.precision(13);
 	std::cin >> N;
 	Polygon3D P(N); for (Pos3D& p : P) std::cin >> p;
+	Hull3D H = convex_hull_3D(P);
+	assert(!col);
+	assert(!cop);
+	assert(N > 3);
+	int ret = 0;
+	for (int i = 0; i < N; i++) {
+		const Pos3D& p0 = P[i];
+		for (int j = i + 1; j < N; j++) {
+			const Pos3D& p1 = P[j];
+			for (int k = j + 1; k < N; k++) {
+				const Pos3D& p2 = P[k];
+				int R = 0, L = 0;
+				int r = 0, l = 0;
+				for (const Face& h : H) {
+					int u = 0, d = 0, m = 0;
+					for (int n = 0; n < 3; n++) {
+						int s = side(p0, p1, p2, P[h.v[n]]);
+						if (!s) m++;
+						if (s > 0) u++;
+						if (s < 0) d++;
+					}
+					if (u && d) R++, L++;
+					else if (u && m) r++;
+					else if (d && m) l++;
+					else if (u && !m) R++;
+					else if (d && !m) L++;
+				}
+				int U = R + 1;
+				int D = L + 1;
+				ret = std::max(ret, U + D + r + r + l);
+				ret = std::max(ret, U + D + r + l + l);
+				ret = std::max(ret, U + D + r + r + l + l);
+			}
+		}
+	}
+	std::cout << ret << "\n";
 }
+int main() { solve(); return 0; }

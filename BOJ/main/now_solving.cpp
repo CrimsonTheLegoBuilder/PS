@@ -2,235 +2,112 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include <cstring>
-#include <cassert>
 #include <vector>
-#include <random>
-#include <array>
-#include <tuple>
 typedef long long ll;
-//typedef long double ld;
 typedef double ld;
-typedef std::pair<int, int> pi;
-typedef std::vector<int> Vint;
-typedef std::vector<ld> Vld;
-const ll INF = 1e17;
-const int LEN = 1e5 + 1;
+//typedef long double ld;
 const ld TOL = 1e-7;
-const ll MOD = 1e9 + 7;
-const ld PI = acos(-1);
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
-inline int zero(const ll& x) { return !x; }
+inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
+inline bool zero(const ld& x) { return !sign(x); }
+
+#include <unistd.h>
+int iptr = 0, left = 0;
+char ibuf[1 << 20];
+int read() {
+	int x = 0, s = 1;
+	bool started = false;
+	for (;;) {
+		if (iptr >= left) {
+			left = read(0, ibuf, sizeof ibuf);
+			iptr = 0;
+		}
+		if (!left) break;
+		char c = ibuf[iptr++];
+		if (c == '-') {
+			s = -1;
+		}
+		else if (c >= '0' && c <= '9') {
+			x = x * 10 + (c - '0');
+			started = true;
+		}
+		else if (started) {
+			break;
+		}
+	}
+	return s > 0 ? x : -x;
+}
 
 int N;
-
-struct Pos3D {
-	ll x, y, z;
-	Pos3D(ll x_ = 0, ll y_ = 0, ll z_ = 0) : x(x_), y(y_), z(z_) {}
-	bool operator == (const Pos3D& p) const { return x == p.x && y == p.y && z == p.z; }
-	bool operator != (const Pos3D& p) const { return x != p.x || y != p.y || z != p.z; }
-	bool operator < (const Pos3D& p) const { return x == p.x ? y == p.y ? z < p.z : y < p.y : x < p.x; }
-	ll operator * (const Pos3D& p) const { return x * p.x + y * p.y + z * p.z; }
-	Pos3D operator / (const Pos3D& p) const {
-		Pos3D ret;
-		ret.x = y * p.z - z * p.y;
-		ret.y = z * p.x - x * p.z;
-		ret.z = x * p.y - y * p.x;
-		return ret;
-	}
-	Pos3D operator + (const Pos3D& p) const { return { x + p.x, y + p.y, z + p.z }; }
-	Pos3D operator - (const Pos3D& p) const { return { x - p.x, y - p.y, z - p.z }; }
-	Pos3D operator * (const ll& n) const { return { x * n, y * n, z * n }; }
-	Pos3D operator / (const ll& n) const { return { x / n, y / n, z / n }; }
-	Pos3D& operator += (const Pos3D& p) { x += p.x; y += p.y; z += p.z; return *this; }
-	Pos3D& operator -= (const Pos3D& p) { x -= p.x; y -= p.y; z -= p.z; return *this; }
-	Pos3D& operator *= (const ll& n) { x *= n; y *= n; z *= n; return *this; }
-	Pos3D& operator /= (const ll& n) { x /= n; y /= n; z /= n; return *this; }
-	ll Euc() const { return x * x + y * y + z * z; }
+struct Pos {
+	int x, y;
+	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
+	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
+	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
+	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ld mag() const { return sqrtl(Euc()); }
-	friend std::istream& operator >> (std::istream& is, Pos3D& p) { is >> p.x >> p.y >> p.z; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Pos3D& p) { os << p.x << " " << p.y << " " << p.z << "\n"; return os; }
-} candi[LEN];
-const Pos3D O3D = { 0, 0, 0 };
-const Pos3D X_axis = { 1, 0, 0 };
-const Pos3D Y_axis = { 0, 1, 0 };
-const Pos3D Z_axis = { 0, 0, 1 };
-const Pos3D MAXP3D = { INF, INF, INF };
-typedef std::vector<Pos3D> Polygon3D;
-typedef std::vector<Polygon3D> Polyhedron;
-struct Line3D {
-	Pos3D dir, p0;
-	Line3D(Pos3D d = Pos3D(), Pos3D p = Pos3D()) : dir(d), p0(p) {}
+	//friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
+	//friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 };
-struct Planar {
-	Pos3D norm, p0;
-	Planar(Pos3D n = Pos3D(), Pos3D p = Pos3D()) : norm(n), p0(p) {}
-	friend std::istream& operator >> (std::istream& is, Planar& P) { is >> P.norm >> P.p0; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Planar& P) { os << P.norm << " " << P.p0; return os; }
-};
-Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) / (d3 - d2); }
-Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
-ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) * (d4 - d3); }
-bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return !zero(cross(d1, d2, d3).mag()) && dot(d1, d3, d2) >= 0; }
-bool on_seg_weak(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).mag()) && dot(d1, d3, d2) > 0; }
-int ccw(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& norm) { return sign(cross(d1, d2, d3) * norm); }
-bool collinear(const Pos3D& a, const Pos3D& b, const Pos3D& c) { return !(((b - a) / (c - b)).Euc()); }
-bool coplanar(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return !(cross(a, b, c) * (p - a)); }
-bool above(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return cross(a, b, c) * (p - a) > 0; }
-int prep(std::vector<Pos3D>& p) {//refer to Koosaga'
-	shuffle(p.begin(), p.end(), std::mt19937(0x14004));
-	int dim = 1;
-	for (int i = 1; i < p.size(); i++) {
-		if (dim == 1) {
-			if (p[0] != p[i]) std::swap(p[1], p[i]), ++dim;
-		}
-		else if (dim == 2) {
-			if (!collinear(p[0], p[1], p[i]))
-				std::swap(p[2], p[i]), ++dim;
-		}
-		else if (dim == 3) {
-			if (!coplanar(p[0], p[1], p[2], p[i]))
-				std::swap(p[3], p[i]), ++dim;
-		}
-	}
-	//assert(dim == 4);
-	return dim;
+const Pos O = Pos(0, 0);
+const Pos pp = Pos(1, 1);
+const Pos np = Pos(-1, 1);
+typedef std::vector<Pos> Polygon;
+ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
+int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
+ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
+	ld det = (q2 - q1) / (p2 - p1);
+	if (zero(det)) return -1;
+	return ((q2 - q1) / (q1 - p1)) / det;
 }
-struct Face {
-	int v[3];
-	Face(int a = 0, int b = 0, int c = 0) { v[0] = a; v[1] = b; v[2] = c; }
-	Pos3D norm(std::vector<Pos3D>& C) const { return cross(C[v[0]], C[v[1]], C[v[2]]); }
-	Planar P(std::vector<Pos3D>& C) const { return Planar(norm(C), C[v[0]]); }
-};
-struct Edge {
-	int face_num, edge_num;
-	Edge(int t = 0, int v = 0) : face_num(t), edge_num(v) {}
-};
-bool col = 0, cop = 0;
-std::vector<Face> convex_hull_3D(std::vector<Pos3D>& candi) {//incremental construction
-	// 3D Convex Hull in O(n log n)
-	// Very well tested. Good as long as not all points are coplanar
-	// In case of collinear faces, returns arbitrary triangulation
-	// Credit: Benq
-	// refer to Koosaga'
-	col = 0, cop = 0;
-	int suf = prep(candi);
-	if (suf <= 2) { col = 1; return {}; };
-	if (suf == 3) { cop = 1; return {}; };
-	int sz = candi.size();
-	std::vector<Face> faces;
-	std::vector<int> active;//whether face is active - face faces outside 
-	std::vector<std::vector<int>> vis(sz);//faces visible from each point
-	std::vector<std::vector<int>> rvis;//points visible from each face
-	std::vector<std::array<Edge, 3>> other;//other face adjacent to each edge of face
-	auto ad = [&](const int& a, const int& b, const int& c) -> void {//add face
-		faces.push_back({ a, b, c });
-		active.push_back(1);
-		rvis.emplace_back();
-		other.emplace_back();
-		return;
-		};
-	auto visible = [&](const int& a, const int& b) -> void {
-		vis[b].push_back(a);
-		rvis[a].push_back(b);
-		return;
-		};
-	auto abv = [&](const int& a, const int& b) -> bool {//above
-		Face tri = faces[a];
-		return above(candi[tri.v[0]], candi[tri.v[1]], candi[tri.v[2]], candi[b]);
-		};
-	auto edge = [&](const Edge& e) -> pi {
-		return { faces[e.face_num].v[e.edge_num], faces[e.face_num].v[(e.edge_num + 1) % 3] };
-		};
-	auto glue = [&](const Edge& a, const Edge& b) -> void {//link two faces by an edge
-		pi x = edge(a); assert(edge(b) == pi(x.second, x.first));
-		other[a.face_num][a.edge_num] = b;
-		other[b.face_num][b.edge_num] = a;
-		return;
-		};//ensure face 0 is removed when i = 3
-
-	ad(0, 1, 2), ad(0, 2, 1);
-	if (abv(1, 3)) std::swap(candi[1], candi[2]);
-	for (int i = 0; i < 3; i++) glue({ 0, i }, { 1, 2 - i });
-	for (int i = 3; i < sz; i++) visible(abv(1, i), i);//coplanar points go in rvis[0]
-
-	std::vector<int> label(sz, -1);
-	for (int i = 3; i < sz; i++) {//incremental construction
-		std::vector<int> rem;
-		for (auto& v : vis[i]) if (active[v]) { active[v] = 0, rem.push_back(v); }
-		if (!rem.size()) continue;//hull unchanged
-
-		int st = -1;//start idx
-		for (const int& v : rem) {
-			for (int j = 0; j < 3; j++) {
-				int o = other[v][j].face_num;
-				if (active[o]) {//create new face!
-					int idx1, idx2;
-					std::tie(idx1, idx2) = edge({ v, j });
-					ad(idx1, idx2, i);
-					st = idx1;
-					int cur = rvis.size() - 1;
-					label[idx1] = cur;
-
-					std::vector<int> tmp;
-					set_union(rvis[v].begin(), rvis[v].end(), rvis[o].begin(), rvis[o].end(), back_inserter(tmp));
-					//merge sorted vectors ignoring duplicates
-
-					for (auto& x : tmp) if (abv(cur, x)) visible(cur, x);
-					//if no rounding errors then guaranteed that only x > i matters
-
-					glue({ cur, 0 }, other[v][j]);//glue old, new face
-				}
-			}
-		}
-		for (int x = st, y; ; x = y) {//glue new faces together
-			int X = label[x];
-			glue({ X, 1 }, { label[y = faces[X].v[1]], 2 });
-			if (y == st) break;
-		}
-	}
-	std::vector<Face> hull3D;
-	for (int i = 0; i < faces.size(); i++) if (active[i]) hull3D.push_back(faces[i]);
-	return hull3D;
-}
-int side(const Pos3D& a, const Pos3D& b, const Pos3D& c, const Pos3D& p) { return sign(cross(a, b, c) * (p - a)); }
-typedef std::vector<Face> Hull3D;
-int V[100];
+Pos seg[8][2];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(13);
-	std::cin >> N;
-	Polygon3D P(N); for (Pos3D& p : P) std::cin >> p;
-	Hull3D H = convex_hull_3D(P);
-	assert(!col); assert(!cop); assert(N > 3);
-	int ret = 0, sz = H.size();
+	std::cout.precision(19);
+	//std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
+	std::cin >> N; Polygon P(N); for (Pos& p : P) p.x = read(), p.y = read();
+	Pos r = P[0], ur = P[0], u = P[0], ul = P[0];
+	Pos l = P[0], dl = P[0], d = P[0], dr = P[0];
 	for (int i = 0; i < N; i++) {
-		const Pos3D& p0 = P[i];
-		for (int j = i + 1; j < N; j++) {
-			const Pos3D& p1 = P[j];
-			for (int k = j + 1; k < N; k++) {
-				const Pos3D& p2 = P[k];
-				for (int p = 0; p < N; p++) V[p] = side(p0, p1, p2, P[p]) > 0;
-				assert(!V[i]); assert(!V[j]); assert(!V[k]);
-				for (V[i] = 0; V[i] <= 1; V[i]++) {
-					for (V[j] = 0; V[j] <= 1; V[j]++) {
-						for (V[k] = 0; V[k] <= 1; V[k]++) {
-							int tmp = 0;
-							for (const Face& h : H) {
-								int s = V[h.v[0]] + V[h.v[1]] + V[h.v[2]];
-								if (s == 1 || s == 2) tmp++;
-							}
-							ret = std::max(ret, tmp);
-						}
-					}
-				}
-			}
-		}
+		if (u.y < P[i].y) u = P[i];
+		if (d.y > P[i].y) d = P[i];
+		if (r.x < P[i].x) r = P[i];
+		if (l.x > P[i].x) l = P[i];
+		if (cross(O, pp, ul) < cross(O, pp, P[i])) ul = P[i];
+		if (cross(O, pp, dr) > cross(O, pp, P[i])) dr = P[i];
+		if (cross(O, np, dl) < cross(O, np, P[i])) dl = P[i];
+		if (cross(O, np, ur) > cross(O, np, P[i])) ur = P[i];
 	}
-	std::cout << ret + sz + 2 << "\n";
+	r = r + Pos(1, 0);
+	ur = ur + Pos(1, 0);
+	u = u + Pos(0, 1);
+	ul = ul + Pos(0, 1);
+	l = l + Pos(-1, 0);
+	dl = dl + Pos(-1, 0);
+	d = d + Pos(0, -1);
+	dr = dr + Pos(0, -1);
+	seg[0][0] = r; seg[0][1] = r + Pos(0, 1);
+	seg[1][0] = ur; seg[1][1] = ur + Pos(-1, 1);
+	seg[2][0] = u; seg[2][1] = u + Pos(-1, 0);
+	seg[3][0] = ul; seg[3][1] = ul + Pos(-1, -1);
+	seg[4][0] = l; seg[4][1] = l + Pos(0, -1);
+	seg[5][0] = dl; seg[5][1] = dl + Pos(1, -1);
+	seg[6][0] = d; seg[6][1] = d + Pos(1, 0);
+	seg[7][0] = dr; seg[7][1] = dr + Pos(1, 1);
+	ld ppp = 0;
+	for (int i = 0; i < 8; i++) {
+		int i0 = (i + 7) % 8, i1 = i, i2 = (i + 1) % 8;
+		ld s = intersection(seg[i1][0], seg[i1][1], seg[i0][0], seg[i0][1]);
+		ld e = intersection(seg[i1][0], seg[i1][1], seg[i2][0], seg[i2][1]);
+		ppp += (seg[i1][1] - seg[i1][0]).mag() * (e - s);
+	}
+	//std::cout << ppp << "\n";
+	printf("%13lf\n", ppp);
 	return;
 }
 int main() { solve(); return 0; }

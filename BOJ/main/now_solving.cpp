@@ -11,32 +11,32 @@ inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 
-#include <unistd.h>
-int iptr = 0, left = 0;
-char ibuf[1 << 20];
-int read() {
-	int x = 0, s = 1;
-	bool started = false;
-	for (;;) {
-		if (iptr >= left) {
-			left = read(0, ibuf, sizeof ibuf);
-			iptr = 0;
-		}
-		if (!left) break;
-		char c = ibuf[iptr++];
-		if (c == '-') {
-			s = -1;
-		}
-		else if (c >= '0' && c <= '9') {
-			x = x * 10 + (c - '0');
-			started = true;
-		}
-		else if (started) {
-			break;
-		}
-	}
-	return s > 0 ? x : -x;
-}
+//#include <unistd.h>
+//int iptr = 0, left = 0;
+//char ibuf[1 << 20];
+//int read() {
+//	int x = 0, s = 1;
+//	bool started = false;
+//	for (;;) {
+//		if (iptr >= left) {
+//			left = read(0, ibuf, sizeof ibuf);
+//			iptr = 0;
+//		}
+//		if (!left) break;
+//		char c = ibuf[iptr++];
+//		if (c == '-') {
+//			s = -1;
+//		}
+//		else if (c >= '0' && c <= '9') {
+//			x = x * 10 + (c - '0');
+//			started = true;
+//		}
+//		else if (started) {
+//			break;
+//		}
+//	}
+//	return s > 0 ? x : -x;
+//}
 
 int N;
 struct Pos {
@@ -49,8 +49,8 @@ struct Pos {
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ld mag() const { return sqrtl(Euc()); }
-	//friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
-	//friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
+	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 };
 const Pos O = Pos(0, 0);
 const Pos pp = Pos(1, 1);
@@ -69,8 +69,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(19);
-	//std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
-	std::cin >> N; Polygon P(N); for (Pos& p : P) p.x = read(), p.y = read();
+	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
+	//std::cin >> N; Polygon P(N); for (Pos& p : P) p.x = read(), p.y = read();
 	Pos r = P[0], ur = P[0], u = P[0], ul = P[0];
 	Pos l = P[0], dl = P[0], d = P[0], dr = P[0];
 	for (int i = 0; i < N; i++) {
@@ -106,8 +106,8 @@ void solve() {
 		ld e = intersection(seg[i1][0], seg[i1][1], seg[i2][0], seg[i2][1]);
 		ppp += (seg[i1][1] - seg[i1][0]).mag() * (e - s);
 	}
-	//std::cout << ppp << "\n";
-	printf("%13lf\n", ppp);
+	std::cout << ppp << "\n";
+	//printf("%13lf\n", ppp);
 	return;
 }
 int main() { solve(); return 0; }

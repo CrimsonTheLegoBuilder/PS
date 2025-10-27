@@ -69,19 +69,34 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(19);
-	std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
+	//std::cin >> N; Polygon P(N); for (Pos& p : P) std::cin >> p;
+	////std::cin >> N; Polygon P(N); for (Pos& p : P) p.x = read(), p.y = read();
+	//Pos r = P[0], ur = P[0], u = P[0], ul = P[0];
+	//Pos l = P[0], dl = P[0], d = P[0], dr = P[0];
+	//for (int i = 0; i < N; i++) {
+	//	if (u.y < P[i].y) u = P[i];
+	//	if (d.y > P[i].y) d = P[i];
+	//	if (r.x < P[i].x) r = P[i];
+	//	if (l.x > P[i].x) l = P[i];
+	//	if (cross(O, pp, ul) < cross(O, pp, P[i])) ul = P[i];
+	//	if (cross(O, pp, dr) > cross(O, pp, P[i])) dr = P[i];
+	//	if (cross(O, np, dl) < cross(O, np, P[i])) dl = P[i];
+	//	if (cross(O, np, ur) > cross(O, np, P[i])) ur = P[i];
+	//}
+	std::cin >> N; Pos p; std::cin >> p;
 	//std::cin >> N; Polygon P(N); for (Pos& p : P) p.x = read(), p.y = read();
-	Pos r = P[0], ur = P[0], u = P[0], ul = P[0];
-	Pos l = P[0], dl = P[0], d = P[0], dr = P[0];
+	Pos r = p, ur = p, u = p, ul = p;
+	Pos l = p, dl = p, d = p, dr = p;
 	for (int i = 0; i < N; i++) {
-		if (u.y < P[i].y) u = P[i];
-		if (d.y > P[i].y) d = P[i];
-		if (r.x < P[i].x) r = P[i];
-		if (l.x > P[i].x) l = P[i];
-		if (cross(O, pp, ul) < cross(O, pp, P[i])) ul = P[i];
-		if (cross(O, pp, dr) > cross(O, pp, P[i])) dr = P[i];
-		if (cross(O, np, dl) < cross(O, np, P[i])) dl = P[i];
-		if (cross(O, np, ur) > cross(O, np, P[i])) ur = P[i];
+		std::cin >> p;
+		if (u.y < p.y) u = p;
+		if (d.y > p.y) d = p;
+		if (r.x < p.x) r = p;
+		if (l.x > p.x) l = p;
+		if (cross(O, pp, ul) < cross(O, pp, p)) ul = p;
+		if (cross(O, pp, dr) > cross(O, pp, p)) dr = p;
+		if (cross(O, np, dl) < cross(O, np, p)) dl = p;
+		if (cross(O, np, ur) > cross(O, np, p)) ur = p;
 	}
 	r = r + Pos(1, 0);
 	ur = ur + Pos(1, 0);

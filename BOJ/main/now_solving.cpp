@@ -9,15 +9,15 @@ typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 const int LEN = 1e5;
-inline int sign(ll x) { return x < 0 ? -1 : !!x; }
+inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 
 #define STRONG 0
 #define WEAK 1
 
 int N, M, A;
 struct Pos {
-	int x, y, i;
-	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
+	int x, y;
+	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -59,36 +59,13 @@ Polygon graham_scan(Polygon& C) {
 	}
 	return H;
 }
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	std::sort(C.begin(), C.end());
-	int sz = C.size();
-	if (sz <= 2) return C;
-	bool f = 1;
-	for (int i = 1; i < sz - 1; i++) if (ccw(C[i - 1], C[i], C[i + 1])) { f = 0; break; }
-	if (f) return C;
-	for (int i = 0; i < C.size(); i++) {
-		while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) < 0)
-			H.pop_back();
-		H.push_back(C[i]);
-	}
-	H.pop_back();
-	int s = H.size() + 1;
-	for (int i = C.size() - 1; i >= 0; i--) {
-		while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) < 0)
-			H.pop_back();
-		H.push_back(C[i]);
-	}
-	H.pop_back();
-	return H;
-}
 ll f(Polygon P, const Polygon& Q, const int& m) {
 	for (int i = 0; i <= m; i++) P.push_back(Q[i]);
 	Polygon H = graham_scan(P);
 	return area(H);
 }
 int bi_search(const Polygon& P, const Polygon& Q, const ll& A) {
-	int s = 0, e = Q.size();
+	int s = 0, e = Q.size() - 1;
 	if (f(P, Q, e) < A) return -1;
 	while (s < e) {
 		int m = s + e >> 1;
@@ -104,8 +81,10 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	ll A;
-	std::cin >> N >> A; Polygon P(3), Q(N);
+	ll A; std::cin >> N >> A; A <<= 1;
+	Polygon P(3), Q(N);
+	for (Pos& p : P) std::cin >> p;
+	for (Pos& q : Q) std::cin >> q;
 	int c = bi_search(P, Q, A);
 	if (c == -1) { std::cout << "draw\n"; return; }
 	std::cout << (c & 1 ? "wider\n" : "wapas\n");

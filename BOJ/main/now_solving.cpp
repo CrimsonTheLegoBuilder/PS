@@ -16,8 +16,8 @@ inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 
 int N, M, A;
 struct Pos {
-	int x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	int x, y, i;
+	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -37,39 +37,41 @@ ll area(Polygon& H) {
 	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
 	return a;
 }
-Polygon graham_scan(Polygon& C) {
+Polygon monotone_chain(Polygon& C) {
 	Polygon H;
-	if (C.size() < 3) {
-		std::sort(C.begin(), C.end());
-		return C;
-	}
-	std::swap(C[0], *min_element(C.begin(), C.end()));
-	std::sort(C.begin() + 1, C.end(), [&](const Pos& p, const Pos& q) -> bool {
-		int ret = ccw(C[0], p, q);
-		if (!ret) return (C[0] - p).Euc() < (C[0] - q).Euc();
-		return ret > 0;
+	//std::sort(C.begin(), C.end());
+	//C.erase(unique(C.begin(), C.end()), C.end());
+	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
+	else {
+		for (int i = 0; i < C.size(); i++) {
+			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
+				H.pop_back();
+			H.push_back(C[i]);
 		}
-	);
-	C.erase(unique(C.begin(), C.end()), C.end());
-	int sz = C.size();
-	for (int i = 0; i < sz; i++) {
-		while (H.size() >= 2 && ccw(H[H.size() - 2], H.back(), C[i]) <= 0)
-			H.pop_back();
-		H.push_back(C[i]);
+		H.pop_back();
+		int s = H.size() + 1;
+		for (int i = C.size() - 1; i >= 0; i--) {
+			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
+				H.pop_back();
+			H.push_back(C[i]);
+		}
+		H.pop_back();
 	}
 	return H;
 }
-ll f(Polygon P, const Polygon& Q, const int& m) {
-	for (int i = 0; i <= m; i++) P.push_back(Q[i]);
-	Polygon H = graham_scan(P);
+ll f(const Polygon& P, const int& m) {
+	Polygon C;
+	int sz = P.size();
+	for (int i = 0; i < sz; i++) if (P[i].i <= m) C.push_back(P[i]);
+	Polygon H = monotone_chain(C);
 	return area(H);
 }
-int bi_search(const Polygon& P, const Polygon& Q, const ll& A) {
-	int s = 0, e = Q.size() - 1;
-	if (f(P, Q, e) < A) return -1;
+int bi_search(const Polygon& P, const int& n, const ll& A) {
+	int s = 0, e = n - 1;
+	if (f(P, e) < A) return -1;
 	while (s < e) {
 		int m = s + e >> 1;
-		ll a = f(P, Q, m);
+		ll a = f(P, m);
 		if (a == A) return m;
 		if (a > A) e = m - 1;
 		else s = m + 1;
@@ -85,7 +87,10 @@ void solve() {
 	Polygon P(3), Q(N);
 	for (Pos& p : P) std::cin >> p;
 	for (Pos& q : Q) std::cin >> q;
-	int c = bi_search(P, Q, A);
+	for (int i = 0; i < N; i++) Q[i].i = i;
+	for (const Pos& q : Q) P.push_back(q);
+	std::sort(P.begin(), P.end());
+	int c = bi_search(P, N, A);
 	if (c == -1) { std::cout << "draw\n"; return; }
 	std::cout << (c & 1 ? "wider\n" : "wapas\n");
 	return;

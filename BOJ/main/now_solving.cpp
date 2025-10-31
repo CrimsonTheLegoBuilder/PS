@@ -14,7 +14,7 @@ inline int sign(ll x) { return x < 0 ? -1 : !!x; }
 #define STRONG 0
 #define WEAK 1
 
-int N, M;
+int N, M, A;
 struct Pos {
 	int x, y, i;
 	Pos(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
@@ -82,23 +82,33 @@ Polygon monotone_chain(Polygon& C) {
 	H.pop_back();
 	return H;
 }
+ll f(Polygon P, const Polygon& Q, const int& m) {
+	for (int i = 0; i <= m; i++) P.push_back(Q[i]);
+	Polygon H = graham_scan(P);
+	return area(H);
+}
+int bi_search(const Polygon& P, const Polygon& Q, const ll& A) {
+	int s = 0, e = Q.size();
+	if (f(P, Q, e) < A) return -1;
+	while (s < e) {
+		int m = s + e >> 1;
+		ll a = f(P, Q, m);
+		if (a == A) return m;
+		if (a > A) e = m - 1;
+		else s = m + 1;
+	}
+	return s;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	std::cin >> N; Polygon P(N);
-	for (int i = 0; i < N; i++) std::cin >> P[i], P[i].i = i;
-	std::cin >> M; Polygon Q(M);
-	for (int i = 0; i < M; i++) std::cin >> Q[i], Q[i].i = -1;
-	for (const Pos& q : Q) P.push_back(q);
-	Polygon H = monotone_chain(P);
-	int sz = H.size(), c = 0;
-	for (int i = 0, j; i < sz; i++) {
-		j = (i + 1) % sz;
-		c += (H[i].i != -1 && H[j].i != -1);
-	}
-	std::cout << c << "\n";
+	ll A;
+	std::cin >> N >> A; Polygon P(3), Q(N);
+	int c = bi_search(P, Q, A);
+	if (c == -1) { std::cout << "draw\n"; return; }
+	std::cout << (c & 1 ? "wider\n" : "wapas\n");
 	return;
 }
 int main() { solve(); return 0; }

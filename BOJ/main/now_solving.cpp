@@ -51,9 +51,9 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 int R, N, M;
 struct Pos {
 	ld x, y;
-	int i;
+	int i, f;
 	bool rv;
-	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) { i = -1, rv = 0; }
+	Pos(ld x_ = 0, ld y_ = 0, int f_ = -1) : x(x_), y(y_), f(f_) { i = -1, rv = 0; }
 	//bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	//bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
 	//bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
@@ -256,8 +256,6 @@ void solve() {
 		seg[i].i = LINE;
 		INX[i].push_back(s);
 		INX[i].push_back(e);
-		X.push_back(c.rad(s));
-		INXS.push_back(c.p(c.rad(s)));
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
 			const Pos p = seg[i].p(x);
@@ -269,9 +267,12 @@ void solve() {
 	}
 	if (f0) {
 		ld r = N * 2 * PI;
-		for (int i = 0; i < N; i++) {
-			const Pos& s = P[i], & e = P[(i + 1) % N];
-			r += (s - e).mag();
+		if (c < P[0]) {
+			r = 0;
+			for (int i = 0; i < N; i++) {
+				const Pos& s = P[i], & e = P[(i + 1) % N];
+				r += (s - e).mag();
+			}
 		}
 		std::cout << r << "\n";
 		return;
@@ -280,15 +281,15 @@ void solve() {
 	int sz = X.size();
 	for (int i = 0, j; i < sz; i++) {
 		j = (i + 1) % sz;
-		seg[i + N].a = c.p(i);
-		seg[i + N].b = c.p(j);
+		seg[i + N].a = c.p(X[i]);
+		seg[i + N].b = c.p(X[j]);
 		seg[i + N].i = CIRCLE;
 		INX[i + N].push_back(seg[i + N].a);
 		INX[(i + 1) % sz + N].push_back(seg[i + N].a);
 	}
 	std::sort(INXS.begin(), INXS.end());
 	INXS.erase(unique(INXS.begin(), INXS.end()), INXS.end());
-	N += sz;
+	M = N + sz;
 	I = 0;
 	for (int i = 0; i < M; i++) {
 		inx_sort(INX[i], seg[i].a);
@@ -297,6 +298,7 @@ void solve() {
 		for (int j = 0; j < sz - 1; j++) {
 			frag[I] = Seg(v[j], v[j + 1]);
 			frag[I].i = I;
+			frag[I].f = (M < N ? LINE : CIRCLE);
 			I++;
 		}
 	}
@@ -307,6 +309,7 @@ void solve() {
 		for (int j = 0; j < sz - 1; j++) {
 			frag[I] = Seg(v[j + 1], v[j]);
 			frag[I].i = I;
+			frag[I].f = (M < N ? LINE : CIRCLE);
 			I++;
 		}
 	}
@@ -314,11 +317,13 @@ void solve() {
 		key = frag[i].a;
 		vec = frag[i].b - frag[i].a;
 		vec.i = frag[i].i;
+		vec.f = frag[i].f;
 		map_pos[key].push_back(vec);
 
 		key = frag[i].b;
 		vec = frag[i].a - frag[i].b;
 		vec.i = frag[i].i;
+		vec.f = frag[i].f;
 		vec.rv = 1;
 		map_pos[key].push_back(vec);
 	}

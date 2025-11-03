@@ -226,6 +226,9 @@ void dfs(const int& i, int v) {
 	}
 	return;
 }
+ld par(const Polygon& H) {
+
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -316,6 +319,8 @@ void solve() {
 	}
 	memset(V, 0, sizeof V);
 	ci = 0;
+	ld AA = 0;
+	ld r = 0;
 	for (int i = 0; i < I; i++) {
 		if (!V[i]) {
 			dfs(ci, i);

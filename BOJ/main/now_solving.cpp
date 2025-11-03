@@ -290,7 +290,7 @@ void solve() {
 		}
 	}
 	if (f0) {
-		ld r = N * 2 * PI;
+		ld r = R * 2 * PI;
 		if (c < P[0]) {
 			r = 0;
 			for (int i = 0; i < N; i++) {

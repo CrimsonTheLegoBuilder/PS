@@ -382,7 +382,10 @@ void solve() {
 				A[ci] = 0;
 				ci--;
 			}
-			r = std::max(r, par(cell[ci]));
+			if (AA < A[ci]) {
+				AA = A[ci];
+				r = std::max(r, par(cell[ci]));
+			}
 			ci++;
 		}
 	}

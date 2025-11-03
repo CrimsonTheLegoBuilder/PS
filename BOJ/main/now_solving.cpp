@@ -10,74 +10,45 @@
 #include <deque>
 #include <map>
 #include <set>
+#include <random>
+#include <array>
+#include <tuple>
+#include <complex>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 typedef std::vector<int> Vint;
 typedef std::vector<ll> Vll;
-const ll INF = 1e17;
-const int LEN = 105;
-const ld TOL = 1e-25;
-inline int sign(const ll& x) { return x < 0 ? -1 : x > 0; }
+typedef std::pair<int, int> pi;
+typedef std::vector<ld> Vld;
+const ld INF = 1e17;
+const ld TOL = 1e-7;
+const ld PI = acos(-1);
+const int LEN = 1e3;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
+inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
+inline ld sq(const ld& x) { return x * x; }
+inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >= 0) th -= 2 * PI; return th; }
+inline ld fit(const ld& x, const ld& lo, const ld& hi) { return std::min(hi, std::max(lo, x)); }
 ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define __FUCK__ ;
 #define WHAT_THE_FUCK
 //#define DEBUG
 
-int N, M;
-struct BigPos {//what the fuck??? holy shit fucking floating point accuracy error!!
-	ll x, y, den;
-	BigPos(ll X = 0, ll Y = 0, ll D = 1) : x(X), y(Y), den(D) {}
-	bool operator == (const BigPos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const BigPos& p) const { return x != p.x || y != p.y; }
-	bool operator < (const BigPos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	BigPos operator + (const BigPos& p) const { return { x + p.x, y + p.y }; }
-	BigPos operator - (const BigPos& p) const { return { x - p.x, y - p.y }; }
-	BigPos operator * (const ll& n) const { return { x * n, y * n }; }
-	BigPos operator / (const ll& n) const { return { x / n, y / n }; }
-	ll operator * (const BigPos& p) const { return x * p.x + y * p.y; }
-	ll operator / (const BigPos& p) const { return x * p.y - y * p.x; }
-	ll Euc() const { return x * x + y * y; }
-	friend std::istream& operator >> (std::istream& is, BigPos& p) { is >> p.x >> p.y; return is; }
-	friend std::ostream& operator << (std::ostream& os, const BigPos& p) { os << "(" << p.x << ", " << p.y << ")"; return os; }
-} bp0, bp1; const BigPos BO = { 0, 0, 1 }; const BigPos BINVAL = { 0, 0, 0 };
-ll cross(const BigPos& d1, const BigPos& d2, const BigPos& d3) { return (d2 - d1) / (d3 - d2); }
-ll dot(const BigPos& d1, const BigPos& d2, const BigPos& d3) { return (d2 - d1) * (d3 - d2); }
-int ccw(const BigPos& d1, const BigPos& d2, const BigPos& d3) { ll ret = cross(d1, d2, d3); return sign(ret); }
-bool on_seg_strong(const BigPos& d1, const BigPos& d2, const BigPos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
-bool intersect(const BigPos& s1, const BigPos& s2, const BigPos& d1, const BigPos& d2) {
-	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
-	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
-	bool f3 = on_seg_strong(s1, s2, d1) ||
-		on_seg_strong(s1, s2, d2) ||
-		on_seg_strong(d1, d2, s1) ||
-		on_seg_strong(d1, d2, s2);
-	return (f1 && f2) || f3;
-}
-BigPos intersection(const BigPos& p1, const BigPos& p2, const BigPos& q1, const BigPos& q2) {
-	if (p1 == q1 || p1 == q2) return p1;
-	if (p2 == q1 || p2 == q2) return p2;
-	ll a1 = cross(q1, q2, p1);
-	ll a2 = -cross(q1, q2, p2);
-	ll x = p1.x * a2 + p2.x * a1;
-	ll y = p1.y * a2 + p2.y * a1;
-	ll den = a1 + a2;
-	ll gcd_ = gcd(std::abs(x), std::abs(den));
-	gcd_ = gcd(std::abs(y), gcd_);
-	x /= gcd_; y /= gcd_; den /= gcd_;
-	return BigPos(x, y, den);
-}
-struct BigSeg {
-	BigPos a, b;
-	friend std::istream& operator >> (std::istream& is, BigSeg& s) { is >> s.a >> s.b; return is; }
-} B[LEN];
-BigPos intersection(const BigSeg& s1, const BigSeg& s2) {
-	if (!intersect(s1.a, s1.b, s2.a, s2.b)) return BINVAL;
-	return intersection(s1.a, s1.b, s2.a, s2.b);
-}
+#define LO x
+#define HI y
+
+#define LINE 1
+#define CIRCLE 2
+#define SEG 3
+#define POS 4
+
+#define STRONG 0
+#define WEAK 1
+
+int R, N, M;
 struct Pos {
 	ld x, y;
 	int i;
@@ -114,11 +85,6 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << "(" << p.x << ", " << p.y << ")"; return os; }
 } p0, p1, key, vec; const Pos O = Pos(0, 0); const Pos INVAL = Pos(INF, INF);
 typedef std::vector<Pos> Polygon;
-Pos conv(const BigPos& b) {
-	ld x = 1. * b.x / b.den;
-	ld y = 1. * b.y / b.den;
-	return Pos(x, y);
-}
 ld cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ld dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = cross(d1, d2, d3); return sign(ret); }
@@ -176,6 +142,62 @@ void inx_sort(Polygon& INX, const Pos& a) {
 		});
 	INX.erase(unique(INX.begin(), INX.end()), INX.end());
 }
+struct Circle {
+	Pos c;
+	int r;
+	Circle(Pos c_ = Pos(), int r_ = 0) : c(c_), r(r_) {}
+	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
+	bool operator != (const Circle& q) const { return !(*this == q); }
+	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
+	//bool operator < (const Circle& q) const { return r < q.r && (c - q.c).mag() + r < q.r + TOL; }
+	bool outside(const Circle& q) const { return sign((c - q.c).Euc() - sq((ll)r + q.r)) >= 0; }
+	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
+	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
+	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
+	ld rad(const Pos& p) const { return (p - c).rad(); }
+	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
+	ld green(const ld& lo, const ld& hi) const {
+		//if (hi < lo) { return green(lo, 2 * PI) + green(0, hi); }
+		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
+		ld fan = area(lo, hi);
+		Pos m = c + (s + e) * r * (ld).5;
+		ld tz = (cos(lo) - cos(hi)) * m.y * r;
+		return fan + tz - (s / e) * r * r * (ld).5;
+	}
+	ld H(const ld& th) const { return sin(th) * c.x + cos(th) * c.y + r; }//coord trans | check right
+	//bool operator < (const Pos& p) const { return r < (c - p).mag(); }
+	bool operator < (const Pos& p) const { return sign(r - (c - p).mag()) < 0; }
+	bool operator > (const Pos& p) const { return r > (c - p).mag(); }
+	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
+	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
+	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
+} INVAL = { { 0, 0 }, -1 };
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f == LINE) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
+	}
+	else {
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+	}
+	return ret;
+}
 int I, I0;
 std::map<Pos, Polygon> map_pos;
 ld A[LEN * LEN + 10];
@@ -202,42 +224,14 @@ void dfs(const int& i, int v) {
 	}
 	return;
 }
-struct Info {
-	int i, c;
-	Info(int i_ = 0, int c_ = 0) : i(i_), c(c_) {}
-};
-std::vector<Info> GC[LEN * LEN * 10];
-int zero_one_bfs(int v, int g) {
-	memset(V, -1, sizeof V);
-	std::deque<Info> DQ;
-	DQ.push_front(Info(v, 0));
-	V[v] = 0;
-	while (DQ.size()) {
-		Info p = DQ.front(); DQ.pop_front();
-		if (p.i == g) return V[g];
-		for (const Info& w : GC[p.i]) {
-			if (!~V[w.i]) {
-				if (w.c) DQ.push_back(w);
-				else if (!w.c) DQ.push_front(w);
-				V[w.i] = V[p.i] + w.c;
-			}
-		}
-	}
-#ifdef DEBUG
-	std::cout << "I am stupid\n";
-	assert(~V[g]);
-#endif
-	return V[g];
-}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	std::cin >> M >> bp0 >> bp1;
-	bp0.den = 1; p0 = conv(bp0);
-	bp1.den = 1; p1 = conv(bp1);
-	if (M <= 2 || bp0 == bp1) { std::cout << "0\n"; return; }
+	std::cin >> R >> N;
+	Polygon P(N); for (Pos& p : P) std::cin >> p;
+
 	for (int i = 0; i < M; i++) {
 		std::cin >> B[i];
 		B[i].a.den = B[i].b.den = 1;
@@ -351,63 +345,12 @@ void solve() {
 			std::set<int>& NXT = cell_i[j];
 			for (const int& idx : CUR) {
 				if (NXT.count(idx + I0) || NXT.count(idx - I0)) {
-					GC[i].push_back(Info(j, 1));
-					GC[j].push_back(Info(i, 1));
 					join(i, j);
 					break;
 				}
 			}
 		}
 	}
-#ifdef DEBUG
-	std::cout << "FUCK::\n";
-	for (int i = 0; i < ci; i++) {
-		std::cout << "cell[" << i << "]\n";
-		std::cout << "A[" << i << "]:: " << A[i] << "\n";
-		for (const Pos& p : cell[i]) std::cout << p << "\n";
-	}
-	std::cout << "FUCK::\n";
-#endif
-	int s = ci, e = ci;
-	ld sa = INF, ea = INF;
-	for (int i = 0; i < ci; i++) {
-		int out = -1;
-		if (sign(A[i]) > 0) {
-			if (sa > A[i] && inner_check(cell[i], p0)) { s = i; sa = A[i]; }
-			if (ea > A[i] && inner_check(cell[i], p1)) { e = i; ea = A[i]; }
-			continue;
-		}
-		else {
-			for (int j = 0; j < ci; j++) {//O(5051 * 20000)
-				if (sign(A[j]) < 0) continue;
-				if (i == j || find(i) == find(j)) continue;
-				if (out >= 0 && find(out) == find(j)) continue;
-				if (out >= 0 && (A[out] < A[j])) continue;
-				if (inner_check(cell[j], cell[i][0]) == 2) {
-					if (out < 0 || (A[out] > A[j])) out = j;
-				}
-			}
-			if (!~out) {
-				GC[i].push_back(Info(ci, 0));
-				GC[ci].push_back(Info(i, 0));
-			}
-			else {
-				GC[i].push_back(Info(out, 0));
-				GC[out].push_back(Info(i, 0));
-			}
-		}
-	}
-#ifdef DEBUG
-	std::cout << "FUCK::\n";
-	for (int i = 0; i <= ci; i++) {
-		std::cout << "GC[" << i << "] A:: " << A[i] << "\n";
-		for (const Info& p : GC[i]) std::cout << p.i << " " << p.c << "\n";
-	}
-	std::cout << "FUCK::\n";
-	std::cout << "s, e:: " << s << " " << e << "\n";
-#endif
-	if (s == e) { std::cout << "0\n"; return; }
-	std::cout << zero_one_bfs(s, e) << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj

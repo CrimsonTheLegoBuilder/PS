@@ -134,6 +134,7 @@ struct Seg {
 	int i;
 	Seg(Pos A = Pos(), Pos B = Pos()) : a(A), b(B) { i = -1; }
 	Pos inx(const Seg& o) const { return intersection(a, b, o.a, o.b); }
+	Pos p(const ld& rt = .5) const { return a + (b - a) * rt; }
 } seg[LEN], frag[LEN * LEN * 10];
 Polygon INX[LEN];
 void inx_sort(Polygon& INX, const Pos& a) {
@@ -141,6 +142,7 @@ void inx_sort(Polygon& INX, const Pos& a) {
 		return (a - p).Euc() < (a - q).Euc();
 		});
 	INX.erase(unique(INX.begin(), INX.end()), INX.end());
+	return;
 }
 struct Circle {
 	Pos c;
@@ -231,38 +233,32 @@ void solve() {
 	std::cout.precision(15);
 	std::cin >> R >> N;
 	Polygon P(N); for (Pos& p : P) std::cin >> p;
-
-	for (int i = 0; i < M; i++) {
-		std::cin >> B[i];
-		B[i].a.den = B[i].b.den = 1;
-		seg[i].a = conv(B[i].a);
-		seg[i].b = conv(B[i].b);
-		seg[i].i = i;
-		seg[i].a.i = i;
-		seg[i].b.i = i;
-	}
+	for (int i = 0; i < N; i++) P[i].i = i;
+	Circle c = Circle(Pos(0, 0), R);
 	bool f0 = 1;
 	Polygon INXS;
-	for (int i = 0; i < M; i++) {
-		if (intersect(bp0, bp1, B[i].a, B[i].b)) f0 = 0;
-		for (int j = i + 1; j < M; j++) {
-			BigPos inx = intersection(B[i], B[j]);
-			if (inx.den) {
-#ifdef DEBUG
-				std::cout << "FUUUUCK!!!\n";
-				std::cout << "FUCK:: S[i].a:: " << B[i].a << " S[i].b:: " << B[i].b << "\n";
-				std::cout << "FUCK:: S[j].a:: " << B[j].a << " S[j].b:: " << B[j].b << "\n";
-				std::cout << "FUCK:: inx:: " << conv(inx) << "\n";
-				std::cout << "FUUUUCK!!!\n";
-#endif
-				Pos X = conv(inx);
-				INX[i].push_back(X);
-				INX[j].push_back(X);
-				INXS.push_back(X);
-			}
+	for (int i = 0, j; i < N; i++) {
+		j = (i + 1) % N;
+		const Pos& s = P[i], & e = P[j];
+		seg[i].a = s;
+		seg[i].b = e;
+		Vld inxs = circle_line_intersections(c, s, e, LINE);
+		for (const ld& x : inxs) {
+			const Pos X = seg[i].p(x);
+			INX[i].push_back(X);
+			INX[j].push_back(X);
+			INXS.push_back(X);
 		}
 	}
-	if (f0) { std::cout << "0\n"; return; }
+	if (f0) {
+		ld r = N * 2 * PI;
+		for (int i = 0; i < N; i++) {
+			const Pos& s = P[i], & e = P[(i + 1) % N];
+			r += (s - e).mag();
+		}
+		std::cout << r << "\n";
+		return;
+	}
 	std::sort(INXS.begin(), INXS.end());
 	INXS.erase(unique(INXS.begin(), INXS.end()), INXS.end());
 	I = 0;
@@ -336,19 +332,6 @@ void solve() {
 				ci--;
 			}
 			ci++;
-		}
-	}
-	memset(P, -1, sizeof P);
-	for (int i = 0; i < ci; i++) {
-		std::set<int>& CUR = cell_i[i];
-		for (int j = i + 1; j < ci; j++) {
-			std::set<int>& NXT = cell_i[j];
-			for (const int& idx : CUR) {
-				if (NXT.count(idx + I0) || NXT.count(idx - I0)) {
-					join(i, j);
-					break;
-				}
-			}
 		}
 	}
 	return;

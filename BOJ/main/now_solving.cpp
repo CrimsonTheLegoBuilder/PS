@@ -282,6 +282,7 @@ void solve() {
 		INX[i].push_back(e);
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
+			f0 = 0;
 			const Pos p = seg[i].p(x);
 			INX[i].push_back(p);
 			INX[j].push_back(p);

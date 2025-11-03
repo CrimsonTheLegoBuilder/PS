@@ -254,6 +254,8 @@ void solve() {
 		seg[i].a = s;
 		seg[i].b = e;
 		seg[i].i = LINE;
+		INX[i].push_back(s);
+		INX[i].push_back(e);
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
 			const Pos p = seg[i].p(x);
@@ -279,6 +281,8 @@ void solve() {
 		seg[i + N].a = c.p(i);
 		seg[i + N].b = c.p(j);
 		seg[i + N].i = CIRCLE;
+		INX[i + N].push_back(seg[i + N].a);
+		INX[(i + 1) % sz + N].push_back(seg[i + N].a);
 	}
 	std::sort(INXS.begin(), INXS.end());
 	INXS.erase(unique(INXS.begin(), INXS.end()), INXS.end());
@@ -303,7 +307,6 @@ void solve() {
 			I++;
 		}
 	}
-
 	for (int i = 0; i < I; i++) {
 		key = frag[i].a;
 		vec = frag[i].b - frag[i].a;
@@ -320,14 +323,6 @@ void solve() {
 		Polygon& v = map_pos[key];
 		std::sort(v.begin(), v.end(), cmpr);
 		int sz = v.size();
-#ifdef DEBUG
-		std::cout << "DEBUG:: key:: " << key << "\n";
-		std::cout << "DEBUG:: sz:: " << sz << "\n";
-		for (int k = 0; k < sz; k++) {
-			std::cout << "v[" << k << "]:: " << v[k] << " i:: " << v[k].i << " rv:: " << v[k].rv << "\n";
-		}
-		std::cout << "FUCK::\n";
-#endif
 		assert(!(sz & 1));
 		for (int j = 0; j < sz; j += 2) {
 			Pos cur = v[(j - 1 + sz) % sz], nxt = v[j];

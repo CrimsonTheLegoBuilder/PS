@@ -271,7 +271,7 @@ void solve() {
 	Circle c = Circle(Pos(0, 0), R);
 	bool f0 = 1;
 	Polygon INXS;
-	Vld X = { 0 };
+	Vld X = { 0, PI * 2 };
 	for (int i = 0, j; i < N; i++) {
 		j = (i + 1) % N;
 		const Pos& s = P[i], & e = P[j];

@@ -247,17 +247,20 @@ void solve() {
 	Circle c = Circle(Pos(0, 0), R);
 	bool f0 = 1;
 	Polygon INXS;
+	Vld X;
 	for (int i = 0, j; i < N; i++) {
 		j = (i + 1) % N;
 		const Pos& s = P[i], & e = P[j];
 		seg[i].a = s;
 		seg[i].b = e;
+		seg[i].i = LINE;
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
-			const Pos X = seg[i].p(x);
-			INX[i].push_back(X);
-			INX[j].push_back(X);
-			INXS.push_back(X);
+			const Pos p = seg[i].p(x);
+			INX[i].push_back(p);
+			INX[j].push_back(p);
+			INXS.push_back(p);
+			X.push_back(x);
 		}
 	}
 	if (f0) {
@@ -268,6 +271,14 @@ void solve() {
 		}
 		std::cout << r << "\n";
 		return;
+	}
+	std::sort(X.begin(), X.end());
+	int sz = X.size();
+	for (int i = 0, j; i < sz; i++) {
+		j = (i + 1) % sz;
+		seg[i + N].a = c.p(i);
+		seg[i + N].b = c.p(j);
+		seg[i + N].i = CIRCLE;
 	}
 	std::sort(INXS.begin(), INXS.end());
 	INXS.erase(unique(INXS.begin(), INXS.end()), INXS.end());

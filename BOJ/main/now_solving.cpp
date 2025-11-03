@@ -135,6 +135,12 @@ struct Seg {
 	Seg(Pos a_ = Pos(), Pos b_ = Pos(), int i_ = -1, int f_ = -1) : a(a_), b(b_), i(i_), f(f_) {}
 	Pos inx(const Seg& o) const { return intersection(a, b, o.a, o.b); }
 	Pos p(const ld& rt = .5) const { return a + (b - a) * rt; }
+	ld green(const ld& lo = 0, const ld& hi = 1) const {
+		ld d = hi - lo;
+		ld ratio = (lo + hi) * .5;
+		Pos m = p(ratio);
+		return m.y * d * (a.x - b.x);
+	}
 } seg[LEN], frag[LEN * LEN * 10];
 typedef std::vector<Seg> Vseg;
 Vseg H[100];
@@ -205,7 +211,7 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 int I, I0;
 std::map<Pos, Polygon> map_pos;
 ld A[LEN * LEN + 10];
-Polygon cell[LEN * LEN + 10]; int ci;
+Vseg cell[LEN * LEN + 10]; int ci;
 std::set<int> cell_i[LEN * LEN + 10];
 int P[LEN * LEN + 10];//disjoint set
 int find(int i) { return P[i] < 0 ? i : P[i] = find(P[i]); }
@@ -228,11 +234,29 @@ void dfs(const int& i, int v) {
 	}
 	return;
 }
+ld area(const Vseg& h) {
+	int sz = h.size();
+	ld a = 0;
+	for (const Seg& se : h) {
+		if (se.f == LINE) a += se.green();
+		else {
+			ld s = se.a.rad();
+			ld e = se.b.rad();
+			a += Circle(Pos(0, 0), R).green(s, e);
+		}
+	}
+	return a;
+}
 ld par(const Vseg& h) {
 	int sz = h.size();
 	ld r = 0;
-	for (int i = 0; i < sz; i++) {
-
+	for (const Seg& se : h) {
+		if (se.f == LINE) r += (se.a - se.b).mag();
+		else {
+			ld s = se.a.rad();
+			ld e = se.b.rad();
+			r += std::abs(PI * (e - s));
+		}
 	}
 	return r;
 }
@@ -247,7 +271,7 @@ void solve() {
 	Circle c = Circle(Pos(0, 0), R);
 	bool f0 = 1;
 	Polygon INXS;
-	Vld X;
+	Vld X = { 0 };
 	for (int i = 0, j; i < N; i++) {
 		j = (i + 1) % N;
 		const Pos& s = P[i], & e = P[j];
@@ -357,6 +381,7 @@ void solve() {
 				A[ci] = 0;
 				ci--;
 			}
+			r = std::max(r, par(cell[ci]));
 			ci++;
 		}
 	}

@@ -53,7 +53,7 @@ struct Pos {
 	ld x, y;
 	int i;
 	bool rv;
-	Pos(ld X = 0, ld Y = 0) : x(X), y(Y) { i = -1, rv = 0; }
+	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) { i = -1, rv = 0; }
 	//bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	//bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
 	//bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
@@ -131,8 +131,8 @@ ld area(const Polygon& H) {
 }
 struct Seg {
 	Pos a, b;
-	int i;
-	Seg(Pos A = Pos(), Pos B = Pos()) : a(A), b(B) { i = -1; }
+	int i, f;
+	Seg(Pos a_ = Pos(), Pos b_ = Pos(), int i_ = -1, int f_ = -1) : a(a_), b(b_), i(i_), f(f_) {}
 	Pos inx(const Seg& o) const { return intersection(a, b, o.a, o.b); }
 	Pos p(const ld& rt = .5) const { return a + (b - a) * rt; }
 } seg[LEN], frag[LEN * LEN * 10];
@@ -256,6 +256,7 @@ void solve() {
 		seg[i].i = LINE;
 		INX[i].push_back(s);
 		INX[i].push_back(e);
+		X.push_back(c.rad(s));
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
 			const Pos p = seg[i].p(x);
@@ -286,6 +287,7 @@ void solve() {
 	}
 	std::sort(INXS.begin(), INXS.end());
 	INXS.erase(unique(INXS.begin(), INXS.end()), INXS.end());
+	N += sz;
 	I = 0;
 	for (int i = 0; i < M; i++) {
 		inx_sort(INX[i], seg[i].a);

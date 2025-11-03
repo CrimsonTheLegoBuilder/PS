@@ -136,6 +136,8 @@ struct Seg {
 	Pos inx(const Seg& o) const { return intersection(a, b, o.a, o.b); }
 	Pos p(const ld& rt = .5) const { return a + (b - a) * rt; }
 } seg[LEN], frag[LEN * LEN * 10];
+typedef std::vector<Seg> Vseg;
+Vseg H[100];
 Polygon INX[LEN];
 void inx_sort(Polygon& INX, const Pos& a) {
 	std::sort(INX.begin(), INX.end(), [&](const Pos& p, const Pos& q) -> bool {
@@ -226,8 +228,13 @@ void dfs(const int& i, int v) {
 	}
 	return;
 }
-ld par(const Polygon& H) {
+ld par(const Vseg& h) {
+	int sz = h.size();
+	ld r = 0;
+	for (int i = 0; i < sz; i++) {
 
+	}
+	return r;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

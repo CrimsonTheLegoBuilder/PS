@@ -145,11 +145,11 @@ struct Seg {
 typedef std::vector<Seg> Vseg;
 Vseg H[100];
 Polygon INX[LEN];
-void inx_sort(Polygon& INX, const Pos& a) {
-	std::sort(INX.begin(), INX.end(), [&](const Pos& p, const Pos& q) -> bool {
+void inx_sort(Polygon& inx, const Pos& a) {
+	std::sort(inx.begin(), inx.end(), [&](const Pos& p, const Pos& q) -> bool {
 		return (a - p).Euc() < (a - q).Euc();
 		});
-	INX.erase(unique(INX.begin(), INX.end()), INX.end());
+	inx.erase(unique(inx.begin(), inx.end()), inx.end());
 	return;
 }
 struct Circle {
@@ -196,9 +196,11 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	ld hi = (-b + det) / a;
 	Vld ret;
 	if (f == LINE) {
-		if (0 < hi && hi < 1) ret.push_back(hi);
+		//if (0 < hi && hi < 1) ret.push_back(hi);
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(hi);
 		if (zero(det)) return ret;
-		if (0 < lo && lo < 1) ret.push_back(lo);
+		//if (0 < lo && lo < 1) ret.push_back(lo);
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(lo);
 	}
 	else {
 		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
@@ -212,7 +214,7 @@ int I, I0;
 std::map<Pos, Polygon> map_pos;
 ld A[LEN * LEN + 10];
 Vseg cell[LEN * LEN + 10]; int ci;
-std::set<int> cell_i[LEN * LEN + 10];
+//std::set<int> cell_i[LEN * LEN + 10];
 int P[LEN * LEN + 10];//disjoint set
 int find(int i) { return P[i] < 0 ? i : P[i] = find(P[i]); }
 bool join(int i, int j) {
@@ -226,8 +228,8 @@ int V[LEN * LEN * 10];
 Vint GS[LEN * LEN * 10];
 void dfs(const int& i, int v) {
 	V[v] = 1;
-	cell[i].push_back(frag[v].a);
-	cell_i[i].insert(v);
+	cell[i].push_back(frag[v]);
+	//cell_i[i].insert(v);
 	for (const int& w : GS[v]) {
 		if (V[w]) continue;
 		dfs(i, w);
@@ -253,9 +255,10 @@ ld par(const Vseg& h) {
 	for (const Seg& se : h) {
 		if (se.f == LINE) r += (se.a - se.b).mag();
 		else {
-			ld s = se.a.rad();
-			ld e = se.b.rad();
-			r += std::abs(PI * (e - s));
+			const Pos& a = se.a;
+			const Pos& b = se.b;
+			ld t = std::abs(atan2l((a / b), (a * b)));
+			r += std::abs(PI * t);
 		}
 	}
 	return r;
@@ -286,6 +289,7 @@ void solve() {
 			const Pos p = seg[i].p(x);
 			INX[i].push_back(p);
 			INX[j].push_back(p);
+			INXS.push_back(p);
 		}
 		inxs = circle_line_intersections(c, s, e, CIRCLE);
 		for (const ld& x : inxs) {
@@ -326,7 +330,7 @@ void solve() {
 		for (int j = 0; j < sz - 1; j++) {
 			frag[I] = Seg(v[j], v[j + 1]);
 			frag[I].i = I;
-			frag[I].f = (M < N ? LINE : CIRCLE);
+			frag[I].f = (i < N ? LINE : CIRCLE);
 			I++;
 		}
 	}
@@ -337,7 +341,7 @@ void solve() {
 		for (int j = 0; j < sz - 1; j++) {
 			frag[I] = Seg(v[j + 1], v[j]);
 			frag[I].i = I;
-			frag[I].f = (M < N ? LINE : CIRCLE);
+			frag[I].f = (i < N ? LINE : CIRCLE);
 			I++;
 		}
 	}
@@ -374,24 +378,20 @@ void solve() {
 		if (!V[i]) {
 			dfs(ci, i);
 			A[ci] = area(cell[ci]);
-#ifdef DEBUG
-			std::cout << "FUCK:: i:: " << i << " sz:: " << cell[ci].size() << "\n";
-			//for (const Pos& p : cell[ci]) std::cout << p << "\n";
-			std::cout << "FUCK:: A[" << ci << "]:: " << A[ci] << "\n";
-#endif
 			if (0 == A[ci]) {
 				cell[ci].clear();
-				cell_i[ci].clear();
+				//cell_i[ci].clear();
 				A[ci] = 0;
 				ci--;
 			}
 			if (AA < A[ci]) {
 				AA = A[ci];
-				r = std::max(r, par(cell[ci]));
+				r = par(cell[ci]);
 			}
 			ci++;
 		}
 	}
+	std::cout << r << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj

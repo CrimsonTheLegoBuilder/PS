@@ -181,7 +181,7 @@ struct Circle {
 	bool operator >= (const Pos& p) const { return r + TOL > (c - p).mag(); }
 	friend std::istream& operator >> (std::istream& is, Circle& c) { is >> c.c >> c.r; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Circle& c) { os << c.c << " " << c.r; return os; }
-} INVAL = { { 0, 0 }, -1 };
+};
 Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;

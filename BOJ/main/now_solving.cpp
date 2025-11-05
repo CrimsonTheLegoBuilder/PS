@@ -314,13 +314,13 @@ void solve() {
 	int sz = X.size();
 	for (int i = 0, j; i < sz; i++) {
 		j = (i + 1) % sz;
-		if (eq(X[i], X[j])) continue;
 		seg[i + N].a = c.p(X[i]);
 		seg[i + N].b = c.p(X[j]);
+		if (seg[i + N].a == seg[i + N].b) continue;
 #ifdef DEBUG
 		std::cout << "DEBUG::\n";
-		std::cout << "	a:: " << "\n";
-		std::cout << "	INXS::\n";
+		std::cout << "	a:: " << seg[i + N].a << "\n";
+		std::cout << "	b:: " << seg[i + N].b << "\n";
 		std::cout << "DEBUG::\n";
 #endif
 		seg[i + N].i = CIRCLE;

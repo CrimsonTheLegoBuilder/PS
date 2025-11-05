@@ -35,7 +35,7 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define __FUCK__ ;
 #define WHAT_THE_FUCK
-//#define DEBUG
+#define DEBUG
 
 #define LO x
 #define HI y
@@ -54,12 +54,12 @@ struct Pos {
 	int i, f;
 	bool rv;
 	Pos(ld x_ = 0, ld y_ = 0, int f_ = -1) : x(x_), y(y_), f(f_) { i = -1, rv = 0; }
-	//bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
-	//bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
-	//bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
-	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
+	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
+	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	//bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
+	//bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
+	//bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
@@ -281,6 +281,7 @@ void solve() {
 		seg[i].a = s;
 		seg[i].b = e;
 		seg[i].i = LINE;
+		INXS.push_back(s);
 		INX[i].push_back(s);
 		INX[i].push_back(e);
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
@@ -313,14 +314,29 @@ void solve() {
 	int sz = X.size();
 	for (int i = 0, j; i < sz; i++) {
 		j = (i + 1) % sz;
+		if (eq(X[i], X[j])) continue;
 		seg[i + N].a = c.p(X[i]);
 		seg[i + N].b = c.p(X[j]);
+#ifdef DEBUG
+		std::cout << "DEBUG::\n";
+		std::cout << "	a:: " << "\n";
+		std::cout << "	INXS::\n";
+		std::cout << "DEBUG::\n";
+#endif
 		seg[i + N].i = CIRCLE;
 		INX[i + N].push_back(seg[i + N].a);
 		INX[(i + 1) % sz + N].push_back(seg[i + N].a);
+		INXS.push_back(seg[i + N].a);
 	}
 	std::sort(INXS.begin(), INXS.end());
 	INXS.erase(unique(INXS.begin(), INXS.end()), INXS.end());
+#ifdef DEBUG
+	std::cout << "DEBUG::\n";
+	std::cout << "	INXS::\n";
+	for (const Pos& p : INXS) std::cout << "	" << p << "\n";
+	std::cout << "	INXS::\n";
+	std::cout << "DEBUG::\n";
+#endif
 	M = N + sz;
 	I = 0;
 	for (int i = 0; i < M; i++) {

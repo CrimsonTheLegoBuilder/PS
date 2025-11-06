@@ -22,7 +22,7 @@ typedef std::vector<ll> Vll;
 typedef std::pair<int, int> pi;
 typedef std::vector<ld> Vld;
 const ld INF = 1e17;
-const ld TOL = 1e-7;
+const ld TOL = 1e-6;
 const ld PI = acos(-1);
 const int LEN = 1e3;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
@@ -56,7 +56,15 @@ struct Pos {
 	Pos(ld x_ = 0, ld y_ = 0, int f_ = -1) : x(x_), y(y_), f(f_) { i = -1, rv = 0; }
 	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
-	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	//bool operator < (const Pos& p) const { return zero(x - p.x) ? sign(p.y - y) > 0 : sign(p.x - x) > 0; }
+	bool operator<(const Pos& p) const {
+		if (x < p.x - TOL) return true;
+		if (x > p.x + TOL) return false;
+		// x ≈ p.x
+		if (y < p.y - TOL) return true;
+		if (y > p.y + TOL) return false;
+		return false; // x≈, y≈ → 동치로 취급
+	}
 	//bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	//bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	//bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -258,7 +266,7 @@ ld par(const Vseg& h) {
 			const Pos& a = se.a;
 			const Pos& b = se.b;
 			ld t = std::abs(atan2l((a / b), (a * b)));
-			r += std::abs(PI * t);
+			r += std::abs(R * t);
 		}
 	}
 	return r;
@@ -309,6 +317,10 @@ void solve() {
 		std::cout << r << "\n";
 		return;
 	}
+#ifdef DEBUG
+	std::cout << "\n\n\n";
+	std::cout << "DEBUG:: ROT::\n";
+#endif
 	std::sort(X.begin(), X.end());
 	int sz = X.size();
 	for (int i = 0, j; i < sz; i++) {
@@ -324,6 +336,7 @@ void solve() {
 #endif
 		seg[i + N].i = CIRCLE;
 		INX[i + N].push_back(seg[i + N].a);
+		INX[i + N].push_back(seg[i + N].b);
 		INXS.push_back(seg[i + N].a);
 	}
 	std::sort(INXS.begin(), INXS.end());
@@ -371,23 +384,53 @@ void solve() {
 			I++;
 		}
 	}
+#ifdef DEBUG
+	std::cout << "\n\n\n";
+	std::cout << "DEBUG:: I:: " << I << "\n";
+#endif
 	for (int i = 0; i < I; i++) {
 		key = frag[i].a;
 		vec = frag[i].b - frag[i].a;
 		vec.i = frag[i].i;
 		vec.f = frag[i].f;
 		map_pos[key].push_back(vec);
-
+#ifdef DEBUG
+		std::cout << "	key:: " << key << "\n";
+		std::cout << "	vec:: " << vec << "\n\n";
+#endif
 		key = frag[i].b;
 		vec = frag[i].a - frag[i].b;
 		vec.i = frag[i].i;
 		vec.f = frag[i].f;
 		vec.rv = 1;
 		map_pos[key].push_back(vec);
+#ifdef DEBUG
+		std::cout << "	key:: " << key << "\n";
+		std::cout << "	vec:: " << vec << "\n\n";
+#endif
 	}
+	
+#ifdef DEBUG
+	std::cout << "\n\nMAP_POS::\n";
+	std::cout << "MAP_POS::\n";
+	for (auto it = map_pos.begin(); it != map_pos.end(); ++it) {
+		const auto& k = it->first;
+		std::cout << "	key:: " << k << "\n";
+	}
+	std::cout << "MAP_POS::\n";
+	std::cout << "MAP_POS::\n";
+#endif
+
 	for (const Pos& key : INXS) {
 		Polygon& v = map_pos[key];
 		std::sort(v.begin(), v.end(), cmpr);
+#ifdef DEBUG
+		std::cout << "DEBUG::\n";
+		std::cout << "	ROT[" << key << "]::\n";
+		for (const Pos& p : v) std::cout << "	" << p << ", " << p.i << ", rv:: " << p.rv << "\n";
+		std::cout << "	ROT[" << key << "]::\n";
+		std::cout << "DEBUG::\n";
+#endif
 		int sz = v.size();
 		assert(!(sz & 1));
 		for (int j = 0; j < sz; j += 2) {
@@ -400,9 +443,24 @@ void solve() {
 	ci = 0;
 	ld AA = 0;
 	ld r = 0;
+#ifdef DEBUG
+	std::cout << "\n\n";
+	std::cout << "SEG::\n";
+	std::cout << "SEG::\n";
+	std::cout << "SEG::\n";
+#endif
 	for (int i = 0; i < I; i++) {
 		if (!V[i]) {
 			dfs(ci, i);
+#ifdef DEBUG
+			std::cout << "DEBUG::\n";
+			std::cout << "	cell[" << ci <<"]::\n";
+			for (const Seg& se : cell[ci]) {
+				std::cout << "	" << se.a << ", " << se.b << ", " << se.f << "\n";
+			}
+			std::cout << "	cell[" << ci <<"]::\n";
+			std::cout << "DEBUG::\n";
+#endif
 			A[ci] = area(cell[ci]);
 			if (0 == A[ci]) {
 				cell[ci].clear();

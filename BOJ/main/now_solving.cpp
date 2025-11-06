@@ -24,7 +24,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-6;
 const ld PI = acos(-1);
-const int LEN = 3e2;
+const int LEN = 500;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -148,7 +148,7 @@ struct Seg {
 		Pos m = p(ratio);
 		return m.y * d * (a.x - b.x);
 	}
-} seg[LEN], frag[LEN * LEN * 10];
+} seg[LEN], frag[LEN];
 typedef std::vector<Seg> Vseg;
 Vseg H[100];
 Polygon INX[LEN];
@@ -219,8 +219,8 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 }
 int I, I0;
 std::map<Pos, Polygon> map_pos;
-ld A[LEN * LEN + 10];
-Vseg cell[LEN * LEN + 10]; int ci;
+ld A[LEN];
+Vseg cell[LEN]; int ci;
 //std::set<int> cell_i[LEN * LEN + 10];
 //int P[LEN * LEN + 10];//disjoint set
 //int find(int i) { return P[i] < 0 ? i : P[i] = find(P[i]); }
@@ -231,8 +231,8 @@ Vseg cell[LEN * LEN + 10]; int ci;
 //	else P[j] += P[i], P[i] = j;
 //	return 1;
 //}
-int V[LEN * LEN * 10];
-Vint GS[LEN * LEN * 10];
+int V[LEN];
+Vint GS[LEN];
 void dfs(const int& i, int v) {
 	V[v] = 1;
 	cell[i].push_back(frag[v]);

@@ -24,7 +24,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-6;
 const ld PI = acos(-1);
-const int LEN = 1e3;
+const int LEN = 1e2;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -56,15 +56,15 @@ struct Pos {
 	Pos(ld x_ = 0, ld y_ = 0, int f_ = -1) : x(x_), y(y_), f(f_) { i = -1, rv = 0; }
 	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
-	//bool operator < (const Pos& p) const { return zero(x - p.x) ? sign(p.y - y) > 0 : sign(p.x - x) > 0; }
-	bool operator<(const Pos& p) const {
-		if (x < p.x - TOL) return true;
-		if (x > p.x + TOL) return false;
-		// x ≈ p.x
-		if (y < p.y - TOL) return true;
-		if (y > p.y + TOL) return false;
-		return false; // x≈, y≈ → 동치로 취급
-	}
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? sign(p.y - y) > 0 : sign(p.x - x) > 0; }
+	//bool operator<(const Pos& p) const {
+	//	if (x < p.x - TOL) return true;
+	//	if (x > p.x + TOL) return false;
+	//	// x ≈ p.x
+	//	if (y < p.y - TOL) return true;
+	//	if (y > p.y + TOL) return false;
+	//	return false;
+	//}
 	//bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	//bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	//bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -247,17 +247,10 @@ void dfs(const int& i, int v) {
 ld area(const Vseg& h) {
 	int sz = h.size();
 	ld a = 0;
-	for (const Seg& se : h) {
-		if (se.f == LINE) a += se.green();
-		else {
-			ld s = se.a.rad();
-			ld e = se.b.rad();
-			a += Circle(Pos(0, 0), R).green(s, e);
-		}
-	}
+	for (const Seg& se : h) a += se.green();
 	return a;
 }
-ld par(const Vseg& h) {
+ld par(const Vseg& h, const ld& a) {
 	int sz = h.size();
 	ld r = 0;
 	for (const Seg& se : h) {
@@ -266,6 +259,7 @@ ld par(const Vseg& h) {
 			const Pos& a = se.a;
 			const Pos& b = se.b;
 			ld t = std::abs(atan2l((a / b), (a * b)));
+			if (a < 0) t = 2 * PI - t;
 			r += std::abs(R * t);
 		}
 	}
@@ -468,9 +462,9 @@ void solve() {
 				A[ci] = 0;
 				ci--;
 			}
-			if (AA < A[ci]) {
-				AA = A[ci];
-				r = par(cell[ci]);
+			if (AA < std::abs(A[ci])) {
+				AA = std::abs(A[ci]);
+				r = par(cell[ci], A[ci]);
 			}
 			ci++;
 		}

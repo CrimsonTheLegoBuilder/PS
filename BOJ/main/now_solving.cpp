@@ -35,7 +35,7 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define __FUCK__ ;
 #define WHAT_THE_FUCK
-#define DEBUG
+//#define DEBUG
 
 #define LO x
 #define HI y
@@ -284,6 +284,7 @@ void solve() {
 		INXS.push_back(s);
 		INX[i].push_back(s);
 		INX[i].push_back(e);
+		X.push_back(s.rad());
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
 			f0 = 0;

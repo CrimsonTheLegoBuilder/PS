@@ -22,7 +22,7 @@ typedef std::vector<ll> Vll;
 typedef std::pair<int, int> pi;
 typedef std::vector<ld> Vld;
 const ld INF = 1e17;
-const ld TOL = 1e-6;
+const ld TOL = 1e-7;
 const ld PI = acos(-1);
 const int LEN = 1e4;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }

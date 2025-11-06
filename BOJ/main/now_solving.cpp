@@ -284,7 +284,7 @@ void solve() {
 		INXS.push_back(s);
 		INX[i].push_back(s);
 		INX[i].push_back(e);
-		X.push_back(s.rad());
+		X.push_back(norm(s.rad()));
 		Vld inxs = circle_line_intersections(c, s, e, LINE);
 		for (const ld& x : inxs) {
 			f0 = 0;

@@ -35,7 +35,7 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define __FUCK__ ;
 #define WHAT_THE_FUCK
-#define DEBUG
+//#define DEBUG
 
 #define LO x
 #define HI y
@@ -259,7 +259,7 @@ ld par(const Vseg& h, const ld& a) {
 			const Pos& a = se.a;
 			const Pos& b = se.b;
 			ld t = std::abs(atan2l((a / b), (a * b)));
-			if (a < 0) t = 2 * PI - t;
+			//if (a < 0) t = 2 * PI - t;
 			r += std::abs(R * t);
 		}
 	}
@@ -317,6 +317,12 @@ void solve() {
 #endif
 	std::sort(X.begin(), X.end());
 	int sz = X.size();
+	for (int i = 0, j; i < sz - 1; i++) {
+		j = (i + 1);
+		X.push_back((X[i] + X[j]) * .5);
+	}
+	std::sort(X.begin(), X.end());
+	sz = X.size();
 	for (int i = 0, j; i < sz; i++) {
 		j = (i + 1) % sz;
 		seg[i + N].a = c.p(X[i]);
@@ -446,6 +452,7 @@ void solve() {
 	for (int i = 0; i < I; i++) {
 		if (!V[i]) {
 			dfs(ci, i);
+			A[ci] = area(cell[ci]);
 #ifdef DEBUG
 			std::cout << "DEBUG::\n";
 			std::cout << "	cell[" << ci <<"]::\n";
@@ -453,9 +460,10 @@ void solve() {
 				std::cout << "	" << se.a << ", " << se.b << ", " << se.f << "\n";
 			}
 			std::cout << "	cell[" << ci <<"]::\n";
+			std::cout << "	A[" << ci <<"]:: " << A[ci] <<"\n";
+			std::cout << "	R[" << ci <<"]:: " << par(cell[ci], A[ci]) <<"\n";
 			std::cout << "DEBUG::\n";
 #endif
-			A[ci] = area(cell[ci]);
 			if (0 == A[ci]) {
 				cell[ci].clear();
 				//cell_i[ci].clear();

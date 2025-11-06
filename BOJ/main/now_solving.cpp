@@ -215,15 +215,15 @@ std::map<Pos, Polygon> map_pos;
 ld A[LEN * LEN + 10];
 Vseg cell[LEN * LEN + 10]; int ci;
 //std::set<int> cell_i[LEN * LEN + 10];
-int P[LEN * LEN + 10];//disjoint set
-int find(int i) { return P[i] < 0 ? i : P[i] = find(P[i]); }
-bool join(int i, int j) {
-	i = find(i), j = find(j);
-	if (i == j) return 0;
-	if (P[i] < P[j]) P[i] += P[j], P[j] = i;
-	else P[j] += P[i], P[i] = j;
-	return 1;
-}
+//int P[LEN * LEN + 10];//disjoint set
+//int find(int i) { return P[i] < 0 ? i : P[i] = find(P[i]); }
+//bool join(int i, int j) {
+//	i = find(i), j = find(j);
+//	if (i == j) return 0;
+//	if (P[i] < P[j]) P[i] += P[j], P[j] = i;
+//	else P[j] += P[i], P[i] = j;
+//	return 1;
+//}
 int V[LEN * LEN * 10];
 Vint GS[LEN * LEN * 10];
 void dfs(const int& i, int v) {
@@ -289,7 +289,6 @@ void solve() {
 			f0 = 0;
 			const Pos p = seg[i].p(x);
 			INX[i].push_back(p);
-			INX[j].push_back(p);
 			INXS.push_back(p);
 		}
 		inxs = circle_line_intersections(c, s, e, CIRCLE);
@@ -325,7 +324,6 @@ void solve() {
 #endif
 		seg[i + N].i = CIRCLE;
 		INX[i + N].push_back(seg[i + N].a);
-		INX[(i + 1) % sz + N].push_back(seg[i + N].a);
 		INXS.push_back(seg[i + N].a);
 	}
 	std::sort(INXS.begin(), INXS.end());
@@ -341,14 +339,26 @@ void solve() {
 	I = 0;
 	for (int i = 0; i < M; i++) {
 		inx_sort(INX[i], seg[i].a);
+#ifdef DEBUG
+		std::cout << "DEBUG::\n";
+		std::cout << "	SEG[" << i << "]::\n";
+		std::cout << "	" << seg[i].a << ", " << seg[i].b << "\n";
+		std::cout << "	SEG[" << i << "]::\n";
+#endif
 		Polygon& v = INX[i];
 		int sz = v.size();
 		for (int j = 0; j < sz - 1; j++) {
 			frag[I] = Seg(v[j], v[j + 1]);
+#ifdef DEBUG
+			std::cout << "	" << v[j] << ", " << v[j + 1] << "\n";
+#endif
 			frag[I].i = I;
 			frag[I].f = (i < N ? LINE : CIRCLE);
 			I++;
 		}
+#ifdef DEBUG
+		std::cout << "DEBUG::\n";
+#endif
 	}
 	I0 = I;
 	for (int i = 0; i < M; i++) {

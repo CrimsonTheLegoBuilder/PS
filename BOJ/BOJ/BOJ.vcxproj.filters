@@ -165,5 +165,8 @@
     <ClCompile Include="..\main\fastio_optimize_gcc.cpp">
       <Filter>소스 파일\_tools</Filter>
     </ClCompile>
+    <ClCompile Include="..\library\planar_graph_seg_circle.cpp">
+      <Filter>소스 파일\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

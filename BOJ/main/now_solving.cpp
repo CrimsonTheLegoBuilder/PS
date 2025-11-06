@@ -479,12 +479,4 @@ void solve() {
 	std::cout << r << "\n";
 	return;
 }
-int main() { solve(); return 0; }//boj
-
-/*
-
-1000
-4
--1000 -1000 -1000 1000 1000 1000 1000 -1000
-
-*/
+int main() { solve(); return 0; }

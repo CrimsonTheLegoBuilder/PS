@@ -24,7 +24,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-6;
 const ld PI = acos(-1);
-const int LEN = 500;
+const int LEN = 1e4;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -35,7 +35,7 @@ ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define __FUCK__ ;
 #define WHAT_THE_FUCK
-//#define DEBUG
+#define DEBUG
 
 #define LO x
 #define HI y

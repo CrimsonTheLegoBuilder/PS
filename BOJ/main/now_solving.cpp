@@ -24,7 +24,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-6;
 const ld PI = acos(-1);
-const int LEN = 1e2;
+const int LEN = 3e2;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -60,7 +60,6 @@ struct Pos {
 	//bool operator<(const Pos& p) const {
 	//	if (x < p.x - TOL) return true;
 	//	if (x > p.x + TOL) return false;
-	//	// x ≈ p.x
 	//	if (y < p.y - TOL) return true;
 	//	if (y > p.y + TOL) return false;
 	//	return false;
@@ -259,7 +258,6 @@ ld par(const Vseg& h, const ld& a) {
 			const Pos& a = se.a;
 			const Pos& b = se.b;
 			ld t = std::abs(atan2l((a / b), (a * b)));
-			//if (a < 0) t = 2 * PI - t;
 			r += std::abs(R * t);
 		}
 	}
@@ -276,7 +274,7 @@ void solve() {
 	Circle c = Circle(Pos(0, 0), R);
 	bool f0 = 1;
 	Polygon INXS;
-	Vld X = { 0, PI * 2 };
+	Vld X = { 0, PI * 0.5, PI, PI * 1.5, PI * 2 };
 	for (int i = 0, j; i < N; i++) {
 		j = (i + 1) % N;
 		const Pos& s = P[i], & e = P[j];
@@ -464,15 +462,15 @@ void solve() {
 			std::cout << "	R[" << ci <<"]:: " << par(cell[ci], A[ci]) <<"\n";
 			std::cout << "DEBUG::\n";
 #endif
+			if (AA < std::abs(A[ci])) {
+				AA = std::abs(A[ci]);
+				r = par(cell[ci], A[ci]);
+			}
 			if (0 == A[ci]) {
 				cell[ci].clear();
 				//cell_i[ci].clear();
 				A[ci] = 0;
 				ci--;
-			}
-			if (AA < std::abs(A[ci])) {
-				AA = std::abs(A[ci]);
-				r = par(cell[ci], A[ci]);
 			}
 			ci++;
 		}
@@ -481,3 +479,11 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj
+
+/*
+
+1000
+4
+-1000 -1000 -1000 1000 1000 1000 1000 -1000
+
+*/

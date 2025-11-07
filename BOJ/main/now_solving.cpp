@@ -69,6 +69,7 @@ struct Pos {
 const Pos INVAL = Pos(-1, -1);
 typedef std::vector<Pos> Polygon;
 Pos seg[LEN][2];
+Pos B[LEN][12];
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
@@ -107,8 +108,9 @@ bool block(const int& i, const int& j) {
 	bool f0 = intersect(seg[i][0], O, seg[j][0], seg[j][1], WEAK);
 	bool f1 = intersect(seg[i][1], O, seg[j][0], seg[j][1], WEAK);
 	if (f0 || f1) return 1;
-
-
+	f0 = intersect(seg[i][0], O, seg[j][0], seg[j][1]);
+	f1 = intersect(seg[i][1], O, seg[j][0], seg[j][1]);
+	if (f0 && f1) return 1;
 	return 0;
 }
 void solve() {
@@ -119,21 +121,28 @@ void solve() {
 	std::cin >> N;
 	for (int i = 0; i < N; i++) {
 		int x, y, l; std::cin >> x >> y >> l;
-		Polygon B = { Pos(x, y), Pos(x + l, y), Pos(x + l, y + l), Pos(x, y + l) };
-		Pos s = B[0], e = B[0];
-		for (const Pos& b : B) {
+		Polygon box = { Pos(x, y), Pos(x + l, y), Pos(x + l, y + l), Pos(x, y + l) };
+		Pos s = box[0], e = box[0];
+		for (const Pos& b : box) {
 			if (ccw(O, s, b) < 0) s = b;
 			if (ccw(O, e, b) > 0) e = b;
-			seg[i][0] = s;
-			seg[i][1] = e;
 		}
+		seg[i][0] = s;
+		seg[i][1] = e;
+		B[i][0] = box[0];
+		B[i][1] = box[1];
 	}
+	int cnt = 0;
 	for (int i = 0; i < N; i++) {
+		bool f = 1;
 		for (int j = 0; j < N; j++) {
 			if (i == j) continue;
-
+			if (block(i, j)) { f = 0; break; }
 		}
+		std::cout << "f:: " << f << "\n";
+		cnt += f;
 	}
+	std::cout << cnt << "\n";
 	return;
 }
 int main() { solve(); return 0; }

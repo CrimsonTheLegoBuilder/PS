@@ -199,19 +199,20 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	}
 	return ret;
 }
-Pos shadow() {
-
+Pos shadow(const Circle& pp, const Circle& rd, const Circle& og) {
+	return Pos();
 }
 Circle C[1005];
 bool query() {
 	int x, y, r;
 	std::cin >> N >> P >> x >> y >> r;
 	if (!N && !P && !x && !y && !r) return 0;
+	Circle pp = Circle(Pos(0, 0), P), rd = Circle(Pos(x, y), r);
 	for (int i = 0; i < N; i++) std::cin >> C[i];
 	Polygon vp = { Pos(0, 0) };
 	for (int i = 0; i < N; i++) {
-		Pos v = shadow();
-		vp.push_back(v);
+		Pos sd = shadow();
+		vp.push_back(sd);
 	}
 	vp.push_back(Pos(2 * PI, 2 * PI));
 	std::sort(vp.begin(), vp.end());

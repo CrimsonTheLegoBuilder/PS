@@ -220,4 +220,4 @@ void solve() {
 	std::cout << cnt << "\n";
 	return;
 }
-int main() { solve(); return 0; }//boj7047
+int main() { solve(); return 0; }//boj2397

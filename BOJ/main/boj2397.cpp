@@ -108,6 +108,9 @@ void norm(Polygon& H) {
 	std::rotate(H.begin(), s, H.end());
 	return;
 }
+bool inner_check(const Pos& p0, const Pos& p1, const Pos& p2, const Pos& q) {
+	return ccw(p0, p1, q) > 0 && ccw(p1, p2, q) > 0 && ccw(p2, p0, q) > 0;
+}
 int128 abs_(int128 x) { if (x < 0) x *= -1; return x; }
 int128 gcd(int128 a, int128 b) { while (b) { int128 tmp = a % b; a = b; b = tmp; } return a; }
 int sign(const int128& x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
@@ -141,7 +144,7 @@ struct Frac {
 	}
 	bool operator == (const Frac& o) const { return x == o.x && den == o.den; }
 	friend std::ostream& operator << (std::ostream& os, const Frac& p) { os << p.x << " " << p.den; return os; }
-} z(0, 1), o(1, 1);
+}; const Frac z(0, 1), o(1, 1);
 std::vector<Frac> tmp;
 Frac intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {
 	ll a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2);
@@ -162,6 +165,8 @@ bool block(const int& i, const int& j) {
 	f0 = intersect(seg[i][0], O, seg[j][0], seg[j][1]);
 	f1 = intersect(seg[i][1], O, seg[j][0], seg[j][1]);
 	if (f0 && f1) return 1;
+	if (inner_check(seg[i][1], O, seg[i][0], seg[j][0])) return 1;
+	if (inner_check(seg[i][1], O, seg[i][0], seg[j][0])) return 1;
 	return 0;
 }
 void shadow(const int& i, const int& j, Frac& s, Frac& e) {
@@ -190,6 +195,7 @@ void solve() {
 			if (ccw(O, s, b) < 0) s = b;
 			if (ccw(O, e, b) > 0) e = b;
 		}
+		assert(s / e > 0);
 		seg[i][0] = s;
 		seg[i][1] = e;
 	}

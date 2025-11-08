@@ -145,7 +145,7 @@ void inx_sort(Polygon& inx, const Pos& a) {
 struct Circle {
 	Pos c;
 	ld r;
-	Circle(Pos c_ = Pos(), int r_ = 0) : c(c_), r(r_) {}
+	Circle(Pos c_ = Pos(), ld r_ = 0) : c(c_), r(r_) {}
 	bool operator == (const Circle& q) const { return c == q.c && r == q.r; }
 	bool operator != (const Circle& q) const { return !(*this == q); }
 	bool operator < (const Circle& q) const { return c == q.c ? r < q.r : c < q.c; }
@@ -154,7 +154,7 @@ struct Circle {
 	Circle operator + (const Circle& q) const { return { c + q.c, r + q.r }; }
 	Circle operator - (const Circle& q) const { return { c - q.c, r - q.r }; }
 	Pos p(const ld& t) const { return c + Pos(r, 0).rot(t); }
-	ld rad(const Pos& p) const { return (p - c).rad(); }
+	ld rad(const Pos& p) const { return norm((p - c).rad()); }
 	ld area(const ld& lo = 0, const ld& hi = 2 * PI) const { return (hi - lo) * r * r * .5; }
 	ld green(const ld& lo, const ld& hi) const {
 		Pos s = Pos(cos(lo), sin(lo)), e = Pos(cos(hi), sin(hi));
@@ -185,11 +185,11 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	ld hi = (-b + det) / a;
 	Vld ret;
 	if (f == LINE) {
-		//if (0 < hi && hi < 1) ret.push_back(hi);
-		if (-TOL < hi && hi < 1 + TOL) ret.push_back(hi);
+		ret.push_back(hi);
+		//if (-TOL < hi && hi < 1 + TOL) ret.push_back(hi);
 		if (zero(det)) return ret;
-		//if (0 < lo && lo < 1) ret.push_back(lo);
-		if (-TOL < lo && lo < 1 + TOL) ret.push_back(lo);
+		ret.push_back(lo);
+		//if (-TOL < lo && lo < 1 + TOL) ret.push_back(lo);
 	}
 	else {
 		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
@@ -200,7 +200,33 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	return ret;
 }
 Pos shadow(const Circle& pp, const Circle& rd, const Circle& og) {
-	return Pos();
+	Pos v = og.c - rd.c;
+	ld a = v.mag(), b = og.r + rd.r;
+	ld t = acos(b / a);
+
+	Vld inxs;
+	ld hi, lo;
+
+	Pos r1 = v.rot(t) / a * rd.r + rd.c;
+	Pos p1 = (-v).rot(t) / a * og.r + og.c;
+	inxs = circle_line_intersections(pp, r1, p1, LINE);
+	assert(inxs.size() == 2);
+	hi = inxs[0]; lo = inxs[1];
+	if (hi < lo) std::swap(hi, lo);
+	assert(hi > 0 && lo < 0);
+	Pos x1 = Seg(r1, p1).p(hi);
+
+	Pos r2 = v.rot(-t) / a * rd.r + rd.c;
+	Pos p2 = (-v).rot(-t) / a * og.r + og.c;
+	inxs = circle_line_intersections(pp, r2, p2, LINE);
+	assert(inxs.size() == 2);
+	if (hi < lo) std::swap(hi, lo);
+	assert(hi > 0 && lo < 0);
+	Pos x2 = Seg(r2, p2).p(hi);
+
+	ld t1 = pp.rad(x1);
+	ld t2 = pp.rad(x2);
+	return Pos(t1, t2);
 }
 Circle C[1005];
 bool query() {
@@ -211,8 +237,14 @@ bool query() {
 	for (int i = 0; i < N; i++) std::cin >> C[i];
 	Polygon vp = { Pos(0, 0) };
 	for (int i = 0; i < N; i++) {
-		Pos sd = shadow();
-		vp.push_back(sd);
+		Pos sd = shadow(pp, rd, C[i]);
+		std::cout << "shadow:: " << sd << "\n";
+		ld hi = sd.HI, lo = sd.LO;
+		if (lo < hi) vp.push_back(sd);
+		else {
+			vp.push_back(Pos(lo, PI * 2));
+			vp.push_back(Pos(0, hi));
+		}
 	}
 	vp.push_back(Pos(2 * PI, 2 * PI));
 	std::sort(vp.begin(), vp.end());
@@ -222,7 +254,7 @@ bool query() {
 		if (hi < p.LO) t += (p.LO - hi), hi = p.HI;
 		else hi = std::max(hi, p.HI);
 	}
-	std::cout << t / (PI * 2);
+	std::cout << t / (PI * 2) << "\n";
 	return 1;
 }
 void solve() {

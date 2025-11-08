@@ -115,22 +115,21 @@ int128 abs_(int128 x) { if (x < 0) x *= -1; return x; }
 int128 gcd(int128 a, int128 b) { while (b) { int128 tmp = a % b; a = b; b = tmp; } return a; }
 int sign(const int128& x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 struct Frac {
-	int128 x, den;
-	Frac(int128 x_ = 0, int128 den_ = 1) : x(x_), den(den_) {}
-	//int f;
+	int128 num, den;
+	Frac(int128 num_ = 0, int128 den_ = 1) : num(num_), den(den_) {}
 	bool operator < (const Frac& o) const {
-		int s1 = sign(x) * sign(den);
-		int s2 = sign(o.x) * sign(o.den);
+		int s1 = sign(num) * sign(den);
+		int s2 = sign(o.num) * sign(o.den);
 		if (s1 != s2) return s1 < s2;
-		if (!x) {
-			assert(!o.x);
+		if (!num) {
+			assert(!o.num);
 			//if (f != o.f) return f < o.f;
 			return 0;
 		}
-		int128 div1 = abs_(x) / abs_(den);
-		int128 div2 = abs_(o.x) / abs_(o.den);
-		int128 mod1 = abs_(x) % abs_(den);
-		int128 mod2 = abs_(o.x) % abs_(o.den);
+		int128 div1 = abs_(num) / abs_(den);
+		int128 div2 = abs_(o.num) / abs_(o.den);
+		int128 mod1 = abs_(num) % abs_(den);
+		int128 mod2 = abs_(o.num) % abs_(o.den);
 		if (div1 == div2) {
 			int128 n1 = mod1 * o.den;
 			int128 n2 = mod2 * den;
@@ -142,8 +141,19 @@ struct Frac {
 		}
 		return s1 > 0 ? div1 < div2 : div1 > div2;
 	}
-	bool operator == (const Frac& o) const { return x == o.x && den == o.den; }
-	friend std::ostream& operator << (std::ostream& os, const Frac& p) { os << p.x << " " << p.den; return os; }
+	bool operator == (const Frac& o) const { return num == o.num && den == o.den; }
+	//friend bool operator < (const Frac& a, const Frac& b) { return a.num * b.den < b.num * a.den; }
+	//friend bool operator == (const Frac& a, const Frac& b) { return a.num == b.num && a.den == b.den; }
+	//friend bool operator != (const Frac& a, const Frac& b) { return !(a == b); }
+	//friend bool operator > (const Frac& a, const Frac& b) { return b < a; }
+	//friend bool operator <= (const Frac& a, const Frac& b) { return !(b < a); }
+	//friend bool operator >= (const Frac& a, const Frac& b) { return !(a < b); }
+	//Frac operator + (const Frac& o) const { return Frac(num * o.den + o.num * den, den * o.den); }
+	//Frac operator - (const Frac& o) const { return Frac(num * o.den - o.num * den, den * o.den); }
+	//Frac operator * (const Frac& o) const { return Frac(num * o.num, den * o.den); }
+	//Frac operator / (const Frac& o) const { assert(o.num != 0); return Frac(num * o.den, den * o.num); }
+	//friend std::ostream& operator << (std::ostream& os, const Frac& f) { return os << (long long)f.num << "/" << (long long)f.den; }
+	friend std::ostream& operator << (std::ostream& os, const Frac& p) { os << p.num << " " << p.den; return os; }
 }; const Frac z(0, 1), o(1, 1);
 std::vector<Frac> tmp;
 Frac intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) {

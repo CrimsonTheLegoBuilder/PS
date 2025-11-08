@@ -24,7 +24,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 1e4;
+const int LEN = 105;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -56,7 +56,7 @@ struct Pos {
 	Pos(ld x_ = 0, ld y_ = 0, int f_ = -1) : x(x_), y(y_), f(f_) { i = -1, rv = 0; }
 	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
-	bool operator < (const Pos& p) const { return zero(x - p.x) ? sign(p.y - y) > 0 : sign(p.x - x) > 0; }
+	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
 	//bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	//bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	//bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -91,34 +91,6 @@ int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = cross(d1, d2, d3
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = dot(d1, d3, d2); return !ccw(d1, d2, d3) && sign(ret) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { ld ret = dot(d1, d3, d2); return !ccw(d1, d2, d3) && sign(ret) > 0; }
 Pos intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
-bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2) {
-	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
-	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
-	//return f1 && f2;
-	bool f3 = on_seg_strong(s1, s2, d1) ||
-		on_seg_strong(s1, s2, d2) ||
-		on_seg_strong(d1, d2, s1) ||
-		on_seg_strong(d1, d2, s2);
-	return (f1 && f2) || f3;
-}
-int inner_check(const Polygon& H, const Pos& p) {//concave
-	int sz = H.size(), cnt = 0;
-	for (int i = 0; i < sz; i++) {
-		Pos cur = H[i], nxt = H[(i + 1) % sz];
-		if (on_seg_strong(cur, nxt, p)) return 1;
-		if (cur.y == nxt.y) continue;
-		if (nxt.y < cur.y) std::swap(cur, nxt);
-		if (nxt.y <= p.y || cur.y > p.y) continue;
-		cnt += ccw(cur, nxt, p) > 0;
-	}
-	return (cnt & 1) * 2;
-}
-ld area(const Polygon& H) {
-	ld ret = 0;
-	int sz = H.size();
-	for (int i = 0; i < sz; i++) ret += H[i] / H[(i + 1) % sz];
-	return ret;
-}
 struct Seg {
 	Pos a, b;
 	int i, f;
@@ -131,17 +103,7 @@ struct Seg {
 		Pos m = p(ratio);
 		return m.y * d * (a.x - b.x);
 	}
-} seg[LEN], frag[LEN];
-typedef std::vector<Seg> Vseg;
-Vseg H[100];
-Polygon INX[LEN];
-void inx_sort(Polygon& inx, const Pos& a) {
-	std::sort(inx.begin(), inx.end(), [&](const Pos& p, const Pos& q) -> bool {
-		return (a - p).Euc() < (a - q).Euc();
-		});
-	inx.erase(unique(inx.begin(), inx.end()), inx.end());
-	return;
-}
+};
 struct Circle {
 	Pos c;
 	ld r;
@@ -220,6 +182,7 @@ Pos shadow(const Circle& pp, const Circle& rd, const Circle& og) {
 	Pos p2 = (-v).rot(-t) / a * og.r + og.c;
 	inxs = circle_line_intersections(pp, r2, p2, LINE);
 	assert(inxs.size() == 2);
+	hi = inxs[0]; lo = inxs[1];
 	if (hi < lo) std::swap(hi, lo);
 	assert(hi > 0 && lo < 0);
 	Pos x2 = Seg(r2, p2).p(hi);
@@ -228,7 +191,7 @@ Pos shadow(const Circle& pp, const Circle& rd, const Circle& og) {
 	ld t2 = pp.rad(x2);
 	return Pos(t1, t2);
 }
-Circle C[1005];
+Circle C[LEN];
 bool query() {
 	int x, y, r;
 	std::cin >> N >> P >> x >> y >> r;
@@ -238,7 +201,7 @@ bool query() {
 	Polygon vp = { Pos(0, 0) };
 	for (int i = 0; i < N; i++) {
 		Pos sd = shadow(pp, rd, C[i]);
-		std::cout << "shadow:: " << sd << "\n";
+		//std::cout << "shadow:: " << sd << "\n";
 		ld hi = sd.HI, lo = sd.LO;
 		if (lo < hi) vp.push_back(sd);
 		else {
@@ -261,7 +224,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(15);
+	std::cout.precision(4);
 	while (query());
 	return;
 }

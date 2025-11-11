@@ -20,7 +20,7 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 1e3;
+const int LEN = 1e3 + 5;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -46,7 +46,33 @@ ld flip(ld lat) {
 #define STRONG 0
 #define WEAK 1
 
-int N, M, K, T, Q;
+ld C[LEN * LEN * 4]; int vp;
+struct Info {
+	int i;
+	ld c;
+	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
+	bool operator < (const Info& x) const { return c > x.c; }
+};
+std::vector<Info> G[LEN * LEN * 4];
+ld dijkstra(const int& v, const int& g) {
+	std::priority_queue<Info> PQ;
+	for (int i = 0; i < vp; i++) C[i] = INF;
+	PQ.push(Info(v, 0));
+	C[v] = 0;
+	while (PQ.size()) {
+		Info p = PQ.top(); PQ.pop();
+		if (p.c > C[p.i]) continue;
+		for (Info& w : G[p.i]) {
+			ld cost = p.c + w.c;
+			if (C[w.i] > cost) {
+				C[w.i] = cost;
+				PQ.push(Info(w.i, cost));
+			}
+		}
+	}
+	return C[g];
+}
+int N, M, K, T, Q, R;
 struct Pos {
 	ld x, y;
 	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
@@ -195,7 +221,6 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const
 		on_seg_strong(d1, d2, s2);
 	return (f1 && f2) || f3;
 }
-
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -247,7 +272,6 @@ ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
 }
-
 struct Circle {
 	Pos c;
 	int r;
@@ -355,12 +379,35 @@ ld circle_cut(const Circle& c, const Pos& p1, const Pos& p2) {
 		return (r * r * (rad(v1, m1) + rad(m2, v2)) + m1 / m2) * .5;
 	else return (r * r * rad(v1, v2)) * .5;
 }
+Seg S[LEN];
+Vld r[LEN];
+ld A[LEN];
+void test() {
+	M = 0;
+	std::cin >> N >> R;
+	for (int i = 0; i < N; i++) {
+		int m;
+		std::cin >> S[i].s >> S[i].e >> m;
+		if (m > 0) {
+			M += m;
+			r[i].clear();
+			r[i].resize(m);
+			for (int j = 0; j < m; j++) {
+				ld x; std::cin >> x; r[i].push_back(x);
+			}
+		}
+	}
+	std::cin >> Q;
+	for (int k = 0; k < Q; k++) {
+
+	}
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(13);
-
+	std::cin >> T; while (T--) test();
 	return;
 }
 int main() { solve(); return 0; }//boj10732

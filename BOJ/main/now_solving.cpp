@@ -148,13 +148,13 @@ void test() {
 		}
 	}
 	for (int i = 0; i < N; i++) {
-		ld mag = (S[i] - E[i]).mag();
+		ld l = (S[i] - E[i]).mag();
 		std::sort(X[i].begin(), X[i].end());
 		int sz = X[i].size();
 		for (int j = 0; j < sz - 1; j++) {
 			ld d = X[i][j + 1].x - X[i][j].x;
-			G[X[i][j].i].push_back(Info(X[i][j + 1].i, mag * d));
-			G[X[i][j + 1].i].push_back(Info(X[i][j].i, mag * d));
+			G[X[i][j].i].push_back(Info(X[i][j + 1].i, l * d));
+			G[X[i][j + 1].i].push_back(Info(X[i][j].i, l * d));
 		}
 	}
 

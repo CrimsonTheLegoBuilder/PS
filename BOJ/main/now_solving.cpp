@@ -14,7 +14,8 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 1'002'000;
+const int LEN = 1005;
+const int G_LEN = 1'002'000;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
@@ -22,7 +23,7 @@ inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ll sq(const ll& x) { return x * x; }
 inline ld fit(const ld& x, const ld& lo = 0, const ld& hi = 1) { return std::min(hi, std::max(lo, x)); }
 
-ld C[LEN];
+ld C[G_LEN];
 int vp;
 struct Info {
 	int i;
@@ -30,7 +31,7 @@ struct Info {
 	Info(int i_ = 0, ld c_ = 0) : i(i_), c(c_) {}
 	bool operator < (const Info& x) const { return c > x.c; }
 };
-std::vector<Info> G[LEN];
+std::vector<Info> G[G_LEN];
 void dijkstra(const int& v) {
 	std::priority_queue<Info> PQ;
 	for (int i = 0; i < vp; i++) C[i] = INF;
@@ -63,7 +64,7 @@ struct Pos {
 	ll mag() const { return sqrtl(Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-} S[1005], E[1005], qry[1005], FS[105], FE[105]; ld FC[105]; int f;
+} S[LEN], E[LEN], qry[LEN], FS[105], FE[105]; ld FC[105]; int f;
 const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
@@ -112,9 +113,9 @@ struct Event {
 	Event(int i_ = 0, ld x_ = 0, ld c_ = INF) : i(i_), x(x_), c(c_) {}
 	bool operator < (const Event& e) const { return eq(x, e.x) ? i > e.i : x < e.x; }
 };
-std::vector<Event> X[1005], A[1005], D[1005];
-ld ans[1005];
-bool V[1005];
+std::vector<Event> X[LEN];
+ld ans[LEN];
+bool V[LEN];
 void test() {
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < N; i++) X[i].clear();
@@ -170,6 +171,7 @@ void test() {
 			if (inxs.empty()) continue;
 			ld lo = inxs[0], hi = inxs[1], x = FC[m];
 			if (lo <= x && x <= hi) { V[k] = 1; break; }
+			//if (sign(x - lo) >= 0 && sign(hi - x) >= 0) { V[k] = 1; break; }
 		}
 		if (V[k]) { ans[k] = 0; continue; }
 	}
@@ -186,11 +188,12 @@ void test() {
 			if (inxs.empty()) continue;
 			ld lo = inxs[0];
 			if (0 <= lo && lo <= 1) A.push_back(Event(-k, lo));
+			//if (sign(lo - 0) >= 0 && sign(1 - lo) >= 0) A.push_back(Event(-k, lo));
 		}
 		std::sort(A.begin(), A.end());
 		cur = Event(0, 0, INF);
 		sz = A.size();
-		for (int k = 0; k < sz - 1; k++) {
+		for (int k = 0; k < sz; k++) {
 			ld d = (A[k].x - cur.x) * l;
 			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
 			else { if (cur.c + d > A[k].c) cur = A[k]; }
@@ -204,12 +207,13 @@ void test() {
 			if (inxs.empty()) continue;
 			ld hi = inxs[1];
 			if (0 <= hi && hi <= 1) A.push_back(Event(-k, hi));
+			//if (sign(hi - 0) >= 0 && sign(1 - hi) >= 0)  A.push_back(Event(-k, hi));
 		}
 		sz = A.size(); for (int k = 0; k < sz; k++) A[k].x = 1 - A[k].x;
 		std::sort(A.begin(), A.end());
 		cur = Event(0, 0, INF);
 		sz = A.size();
-		for (int k = 0; k < sz - 1; k++) {
+		for (int k = 0; k < sz; k++) {
 			ld d = (A[k].x - cur.x) * l;
 			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
 			else { if (cur.c + d > A[k].c) cur = A[k]; }

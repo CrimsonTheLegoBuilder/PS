@@ -185,7 +185,7 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0];
-			if (0 <= lo && lo <= lo) A.push_back(Event(-k, lo));
+			if (0 <= lo && lo <= 1) A.push_back(Event(-k, lo));
 		}
 		std::sort(A.begin(), A.end());
 		cur = Event(0, 0, INF);

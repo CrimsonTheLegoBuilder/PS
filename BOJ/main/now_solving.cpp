@@ -14,14 +14,15 @@ typedef std::vector<ld> Vld;
 const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
-const int LEN = 1'000'200;
+const int LEN = 1'002'000;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
 inline ll sq(const ll& x) { return x * x; }
 inline ld fit(const ld& x, const ld& lo = 0, const ld& hi = 1) { return std::min(hi, std::max(lo, x)); }
 
-ld C[LEN]; int vp;
+ld C[LEN];
+int vp;
 struct Info {
 	int i;
 	ld c;
@@ -61,7 +62,7 @@ struct Pos {
 	ll mag() const { return sqrtl(Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-} S[1005], E[1005], FS[105], FE[105]; ld FC[105]; int f;
+} S[1005], E[1005], qry[1005], FS[105], FE[105]; ld FC[105]; int f;
 const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
@@ -86,7 +87,7 @@ ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, cons
 	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
 	return -1;
 }
-bool inner_circle_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) < (p - q).Euc(); }
+bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
 Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
@@ -99,28 +100,30 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 	ld det = sqrt(std::max(0ll, J));
 	ld lo = (-b - det) / a;
 	ld hi = (-b + det) / a;
+	if (!circle_inner_check(q, r, s) && !circle_inner_check(q, r, e))
+		if ((lo < 0 && hi < 0) || (lo > 1 && hi > 1)) return {};
 	assert(lo <= hi);
-	return { fit(lo), fit(hi) };
+	return { lo, hi };
 }
 struct Event {
 	ld x, c;
 	int i;
-	Event(int i_ = -1, ld x_ = 0, ld c_ = 0) : i(i_), x(x_), c(c_) {}
-	bool operator < (const Event& e) const { return x < e.x; }
+	Event(int i_ = 0, ld x_ = 0, ld c_ = INF) : i(i_), x(x_), c(c_) {}
+	bool operator < (const Event& e) const { return eq(x, e.x) ? i > e.i : x < e.x; }
 };
 std::vector<Event> X[1005], A[1005], D[1005];
 ld ans[1005];
 bool V[1005];
 void test() {
 	for (int i = 0; i < vp; i++) G[i].clear();
-	for (int i = 0; i < 1005; i++) X[i].clear(), A[i].clear(), D[i].clear();
-	vp = 1; f = 0;
+	for (int i = 0; i < N; i++) X[i].clear();
 	memset(V, sizeof V, 0);
+	vp = 1; f = 0;
 	std::cin >> N >> R;
 	for (int i = 0; i < N; i++) {
-		std::cin >> S[i] >> E[i];
-		int m; std::cin >> m; if (!m) continue;
-		for (int j = 0; j < m; j++) {
+		std::cin >> S[i] >> E[i] >> M;
+		if (!M) continue;
+		for (int j = 0; j < M; j++) {
 			ld x; std::cin >> x;
 			X[i].push_back(Event(vp, x));
 			G[0].push_back(Info(vp, 0));
@@ -152,44 +155,66 @@ void test() {
 			G[X[i][j + 1].i].push_back(Info(X[i][j].i, mag * d));
 		}
 	}
+
 	dijkstra(0);
-	for (int i = 0; i < N; i++) {
-		int sz = X[i].size();
-		for (int j = 0; j < sz; j++) X[i][j].c = C[X[i][j].i];
-	}
+	for (int i = 0; i < N; i++)
+		for (int j = 0; j < X[i].size(); j++)
+			X[i][j].c = C[X[i][j].i];
+
 	std::cin >> Q;
-	for (int k = 0; k < Q; k++) {
-		Pos q; std::cin >> q;
-		bool good = 0;
+	for (int k = 1; k <= Q; k++) {
+		std::cin >> qry[k]; V[k] = 0;
 		for (int m = 0; m < f; m++) {
-			Vld inxs = circle_line_intersections(q, R, FS[m], FE[m]);
+			Vld inxs = circle_line_intersections(qry[k], R, FS[m], FE[m]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0], hi = inxs[1], x = FC[m];
-			if (lo <= x && x <= hi) { good = 1; break; }
+			if (lo <= x && x <= hi) { V[k] = 1; break; }
 		}
-		if (good) { ans[k] = 0; continue; }
-		for (int i = 0; i < N; i++) {
-			Vld inxs = circle_line_intersections(q, R, S[i], E[i]);
-			if (inxs.empty()) continue;
-			ld lo = inxs[0], hi = inxs[1];
-			A[i].push_back(Event(lo, k));
-			D[i].push_back(Event(hi, k));
-			V[i] = 1;
-		}
+		if (V[k]) { ans[k] = 0; continue; }
 	}
 	for (int i = 0; i < N; i++) {
-		if (!V[i]) continue;
-		///???
-		for (const Event& v : X[i]) {
-			A[i].push_back(v);
-			D[i].push_back(v);
-		}
-		Event s = Event(-1, 0, INF), e = Event(-1, 1, INF);
-		A[i].push_back(s); D[i].push_back(e);
-		std::sort(A[i].begin(), A[i].end());
-		std::sort(D[i].rbegin(), D[i].rend());
+		ld l = (S[i] - E[i]).mag();
+		std::vector<Event> A;
+		Event cur;
+		int sz;
 
+		for (const Event& v : X[i]) A.push_back(v);
+		for (int k = 1; k <= Q; k++) {
+			if (V[k]) continue;
+			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
+			if (inxs.empty()) continue;
+			ld lo = inxs[0];
+			if (0 <= lo && lo <= lo) A.push_back(Event(-k, lo));
+		}
+		std::sort(A.begin(), A.end());
+		cur = Event(0, 0, INF);
+		sz = A.size();
+		for (int k = 0; k < sz - 1; k++) {
+			ld d = (A[k].x - cur.x) * l;
+			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
+			else { if (cur.c + d > A[k].c) cur = A[k]; }
+		}
+
+		A.clear();
+		for (const Event& v : X[i]) A.push_back(v);
+		for (int k = 1; k <= Q; k++) {
+			if (V[k]) continue;
+			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
+			if (inxs.empty()) continue;
+			ld hi = inxs[1];
+			if (0 <= hi && hi <= 1) A.push_back(Event(-k, hi));
+		}
+		sz = A.size(); for (int k = 0; k < sz; k++) A[k].x = 1 - A[k].x;
+		std::sort(A.begin(), A.end());
+		cur = Event(0, 0, INF);
+		sz = A.size();
+		for (int k = 0; k < sz - 1; k++) {
+			ld d = (A[k].x - cur.x) * l;
+			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
+			else { if (cur.c + d > A[k].c) cur = A[k]; }
+		}
 	}
+	for (int q = 1; q <= Q; q++) std::cout << ans[q] << "\n";
 	return;
 }
 void solve() {

@@ -224,7 +224,10 @@ void test() {
 			else { if (cur.c + d > A[k].c) cur = A[k]; }
 		}
 	}
-	for (int q = 1; q <= Q; q++) std::cout << ans[q] << "\n";
+	for (int q = 1; q <= Q; q++) {
+		if (ans[q] > 1e16) std::cout << "-1\n";
+		else std::cout << ans[q] << "\n";
+	}
 	return;
 }
 void solve() {

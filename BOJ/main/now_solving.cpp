@@ -152,6 +152,7 @@ void test() {
 			vp++;
 		}
 	}
+	assert(vp < 1e6);
 	for (int i = 0; i < N; i++) {
 		ld l = (S[i] - E[i]).mag();
 		std::sort(X[i].begin(), X[i].end());

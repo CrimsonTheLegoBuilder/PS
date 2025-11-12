@@ -176,10 +176,9 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, FS[m], FE[m]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0], hi = inxs[1], x = FC[m];
-			if (lo <= x && x <= hi) { V[k] = 1; break; }
-			//if (sign(x - lo) >= 0 && sign(hi - x) >= 0) { V[k] = 1; break; }
+			if (lo <= x && x <= hi) { V[k] = 1; ans[k] = 0; break; }
+			//if (sign(x - lo) >= 0 && sign(hi - x) >= 0) { V[k] = 1; ans[k] = 0; break; }
 		}
-		if (V[k]) { ans[k] = 0; continue; }
 	}
 	for (int i = 0; i < N; i++) {
 		ld l = (S[i] - E[i]).mag();

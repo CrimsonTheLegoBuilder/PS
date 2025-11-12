@@ -105,8 +105,8 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 	ll J = b * b - a * c;
 	if (J < 0) return {};
 	ld det = sqrt(std::max(0ll, J));
-	ld lo = (-b - det) / a;
-	ld hi = (-b + det) / a;
+	ld lo = (ld)(-b - det) / a;
+	ld hi = (ld)(-b + det) / a;
 	if (!circle_inner_check(q, r, s) && !circle_inner_check(q, r, e))
 		if ((lo < 0 && hi < 0) || (lo > 1 && hi > 1)) return {};
 	assert(lo <= hi);
@@ -164,14 +164,21 @@ void test() {
 		}
 	}
 
+
 	dijkstra(0);
 	for (int i = 0; i < N; i++)
 		for (int j = 0; j < X[i].size(); j++)
 			X[i][j].c = C[X[i][j].i];
 
+	std::cout << "DEBUG\n";
+	for (int i = 0; i < vp; i++) {
+		std::cout << C[i] << "\n";
+	}
+	std::cout << "DEBUG\n";
+
 	std::cin >> Q;
 	for (int k = 1; k <= Q; k++) {
-		std::cin >> qry[k]; V[k] = 0;
+		std::cin >> qry[k]; V[k] = 0; ans[k] = INF;
 		for (int m = 0; m < f; m++) {
 			Vld inxs = circle_line_intersections(qry[k], R, FS[m], FE[m]);
 			if (inxs.empty()) continue;
@@ -202,6 +209,13 @@ void test() {
 			ld d = (A[k].x - cur.x) * l;
 			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
 			else { if (cur.c + d > A[k].c) cur = A[k]; }
+
+			if (A[k].i < 0) {
+				std::cout << "DEBUG\n";
+				std::cout << "i:: " << -A[k].i << "\n";
+				std::cout << "c:: " << ans[-A[k].i] << "\n";
+				std::cout << "DEBUG\n";
+			}
 		}
 
 		A.clear();
@@ -222,6 +236,13 @@ void test() {
 			ld d = (A[k].x - cur.x) * l;
 			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
 			else { if (cur.c + d > A[k].c) cur = A[k]; }
+
+			if (A[k].i < 0) {
+				std::cout << "DEBUG\n";
+				std::cout << "i:: " << -A[k].i << "\n";
+				std::cout << "c:: " << ans[-A[k].i] << "\n";
+				std::cout << "DEBUG\n";
+			}
 		}
 	}
 	for (int q = 1; q <= Q; q++) {

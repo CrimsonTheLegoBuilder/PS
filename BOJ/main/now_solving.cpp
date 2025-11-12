@@ -61,7 +61,7 @@ struct Pos {
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	ll mag() const { return sqrtl(Euc()); }
+	ld mag() const { return sqrtl(Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 } S[LEN], E[LEN], qry[LEN], FS[105], FE[105]; ld FC[105]; int f;
@@ -124,7 +124,7 @@ bool V[LEN];
 void test() {
 	for (int i = 0; i < vp; i++) G[i].clear();
 	for (int i = 0; i < N; i++) X[i].clear();
-	memset(V, sizeof V, 0);
+	memset(V, 0, sizeof V);
 	vp = 1; f = 0;
 	std::cin >> N >> R;
 	for (int i = 0; i < N; i++) {
@@ -170,11 +170,11 @@ void test() {
 		for (int j = 0; j < X[i].size(); j++)
 			X[i][j].c = C[X[i][j].i];
 
-	std::cout << "DEBUG\n";
-	for (int i = 0; i < vp; i++) {
-		std::cout << C[i] << "\n";
-	}
-	std::cout << "DEBUG\n";
+	//std::cout << "DEBUG\n";
+	//for (int i = 0; i < vp; i++) {
+	//	std::cout << C[i] << "\n";
+	//}
+	//std::cout << "DEBUG\n";
 
 	std::cin >> Q;
 	for (int k = 1; k <= Q; k++) {
@@ -199,6 +199,7 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0];
+			//std::cout << "lo:: " << lo << "\n";
 			if (0 <= lo && lo <= 1) A.push_back(Event(-k, lo));
 			//if (sign(lo - 0) >= 0 && sign(1 - lo) >= 0) A.push_back(Event(-k, lo));
 		}
@@ -207,15 +208,16 @@ void test() {
 		sz = A.size();
 		for (int k = 0; k < sz; k++) {
 			ld d = (A[k].x - cur.x) * l;
+			//std::cout << "d1:: " << d << "\n";
 			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
 			else { if (cur.c + d > A[k].c) cur = A[k]; }
 
-			if (A[k].i < 0) {
-				std::cout << "DEBUG\n";
-				std::cout << "i:: " << -A[k].i << "\n";
-				std::cout << "c:: " << ans[-A[k].i] << "\n";
-				std::cout << "DEBUG\n";
-			}
+			//if (A[k].i < 0) {
+			//	std::cout << "DEBUG\n";
+			//	std::cout << "i:: " << -A[k].i << "\n";
+			//	std::cout << "c:: " << ans[-A[k].i] << "\n";
+			//	std::cout << "DEBUG\n";
+			//}
 		}
 
 		A.clear();
@@ -225,6 +227,7 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
 			ld hi = inxs[1];
+			//std::cout << "hi:: " << hi << "\n";
 			if (0 <= hi && hi <= 1) A.push_back(Event(-k, hi));
 			//if (sign(hi - 0) >= 0 && sign(1 - hi) >= 0)  A.push_back(Event(-k, hi));
 		}
@@ -234,15 +237,16 @@ void test() {
 		sz = A.size();
 		for (int k = 0; k < sz; k++) {
 			ld d = (A[k].x - cur.x) * l;
+			//std::cout << "d2:: " << d << "\n";
 			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
 			else { if (cur.c + d > A[k].c) cur = A[k]; }
 
-			if (A[k].i < 0) {
-				std::cout << "DEBUG\n";
-				std::cout << "i:: " << -A[k].i << "\n";
-				std::cout << "c:: " << ans[-A[k].i] << "\n";
-				std::cout << "DEBUG\n";
-			}
+			//if (A[k].i < 0) {
+			//	std::cout << "DEBUG\n";
+			//	std::cout << "i:: " << -A[k].i << "\n";
+			//	std::cout << "c:: " << ans[-A[k].i] << "\n";
+			//	std::cout << "DEBUG\n";
+			//}
 		}
 	}
 	for (int q = 1; q <= Q; q++) {
@@ -255,7 +259,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(13);
+	std::cout.precision(21);
 	std::cin >> T; while (T--) test();
 	return;
 }

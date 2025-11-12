@@ -15,7 +15,7 @@ const ld INF = 1e17;
 const ld TOL = 1e-7;
 const ld PI = acos(-1);
 const int LEN = 1005;
-const int G_LEN = 500'000;
+const int G_LEN = 5e5;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }

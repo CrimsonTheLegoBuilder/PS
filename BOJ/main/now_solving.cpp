@@ -82,7 +82,11 @@ bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2) {
 }
 ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const bool& f = 0) {
 	ll tq = (q2 - q1) / (p2 - p1);
-	if (tq == 0) return -1;
+	if (tq == 0) {
+		if (q1 == p1 || q2 == p1) return 0;
+		if (q1 == p2 || q2 == p2) return 1;
+		return -1;
+	}
 	ld det = tq;
 	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
 	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;

@@ -90,8 +90,9 @@ ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, cons
 	ld det = tq;
 	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
 	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
+	return a1;
+	//if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
+	//return -1;
 }
 bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
 Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e) {

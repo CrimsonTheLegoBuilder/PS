@@ -104,7 +104,7 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 	ll c = OM.Euc() - sq(r);
 	ll J = b * b - a * c;
 	if (J < 0) return {};
-	ld det = sqrt(std::max(0ll, J));
+	ld det = sqrtl(std::max(0ll, J));
 	ld lo = (ld)(-b - det) / a;
 	ld hi = (ld)(-b + det) / a;
 	if (!circle_inner_check(q, r, s) && !circle_inner_check(q, r, e))

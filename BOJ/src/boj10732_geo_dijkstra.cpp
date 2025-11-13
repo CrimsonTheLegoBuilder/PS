@@ -83,8 +83,7 @@ ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, cons
 		if (q1 == p2 || q2 == p2) return 1;
 		return -1;
 	}
-	ld det = tq;
-	return ((q2 - q1) / (q1 - p1)) / det;
+	return ((q2 - q1) / (q1 - p1)) / (ld)tq;
 }
 inline bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
 Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e) {
@@ -105,8 +104,8 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 }
 struct Event {
 	int i;
-	ld x, c;
-	Event(int i_ = 0, ld x_ = 0, ld c_ = INF) : i(i_), x(x_), c(c_) {}
+	ld x;
+	Event(int i_ = 0, ld x_ = 0) : i(i_), x(x_) {}
 	bool operator < (const Event& e) const { return x < e.x; }
 };
 std::vector<Event> X[V_LEN];
@@ -154,9 +153,6 @@ void test() {
 	}
 
 	dijkstra(0);
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < X[i].size(); j++)
-			X[i][j].c = C[X[i][j].i];
 
 	std::cin >> Q;
 	for (int k = 1; k <= Q; k++) {
@@ -169,45 +165,29 @@ void test() {
 		}
 	}
 	for (int i = 0; i < N; i++) {
-		ld l = (S[i] - E[i]).mag();
+		ld l = (S[i] - E[i]).mag(), cs, ce, d;
 		std::vector<Event> A;
-		Event cur;
-		int sz;
-
+		Event s = Event(0, 0), e = Event(0, 1);
 		for (const Event& v : X[i]) A.push_back(v);
 		for (int k = 1; k <= Q; k++) {
 			if (V[k]) continue;
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
-			ld lo = inxs[0];
+			ld lo = inxs[0], hi = inxs[1];
 			if (-TOL < lo && lo < 1 + TOL) A.push_back(Event(-k, lo));
+			if (-TOL < hi && hi < 1 + TOL) A.push_back(Event(-k, hi));
 		}
 		std::sort(A.begin(), A.end());
-		cur = Event(0, 0, INF);
-		sz = A.size();
-		for (int k = 0; k < sz; k++) {
-			ld d = (A[k].x - cur.x) * l;
-			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
-			else { if (cur.c + d > A[k].c) cur = A[k]; }
-		}
-
-		A.clear();
-		for (const Event& v : X[i]) A.push_back(v);
-		for (int k = 1; k <= Q; k++) {
-			if (V[k]) continue;
-			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
-			if (inxs.empty()) continue;
-			ld hi = inxs[1];
-			if (-TOL < hi && hi < 1 + TOL)  A.push_back(Event(-k, hi));
-		}
-		sz = A.size(); for (int k = 0; k < sz; k++) A[k].x = 1 - A[k].x;
-		std::sort(A.begin(), A.end());
-		cur = Event(0, 0, INF);
-		sz = A.size();
-		for (int k = 0; k < sz; k++) {
-			ld d = (A[k].x - cur.x) * l;
-			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
-			else { if (cur.c + d > A[k].c) cur = A[k]; }
+		int sz = A.size();
+		cs = INF, ce = INF;
+		for (int k = 0, j; k < sz; k++) {
+			j = sz - k - 1;
+			d = (A[k].x - s.x) * l;
+			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cs + d);
+			else { if (cs + d > C[A[k].i]) s = A[k], cs = C[A[k].i]; }
+			d = (e.x - A[j].x) * l;
+			if (A[j].i < 0) ans[-A[j].i] = std::min(ans[-A[j].i], ce + d);
+			else { if (ce + d > C[A[j].i]) e = A[j], ce = C[A[j].i]; }
 		}
 	}
 	for (int k = 1; k <= Q; k++) {

@@ -52,7 +52,6 @@ struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
@@ -84,12 +83,9 @@ ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, cons
 		if (q1 == p2 || q2 == p2) return 1;
 		return -1;
 	}
-	ld det = tq;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	return a1;
+	return ((q2 - q1) / (q1 - p1)) / (ld)tq;
 }
-bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
+inline bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
 Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
@@ -107,10 +103,10 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 	return { lo, hi };
 }
 struct Event {
-	ld x, c;
 	int i;
-	Event(int i_ = 0, ld x_ = 0, ld c_ = INF) : i(i_), x(x_), c(c_) {}
-	bool operator < (const Event& e) const { return eq(x, e.x) ? i > e.i : x < e.x; }
+	ld x;
+	Event(int i_ = 0, ld x_ = 0) : i(i_), x(x_) {}
+	bool operator < (const Event& e) const { return x < e.x; }
 };
 std::vector<Event> X[V_LEN];
 ld ans[V_LEN];
@@ -157,9 +153,6 @@ void test() {
 	}
 
 	dijkstra(0);
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < X[i].size(); j++)
-			X[i][j].c = C[X[i][j].i];
 
 	std::cin >> Q;
 	for (int k = 1; k <= Q; k++) {
@@ -168,49 +161,33 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, FS[m], FE[m]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0], hi = inxs[1], x = FC[m];
-			if (sign(x - lo) >= 0 && sign(hi - x) >= 0) { V[k] = 1; ans[k] = 0; break; }
+			if (lo <= x && x <= hi) { V[k] = 1; ans[k] = 0; break; }
 		}
 	}
 	for (int i = 0; i < N; i++) {
-		ld l = (S[i] - E[i]).mag();
+		ld l = (S[i] - E[i]).mag(), cs, ce, d;
 		std::vector<Event> A;
-		Event cur;
-		int sz;
-
+		Event s = Event(0, 0), e = Event(0, 1);
 		for (const Event& v : X[i]) A.push_back(v);
 		for (int k = 1; k <= Q; k++) {
 			if (V[k]) continue;
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
-			ld lo = inxs[0];
-			if (sign(lo - 0) >= 0 && sign(1 - lo) >= 0) A.push_back(Event(-k, lo));
+			ld lo = inxs[0], hi = inxs[1];
+			if (-TOL < lo && lo < 1 + TOL) A.push_back(Event(-k, lo));
+			if (-TOL < hi && hi < 1 + TOL) A.push_back(Event(-k, hi));
 		}
 		std::sort(A.begin(), A.end());
-		cur = Event(0, 0, INF);
-		sz = A.size();
-		for (int k = 0; k < sz; k++) {
-			ld d = (A[k].x - cur.x) * l;
-			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
-			else { if (cur.c + d > A[k].c) cur = A[k]; }
-		}
-
-		A.clear();
-		for (const Event& v : X[i]) A.push_back(v);
-		for (int k = 1; k <= Q; k++) {
-			if (V[k]) continue;
-			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
-			if (inxs.empty()) continue;
-			ld hi = inxs[1];
-			if (sign(hi - 0) >= 0 && sign(1 - hi) >= 0)  A.push_back(Event(-k, hi));
-		}
-		sz = A.size(); for (int k = 0; k < sz; k++) A[k].x = 1 - A[k].x;
-		std::sort(A.begin(), A.end());
-		cur = Event(0, 0, INF);
-		sz = A.size();
-		for (int k = 0; k < sz; k++) {
-			ld d = (A[k].x - cur.x) * l;
-			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cur.c + d);
-			else { if (cur.c + d > A[k].c) cur = A[k]; }
+		int sz = A.size();
+		cs = INF, ce = INF;
+		for (int k = 0, j; k < sz; k++) {
+			j = sz - k - 1;
+			d = (A[k].x - s.x) * l;
+			if (A[k].i < 0) ans[-A[k].i] = std::min(ans[-A[k].i], cs + d);
+			else { if (cs + d > C[A[k].i]) s = A[k], cs = C[A[k].i]; }
+			d = (e.x - A[j].x) * l;
+			if (A[j].i < 0) ans[-A[j].i] = std::min(ans[-A[j].i], ce + d);
+			else { if (ce + d > C[A[j].i]) e = A[j], ce = C[A[j].i]; }
 		}
 	}
 	for (int k = 1; k <= Q; k++) {
@@ -223,7 +200,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(21);
+	std::cout.precision(7);
 	std::cin >> T; while (T--) test();
 	return;
 }

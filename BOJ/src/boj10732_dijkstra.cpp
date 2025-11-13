@@ -168,7 +168,7 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, FS[m], FE[m]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0], hi = inxs[1], x = FC[m];
-			if (sign(x - lo) >= 0 && sign(hi - x) >= 0) { V[k] = 1; ans[k] = 0; break; }
+			if (lo <= x && x <= hi) { V[k] = 1; ans[k] = 0; break; }
 		}
 	}
 	for (int i = 0; i < N; i++) {
@@ -183,7 +183,7 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
 			ld lo = inxs[0];
-			if (sign(lo - 0) >= 0 && sign(1 - lo) >= 0) A.push_back(Event(-k, lo));
+			if (-TOL < lo && lo < 1 + TOL) A.push_back(Event(-k, lo));
 		}
 		std::sort(A.begin(), A.end());
 		cur = Event(0, 0, INF);
@@ -201,7 +201,7 @@ void test() {
 			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
 			if (inxs.empty()) continue;
 			ld hi = inxs[1];
-			if (sign(hi - 0) >= 0 && sign(1 - hi) >= 0)  A.push_back(Event(-k, hi));
+			if (-TOL < hi && hi < 1 + TOL)  A.push_back(Event(-k, hi));
 		}
 		sz = A.size(); for (int k = 0; k < sz; k++) A[k].x = 1 - A[k].x;
 		std::sort(A.begin(), A.end());

@@ -52,7 +52,6 @@ struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
@@ -85,11 +84,9 @@ ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, cons
 		return -1;
 	}
 	ld det = tq;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	return a1;
+	return ((q2 - q1) / (q1 - p1)) / det;
 }
-bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
+inline bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
 Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
@@ -107,10 +104,10 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 	return { lo, hi };
 }
 struct Event {
-	ld x, c;
 	int i;
+	ld x, c;
 	Event(int i_ = 0, ld x_ = 0, ld c_ = INF) : i(i_), x(x_), c(c_) {}
-	bool operator < (const Event& e) const { return eq(x, e.x) ? i > e.i : x < e.x; }
+	bool operator < (const Event& e) const { return x < e.x; }
 };
 std::vector<Event> X[V_LEN];
 ld ans[V_LEN];
@@ -223,7 +220,7 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(21);
+	std::cout.precision(7);
 	std::cin >> T; while (T--) test();
 	return;
 }

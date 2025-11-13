@@ -48,6 +48,7 @@ void dijkstra(const int& v) {
 	return;
 }
 int T, N, R, M, Q;
+ld L[V_LEN], lo, hi;
 struct Pos {
 	int x, y;
 	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
@@ -86,7 +87,7 @@ ld intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, cons
 	return ((q2 - q1) / (q1 - p1)) / (ld)tq;
 }
 inline bool circle_inner_check(const Pos& q, const ll& r, const Pos& p) { return sq(r) >= (p - q).Euc(); }
-Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e) {
+bool circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos& e, ld& lo, ld& hi) {
 	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
 	Pos vec = e - s;
 	Pos OM = s - q;
@@ -94,13 +95,13 @@ Vld circle_line_intersections(const Pos& q, const ll& r, const Pos& s, const Pos
 	ll b = vec * OM;
 	ll c = OM.Euc() - sq(r);
 	ll J = b * b - a * c;
-	if (J < 0) return {};
+	if (J < 0) return 0;
 	ld det = sqrt(J);
-	ld lo = (-b - det) / a;
-	ld hi = (-b + det) / a;
+	lo = (-b - det) / a;
+	hi = (-b + det) / a;
 	if (!circle_inner_check(q, r, s) && !circle_inner_check(q, r, e))
-		if ((lo < 0 && hi < 0) || (lo > 1 && hi > 1)) return {};
-	return { lo, hi };
+		if ((lo < 0 && hi < 0) || (lo > 1 && hi > 1)) return 0;
+	return 1;
 }
 struct Event {
 	int i;
@@ -119,6 +120,7 @@ void test() {
 	std::cin >> N >> R;
 	for (int i = 0; i < N; i++) {
 		std::cin >> S[i] >> E[i] >> M;
+		L[i] = (S[i] - E[i]).mag();
 		if (!M) continue;
 		for (int j = 0; j < M; j++) {
 			ld x; std::cin >> x;
@@ -158,22 +160,20 @@ void test() {
 	for (int k = 1; k <= Q; k++) {
 		std::cin >> qry[k]; V[k] = 0; ans[k] = INF;
 		for (int m = 0; m < f; m++) {
-			Vld inxs = circle_line_intersections(qry[k], R, FS[m], FE[m]);
-			if (inxs.empty()) continue;
-			ld lo = inxs[0], hi = inxs[1], x = FC[m];
+			if (!circle_line_intersections(qry[k], R, FS[m], FE[m], lo, hi)) continue;
+			ld x = FC[m];
 			if (lo <= x && x <= hi) { V[k] = 1; ans[k] = 0; break; }
 		}
 	}
+	std::vector<Event> A; A.reserve(V_LEN << 1);
 	for (int i = 0; i < N; i++) {
-		ld l = (S[i] - E[i]).mag(), cs, ce, d;
-		std::vector<Event> A;
+		ld & l = L[i], cs, ce, d;
 		Event s = Event(0, 0), e = Event(0, 1);
+		A.clear();
 		for (const Event& v : X[i]) A.push_back(v);
 		for (int k = 1; k <= Q; k++) {
 			if (V[k]) continue;
-			Vld inxs = circle_line_intersections(qry[k], R, S[i], E[i]);
-			if (inxs.empty()) continue;
-			ld lo = inxs[0], hi = inxs[1];
+			if (!circle_line_intersections(qry[k], R, S[i], E[i], lo, hi)) continue;
 			if (-TOL < lo && lo < 1 + TOL) A.push_back(Event(-k, lo));
 			if (-TOL < hi && hi < 1 + TOL) A.push_back(Event(-k, hi));
 		}

@@ -18,117 +18,19 @@ inline ll sq(const ll& x) { return x * x; }
 int N, M, K, T, Q, C, a, b;
 ll W, H;
 ld l, v, V, G;
-int A(int a) {
-	if (a == 0) return 0;
-	else if (a == 1) return 500;
-	else if (a <= 3) return 300;
-	else if (a <= 6) return 200;
-	else if (a <= 10) return 50;
-	else if (a <= 15) return 30;
-	else if (a <= 21) return 10;
-	return 0;
-}
-int B(int b) {
-	if (b == 0) return 0;
-	else if (b == 1) return 512;
-	else if (b <= 3) return 256;
-	else if (b <= 7) return 128;
-	else if (b <= 15) return 64;
-	else if (b <= 31) return 32;
-	return 0;
-}
-const ll LINF = 1e18;
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(1);
-	std::cout << LINF << "\n";
+	std::cin >> W >> H;
+	W--; H--;
+	if (W != H) std::cout << sq(std::min(W, H)) << "\n";
+	else std::cout << sq(W) - (W - 1) * 2 << "\n";
 	return;
 }
 int main() { solve(); return 0; }
 //boj 27712 10239 22635 29691 31392 16068
-
-/*
-
-1
-8
-2 2
--2 -2
-2 -2
--2 2
-3 0
--3 0
-0 3
-0 -3
-
-1
-10
--2 -4
-5 2
-7 7
-10 -2
-9 -5
--5 10
-1 -5
-4 -9
-5 1
-7 -7
-
-1
-4
-4 5
--2 4
-1 4
--5 -2
-
-1
-5
-1 1
-2 4
-1 4
-0 4
--1 1
-
-3
-4
-0 3
-1 3
-3 1
-3 0
-4
--4 0
-5 3
-0 -4
--1 0
-5
-4 4
-5 0
-3 3
-3 2
--4 2
-5
-1 1
-2 4
-1 4
-0 4
--1 1
-
-2
-4
--1 -1
-1 1
-1 -1
--1 1
-5
--1 -1
-1 1
-1 -1
--1 1
-0 2
-
-
-*/
 
 #define BOJ
 #ifdef BOJ

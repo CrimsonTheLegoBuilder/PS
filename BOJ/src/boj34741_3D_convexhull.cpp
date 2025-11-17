@@ -264,13 +264,7 @@ void solve() {
 		//assert(eq(rad(n, P[f.v[1]]), rad(n, P[f.v[2]])));
 		//assert(eq(rad(n, P[f.v[2]]), rad(n, P[f.v[0]])));
 		ld t = rad(n, P[f.v[0]]);
-		bool q = 1;
-		for (int i = 0; i < sz; i++) {
-			if (i == f.v[0] || i == f.v[1] || i == f.v[2]) continue;
-			ld t1 = rad(n, P[i]);
-			if (sign(t - t1) > 0) { q = 0; break; }
-		}
-		if (q) { r = std::max(r, t); }
+		r = std::max(r, t);
 	}
 	std::cout << r * 180 / PI << "\n";
 	return;

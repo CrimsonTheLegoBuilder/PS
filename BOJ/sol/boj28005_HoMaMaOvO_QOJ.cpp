@@ -809,7 +809,8 @@ void slv(){
 		int now=-inf;
 		for(auto[x,y]:ans)chmax(now,x);
 		mx-=now;
-		for(auto&[x,y]:ans)x+=mx;
+		for(auto&[x,y]:ans)x+=mx;//좌표 이동
+		//x-y 교환
 		flip(ps);
 		flip(ans);
 	}

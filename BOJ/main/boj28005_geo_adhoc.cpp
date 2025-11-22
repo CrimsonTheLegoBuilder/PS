@@ -291,7 +291,7 @@ public:
 	}
 } sp;
 int D[LEN << 2], h[LEN << 2];
-Vint G[LEN << 2]; int vp;
+Vint G[LEN << 2]; int vp = 0;
 int bfs(int s = 0) {
 	std::queue<int> Q;
 	Vbool V(vp, 0);
@@ -353,6 +353,7 @@ void solve() {
 		cur += C[i];
 		while (i < N - 1 && C[i] / C[i + 1] == 0) {
 			cur += C[i + 1];
+			i++;
 		}
 		F.push_back(cur);
 	}

@@ -136,7 +136,7 @@ typedef std::vector<Seg> Segs;
 struct Trep {
 	Seg l, r;
 	int b, u;
-	Trep(Seg l_, Seg r_, int b_ = -1, int u_ = -1) : l(l_), r(r_), b(b_), u(u_) {}
+	Trep(Seg l_ = Seg(), Seg r_ = Seg(), int b_ = -1, int u_ = -1) : l(l_), r(r_), b(b_), u(u_) {}
 } room[LEN << 2];
 class SplayTree {
 	struct Node {
@@ -274,6 +274,11 @@ public:
 		if (c) splay(c);
 		return c;
 	}
+	bool find_left(const Pos& q, Seg& s) {
+		Node* c = find_left(q);
+		if (c) { s = c->key; return 1; }
+		return 0;
+	}
 	Node* find_right(const Pos& q) {
 		if (!root) return nullptr;
 		Node* p = root;
@@ -290,6 +295,11 @@ public:
 		}
 		if (c) splay(c);
 		return c;
+	}
+	bool find_right(const Pos& q, Seg& s) {
+		Node* c = find_right(q);
+		if (c) { s = c->key; return 1; }
+		return 0;
 	}
 } sp;
 int D[LEN << 2], h[LEN << 2];
@@ -315,24 +325,34 @@ int bfs(int s = 0) {
 ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	for (int i = 0; i < vp; i++) G[i].clear();
 	Polygon P = { H[s] }, E;
-	for (int i = e; i != s; i = (i + 1) % N) P.push_back(P[i]);
+	for (int i = e; i != s; i = (i - 1 + N) % N) P.push_back(H[i]);
 	int sz = P.size();
 	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
 	std::sort(E.begin(), E.end());
-	for (int i = 0; i < sz; i++) {
-		//Seg? Node?
-		//해당 점의 왼쪽 변 찾기
-		auto l = sp.find_left(E[i]);
-		Segs B, U;
-		for (int j = i; j < N; j++) {
-			//막혀있는지 판단
+	for (int i = 0, j, i0, i1, i2, i3; i < sz; i++) {
+		Seg l, r;
+		i0 = (i - 1 + sz) % sz; i1 = i; i2 = (i + 1) % sz; i3 = (i + 2) % sz;
+		if (!sp.find_left(E[i], l) || !l.rvs) {//무조건 이벤트 삽입의 경우
+			l = Seg(P[i0], P[i1], i0, vp);
+			if (P[i1].y == P[i2].y) r = Seg(P[i2], P[i3], i2, vp);
+			else r = Seg(P[i1], P[i2], i1, vp);
+			sp.insert(l); sp.insert(r);
+			vp++;
+			continue;
+		}
+		Segs B = { l }, U = { l };
+
+		for (j = i; j < N; j++) {
+			const Pos& p = P[j];
+			sp.find_right(p, r);
+			//y값이 같은 공선점들을 따라가며 한 번에 이벤트를 처리
 			//오른쪽벽 찾기
-			//아래쪽 변을 찾으면 B에 넣기
+			//아래쪽 변을 찾으면 B에 넣기 -> 이 변들은 이미 sp에 들어있음
 			//위쪽 변을 찾으면 U에 넣기
 			//막혀있다면 break;
 		}
-		//아래쪽 변과 위쪽 변은 순서대로 정렬되어있는 형태이며, 아래쪽 변에는 현재 사다리꼴 방의 번호를 저장
-		//위쪽 방은 현재 가장 번호가 큰 방 이후의 방 번호를 부여, 각 왼쪽 벽에 방 번호를 부여 (seg 객체를 사용)
+		//아래쪽 변들과 위쪽 변들은 순서대로 정렬되어있는 상황이며, 아래쪽 변에는 그 변이 이루고 있는 사다리꼴의 방 번호가 있음
+		//위쪽 방은 현재 가장 번호가 큰 방 이후의 방 번호를 왼쪽부터 부여, 각 왼쪽 벽에 방 번호를 부여 (seg 객체를 사용)
 		//가장 왼쪽 변은 -1, 가장 오른쪽 변은 INF, 나머지 공선점들은 어차피 모든 점이 정수 좌표이므로 각 방의 시작과 끝점을 정수 이벤트로 정렬 후
 		//각각의 엇갈린 이벤트(방)들을 그래프로 연결
 		//아래쪽 변들은 전부 sp에서 제거

@@ -112,9 +112,9 @@ Polygon monotone_chain(Polygon C) {
 }
 struct Seg {
 	Pos s, e;
-	int d, i, rvs;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int d_ = 0, int i_ = -1, int rvs_ = 0) :
-		s(s_), e(e_), d(d_), i(i_), rvs(rvs_) {
+	int i, wi, rvs;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1, int wi_ = -1, int rvs_ = 0) :
+		s(s_), e(e_), i(i_), wi(wi_), rvs(rvs_) {
 		if (s.y > e.y) {
 			std::swap(s, e);
 			rvs = 1;
@@ -123,7 +123,10 @@ struct Seg {
 	bool operator<(const Seg& o) const {
 		if (s == o.s) return e.x < o.e.x;
 		if (e == o.e) return s.x < o.s.x;
-		return ccw(s, e, o.s);
+		int tq1 = ccw(o.s, o.e, s);
+		int tq2 = ccw(o.s, o.e, e);
+		if (tq1 * tq2 >= 0) return tq1 ? tq1 > 0 : tq2 > 0;
+		return ccw(s, e, o.s) < 0;
 	}
 	bool operator==(const Seg& o) const {return s == o.s && e == o.e; }
 } seg[LEN];
@@ -251,6 +254,40 @@ public:
 		Node* p = x->r;
 		while (p->l) p = p->l;
 		return p;
+	}
+	Node* find_left(const Pos& q) {
+		if (!root) return nullptr;
+		Node* p = root;
+		Node* c = nullptr;
+		while (p) {
+			int d = ccw(p->key.s, p->key.e, q);
+			if (d < 0) {
+				c = p;
+				p = p->r;
+			}
+			else {
+				p = p->l;
+			}
+		}
+		if (c) splay(c);
+		return c;
+	}
+	Node* find_rigtt(const Pos& q) {
+		if (!root) return nullptr;
+		Node* p = root;
+		Node* c = nullptr;
+		while (p) {
+			int d = ccw(p->key.s, p->key.e, q);
+			if (d > 0) {
+				c = p;
+				p = p->l;
+			}
+			else {
+				p = p->r;
+			}
+		}
+		if (c) splay(c);
+		return c;
 	}
 } sp;
 int D[LEN << 2], h[LEN << 2];

@@ -341,8 +341,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			continue;
 		}
 		Segs B = { l }, U = { l };
-
-		for (j = i; j < N; j++) {
+		for (j = i; j < sz; j++) {
 			const Pos& p = P[j];
 			sp.find_right(p, r);
 			//y값이 같은 공선점들을 따라가며 한 번에 이벤트를 처리

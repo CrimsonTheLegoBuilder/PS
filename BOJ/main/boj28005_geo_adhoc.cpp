@@ -6,6 +6,8 @@
 #include <cassert>
 #include <vector>
 #include <queue>
+#define right x
+#define left y
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -272,7 +274,7 @@ public:
 		if (c) splay(c);
 		return c;
 	}
-	Node* find_rigtt(const Pos& q) {
+	Node* find_right(const Pos& q) {
 		if (!root) return nullptr;
 		Node* p = root;
 		Node* c = nullptr;
@@ -320,6 +322,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	for (int i = 0; i < sz; i++) {
 		//Seg? Node?
 		//해당 점의 왼쪽 변 찾기
+		auto l = sp.find_left(E[i]);
 		Segs B, U;
 		for (int j = i; j < N; j++) {
 			//막혀있는지 판단
@@ -335,7 +338,6 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		//아래쪽 변들은 전부 sp에서 제거
 		//위쪽 변들은 sp에 넣기
 	}
-	//그래프 완성 후 u region 세서 반환
 	return bfs(0);
 }
 void solve() {

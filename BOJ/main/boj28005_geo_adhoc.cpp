@@ -5,11 +5,13 @@
 #include <cstring>
 #include <cassert>
 #include <vector>
+#include <queue>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
+typedef std::vector<bool> Vbool;
 typedef std::vector<ld> Vld;
 const ll INF = 1e17;
 const int LEN = 1e5 + 1;
@@ -29,6 +31,9 @@ inline ll sq(const ll& x) { return x * x; }
 
 #define STRONG 0
 #define WEAK 1
+
+#define UP 1
+#define DOWN 2
 
 int N, M, T, Q;
 struct Pos {
@@ -107,9 +112,9 @@ Polygon monotone_chain(Polygon C) {
 }
 struct Seg {
 	Pos s, e;
-	int i, rvs;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1, int rvs_ = 0) :
-		s(s_), e(e_), i(i_), rvs(rvs_) {
+	int d, i, rvs;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int d_ = 0, int i_ = -1, int rvs_ = 0) :
+		s(s_), e(e_), d(d_), i(i_), rvs(rvs_) {
 		if (s.y > e.y) {
 			std::swap(s, e);
 			rvs = 1;
@@ -248,8 +253,33 @@ public:
 		return p;
 	}
 } sp;
-ll count(const Polygon& P) {
+int D[LEN << 2], h[LEN << 2];
+Vint G[LEN << 2]; int vp;
+int bfs(int s = 0) {
+	std::queue<int> Q;
+	Vbool V(vp, 0);
+	Q.push(0);
+	int c = 0;
+	V[0] = 1;
+	while (Q.size()) {
+		int p = Q.back(); Q.pop();
+		for (const int& v : G[p]) {
+			if (!V[v]) {
+				if (D[v] == DOWN) c += h[v];
+				Q.push(v);
+				V[v] = 1;
+			}
+		}
+	}
+	return c;
+}
+ll count(const Polygon& H, const int& s, const int& e, const int& n) {
+	for (int i = 0; i < vp; i++) G[i].clear();
+	Polygon P = { H[s] }, E;
+	for (int i = e; i != s; i = (i + 1) % N) P.push_back(P[i]);
 	int sz = P.size();
+	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
+	std::sort(E.begin(), E.end());
 	for (int i = 0; i < sz; i++) {
 		//Seg? Node?
 		//해당 점의 왼쪽 변 찾기
@@ -269,7 +299,7 @@ ll count(const Polygon& P) {
 		//위쪽 변들은 sp에 넣기
 	}
 	//그래프 완성 후 u region 세서 반환
-	return 0;
+	return bfs(0);
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -290,19 +320,21 @@ void solve() {
 		F.push_back(cur);
 	}
 	for (int _ = 0; _ < 2; _++) {
-		int t = -INF;
-		for (int i = 0; i < N; i++) P[i].i = i, t = std::max(t, P[i].y);
+		int Y = -1e9, my = -1e9, diff;
+		for (int i = 0; i < N; i++) P[i].i = i, Y = std::max(Y, P[i].y), my = std::max(my, F[i].y);
 		Polygon H = monotone_chain(P);
-		int sz = H.size(), UG = 0;
+		int sz = H.size(), U = 0;
 		for (int i = 0; i < sz; i++) {
 			if ((H[i].i + 1) % N != H[(i + 1) % sz].i) {
 				int s = H[i].i, e = H[(i + 1) % sz].i;
-				//오목한 다각형 획득 후 스위핑
+				U += count(H, s, e, N);
 			}
 		}
-
-		for (Pos& p : P) p.y += UG/* ??? */, p = ~p;
+		diff = (Y + U) - my;
+		for (Pos& p : P) p = ~p;
+		for (Pos& f : F) f.y += diff, f = ~f;
 	}
+	for (const Pos& f : F) std::cout << f << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj28005

@@ -15,7 +15,7 @@ typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<bool> Vbool;
 typedef std::vector<ld> Vld;
-const ll INF = 1e17;
+const ll INF = 1e9;
 const int LEN = 1e5 + 1;
 const ld TOL = 1e-7;
 inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
@@ -64,6 +64,7 @@ struct Pos {
 const Pos INVAL = Pos(-1, -1);
 Pos ep;//point on event line
 typedef std::vector<Pos> Polygon;
+bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 bool cmpt(const Pos& u, const Pos& v) {
 	bool f0 = O < u;
 	bool f1 = O < v;
@@ -122,7 +123,7 @@ struct Seg {
 			rvs = 1;
 		}
 	}
-	bool operator<(const Seg& o) const {
+	bool operator < (const Seg& o) const {
 		if (s == o.s) return e.x < o.e.x;
 		if (e == o.e) return s.x < o.s.x;
 		int tq1 = ccw(o.s, o.e, s);
@@ -133,6 +134,7 @@ struct Seg {
 	bool operator==(const Seg& o) const {return s == o.s && e == o.e; }
 } seg[LEN];
 typedef std::vector<Seg> Segs;
+bool on_seg_strong(const Seg& se, const Pos& q) { return !ccw(se.s, se.e, q) && dot(se.s, q, se.e) >= 0; }
 struct Trep {
 	Seg l, r;
 	int b, u;
@@ -143,8 +145,8 @@ class SplayTree {
 		Node* l;
 		Node* r;
 		Node* p;
-		Seg key;
-		Node(Seg s) : l(0), r(0), p(0) { key = s; }
+		Seg val;
+		Node(Seg s) : l(0), r(0), p(0) { val = s; }
 		~Node() { if (l) delete l; if (r) delete r; }
 	} *root;
 	void rotate(Node* x) {
@@ -179,8 +181,8 @@ class SplayTree {
 		if (!root) return 0;
 		Node* p = root;
 		while (1) {
-			if (p->key == s/* eq */) break;
-			if (p->key < s/* cmp */) {
+			if (p->val == s/* eq */) break;
+			if (p->val < s/* cmp */) {
 				if (!p->r) {
 					break;
 				}
@@ -197,9 +199,19 @@ class SplayTree {
 		return p;
 	}
 
+private:
+	void _delete_recursive(Node* node) {
+		if (!node) return;
+		_delete_recursive(node->l);
+		_delete_recursive(node->r);
+		delete node;
+	}
+
 public:
 	SplayTree() : root(0) {}
 	~SplayTree() { if (root) delete root; }
+	void clear() { if (root) { _delete_recursive(root); root = nullptr; } }
+	bool empty() const { return root == nullptr; }
 	void insert(Seg s) {
 		if (!root) {
 			root = new Node(s);
@@ -208,7 +220,7 @@ public:
 		Node* p = root;
 		Node** pp;
 		while (1) {
-			if (p->key < s/* cmp */) {
+			if (p->val < s/* cmp */) {
 				if (!p->r) {
 					pp = &p->r;
 					break;
@@ -245,6 +257,23 @@ public:
 		p->l = p->r = 0;
 		delete p;
 	}
+	int erase(Seg i) {
+		if (!find(i)) return 0;
+		Node* p = root;
+		if (p->l && p->r) {
+			root = p->l; root->p = 0;
+			Node* l = root;
+			while (l->r) l = l->r;
+			l->r = p->r;
+			p->r->p = l;
+		}
+		else if (p->l) root = p->l, root->p = 0;
+		else if (p->r) root = p->r, root->p = 0;
+		else root = 0;
+		p->l = p->r = 0;
+		delete p;
+		return 1;
+	}
 	Node* get_prev(Node* x) {
 		if (!x || !x->l) return nullptr;
 		Node* p = x->l;
@@ -262,7 +291,7 @@ public:
 		Node* p = root;
 		Node* c = nullptr;
 		while (p) {
-			int d = ccw(p->key.s, p->key.e, q);
+			int d = ccw(p->val.s, p->val.e, q);
 			if (d < 0) {
 				c = p;
 				p = p->r;
@@ -276,7 +305,7 @@ public:
 	}
 	bool find_left(const Pos& q, Seg& s) {
 		Node* c = find_left(q);
-		if (c) { s = c->key; return 1; }
+		if (c) { s = c->val; return 1; }
 		return 0;
 	}
 	Node* find_right(const Pos& q) {
@@ -284,7 +313,7 @@ public:
 		Node* p = root;
 		Node* c = nullptr;
 		while (p) {
-			int d = ccw(p->key.s, p->key.e, q);
+			int d = ccw(p->val.s, p->val.e, q);
 			if (d > 0) {
 				c = p;
 				p = p->l;
@@ -298,7 +327,7 @@ public:
 	}
 	bool find_right(const Pos& q, Seg& s) {
 		Node* c = find_right(q);
-		if (c) { s = c->key; return 1; }
+		if (c) { s = c->val; return 1; }
 		return 0;
 	}
 } sp;
@@ -322,40 +351,110 @@ int bfs(int s = 0) {
 	}
 	return c;
 }
+bool block(const Polygon& P, const int& i, const int& sz) {
+	int i0 = (i - 2 + sz) % sz, i1 = (i - 1 + sz) % sz, i2 = i, i3 = (i + 1) % sz;
+	if (P[i1].y < P[i2].y && P[i2].y < P[i3].y) return 1;
+	if (P[i1].y == P[i2].y && P[i0].y < P[i1].y && P[i2].y < P[i3].y) return 1;
+	return 0;
+}
+struct Proj {
+	int s, e, i;
+	Proj(int s_ = 0, int e_ = 0, int i_ = -1) : s(s_), e(e_), i(i_) {}
+};
 ll count(const Polygon& H, const int& s, const int& e, const int& n) {
+	sp.clear();
 	for (int i = 0; i < vp; i++) G[i].clear();
+	vp = 0;
 	Polygon P = { H[s] }, E;
 	for (int i = e; i != s; i = (i - 1 + N) % N) P.push_back(H[i]);
 	int sz = P.size();
 	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
-	std::sort(E.begin(), E.end());
-	for (int i = 0, j, i0, i1, i2, i3; i < sz; i++) {
+	for (int i = 0; i < sz; i++) seg[i] = Seg(P[i], P[(i + 1) % sz], i);
+	std::sort(E.begin(), E.end(), cmpy);
+	for (int i = 0, j, i0, i1, i2, i3, i4, y; i < sz; i++) {
 		Seg l, r;
-		i0 = (i - 1 + sz) % sz; i1 = i; i2 = (i + 1) % sz; i3 = (i + 2) % sz;
-		if (!sp.find_left(E[i], l) || !l.rvs) {//무조건 이벤트 삽입의 경우
-			l = Seg(P[i0], P[i1], i0, vp);
-			if (P[i1].y == P[i2].y) r = Seg(P[i2], P[i3], i2, vp);
-			else r = Seg(P[i1], P[i2], i1, vp);
+		Pos cur = E[i];
+		y = cur.y;
+		i2 = cur.i;
+		i0 = (i2 - 2 + sz) % sz; i1 = (i2 - 1 + sz) % sz; i3 = (i2 + 1) % sz; i4 = (i2 + 2) % sz;
+		bool fl = sp.find_left(E[i], l);
+		if (!l.rvs) fl = 0;
+		if (sp.empty() ||
+			(P[i1].y > y && P[i3].y > y && ccw(P[i1], P[i2], P[i3]) > 0) || 
+			(P[i1].y == P[i2].y && P[i0].y > y && P[i3].y > y && ccw(P[i1], P[i2], P[i3]) > 0)
+			) {
+			l = Seg(P[i1], P[i2], i1, vp); seg[i1].wi = vp;
+			if (P[i2].y == P[i3].y) r = Seg(P[i3], P[i4], i3, vp), seg[i3].wi = vp, i++;
+			else r = Seg(P[i2], P[i3], i2, vp), seg[i2].wi = vp;
 			sp.insert(l); sp.insert(r);
 			vp++;
 			continue;
 		}
-		Segs B = { l }, U = { l };
-		for (j = i; j < sz; j++) {
-			const Pos& p = P[j];
-			sp.find_right(p, r);
-			//y값이 같은 공선점들을 따라가며 한 번에 이벤트를 처리
-			//오른쪽벽 찾기
-			//아래쪽 변을 찾으면 B에 넣기 -> 이 변들은 이미 sp에 들어있음
-			//위쪽 변을 찾으면 U에 넣기
-			//막혀있다면 break;
+		if ((P[i1].y < y && P[i3].y < y && ccw(P[i1], P[i2], P[i3]) > 0) ||
+			(P[i1].y == P[i2].y && P[i0].y < y && P[i3].y < y && ccw(P[i1], P[i2], P[i3]) > 0)
+			) {//방 뚜껑 닫기
+			l = Seg(P[i2], P[i3]);
+			if (P[i1].y == P[i2].y) r = Seg(P[i0], P[i1]), i++;
+			else r = Seg(P[i1], P[i2]);
+			sp.erase(l); sp.erase(r);
+			continue;
 		}
-		//아래쪽 변들과 위쪽 변들은 순서대로 정렬되어있는 상황이며, 아래쪽 변에는 그 변이 이루고 있는 사다리꼴의 방 번호가 있음
-		//위쪽 방은 현재 가장 번호가 큰 방 이후의 방 번호를 왼쪽부터 부여, 각 왼쪽 벽에 방 번호를 부여 (seg 객체를 사용)
-		//가장 왼쪽 변은 -1, 가장 오른쪽 변은 INF, 나머지 공선점들은 어차피 모든 점이 정수 좌표이므로 각 방의 시작과 끝점을 정수 이벤트로 정렬 후
-		//각각의 엇갈린 이벤트(방)들을 그래프로 연결
-		//아래쪽 변들은 전부 sp에서 제거
-		//위쪽 변들은 sp에 넣기
+		Segs B = {}, U = {};
+		if (fl && l.s.y < y && y < l.e.y) { B.push_back(l), U.push_back(l); }
+		for (j = i; j < sz; j++) {
+			if (E[j].y != y) break;
+			cur = E[j];
+			int x1 = cur.i, x0 = (x1 - 1 + sz) % sz, x2 = (x1 + 1) % sz;
+			bool blk = 0;
+			if (r.s.y < y && y < r.e.y) {
+				if (ccw(r.s, r.e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
+				sp.find_right(cur, r);
+			}
+			else {
+				blk = block(P, cur.i, sz);
+				sp.find_right(cur, r);
+			}
+			i = j;
+			int s0 = sign(P[x0].y - P[x1].y), s1 = sign(P[x2].y - P[x1].y);
+			if (s0 > 0 && s1 > 0) U.push_back(seg[x1]), U.push_back(seg[x0]);
+			else if (s0 < 0 && s1 < 0) B.push_back(seg[x0]), B.push_back(seg[x1]);
+			else {
+				if (s0 > 0) U.push_back(seg[x0]);
+				else if (s0 < 0) B.push_back(seg[x0]);
+				if (s1 > 0) U.push_back(seg[x1]);
+				else if (s1 < 0) B.push_back(seg[x1]);
+			}
+			if (blk) break;
+		}
+		int szu = U.size(), szb = B.size();
+		assert(szu % 2 == 0);
+		assert(szb % 2 == 0);
+		std::vector<Proj> PU, PB;
+		for (int j = 0; j < szb; j += 2) PB.push_back(Proj(B[j].e.x, B[j + 1].e.x, B[i].wi));
+		for (int j = 0, ni = vp; j < szu; j += 2) PU.push_back(Proj(B[j].e.x, B[j + 1].e.x, B[i].wi)), ni++;
+		
+		if (PU[0].s == PB[0].s) PU[0].s = PB[0].s = -INF;
+		if (PU.back().e == PB.back().e) PU.back().e = PB.back().e = INF;
+
+		int idx_u = 0, idx_b = 0;
+		while (idx_u < PU.size() && idx_b < PB.size()) {
+			Proj& u = PU[idx_u];
+			Proj& b = PB[idx_b];
+			if (std::max(u.s, b.s) < std::min(u.e, b.e)) {
+				G[b.i].push_back(u.i);
+				G[u.i].push_back(b.i);
+			}
+			if (u.e < b.e) idx_u++;
+			else idx_b++;
+		}
+
+		for (const Seg& se : B) sp.erase(se);
+		for (int j = 0; j < szu; j += 2) {
+			seg[B[i].i].wi = vp;
+			seg[B[i + 1].i].wi = vp;
+			sp.insert(seg[B[i].i]);
+			sp.insert(seg[B[i + 1].i]);
+		}
 	}
 	return bfs(0);
 }
@@ -378,6 +477,7 @@ void solve() {
 		}
 		F.push_back(cur);
 	}
+	F.pop_back();
 	for (int _ = 0; _ < 2; _++) {
 		int Y = -1e9, my = -1e9, diff;
 		for (int i = 0; i < N; i++) P[i].i = i, Y = std::max(Y, P[i].y), my = std::max(my, F[i].y);

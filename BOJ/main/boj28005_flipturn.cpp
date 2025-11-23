@@ -324,10 +324,8 @@ public:
 		return 0;
 	}
 } sp;
-struct Info {
-	int i, d;
-};
-int D[LEN << 2], h[LEN << 2];
+struct Info { int i, d; };
+int h[LEN << 2];
 std::vector<Info> G[LEN << 2]; int vp = 0;
 int bfs(int s = 0) {
 	std::queue<int> Q;
@@ -339,12 +337,17 @@ int bfs(int s = 0) {
 		int p = Q.back(); Q.pop();
 		for (const Info& w : G[p]) {
 			if (!V[w.i]) {
-				if (D[w.d] == DOWN) c += h[w.i];
+				if (w.d == DOWN) c += h[w.i];
 				Q.push(w.i);
 				V[w.i] = 1;
 			}
 		}
 	}
+//#ifdef DEBUG
+//	std::cout << "DEBUG::\n";
+//	std::cout << "	bfs - c:: " << c << "\n";
+//	std::cout << "DEBUG::\n";
+//#endif
 	return c;
 }
 bool block(const Polygon& P, const int& i, const int& sz) {
@@ -421,17 +424,17 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			room[vp] = Trep(seg[l], seg[r], y);
 			if (P[i2].y == P[i3].y && P[i2].i == 0) { G[0].push_back({ seg[l].ri, UP }); h[seg[l].ri] = 0; }
 			sp.insert(l); sp.insert(r);
-#ifdef DEBUG
-			std::cout << "ROOM CREATE:: DEBUG::\n";
-			std::cout << "	l:: " << l << " r:: " << r << "\n";
-			std::cout << "	seg[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
-			std::cout << "	seg[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
-			std::cout << "	room info:: l:: " << room[vp].l.s << " e:: " << room[vp].l.e << " ri:: " << vp << "\n";
-			std::cout << "	room info:: r:: " << room[vp].r.s << " e:: " << room[vp].r.e << " ri:: " << vp << "\n";
-			std::cout << "	room info:: b:: " << room[vp].b << "\n";
-			std::cout << "	room info:: u:: " << room[vp].u << "\n";
-			std::cout << "ROOM CREATE:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//			std::cout << "ROOM CREATE:: DEBUG::\n";
+//			std::cout << "	l:: " << l << " r:: " << r << "\n";
+//			std::cout << "	seg[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
+//			std::cout << "	seg[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
+//			std::cout << "	room info:: l:: " << room[vp].l.s << " e:: " << room[vp].l.e << " ri:: " << vp << "\n";
+//			std::cout << "	room info:: r:: " << room[vp].r.s << " e:: " << room[vp].r.e << " ri:: " << vp << "\n";
+//			std::cout << "	room info:: b:: " << room[vp].b << "\n";
+//			std::cout << "	room info:: u:: " << room[vp].u << "\n";
+//			std::cout << "ROOM CREATE:: DEBUG::\n";
+//#endif
 			vp++;
 			continue;
 		}
@@ -447,17 +450,17 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			if (!seg[l].i || !seg[r].i) { G[0].push_back({ seg[l].ri, UP }); h[seg[l].ri] = 0; }
 			if (P[i1].y == P[i2].y && P[i1].i == 0) { G[0].push_back({ seg[l].ri, DOWN }); }
 			sp.erase(l); sp.erase(r);
-#ifdef DEBUG
-			std::cout << "ROOM FINISH:: DEBUG::\n";
-			std::cout << "	l:: " << l << " r:: " << r << "\n";
-			std::cout << "	seg[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
-			std::cout << "	seg[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
-			std::cout << "	room info:: l:: " << room[seg[l].ri].l.s << " e:: " << room[seg[l].ri].l.e << " ri:: " << seg[l].ri << "\n";
-			std::cout << "	room info:: r:: " << room[seg[r].ri].r.s << " e:: " << room[seg[r].ri].r.e << " ri:: " << seg[r].ri << "\n";
-			std::cout << "	room info:: b:: " << room[seg[l].ri].b << "\n";
-			std::cout << "	room info:: u:: " << room[seg[l].ri].u << "\n";
-			std::cout << "ROOM FINISH:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//			std::cout << "ROOM FINISH:: DEBUG::\n";
+//			std::cout << "	l:: " << l << " r:: " << r << "\n";
+//			std::cout << "	seg[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
+//			std::cout << "	seg[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
+//			std::cout << "	room info:: l:: " << room[seg[l].ri].l.s << " e:: " << room[seg[l].ri].l.e << " ri:: " << seg[l].ri << "\n";
+//			std::cout << "	room info:: r:: " << room[seg[r].ri].r.s << " e:: " << room[seg[r].ri].r.e << " ri:: " << seg[r].ri << "\n";
+//			std::cout << "	room info:: b:: " << room[seg[l].ri].b << "\n";
+//			std::cout << "	room info:: u:: " << room[seg[l].ri].u << "\n";
+//			std::cout << "ROOM FINISH:: DEBUG::\n";
+//#endif
 			continue;
 		}
 
@@ -465,12 +468,12 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		bool fr = sp.find_right(E[i], r);
 		if (fl && !seg[l].rvs) fl = 0;
 		assert(fr && r > -1);
-#ifdef DEBUG
-		std::cout << "ROOM SCAN:: DEBUG::\n";
-		if (fl) std::cout << "	wall[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
-		if (fr) std::cout << "	wall[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
-		std::cout << "ROOM SCAN:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//		std::cout << "ROOM SCAN:: DEBUG::\n";
+//		if (fl) std::cout << "	wall[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
+//		if (fr) std::cout << "	wall[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
+//		std::cout << "ROOM SCAN:: DEBUG::\n";
+//#endif
 
 		Vint B = {}, U = {};
 		int tog = 0;
@@ -505,43 +508,43 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		}
 
 		int szu = U.size(), szb = B.size();
-#ifdef DEBUG
-		std::cout << "ROOM CONNECT PHASE 1:: DEBUG::\n";
-		std::cout << "	szu:: " << szu << "\n";
-		for (const int& u : U) {
-			std::cout << "	U.seg:: s:: " << seg[u].s << " e:: " << seg[u].e << " rvs:: " << seg[u].rvs << "\n";
-		}
-		std::cout << "	szb:: " << szb << "\n";
-		for (const int& b : B) {
-			std::cout << "	B.seg:: s:: " << seg[b].s << " e:: " << seg[b].e << " rvs:: " << seg[b].rvs << "\n";
-		}
-		std::cout << "ROOM CONNECT PHASE 1:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//		std::cout << "ROOM CONNECT PHASE 1:: DEBUG::\n";
+//		std::cout << "	szu:: " << szu << "\n";
+//		for (const int& u : U) {
+//			std::cout << "	U.seg:: s:: " << seg[u].s << " e:: " << seg[u].e << " rvs:: " << seg[u].rvs << "\n";
+//		}
+//		std::cout << "	szb:: " << szb << "\n";
+//		for (const int& b : B) {
+//			std::cout << "	B.seg:: s:: " << seg[b].s << " e:: " << seg[b].e << " rvs:: " << seg[b].rvs << "\n";
+//		}
+//		std::cout << "ROOM CONNECT PHASE 1:: DEBUG::\n";
+//#endif
 		assert(szu % 2 == 0);
 		assert(szb % 2 == 0);
 
-#ifdef DEBUG
-		std::cout << "ROOM CONNECT PHASE 2:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//		std::cout << "ROOM CONNECT PHASE 2:: DEBUG::\n";
+//#endif
 		std::vector<Proj> PU, PB;
 		for (int j = 0; j < szb; j += 2) {
 			PB.push_back(Proj(seg[B[j]].e.x, seg[B[j + 1]].e.x, seg[B[j]].ri));
 			room[seg[B[j]].ri].u = y;
 			h[seg[B[j]].ri] = room[seg[B[j]].ri].h();
 			if (!seg[B[j]].i || !seg[B[j + 1]].i) { G[0].push_back({ seg[B[j]].ri, UP }); h[seg[B[j]].ri] = 0; }
-#ifdef DEBUG
-			std::cout << "ROOM FINISH:: DEBUG::\n";
-			std::cout << "	y:: " << y << "\n";
-			std::cout << "	B[j]:: " << B[j] << " B[j + 1]:: " << B[j + 1] << "\n";
-			std::cout << "	seg[l]:: s:: " << seg[B[j]].s << " e:: " << seg[B[j]].e << " ri:: " << seg[B[j]].ri << "\n";
-			std::cout << "	seg[r]:: s:: " << seg[B[j + 1]].s << " e:: " << seg[B[j + 1]].e << " ri:: " << seg[B[j + 1]].ri << "\n";
-			std::cout << "	room info:: l:: " << room[seg[B[j]].ri].l.s << " e:: " << room[seg[B[j]].ri].l.e << " ri:: " << seg[B[j]].ri << "\n";
-			std::cout << "	room info:: r:: " << room[seg[B[j + 1]].ri].r.s << " e:: " << room[seg[B[j + 1]].ri].r.e << " ri:: " << seg[B[j + 1]].ri << "\n";
-			std::cout << "	room info:: b:: " << room[seg[B[j]].ri].b << "\n";
-			std::cout << "	room info:: u:: " << room[seg[B[j]].ri].u << "\n";
-			std::cout << "	room info:: h:: " << h[seg[B[j]].ri] << "\n";
-			std::cout << "ROOM FINISH:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//			std::cout << "ROOM FINISH:: DEBUG::\n";
+//			std::cout << "	y:: " << y << "\n";
+//			std::cout << "	B[j]:: " << B[j] << " B[j + 1]:: " << B[j + 1] << "\n";
+//			std::cout << "	seg[l]:: s:: " << seg[B[j]].s << " e:: " << seg[B[j]].e << " ri:: " << seg[B[j]].ri << "\n";
+//			std::cout << "	seg[r]:: s:: " << seg[B[j + 1]].s << " e:: " << seg[B[j + 1]].e << " ri:: " << seg[B[j + 1]].ri << "\n";
+//			std::cout << "	room info:: l:: " << room[seg[B[j]].ri].l.s << " e:: " << room[seg[B[j]].ri].l.e << " ri:: " << seg[B[j]].ri << "\n";
+//			std::cout << "	room info:: r:: " << room[seg[B[j + 1]].ri].r.s << " e:: " << room[seg[B[j + 1]].ri].r.e << " ri:: " << seg[B[j + 1]].ri << "\n";
+//			std::cout << "	room info:: b:: " << room[seg[B[j]].ri].b << "\n";
+//			std::cout << "	room info:: u:: " << room[seg[B[j]].ri].u << "\n";
+//			std::cout << "	room info:: h:: " << h[seg[B[j]].ri] << "\n";
+//			std::cout << "ROOM FINISH:: DEBUG::\n";
+//#endif
 			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
 		}
 		for (int j = 0; j < szu; j += 2) {
@@ -549,23 +552,23 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			seg[U[j]].ri = vp;
 			seg[U[j + 1]].ri = vp;
 			room[vp] = Trep(seg[U[j]], seg[U[j + 1]], y);
-#ifdef DEBUG
-			std::cout << "ROOM CREATE:: DEBUG::\n";
-			std::cout << "	U[j]:: " << U[j] << " U[j + 1]:: " << U[j + 1] << "\n";
-			std::cout << "	seg[l]:: s:: " << seg[U[j]].s << " e:: " << seg[U[j]].e << " ri:: " << seg[U[j]].ri << "\n";
-			std::cout << "	seg[r]:: s:: " << seg[U[j + 1]].s << " e:: " << seg[U[j + 1]].e << " ri:: " << seg[U[j + 1]].ri << "\n";
-			std::cout << "	room info:: l:: " << room[vp].l.s << " e:: " << room[vp].l.e << " ri:: " << vp << "\n";
-			std::cout << "	room info:: r:: " << room[vp].r.s << " e:: " << room[vp].r.e << " ri:: " << vp << "\n";
-			std::cout << "	room info:: b:: " << room[vp].b << "\n";
-			std::cout << "	room info:: u:: " << room[vp].u << "\n";
-			std::cout << "ROOM CREATE:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//			std::cout << "ROOM CREATE:: DEBUG::\n";
+//			std::cout << "	U[j]:: " << U[j] << " U[j + 1]:: " << U[j + 1] << "\n";
+//			std::cout << "	seg[l]:: s:: " << seg[U[j]].s << " e:: " << seg[U[j]].e << " ri:: " << seg[U[j]].ri << "\n";
+//			std::cout << "	seg[r]:: s:: " << seg[U[j + 1]].s << " e:: " << seg[U[j + 1]].e << " ri:: " << seg[U[j + 1]].ri << "\n";
+//			std::cout << "	room info:: l:: " << room[vp].l.s << " e:: " << room[vp].l.e << " ri:: " << vp << "\n";
+//			std::cout << "	room info:: r:: " << room[vp].r.s << " e:: " << room[vp].r.e << " ri:: " << vp << "\n";
+//			std::cout << "	room info:: b:: " << room[vp].b << "\n";
+//			std::cout << "	room info:: u:: " << room[vp].u << "\n";
+//			std::cout << "ROOM CREATE:: DEBUG::\n";
+//#endif
 			vp++;
 			assert(seg[U[j]].rvs && !seg[U[j + 1]].rvs);
 		}
-#ifdef DEBUG
-		std::cout << "ROOM CONNECT PHASE 2:: DEBUG::\n";
-#endif
+//#ifdef DEBUG
+//		std::cout << "ROOM CONNECT PHASE 2:: DEBUG::\n";
+//#endif
 
 		assert(U.size() && B.size());
 		if (U[0] == B[0]) PU[0].s = PB[0].s = -INF;
@@ -642,13 +645,20 @@ void solve() {
 				U += count(P, s, e, N);
 			}
 		}
+//#ifdef DEBUG
+//			std::cout << "DEBUG::\n";
+//			std::cout << "	Y:: " << Y << "\n";
+//			std::cout << "	U:: " << U << "\n";
+//			std::cout << "	Y + U:: " << Y + U << "\n";
+//			std::cout << "DEBUG::\n";
+//#endif
 		diff = (Y + U) - my;
 		for (Pos& p : P) p = !p;
 		for (Pos& f : F) f.y += diff, f = !f;
 		std::reverse(P.begin(), P.end());
-#ifdef DEBUG
-		std::cout << "\n\nTURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN\n\n\n";
-#endif
+//#ifdef DEBUG
+//		std::cout << "\n\nTURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN::TURN\n\n\n";
+//#endif
 	}
 	std::cout << F.size() << "\n";
 	for (const Pos& f : F) std::cout << f.x << " " << f.y << "\n";

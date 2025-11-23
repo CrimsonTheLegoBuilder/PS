@@ -116,8 +116,8 @@ struct Seg {
 		}
 	}
 	bool operator < (const Seg& o) const {
-		if (s == o.s) return e.x < o.e.x;
-		if (e == o.e) return s.x < o.s.x;
+		if (s == o.s) return ccw(o.s, o.e, e) > 0;
+		if (e == o.e) return ccw(o.s, o.e, s) > 0;
 		int tq1 = ccw(o.s, o.e, s);
 		int tq2 = ccw(o.s, o.e, e);
 		if (tq1 * tq2 >= 0) return tq1 ? tq1 > 0 : tq2 > 0;
@@ -361,8 +361,7 @@ struct Proj {
 ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	sp.clear();
 	for (int i = 0; i < vp; i++) G[i].clear();
-	vp = 0;
-	int start = -1;
+	vp = 1;
 	Polygon P = { H[s] }, E;
 	for (int i = e; i != s; i = (i - 1 + N) % N) P.push_back(H[i]);
 //#ifdef DEBUG
@@ -419,10 +418,12 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			l = i1; seg[i1] = Seg(P[i1], P[i2], i1, vp);
 			if (P[i2].y == P[i3].y) r = i3, seg[i3] = Seg(P[i3], P[i4], i3, vp), i++;
 			else r = i2, seg[i2] = Seg(P[i2], P[i3], i2, vp);
-			sp.insert(l); sp.insert(r);
 			room[vp] = Trep(seg[l], seg[r], y);
+			if (P[i2].y == P[i3].y && P[i2].i == 0) { G[0].push_back({ seg[l].ri, UP }); h[seg[l].ri] = 0; }
+			sp.insert(l); sp.insert(r);
 #ifdef DEBUG
 			std::cout << "ROOM CREATE:: DEBUG::\n";
+			std::cout << "	l:: " << l << " r:: " << r << "\n";
 			std::cout << "	seg[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
 			std::cout << "	seg[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
 			std::cout << "	room info:: l:: " << room[vp].l.s << " e:: " << room[vp].l.e << " ri:: " << vp << "\n";
@@ -443,10 +444,12 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			else r = i1;
 			room[seg[l].ri].u = y;
 			h[seg[l].ri] = room[seg[l].ri].h();
-			if (!seg[l].i || !seg[r].i) { start = seg[l].ri; h[seg[l].ri] = 0; }
+			if (!seg[l].i || !seg[r].i) { G[0].push_back({ seg[l].ri, UP }); h[seg[l].ri] = 0; }
+			if (P[i1].y == P[i2].y && P[i1].i == 0) { G[0].push_back({ seg[l].ri, DOWN }); }
 			sp.erase(l); sp.erase(r);
 #ifdef DEBUG
 			std::cout << "ROOM FINISH:: DEBUG::\n";
+			std::cout << "	l:: " << l << " r:: " << r << "\n";
 			std::cout << "	seg[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
 			std::cout << "	seg[r]:: s:: " << seg[r].s << " e:: " << seg[r].e << " ri:: " << seg[r].ri << "\n";
 			std::cout << "	room info:: l:: " << room[seg[l].ri].l.s << " e:: " << room[seg[l].ri].l.e << " ri:: " << seg[l].ri << "\n";
@@ -525,9 +528,11 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			PB.push_back(Proj(seg[B[j]].e.x, seg[B[j + 1]].e.x, seg[B[j]].ri));
 			room[seg[B[j]].ri].u = y;
 			h[seg[B[j]].ri] = room[seg[B[j]].ri].h();
-			if (!seg[B[j]].i || !seg[B[j + 1]].i) { start = seg[B[j]].ri; h[seg[B[j]].ri] = 0; }
+			if (!seg[B[j]].i || !seg[B[j + 1]].i) { G[0].push_back({ seg[B[j]].ri, UP }); h[seg[B[j]].ri] = 0; }
 #ifdef DEBUG
 			std::cout << "ROOM FINISH:: DEBUG::\n";
+			std::cout << "	y:: " << y << "\n";
+			std::cout << "	B[j]:: " << B[j] << " B[j + 1]:: " << B[j + 1] << "\n";
 			std::cout << "	seg[l]:: s:: " << seg[B[j]].s << " e:: " << seg[B[j]].e << " ri:: " << seg[B[j]].ri << "\n";
 			std::cout << "	seg[r]:: s:: " << seg[B[j + 1]].s << " e:: " << seg[B[j + 1]].e << " ri:: " << seg[B[j + 1]].ri << "\n";
 			std::cout << "	room info:: l:: " << room[seg[B[j]].ri].l.s << " e:: " << room[seg[B[j]].ri].l.e << " ri:: " << seg[B[j]].ri << "\n";
@@ -540,11 +545,20 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
 		}
 		for (int j = 0; j < szu; j += 2) {
-			PU.push_back(Proj(seg[U[j]].s.x, seg[U[j] + 1].s.x, vp));
-			seg[U[j]].ri = seg[U[j] + 1].ri = vp;
-			room[vp] = Trep(seg[U[j]], seg[U[j] + 1], y);
+			PU.push_back(Proj(seg[U[j]].s.x, seg[U[j + 1]].s.x, vp));
+			seg[U[j]].ri = vp;
+			seg[U[j + 1]].ri = vp;
+			room[vp] = Trep(seg[U[j]], seg[U[j + 1]], y);
 #ifdef DEBUG
-			std::cout << "ROOM CONNECT PHASE 2:: DEBUG::\n";
+			std::cout << "ROOM CREATE:: DEBUG::\n";
+			std::cout << "	U[j]:: " << U[j] << " U[j + 1]:: " << U[j + 1] << "\n";
+			std::cout << "	seg[l]:: s:: " << seg[U[j]].s << " e:: " << seg[U[j]].e << " ri:: " << seg[U[j]].ri << "\n";
+			std::cout << "	seg[r]:: s:: " << seg[U[j + 1]].s << " e:: " << seg[U[j + 1]].e << " ri:: " << seg[U[j + 1]].ri << "\n";
+			std::cout << "	room info:: l:: " << room[vp].l.s << " e:: " << room[vp].l.e << " ri:: " << vp << "\n";
+			std::cout << "	room info:: r:: " << room[vp].r.s << " e:: " << room[vp].r.e << " ri:: " << vp << "\n";
+			std::cout << "	room info:: b:: " << room[vp].b << "\n";
+			std::cout << "	room info:: u:: " << room[vp].u << "\n";
+			std::cout << "ROOM CREATE:: DEBUG::\n";
 #endif
 			vp++;
 			assert(seg[U[j]].rvs && !seg[U[j + 1]].rvs);
@@ -572,7 +586,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		for (const int& b : B) sp.erase(b);
 		for (const int& u : U) sp.insert(u);
 	}
-	return bfs(start);
+	return bfs();
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

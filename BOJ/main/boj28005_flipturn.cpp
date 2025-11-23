@@ -447,18 +447,18 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 
 		std::vector<Proj> PU, PB;
 		for (int j = 0; j < szb; j += 2) {
-			PB.push_back(Proj(seg[B[j]].e.x, seg[B[j + 1]].e.x, seg[B[i]].ri));
+			PB.push_back(Proj(seg[B[j]].e.x, seg[B[j + 1]].e.x, seg[B[j]].ri));
 			room[seg[B[j]].ri].u = y;
 			h[seg[B[j]].ri] = room[seg[B[j]].ri].h();
 			if (!seg[B[j]].i || !seg[B[j + 1]].i) { start = seg[B[j]].ri; h[seg[B[j]].ri] = 0; }
 			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
 		}
 		for (int j = 0; j < szu; j += 2) {
-			PU.push_back(Proj(seg[B[j]].s.x, seg[B[j] + 1].s.x, vp));
-			seg[B[j]].ri = seg[B[j] + 1].ri = vp;
-			room[vp] = Trep(seg[B[j]], seg[B[j] + 1], y);
+			PU.push_back(Proj(seg[U[j]].s.x, seg[U[j] + 1].s.x, vp));
+			seg[U[j]].ri = seg[U[j] + 1].ri = vp;
+			room[vp] = Trep(seg[U[j]], seg[U[j] + 1], y);
 			vp++;
-			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
+			assert(seg[U[j]].rvs && !seg[U[j + 1]].rvs);
 		}
 
 		assert(U.size() && B.size());

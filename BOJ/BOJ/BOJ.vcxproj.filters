@@ -174,7 +174,7 @@
     <ClCompile Include="..\main\boj28005_geo_adhoc.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="boj28005_flipturn.cpp">
+    <ClCompile Include="..\main\boj28005_flipturn.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>

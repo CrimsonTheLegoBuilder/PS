@@ -127,10 +127,10 @@ struct Seg {
 } seg[LEN];
 typedef std::vector<Seg> Segs;
 bool on_seg_strong(const Seg& se, const Pos& q) { return !ccw(se.s, se.e, q) && dot(se.s, q, se.e) >= 0; }
-struct Trep {
+struct Trap {
 	Seg l, r;
 	ll b, u;
-	Trep(Seg l_ = Seg(), Seg r_ = Seg(), ll b_ = -1, ll u_ = -1) : l(l_), r(r_), b(b_), u(u_) {}
+	Trap(Seg l_ = Seg(), Seg r_ = Seg(), ll b_ = -1, ll u_ = -1) : l(l_), r(r_), b(b_), u(u_) {}
 	ll h() const { return u - b; }
 } room[LEN << 2];
 class SplayTree {
@@ -384,16 +384,16 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	vp = 1;
 	Polygon P = { H[s] }, E;
 	for (int i = e; i != s; i = (i - 1 + N) % N) P.push_back(H[i]);
-//#ifdef DEBUG
-//	std::cout << "DEBUG::\n";
-//	std::cout << "	s::" << s << " e:: " << e << "\n";
-//	std::cout << "	H[s]::" << H[s] << " H[e]:: " << H[e] << "\n";
-//	std::cout << "P:: DEBUG::\n";
-//	std::cout << "	P::\n";
-//	for (const Pos& p : P) std::cout << "	idx:: " << p.i << " :: " << p << "\n";
-//	std::cout << "	P::\n";
-//	std::cout << "P:: DEBUG::\n";
-//#endif
+	//#ifdef DEBUG
+	//	std::cout << "DEBUG::\n";
+	//	std::cout << "	s::" << s << " e:: " << e << "\n";
+	//	std::cout << "	H[s]::" << H[s] << " H[e]:: " << H[e] << "\n";
+	//	std::cout << "P:: DEBUG::\n";
+	//	std::cout << "	P::\n";
+	//	for (const Pos& p : P) std::cout << "	idx:: " << p.i << " :: " << p << "\n";
+	//	std::cout << "	P::\n";
+	//	std::cout << "P:: DEBUG::\n";
+	//#endif
 #ifdef DEBUG
 	std::cout << "\n\nDEBUG START::\n";
 	std::cout << "DEBUG START::\n";
@@ -404,20 +404,20 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	int sz = P.size();
 	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
 	for (int i = 0; i < sz; i++) seg[i] = Seg(P[i], P[(i + 1) % sz], i);
-//#ifdef DEBUG
-//	std::cout << "DEBUG::\n";
-//	std::cout << "P:: DEBUG::\n";
-//	std::cout << "	P::\n";
-//	for (const Pos& p : P) std::cout << "	idx:: " << p.i << " :: " << p << "\n";
-//	std::cout << "	P::\n";
-//	std::cout << "P:: DEBUG::\n";
-//	std::cout << "SEG:: DEBUG::\n";
-//	std::cout << "	SEG::\n";
-//	for (int i = 0; i < sz; i++) std::cout << "	idx:: " << i << " s:: " << seg[i].s << " e:: " << seg[i].e << "\n";
-//	std::cout << "	SEG::\n";
-//	std::cout << "SEG:: DEBUG::\n";
-//	std::cout << "DEBUG::\n";
-//#endif
+	//#ifdef DEBUG
+	//	std::cout << "DEBUG::\n";
+	//	std::cout << "P:: DEBUG::\n";
+	//	std::cout << "	P::\n";
+	//	for (const Pos& p : P) std::cout << "	idx:: " << p.i << " :: " << p << "\n";
+	//	std::cout << "	P::\n";
+	//	std::cout << "P:: DEBUG::\n";
+	//	std::cout << "SEG:: DEBUG::\n";
+	//	std::cout << "	SEG::\n";
+	//	for (int i = 0; i < sz; i++) std::cout << "	idx:: " << i << " s:: " << seg[i].s << " e:: " << seg[i].e << "\n";
+	//	std::cout << "	SEG::\n";
+	//	std::cout << "SEG:: DEBUG::\n";
+	//	std::cout << "DEBUG::\n";
+	//#endif
 
 	std::sort(E.begin(), E.end(), cmpy);
 #ifdef DEBUG
@@ -447,7 +447,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			l = i1; seg[i1] = Seg(P[i1], P[i2], i1, vp);
 			if (P[i2].y == P[i3].y) r = i3, seg[i3] = Seg(P[i3], P[i4], i3, vp), i++;
 			else r = i2, seg[i2] = Seg(P[i2], P[i3], i2, vp);
-			room[vp] = Trep(seg[l], seg[r], y);
+			room[vp] = Trap(seg[l], seg[r], y);
 			if (P[i2].y == P[i3].y && P[i2].i == 0) { G[0].push_back({ seg[l].ri, UP }); h[seg[l].ri] = 0; }
 			sp.insert(l); sp.insert(r);
 #ifdef DEBUG
@@ -607,7 +607,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			PU.push_back(Proj(seg[U[j]].s.x, seg[U[j + 1]].s.x, vp));
 			seg[U[j]].ri = vp;
 			seg[U[j + 1]].ri = vp;
-			room[vp] = Trep(seg[U[j]], seg[U[j + 1]], y);
+			room[vp] = Trap(seg[U[j]], seg[U[j + 1]], y);
 #ifdef DEBUG
 			std::cout << "ROOM CREATE:: DEBUG::\n";
 			std::cout << "	U[j]:: " << U[j] << " U[j + 1]:: " << U[j + 1] << "\n";
@@ -679,11 +679,11 @@ void solve() {
 	F.pop_back();
 	auto min_it = std::min_element(F.begin(), F.end());
 	std::rotate(F.begin(), min_it, F.end());
-//#ifdef DEBUG
-//	std::cout << "fuck:: F::\n";
-//	for (const Pos& f : F) std::cout << "	" << f << "\n";
-//	std::cout << "fuck:: F::\n";
-//#endif
+	//#ifdef DEBUG
+	//	std::cout << "fuck:: F::\n";
+	//	for (const Pos& f : F) std::cout << "	" << f << "\n";
+	//	std::cout << "fuck:: F::\n";
+	//#endif
 	for (int _ = 0; _ < 2; _++) {
 		ll Y = -1e9, my = -1e9, diff;
 		for (int i = 0; i < N; i++) P[i].i = i, Y = std::max(Y, P[i].y);
@@ -692,25 +692,25 @@ void solve() {
 		int sz = H.size();
 		ll U = 0;
 		for (int i = 0; i < sz; i++) {
-//#ifdef DEBUG
-//			std::cout << "DEBUG::\n";
-//			std::cout << "	H[i].i           :: " << H[i].i << "\n";
-//			std::cout << "	H[i]             :: " << H[i] << "\n";
-//			std::cout << "	(H[i].i + 1) % N :: " << (H[i].i + 1) % N << "\n";
-//			std::cout << "	H[(i + 1) % sz].i:: " << H[(i + 1) % sz].i << "\n";
-//			std::cout << "DEBUG::\n";
-//#endif
+			//#ifdef DEBUG
+			//			std::cout << "DEBUG::\n";
+			//			std::cout << "	H[i].i           :: " << H[i].i << "\n";
+			//			std::cout << "	H[i]             :: " << H[i] << "\n";
+			//			std::cout << "	(H[i].i + 1) % N :: " << (H[i].i + 1) % N << "\n";
+			//			std::cout << "	H[(i + 1) % sz].i:: " << H[(i + 1) % sz].i << "\n";
+			//			std::cout << "DEBUG::\n";
+			//#endif
 			if ((H[i].i + 1) % N != H[(i + 1) % sz].i) {
 				int s = H[i].i, e = H[(i + 1) % sz].i;
 				U += count(P, s, e, N);
 			}
 		}
 #ifdef DEBUG
-			std::cout << "DEBUG::\n";
-			std::cout << "	Y:: " << Y << "\n";
-			std::cout << "	U:: " << U << "\n";
-			std::cout << "	Y + U:: " << Y + U << "\n";
-			std::cout << "DEBUG::\n";
+		std::cout << "DEBUG::\n";
+		std::cout << "	Y:: " << Y << "\n";
+		std::cout << "	U:: " << U << "\n";
+		std::cout << "	Y + U:: " << Y + U << "\n";
+		std::cout << "DEBUG::\n";
 #endif
 		diff = (Y + U) - my;
 		for (Pos& p : P) p = !p;

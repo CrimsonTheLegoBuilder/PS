@@ -127,10 +127,10 @@ struct Seg {
 } seg[LEN];
 typedef std::vector<Seg> Segs;
 bool on_seg_strong(const Seg& se, const Pos& q) { return !ccw(se.s, se.e, q) && dot(se.s, q, se.e) >= 0; }
-struct Trep {
+struct Trap {
 	Seg l, r;
 	ll b, u;
-	Trep(Seg l_ = Seg(), Seg r_ = Seg(), ll b_ = -1, ll u_ = -1) : l(l_), r(r_), b(b_), u(u_) {}
+	Trap(Seg l_ = Seg(), Seg r_ = Seg(), ll b_ = -1, ll u_ = -1) : l(l_), r(r_), b(b_), u(u_) {}
 	ll h() const { return u - b; }
 } room[LEN << 2];
 class SplayTree {
@@ -447,7 +447,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			l = i1; seg[i1] = Seg(P[i1], P[i2], i1, vp);
 			if (P[i2].y == P[i3].y) r = i3, seg[i3] = Seg(P[i3], P[i4], i3, vp), i++;
 			else r = i2, seg[i2] = Seg(P[i2], P[i3], i2, vp);
-			room[vp] = Trep(seg[l], seg[r], y);
+			room[vp] = Trap(seg[l], seg[r], y);
 			if (P[i2].y == P[i3].y && P[i2].i == 0) { G[0].push_back({ seg[l].ri, UP }); h[seg[l].ri] = 0; }
 			sp.insert(l); sp.insert(r);
 #ifdef DEBUG
@@ -607,7 +607,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			PU.push_back(Proj(seg[U[j]].s.x, seg[U[j + 1]].s.x, vp));
 			seg[U[j]].ri = vp;
 			seg[U[j + 1]].ri = vp;
-			room[vp] = Trep(seg[U[j]], seg[U[j + 1]], y);
+			room[vp] = Trap(seg[U[j]], seg[U[j + 1]], y);
 #ifdef DEBUG
 			std::cout << "ROOM CREATE:: DEBUG::\n";
 			std::cout << "	U[j]:: " << U[j] << " U[j + 1]:: " << U[j + 1] << "\n";

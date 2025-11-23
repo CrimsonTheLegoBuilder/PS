@@ -150,16 +150,10 @@
     <ClCompile Include="..\library\_geometry_double.cpp">
       <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj18349_LCT_LCP_MST_GEO.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\boj18349_TG.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
     <ClCompile Include="..\library\checker.cpp">
-      <Filter>소스 파일\_tools</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\fastio_optimize_gcc.cpp">
       <Filter>소스 파일\_tools</Filter>
     </ClCompile>
     <ClCompile Include="..\library\planar_graph_seg_circle.cpp">
@@ -171,11 +165,11 @@
     <ClCompile Include="..\main\boj2397.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj28005_geo_adhoc.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
+    <ClCompile Include="..\library\trapezoidal_decomposition.cpp">
+      <Filter>소스 파일\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj28005_flipturn.cpp">
-      <Filter>소스 파일\_now_solving</Filter>
+    <ClCompile Include="..\library\fastio_optimize_gcc.cpp">
+      <Filter>소스 파일\_tools</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

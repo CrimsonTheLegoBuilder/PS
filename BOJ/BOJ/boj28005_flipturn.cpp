@@ -340,9 +340,9 @@ std::vector<Info> G[LEN << 2]; int vp = 0;
 int bfs(int s = 0) {
 	std::queue<int> Q;
 	Vbool V(vp, 0);
-	Q.push(0);
+	Q.push(s);
 	int c = 0;
-	V[0] = 1;
+	V[s] = 1;
 	while (Q.size()) {
 		int p = Q.back(); Q.pop();
 		for (const Info& w : G[p]) {
@@ -370,6 +370,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	sp.clear();
 	for (int i = 0; i < vp; i++) G[i].clear();
 	vp = 0;
+	int start = -1;
 	Polygon P = { H[s] }, E;
 	for (int i = e; i != s; i = (i - 1 + N) % N) P.push_back(H[i]);
 	int sz = P.size();
@@ -405,6 +406,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			else r = i1;
 			room[seg[l].ri].u = y;
 			h[seg[l].ri] = room[seg[l].ri].h();
+			if (!seg[l].i || !seg[r].i) { start = seg[l].ri; h[seg[l].ri] = 0; }
 			sp.erase(l); sp.erase(r);
 			continue;
 		}
@@ -448,15 +450,18 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			PB.push_back(Proj(seg[B[j]].e.x, seg[B[j + 1]].e.x, seg[B[i]].ri));
 			room[seg[B[j]].ri].u = y;
 			h[seg[B[j]].ri] = room[seg[B[j]].ri].h();
+			if (!seg[B[j]].i || !seg[B[j + 1]].i) { start = seg[B[j]].ri; h[seg[B[j]].ri] = 0; }
 			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
 		}
-		for (int j = 0, ni = vp; j < szu; j += 2) {
-			PU.push_back(Proj(seg[B[j]].s.x, seg[B[j] + 1].s.x, ni));
-			room[ni] = Trep(seg[B[j]], seg[B[j] + 1], y);
-			ni++;
+		for (int j = 0; j < szu; j += 2) {
+			PU.push_back(Proj(seg[B[j]].s.x, seg[B[j] + 1].s.x, vp));
+			seg[B[j]].ri = seg[B[j] + 1].ri = vp;
+			room[vp] = Trep(seg[B[j]], seg[B[j] + 1], y);
+			vp++;
 			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
 		}
 
+		assert(U.size() && B.size());
 		if (U[0] == B[0]) PU[0].s = PB[0].s = -INF;
 		if (U.back() == B.back()) PU.back().e = PB.back().e = INF;
 
@@ -473,15 +478,9 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		}
 
 		for (const int& b : B) sp.erase(b);
-		for (int j = 0; j < szu; j += 2) {
-			seg[U[i]].ri = vp;
-			seg[U[i + 1]].ri = vp;
-			vp++;
-			sp.insert(U[i]);
-			sp.insert(U[i + 1]);
-		}
+		for (const int& u : U) sp.insert(u);
 	}
-	return bfs(0);
+	return bfs(start);
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

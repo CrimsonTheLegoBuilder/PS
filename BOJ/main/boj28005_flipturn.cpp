@@ -21,21 +21,14 @@ const ld TOL = 1e-7;
 inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !x; }
-inline ll sq(const ll& x) { return x * x; }
-//inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
-//inline bool zero(const ld& x) { return !sign(x); }
-//inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
-//ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
-//ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-
-#define LO x
-#define HI y
 
 #define STRONG 0
 #define WEAK 1
 
 #define UP 1
 #define DOWN 2
+
+#define DEBUG
 
 int N, M, T, Q;
 struct Pos {
@@ -62,7 +55,6 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
 const Pos INVAL = Pos(-1, -1);
-Pos ep;//point on event line
 typedef std::vector<Pos> Polygon;
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
 bool cmpt(const Pos& u, const Pos& v) {
@@ -376,6 +368,17 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	int sz = P.size();
 	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
 	for (int i = 0; i < sz; i++) seg[i] = Seg(P[i], P[(i + 1) % sz], i);
+
+#ifdef DEBUG
+	std::cout << "DEBUG::\n";
+	std::cout << "DEBUG::\n";
+	std::cout << "	P::\n";
+	for (const Pos& p : P) std::cout << "	" << p << "\n";
+	std::cout << "	P::\n";
+	std::cout << "DEBUG::\n";
+	std::cout << "DEBUG::\n";
+	return 0;
+#endif
 
 	std::sort(E.begin(), E.end(), cmpy);
 	for (int i = 0, j, i0, i1, i2, i3, i4, y; i < sz; i++) {

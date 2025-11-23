@@ -483,7 +483,7 @@ void solve() {
 		std::reverse(P.begin(), P.end());
 	}
 	std::cout << F.size() << "\n";
-	for (const Pos& f : F) std::cout << f.x << " " << f.y << "\n";
+	for (const Pos& f : F) std::cout << f << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj28005

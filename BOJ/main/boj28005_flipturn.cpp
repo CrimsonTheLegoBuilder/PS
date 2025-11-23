@@ -147,7 +147,7 @@ class SplayTree {
 		Node* r;
 		Node* p;
 		int val;
-		Node(int s) : l(0), r(0), p(0) { val = s; }
+		Node(int i) : l(0), r(0), p(0) { val = i; }
 		~Node() { if (l) delete l; if (r) delete r; }
 	} *root;
 	void rotate(Node* x) {

@@ -476,7 +476,10 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			cur = E[j];
 			int x1 = cur.i, x0 = (x1 - 1 + sz) % sz, x2 = (x1 + 1) % sz;
 			bool blk = 0;
-			blk = block(P, cur.i, sz);
+			if (seg[r].s.y < y && y < seg[r].e.y) {
+				if (ccw(seg[r].s, seg[r].e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
+			}
+			else blk = block(P, cur.i, sz);
 			sp.find_right(cur, r);
 			i = j;
 			int s0 = sign(P[x0].y - P[x1].y), s1 = sign(P[x2].y - P[x1].y);
@@ -487,9 +490,6 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 				else if (s0 < 0) B.push_back(x0);
 				if (s1 > 0) U.push_back(x1);
 				else if (s1 < 0) B.push_back(x1);
-			}
-			if (seg[r].s.y < y && y < seg[r].e.y) {
-				if (ccw(seg[r].s, seg[r].e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
 			}
 			if (blk) break;
 		}

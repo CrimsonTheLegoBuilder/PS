@@ -470,16 +470,18 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 #endif
 
 		Vint B = {}, U = {};
+		int tog = 0;
 		if (fl && seg[l].s.y < y && y < seg[l].e.y) { B.push_back(l), U.push_back(l); }
 		for (j = i; j < sz; j++) {
 			if (E[j].y != y) break;
+			if (ccw(seg[r].s, seg[r].e, cur) < 0) break;
 			cur = E[j];
 			int x1 = cur.i, x0 = (x1 - 1 + sz) % sz, x2 = (x1 + 1) % sz;
 			bool blk = 0;
-			if (seg[r].s.y < y && y < seg[r].e.y) {
-				if (ccw(seg[r].s, seg[r].e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
-			}
-			else blk = block(P, cur.i, sz);
+			//if (seg[r].s.y < y && y < seg[r].e.y) {
+			//	if (ccw(seg[r].s, seg[r].e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
+			//}
+			blk = block(P, cur.i, sz);
 			sp.find_right(cur, r);
 			i = j;
 			int s0 = sign(P[x0].y - P[x1].y), s1 = sign(P[x2].y - P[x1].y);
@@ -491,7 +493,12 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 				if (s1 > 0) U.push_back(x1);
 				else if (s1 < 0) B.push_back(x1);
 			}
-			if (blk) break;
+			if (blk) { tog = 1; break; }
+		}
+		if (!tog) {
+			sp.find_right(cur, r);
+			assert(seg[r].s.y < y && y < seg[r].e.y);
+			B.push_back(r); U.push_back(r);
 		}
 
 		int szu = U.size(), szb = B.size();

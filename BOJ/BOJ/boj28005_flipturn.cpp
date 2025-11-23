@@ -115,9 +115,9 @@ Polygon monotone_chain(Polygon C) {
 }
 struct Seg {
 	Pos s, e;
-	int i, wi, rvs;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1, int wi_ = -1, int rvs_ = 0) :
-		s(s_), e(e_), i(i_), wi(wi_), rvs(rvs_) {
+	int i, ri, rvs;
+	Seg(Pos s_ = Pos(), Pos e_ = Pos(), int i_ = -1, int ri_ = -1, int rvs_ = 0) :
+		s(s_), e(e_), i(i_), ri(ri_), rvs(rvs_) {
 		if (s.y > e.y) {
 			std::swap(s, e);
 			rvs = 1;
@@ -356,9 +356,10 @@ int bfs(int s = 0) {
 	return c;
 }
 bool block(const Polygon& P, const int& i, const int& sz) {
-	int i0 = (i - 2 + sz) % sz, i1 = (i - 1 + sz) % sz, i2 = i, i3 = (i + 1) % sz;
+	int i0 = (i - 2 + sz) % sz, i1 = (i - 1 + sz) % sz, i2 = i, i3 = (i + 1) % sz, i4 = (i + 2) % sz;
 	if (P[i1].y < P[i2].y && P[i2].y < P[i3].y) return 1;
-	if (P[i1].y == P[i2].y && P[i0].y < P[i1].y && P[i2].y < P[i3].y) return 1;
+	if (P[i1].y == P[i2].y && P[i1].x < P[i2].x && P[i0].y < P[i1].y && P[i2].y < P[i3].y) return 1;
+	if (P[i2].y == P[i3].y && P[i3].x < P[i2].x && P[i1].y < P[i2].y && P[i3].y < P[i4].y) return 1;
 	return 0;
 }
 struct Proj {
@@ -402,56 +403,67 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			l = i2;
 			if (P[i1].y == P[i2].y) r = i0, i++;
 			else r = i1;
-			room[seg[l].wi].u = y;
-			h[seg[l].wi] = room[seg[l].wi].h();
+			room[seg[l].ri].u = y;
+			h[seg[l].ri] = room[seg[l].ri].h();
 			sp.erase(l); sp.erase(r);
 			continue;
 		}
 
 		bool fl = sp.find_left(E[i], l);
-		if (!seg[l].rvs) fl = 0;
+		bool fr = sp.find_right(E[i], r);
+		if (fl && !seg[l].rvs) fl = 0;
+		assert(fr && r > -1);
 
-		Segs B = {}, U = {};
+		Vint B = {}, U = {};
 		if (fl && seg[l].s.y < y && y < seg[l].e.y) { B.push_back(l), U.push_back(l); }
 		for (j = i; j < sz; j++) {
 			if (E[j].y != y) break;
 			cur = E[j];
 			int x1 = cur.i, x0 = (x1 - 1 + sz) % sz, x2 = (x1 + 1) % sz;
 			bool blk = 0;
-			if (r.s.y < y && y < r.e.y) {
-				if (ccw(r.s, r.e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
-				sp.find_right(cur, r);
+			if (seg[r].s.y < y && y < seg[r].e.y) {
+				if (ccw(seg[r].s, seg[r].e, cur) < 0) { B.push_back(r); U.push_back(r); break; }
 			}
-			else {
-				blk = block(P, cur.i, sz);
-				sp.find_right(cur, r);
-			}
+			else blk = block(P, cur.i, sz);
+			sp.find_right(cur, r);
 			i = j;
 			int s0 = sign(P[x0].y - P[x1].y), s1 = sign(P[x2].y - P[x1].y);
-			if (s0 > 0 && s1 > 0) U.push_back(seg[x1]), U.push_back(seg[x0]);
-			else if (s0 < 0 && s1 < 0) B.push_back(seg[x0]), B.push_back(seg[x1]);
+			if (s0 > 0 && s1 > 0) U.push_back(x1), U.push_back(x0);
+			else if (s0 < 0 && s1 < 0) B.push_back(x0), B.push_back(x1);
 			else {
-				if (s0 > 0) U.push_back(seg[x0]);
-				else if (s0 < 0) B.push_back(seg[x0]);
-				if (s1 > 0) U.push_back(seg[x1]);
-				else if (s1 < 0) B.push_back(seg[x1]);
+				if (s0 > 0) U.push_back(x0);
+				else if (s0 < 0) B.push_back(x0);
+				if (s1 > 0) U.push_back(x1);
+				else if (s1 < 0) B.push_back(x1);
 			}
 			if (blk) break;
 		}
+
 		int szu = U.size(), szb = B.size();
 		assert(szu % 2 == 0);
 		assert(szb % 2 == 0);
-		std::vector<Proj> PU, PB;
-		for (int j = 0; j < szb; j += 2) PB.push_back(Proj(B[j].e.x, B[j + 1].e.x, B[i].wi));
-		for (int j = 0, ni = vp; j < szu; j += 2) PU.push_back(Proj(B[j].e.x, B[j + 1].e.x, B[i].wi)), ni++;
 
-		if (PU[0].s == PB[0].s) PU[0].s = PB[0].s = -INF;
-		if (PU.back().e == PB.back().e) PU.back().e = PB.back().e = INF;
+		std::vector<Proj> PU, PB;
+		for (int j = 0; j < szb; j += 2) {
+			PB.push_back(Proj(seg[B[j]].e.x, seg[B[j + 1]].e.x, seg[B[i]].ri));
+			room[seg[B[j]].ri].u = y;
+			h[seg[B[j]].ri] = room[seg[B[j]].ri].h();
+			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
+		}
+		for (int j = 0, ni = vp; j < szu; j += 2) {
+			PU.push_back(Proj(seg[B[j]].s.x, seg[B[j] + 1].s.x, ni));
+			room[ni] = Trep(seg[B[j]], seg[B[j] + 1], y);
+			ni++;
+			assert(seg[B[j]].rvs && !seg[B[j + 1]].rvs);
+		}
+
+		if (U[0] == B[0]) PU[0].s = PB[0].s = -INF;
+		if (U.back() == B.back()) PU.back().e = PB.back().e = INF;
 
 		int idx_u = 0, idx_b = 0;
 		while (idx_u < PU.size() && idx_b < PB.size()) {
-			Proj& u = PU[idx_u];
-			Proj& b = PB[idx_b];
+			const Proj& u = PU[idx_u];
+			const Proj& b = PB[idx_b];
 			if (std::max(u.s, b.s) < std::min(u.e, b.e)) {
 				G[b.i].push_back({ u.i, UP });
 				G[u.i].push_back({ b.i, DOWN });
@@ -460,12 +472,13 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			else idx_b++;
 		}
 
-		for (const Seg& se : B) sp.erase(se.wi);
+		for (const int& b : B) sp.erase(b);
 		for (int j = 0; j < szu; j += 2) {
-			seg[U[i].i].wi = vp;
-			seg[U[i + 1].i].wi = vp;
-			sp.insert(U[i].i);
-			sp.insert(U[i + 1].i);
+			seg[U[i]].ri = vp;
+			seg[U[i + 1]].ri = vp;
+			vp++;
+			sp.insert(U[i]);
+			sp.insert(U[i + 1]);
 		}
 	}
 	return bfs(0);

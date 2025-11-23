@@ -17,7 +17,6 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(8);
-
 	return;
 }
 int main() { solve(); return 0; }

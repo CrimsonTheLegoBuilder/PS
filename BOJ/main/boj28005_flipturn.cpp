@@ -651,7 +651,7 @@ void solve() {
 #endif
 	}
 	std::cout << F.size() << "\n";
-	for (const Pos& f : F) std::cout << f.x + 6 << " " << f.y + 1 << "\n";
+	for (const Pos& f : F) std::cout << f.x << " " << f.y << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj28005

@@ -334,20 +334,37 @@ int bfs(int s = 0) {
 	int c = 0;
 	V[s] = 1;
 	while (Q.size()) {
-		int p = Q.back(); Q.pop();
+		int p = Q.front(); Q.pop();
 		for (const Info& w : G[p]) {
+#ifdef DEBUG
+			std::cout << "DEBUG::\n";
+			std::cout << "	bfs - p.i:: " << p << "\n";
+			std::cout << "	bfs - w.i:: " << w.i << "\n";
+			std::cout << "	bfs - h:: " << h[w.i] << "\n";
+			std::cout << "DEBUG::\n";
+#endif
 			if (!V[w.i]) {
-				if (w.d == DOWN) c += h[w.i];
+				if (w.d == DOWN) {
+#ifdef DEBUG
+					std::cout << "DEBUG:: GO DOWN\n";
+					std::cout << "	bfs - p.i:: " << p << "\n";
+					std::cout << "	bfs - w.i:: " << w.i << "\n";
+					std::cout << "	bfs - h:: " << h[w.i] << "\n";
+					std::cout << "	bfs - c  :: " << c << "\n";
+					std::cout << "DEBUG:: GO DOWN\n";
+#endif
+					c += h[w.i];
+				}
 				Q.push(w.i);
 				V[w.i] = 1;
 			}
 		}
 	}
-//#ifdef DEBUG
-//	std::cout << "DEBUG::\n";
-//	std::cout << "	bfs - c:: " << c << "\n";
-//	std::cout << "DEBUG::\n";
-//#endif
+#ifdef DEBUG
+	std::cout << "DEBUG::\n";
+	std::cout << "	bfs - total C:: " << c << "\n";
+	std::cout << "DEBUG::\n";
+#endif
 	return c;
 }
 bool block(const Polygon& P, const int& i, const int& sz) {
@@ -377,6 +394,12 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 //	std::cout << "	P::\n";
 //	std::cout << "P:: DEBUG::\n";
 //#endif
+#ifdef DEBUG
+	std::cout << "\n\nDEBUG START::\n";
+	std::cout << "DEBUG START::\n";
+	std::cout << "DEBUG START::\n\n\n";
+
+#endif
 
 	int sz = P.size();
 	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
@@ -397,26 +420,29 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 //#endif
 
 	std::sort(E.begin(), E.end(), cmpy);
-//#ifdef DEBUG
-//	std::cout << "DEBUG::\n";
-//	std::cout << "E:: DEBUG::\n";
-//	std::cout << "	E::\n";
-//	for (const Pos& e : E) std::cout << "	" << e << "\n";
-//	std::cout << "	E::\n";
-//	std::cout << "E:: DEBUG::\n";
-//	std::cout << "DEBUG::\n";
-//#endif
+#ifdef DEBUG
+	std::cout << "DEBUG:: E::\n";
+	for (int i = 0; i < sz; i++) std::cout << "	E[" << i << "]:: " << E[i] << "\n";
+	std::cout << "DEBUG:: E::\n";
+#endif
 
 	for (int i = 0, j, i0, i1, i2, i3, i4, y; i < sz; i++) {
 		int l = -1, r = -1;
 		Pos cur = E[i];
 		y = cur.y;
+#ifdef DEBUG
+		std::cout << "DEBUG::\n";
+		std::cout << "	i  :: " << i << "\n";
+		std::cout << "	y  :: " << y << "\n";
+		std::cout << "	cur:: " << cur << "\n";
+		std::cout << "DEBUG::\n";
+#endif
 		i2 = cur.i;
 		i0 = (i2 - 2 + sz) % sz; i1 = (i2 - 1 + sz) % sz; i3 = (i2 + 1) % sz; i4 = (i2 + 2) % sz;
 
 		if (sp.empty() ||
 			(P[i1].y > y && P[i3].y > y && ccw(P[i1], P[i2], P[i3]) > 0) ||
-			(P[i1].y == P[i2].y && P[i0].y > y && P[i3].y > y && ccw(P[i1], P[i2], P[i3]) > 0)
+			(P[i2].y == P[i3].y && P[i1].y > y && P[i4].y > y && ccw(P[i1], P[i2], P[i3]) > 0)
 			) {
 			l = i1; seg[i1] = Seg(P[i1], P[i2], i1, vp);
 			if (P[i2].y == P[i3].y) r = i3, seg[i3] = Seg(P[i3], P[i4], i3, vp), i++;
@@ -459,6 +485,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			std::cout << "	room info:: r:: " << room[seg[r].ri].r.s << " e:: " << room[seg[r].ri].r.e << " ri:: " << seg[r].ri << "\n";
 			std::cout << "	room info:: b:: " << room[seg[l].ri].b << "\n";
 			std::cout << "	room info:: u:: " << room[seg[l].ri].u << "\n";
+			std::cout << "	room info:: h:: " << h[seg[l].ri] << "\n";
 			std::cout << "ROOM FINISH:: DEBUG::\n";
 #endif
 			continue;
@@ -467,7 +494,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		bool fl = sp.find_left(E[i], l);
 		bool fr = sp.find_right(E[i], r);
 		if (fl && !seg[l].rvs) fl = 0;
-		assert(fr && r > -1);
+		if (fr && !seg[r].rvs) fr = 0;
 #ifdef DEBUG
 		std::cout << "ROOM SCAN:: DEBUG::\n";
 		if (fl) std::cout << "	wall[l]:: s:: " << seg[l].s << " e:: " << seg[l].e << " ri:: " << seg[l].ri << "\n";
@@ -480,7 +507,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 		if (fl && seg[l].s.y < y && y < seg[l].e.y) { B.push_back(l), U.push_back(l); }
 		for (j = i; j < sz; j++) {
 			if (E[j].y != y) break;
-			if (ccw(seg[r].s, seg[r].e, cur) < 0) break;
+			if (fr && ccw(seg[r].s, seg[r].e, cur) < 0) break;
 			cur = E[j];
 			int x1 = cur.i, x0 = (x1 - 1 + sz) % sz, x2 = (x1 + 1) % sz;
 			bool blk = 0;
@@ -499,11 +526,18 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 				if (s1 > 0) U.push_back(x1);
 				else if (s1 < 0) B.push_back(x1);
 			}
+			if (j + 1 < sz && fr && ccw(seg[r].s, seg[r].e, cur) < 0) break;
 			if (blk) { tog = 1; break; }
 		}
 		if (!tog) {
-			sp.find_right(cur, r);
-			assert(seg[r].s.y < y && y < seg[r].e.y);
+			fr = sp.find_right(cur, r);
+#ifdef DEBUG
+			std::cout << "ASSERT::\n";
+			std::cout << "	RIGHT SEG CHECK::" << "\n";
+			std::cout << "	cur:: " << cur << "\n";
+			std::cout << "ASSERT::\n";
+#endif
+			assert(fr && seg[r].s.y < y && y < seg[r].e.y);
 			B.push_back(r); U.push_back(r);
 		}
 
@@ -579,6 +613,9 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 			const Proj& u = PU[idx_u];
 			const Proj& b = PB[idx_b];
 			if (std::max(u.s, b.s) < std::min(u.e, b.e)) {
+#ifdef DEBUG
+				std::cout << "ROOM CONNECT PHASE :::::: " << b.i << " - " << u.i << "\n";
+#endif
 				G[b.i].push_back({ u.i, UP });
 				G[u.i].push_back({ b.i, DOWN });
 			}
@@ -665,3 +702,70 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj28005
+
+/*
+
+8
+0 3
+0 0
+5 0
+9 1
+5 6
+5 1
+4 5
+3 1
+===
+7
+0 0
+5 0
+9 1
+8 5
+4 10
+1 12
+0 8
+
+=============
+
+34
+1 1
+13 1
+13 9
+5 9
+5 8
+12 8
+12 2
+11 2
+11 3
+3 3
+3 2
+2 2
+2 4
+3 4
+3 5
+2 5
+2 9
+3 9
+3 6
+6 6
+6 5
+4 5
+4 4
+11 4
+11 5
+7 5
+7 6
+11 6
+11 7
+4 7
+4 10
+13 10
+13 11
+1 11
+===
+4
+-8 -4
+36 -4
+36 19
+-8 19
+
+*/

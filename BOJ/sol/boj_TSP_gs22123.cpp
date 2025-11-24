@@ -1,5 +1,3 @@
-http://boj.kr/34a69f867147413180bb6696bcb637e6
-
 //THIS IS NOT MY CODE.
 //AUTHOR: gs22123
 

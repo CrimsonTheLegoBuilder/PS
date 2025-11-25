@@ -323,7 +323,7 @@ ll count(const Polygon& H, const int& s, const int& e, const int& n) {
 	for (int i = 0; i < vp; i++) G[i].clear();
 	vp = 1;
 	Polygon P = { H[s] }, E;
-	for (int i = e; i != s; i = (i - 1 + N) % N) P.push_back(H[i]);
+	for (int i = e; i != s; i = (i - 1 + n) % n) P.push_back(H[i]);
 	int sz = P.size();
 	for (int i = 0; i < sz; i++) P[i].i = i, E.push_back(P[i]);
 	for (int i = 0; i < sz; i++) seg[i] = Seg(P[i], P[(i + 1) % sz], i);

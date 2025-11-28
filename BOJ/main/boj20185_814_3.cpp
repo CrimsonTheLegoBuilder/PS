@@ -22,7 +22,7 @@ typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
 const ld TOL = 1e-5;
 const ld PI = acos(-1);
-const int LEN = 3005;
+const int LEN = 1e4;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
@@ -749,15 +749,8 @@ ll hilbert_order(const Pii& p, int pow2) {
 Pii clst[DX][DY];
 int fst_clst_cnt[DX][DY];
 int fst_belt_cnt[DX];
-void solve() {
-	std::cin.tie(0)->sync_with_stdio(0);
-	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(10);
-	std::cin >> N >> K;
-	Vpii P(N); for (Pii& p : P) std::cin >> p;
-	for (int i = 0; i < N; i++) P[i].i = i;
-	std::sort(P.begin(), P.end(), cmpx);
+int grp[LEN];
+void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
 		if (!((i + 1) % 7)) fst_clst_cnt[i / DY][i % DY] = 58;
 		else fst_clst_cnt[i / DY][i % DY] = 57;
@@ -767,10 +760,35 @@ void solve() {
 			fst_belt_cnt[x] += fst_clst_cnt[x][y];
 		}
 	}
-	Vint tx(DX), ty(DY);
-	for (int i = 0; i < DX; i++) {
-
+	int prv_x = 0;
+	int g = 0;
+	memset(grp, -1, sizeof grp);
+	std::sort(P.begin(), P.end(), cmpx);
+	for (int x = 0; x < DX; x++) {
+		Vpii C;
+		for (int i = 0; i < fst_belt_cnt[x]; i++) C.push_back(P[prv_x + i]);
+		std::sort(C.begin(), C.end(), cmpy);
+		int prv_y = 0;
+		for (int y = 0; y < DY; y++) {
+			for (int i = 0; i < fst_clst_cnt[x][y]; i++) {
+				grp[C[prv_y + i].i] = g;
+			}
+			g++;
+			prv_y += fst_clst_cnt[x][y];
+		}
+		prv_x += fst_belt_cnt[x];
 	}
+	return;
+}
+void solve() {
+	std::cin.tie(0)->sync_with_stdio(0);
+	std::cout.tie(0);
+	std::cout << std::fixed;
+	std::cout.precision(10);
+	std::cin >> N >> K;
+	Vpii P(N); for (Pii& p : P) std::cin >> p;
+	for (int i = 0; i < N; i++) P[i].i = i;
+	first_clustering(P);
 	return;
 }
 int main() { solve(); return 0; }

@@ -84,6 +84,7 @@ const Pii INF_PT = { (int)1e9, (int)1e9 };
 typedef std::vector<Pii> Vpii;
 bool cmpx(const Pii& p, const Pii& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpy(const Pii& p, const Pii& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
+bool cmpi(const Pii& p, const Pii& q) { return p.i < q.i; }
 ll cross(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pii& d1, const Pii& d2, const Pii& d3, const Pii& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pii& d1, const Pii& d2, const Pii& d3) { return (d2 - d1) * (d3 - d2); }
@@ -746,18 +747,18 @@ ll hilbert_order(const Pii& p, int pow2) {
 	}
 	return d;
 }
-Pii clst[DX][DY];
-int fst_clst_cnt[DX][DY];
+Vpii clst[DX][DY];
+int clst_cnt[DX][DY];
 int fst_belt_cnt[DX];
 int grp[LEN];
 void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
-		if (!((i + 1) % 7)) fst_clst_cnt[i / DY][i % DY] = 58;
-		else fst_clst_cnt[i / DY][i % DY] = 57;
+		if (!((i + 1) % 7)) clst_cnt[i / DY][i % DY] = 58;
+		else clst_cnt[i / DY][i % DY] = 57;
 	}
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
-			fst_belt_cnt[x] += fst_clst_cnt[x][y];
+			fst_belt_cnt[x] += clst_cnt[x][y];
 		}
 	}
 	int prv_x = 0;
@@ -770,15 +771,50 @@ void first_clustering(Vpii& P) {
 		std::sort(C.begin(), C.end(), cmpy);
 		int prv_y = 0;
 		for (int y = 0; y < DY; y++) {
-			for (int i = 0; i < fst_clst_cnt[x][y]; i++) {
+			for (int i = 0; i < clst_cnt[x][y]; i++) {
 				grp[C[prv_y + i].i] = g;
+				clst[x][y].push_back(C[prv_y + i]);
 			}
 			g++;
-			prv_y += fst_clst_cnt[x][y];
+			prv_y += clst_cnt[x][y];
 		}
 		prv_x += fst_belt_cnt[x];
 	}
+	std::sort(P.begin(), P.end(), cmpi);
 	return;
+}
+void init_hilbert_paths(Vpii& P) {
+	for (int x = 0; x < DX; x++) {
+		for (int y = 0; y < DY; y++) {
+			if (clst[x][y].empty()) continue;
+			std::vector<Order> V;
+			int min_x = 1e9, min_y = 1e9;
+			int max_x = -1e9, max_y = -1e9;
+			int sz = clst[x][y].size();
+			for (int i = 0; i < sz; i++) {
+				min_x = std::min(min_x, clst[x][y][i].x);
+				min_y = std::min(min_y, clst[x][y][i].y);
+				max_x = std::max(max_x, clst[x][y][i].x);
+				max_y = std::max(max_y, clst[x][y][i].y);
+			}
+			ll pow2 = 1;
+			int tx = max_x - min_x;
+			int ty = max_y - min_y;
+			int t = std::max(tx, ty);
+			while (pow2 <= t) pow2 <<= 1;
+			for (int i = 0; i < clst_cnt[x][y]; i++) {
+				clst[x][y][i].x -= min_x;
+				clst[x][y][i].y -= min_y;
+			}
+			for (int i = 0; i < clst_cnt[x][y]; i++) {
+				Pii p = clst[x][y][i] - Pii(min_x, min_y);
+				V.push_back({ hilbert_order(p, pow2), clst[x][y][i].i });
+			}
+			std::sort(V.begin(), V.end());
+
+			//hilbert path
+		}
+	}
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -789,6 +825,8 @@ void solve() {
 	Vpii P(N); for (Pii& p : P) std::cin >> p;
 	for (int i = 0; i < N; i++) P[i].i = i;
 	first_clustering(P);
+	init_hilbert_paths(P);
+
 	return;
 }
 int main() { solve(); return 0; }

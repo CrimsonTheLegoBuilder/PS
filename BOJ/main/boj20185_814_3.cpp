@@ -53,8 +53,8 @@ const int DY = 10;
 
 int N, K;
 struct Pii {
-	int x, y; int i, o;
-	Pii(int x_ = 0, int y_ = 0, int i_ = 0, int o_ = -1) : x(x_), y(y_), i(i_), o(o_) {}
+	int x, y; int i;
+	Pii(int x_ = 0, int y_ = 0, int i_ = -1) : x(x_), y(y_), i(i_) {}
 	bool operator == (const Pii& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pii& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pii& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -724,6 +724,11 @@ Vint DT[LEN], NG;
 std::vector<Seg> VDP[LEN];
 std::vector<Seg> VDN[LEN];
 
+struct Order {
+	ll o;
+	int i;
+	bool operator < (const Order& q) const { return o < q.o; }
+};
 ll hilbert_order(const Pii& p, int pow2) {
 	int x = p.x, y = p.y;
 	ll d = 0;
@@ -742,6 +747,8 @@ ll hilbert_order(const Pii& p, int pow2) {
 	return d;
 }
 Pii clst[DX][DY];
+int fst_clst_cnt[140];
+int fst_belt_cnt[14];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -751,7 +758,10 @@ void solve() {
 	Vpii P(N); for (Pii& p : P) std::cin >> p;
 	for (int i = 0; i < N; i++) P[i].i = i;
 	std::sort(P.begin(), P.end(), cmpx);
-
+	for (int i = 1; i <= K; i++) {
+		if (!(i % 20)) fst_clst_cnt[i - 1] = 58;
+		else fst_clst_cnt[i] = 57;
+	}
 	Vint tx(DX), ty(DY);
 	for (int i = 0; i < DX; i++) {
 

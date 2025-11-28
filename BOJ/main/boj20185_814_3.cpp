@@ -747,8 +747,8 @@ ll hilbert_order(const Pii& p, int pow2) {
 	return d;
 }
 Pii clst[DX][DY];
-int fst_clst_cnt[140];
-int fst_belt_cnt[14];
+int fst_clst_cnt[DX][DY];
+int fst_belt_cnt[DX];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -758,9 +758,14 @@ void solve() {
 	Vpii P(N); for (Pii& p : P) std::cin >> p;
 	for (int i = 0; i < N; i++) P[i].i = i;
 	std::sort(P.begin(), P.end(), cmpx);
-	for (int i = 1; i <= K; i++) {
-		if (!(i % 20)) fst_clst_cnt[i - 1] = 58;
-		else fst_clst_cnt[i] = 57;
+	for (int i = 0; i < K; i++) {
+		if (!((i + 1) % 7)) fst_clst_cnt[i / DY][i % DY] = 58;
+		else fst_clst_cnt[i / DY][i % DY] = 57;
+	}
+	for (int x = 0; x < DX; x++) {
+		for (int y = 0; y < DY; y++) {
+			fst_belt_cnt[x] += fst_clst_cnt[x][y];
+		}
 	}
 	Vint tx(DX), ty(DY);
 	for (int i = 0; i < DX; i++) {

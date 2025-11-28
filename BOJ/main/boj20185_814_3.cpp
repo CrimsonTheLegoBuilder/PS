@@ -53,27 +53,27 @@ const int DY = 10;
 
 int N, K;
 struct Pii {
-	ll x, y; int i;
-	Pii(ll x_ = 0, ll y_ = 0, int i_ = 0) : x(x_), y(y_), i(i_) {}
+	int x, y; int i, o;
+	Pii(int x_ = 0, int y_ = 0, int i_ = 0, int o_ = -1) : x(x_), y(y_), i(i_), o(o_) {}
 	bool operator == (const Pii& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pii& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pii& p) const { return x == p.x ? y < p.y : x < p.x; }
 	bool operator <= (const Pii& p) const { return x == p.x ? y <= p.y : x <= p.x; }
 	Pii operator + (const Pii& p) const { return { x + p.x, y + p.y }; }
 	Pii operator - (const Pii& p) const { return { x - p.x, y - p.y }; }
-	Pii operator * (const ll& n) const { return { x * n, y * n }; }
-	Pii operator / (const ll& n) const { return { x / n, y / n }; }
-	ll operator * (const Pii& p) const { return { x * p.x + y * p.y }; }
-	ll operator / (const Pii& p) const { return { x * p.y - y * p.x }; }
+	Pii operator * (const int& n) const { return { x * n, y * n }; }
+	Pii operator / (const int& n) const { return { x / n, y / n }; }
+	ll operator * (const Pii& p) const { return { (ll)x * p.x + (ll)y * p.y }; }
+	ll operator / (const Pii& p) const { return { (ll)x * p.y - (ll)y * p.x }; }
 	Pii& operator += (const Pii& p) { x += p.x; y += p.y; return *this; }
 	Pii& operator -= (const Pii& p) { x -= p.x; y -= p.y; return *this; }
-	Pii& operator *= (const ll& n) { x *= n; y *= n; return *this; }
-	Pii& operator /= (const ll& n) { x /= n; y /= n; return *this; }
+	Pii& operator *= (const int& n) { x *= n; y *= n; return *this; }
+	Pii& operator /= (const int& n) { x /= n; y /= n; return *this; }
 	Pii operator - () const { return { -x, -y }; }
 	Pii operator ~ () const { return { -y, x }; }
 	Pii operator ! () const { return { y, x }; }
-	ll xy() const { return x * y; }
-	ll Euc() const { return x * x + y * y; }
+	ll xy() const { return (ll)x * y; }
+	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ll Man() const { return std::abs(x) + std::abs(y); }
 	ld mag() const { return hypot(x, y); }
 	friend std::istream& operator >> (std::istream& is, Pii& p) { is >> p.x >> p.y; return is; }
@@ -724,6 +724,23 @@ Vint DT[LEN], NG;
 std::vector<Seg> VDP[LEN];
 std::vector<Seg> VDN[LEN];
 
+ll hilbert_order(const Pii& p, int pow2) {
+	int x = p.x, y = p.y;
+	ll d = 0;
+	for (int s = pow2 >> 1; s > 0; s >>= 1) {
+		int rx = (x & s) > 0;
+		int ry = (y & s) > 0;
+		d += (ll)s * s * ((3ll * rx) ^ ry);
+		if (ry == 0) {
+			if (rx == 1) {
+				x = pow2 - 1 - x;
+				y = pow2 - 1 - y;
+			}
+			int temp = x; x = y; y = temp;
+		}
+	}
+	return d;
+}
 Pii clst[DX][DY];
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

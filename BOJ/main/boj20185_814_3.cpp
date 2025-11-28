@@ -50,7 +50,6 @@ I'm : stupid
 const int DX = 14;
 const int DY = 10;
 
-
 int N, K;
 struct Pii {
 	int x, y; int i;
@@ -721,10 +720,6 @@ Segs cell(std::vector<Pos>& C, const int& idx, const int f = 1) {
 	}
 	return half_plane_intersection(HP);
 }
-Vint DT[LEN], NG;
-std::vector<Seg> VDP[LEN];
-std::vector<Seg> VDN[LEN];
-
 struct Order {
 	ll o;
 	int i;
@@ -751,6 +746,7 @@ Vpii clst[DX][DY];
 int clst_cnt[DX][DY];
 int fst_belt_cnt[DX];
 int grp[LEN];
+Vint dt[LEN];
 void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
 		if (!((i + 1) % 7)) clst_cnt[i / DY][i % DY] = 58;
@@ -816,6 +812,22 @@ void init_hilbert_paths(Vpii& P) {
 		}
 	}
 }
+void delaunay_triagulation(const Vpii& P) {
+	int sz = P.size();
+	Polygon C;
+	for (const Pii& p : P) C.push_back(conv(p));
+	Delaunator dtr(C);
+	for (int i = 0; i < dtr.triangles_.size(); i += 3) {
+		const int& a = dtr.points_[dtr.triangles_[i]].i;
+		const int& b = dtr.points_[dtr.triangles_[i + 1]].i;
+		const int& c = dtr.points_[dtr.triangles_[i + 2]].i;
+		dt[a].push_back(b); dt[a].push_back(c);
+		dt[b].push_back(a); dt[b].push_back(c);
+		dt[c].push_back(a); dt[c].push_back(b);
+	}
+	for (int i = 0; i < sz; i++) std::sort(dt[i].begin(), dt[i].end());
+	return;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -826,7 +838,7 @@ void solve() {
 	for (int i = 0; i < N; i++) P[i].i = i;
 	first_clustering(P);
 	init_hilbert_paths(P);
-
+	delaunay_triagulation(P);
 	return;
 }
 int main() { solve(); return 0; }

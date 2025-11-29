@@ -13,6 +13,7 @@
 #include <complex>
 #include <numeric>
 #include <set>
+#include <chrono>
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
@@ -842,13 +843,11 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	Vpii& T = clst[tx][ty];
 	Vpii& H = clst[hx][hy];
 	int sz = T.size();
-	if (sz <= 3) return false;
-	ll sx = 0, sy = 0;
-	sz = H.size();
-	for (auto& p : H) { sx += p.x; sy += p.y; }
-	Pii cen = { (int)(sx / sz), (int)(sy / sz) };
+	if (sz <= 3) return 0;
+	if (H.empty()) return 0;
+	Pii cen = { (int)(meta[hx][hy].sx / sz), (int)(meta[hx][hy].sy / sz) };
 	int best_idx = -1;
-	ll min_dist = INF;
+	ll min_dist = 4e18;
 	sz = T.size();
 	for (int i = 0; i < sz; i++) {
 		ll d = sq((ll)T[i].x - cen.x) + sq((ll)T[i].y - cen.y);
@@ -857,17 +856,16 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 			best_idx = i;
 		}
 	}
-	if (best_idx == -1) return false;
+	if (best_idx == -1) return 0;
+	Vpii BT = T;//backup
+	Vpii BH = H;//backup
 	Pii p = T[best_idx];
-	Vpii BT = T;
-	Vpii BH = H;
 	T.erase(T.begin() + best_idx);
 	ld best_inc = 1e18;
 	int best_pos = 0;
-	int h_sz = H.size();
-	for (int i = 0; i < h_sz; i++) {
-		Pii u = H[i];
-		Pii v = H[(i + 1) % h_sz];
+	sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		const Pii& u = H[i], & v = H[(i + 1) % sz];
 		ld inc = (u - p).mag() + (p - v).mag() - (u - v).mag();
 		if (inc < best_inc) {
 			best_inc = inc;
@@ -881,43 +879,50 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
 	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
 
-	ld old_t_dist = 0; for (int i = 0; i < BT.size(); i++) old_t_dist += (BT[i] - BT[(i + 1) % BT.size()]).mag();
-	ld old_h_dist = 0; for (int i = 0; i < BH.size(); i++) old_h_dist += (BH[i] - BH[(i + 1) % BH.size()]).mag();
-
-	ld old_max = std::max(old_t_dist, old_h_dist);
+	ld old_max = std::max(meta[tx][ty].d, meta[hx][hy].d);
 	ld new_max = std::max(new_t_dist, new_h_dist);
 
-	if (new_max < old_max - 1e-5) return 1;
-	else {
-		clst[tx][ty] = BT;
-		clst[hx][hy] = BH;
-		return 0;
+	if (new_max < old_max - 1e-5) {
+		//optimize_2opt_single(tx, ty);
+		update_meta(tx, ty);
+		//optimize_2opt_single(hx, hy);
+		update_meta(hx, hy);
+		return 1;
 	}
+	clst[tx][ty] = BT;
+	clst[hx][hy] = BH;
+	return 0;
 }
 void balancing_step() {
 	ld mx = -1;
 	int tx = -1, ty = -1;
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
-			//if (dist > max_d) { max_d = dist; tx = x; ty = y; }
+			if (meta[x][y].d > mx) {
+				mx = meta[x][y].d;
+				tx = x; ty = y;
+			}
 		}
 	}
-
-	Pii target_center = centroid(tx, ty);
-	double min_d = 1e18;
+	Pii cen = centroid_fast(tx, ty);
+	ld mn = 1e18;
 	int hx = -1, hy = -1;
-
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
 			if (x == tx && y == ty) continue;
-			//double d = /* 그룹 거리 */;
-			//if (d < min_d) { min_d = d; hx = x; hy = y; }
+			Pii c = centroid_fast(x, y);
+			ll d = (cen - c).Euc();
+			if (d > 25000LL * 25000LL) continue;
+			if (meta[x][y].d < mn) {
+				mn = meta[x][y].d;
+				hx = x; hy = y;
+			}
 		}
 	}
 	if (hx != -1) {
 		if (try_move_point(tx, ty, hx, hy)) {
-			// optimize_2opt_single(tx, ty);
-			// optimize_2opt_single(hx, hy);
+			optimize_2opt_single(tx, ty);
+			optimize_2opt_single(hx, hy);
 		}
 	}
 	return;
@@ -944,6 +949,12 @@ ld run_solver() {
 	first_clustering(P);
 	init_hilbert_paths(P);
 	optimize_2opt();
+	auto start_time = std::chrono::steady_clock::now();
+	while (true) {
+		auto now = std::chrono::steady_clock::now();
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
+		balancing_step();
+	}
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;

@@ -21,7 +21,7 @@ typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
-const ld TOL = 1e-5;
+const ld TOL = 1e-9;
 const ld PI = acos(-1);
 const int LEN = 1e4;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
@@ -637,6 +637,13 @@ int grp[LEN];
 Vint dt[LEN];
 int prv[LEN], nxt[LEN];//graph
 bool F[K_];
+Pii get_centroid(int x, int y) {
+	ll sx = 0, sy = 0;
+	int sz = clst[x][y].size();
+	if (sz == 0) return { -1, -1 };
+	for (const Pii& p : clst[x][y]) { sx += p.x; sy += p.y; }
+	return { (int)(sx / sz), (int)(sy / sz) };
+}
 void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
 		if (!((i + 1) % 7)) clst_cnt[i] = clst_cnt_2d[i / DY][i % DY] = 58;
@@ -739,6 +746,167 @@ void delaunay_triagulation(const Vpii& P) {
 	for (int i = 0; i < sz; i++) std::sort(dt[i].begin(), dt[i].end());
 	return;
 }
+void optimize_2opt_single(int x, int y, int thr = 50) {
+	Vpii& path = clst[x][y];
+	int sz = path.size();
+	if (sz < 3) return;
+	bool imp = 1;
+	while (imp && thr--) {
+		imp = 0;
+		for (int i = 0; i < sz - 1; i++) {
+			for (int j = i + 2; j < sz; j++) {
+				if (i == 0 && j == sz - 1) continue;
+				Pii p1 = path[i];
+				Pii p2 = path[i + 1];
+				Pii p3 = path[j];
+				Pii p4 = path[(j + 1) % sz];
+				ld d12 = (p1 - p2).mag();
+				ld d34 = (p3 - p4).mag();
+				ld d13 = (p1 - p3).mag();
+				ld d24 = (p2 - p4).mag();
+				if (d13 + d24 < d12 + d34 - TOL) {
+					std::reverse(path.begin() + i + 1, path.begin() + j + 1);
+					imp = 1;
+				}
+			}
+		}
+	}
+	return;
+}
+void optimize_2opt(int thr = 100000) {
+	for (int x = 0; x < DX; x++) {
+		for (int y = 0; y < DY; y++) {
+			Vpii& path = clst[x][y];
+			int sz = path.size();
+			if (sz < 3) continue;
+			bool imp = 1;
+			while (imp && thr--) {
+				imp = 0;
+				for (int i = 0; i < sz - 1; i++) {
+					for (int j = i + 2; j < sz; j++) {
+						if (j == sz - 1 && i == 0) continue;
+						Pii p1 = path[i];
+						Pii p2 = path[i + 1];
+						Pii p3 = path[j];
+						Pii p4 = path[(j + 1) % sz];
+						ld d12 = (p1 - p2).mag();
+						ld d34 = (p3 - p4).mag();
+						ld d13 = (p1 - p3).mag();
+						ld d24 = (p2 - p4).mag();
+						if (d13 + d24 < d12 + d34 - TOL) {
+							std::reverse(path.begin() + i + 1, path.begin() + j + 1);
+							imp = true;
+						}
+					}
+				}
+			}
+			for (int i = 0; i < sz; i++) {
+				int u = path[i].i;
+				int v = path[(i + 1) % sz].i;
+				int w = path[(i - 1 + sz) % sz].i;
+				nxt[u] = v;
+				prv[u] = w;
+			}
+		}
+	}
+	return;
+}
+bool try_move_point(int tx, int ty, int hx, int hy) {
+	Vpii& T = clst[tx][ty];
+	Vpii& H = clst[hx][hy];
+	int sz = T.size();
+	if (sz <= 3) return false;
+	ll sx = 0, sy = 0;
+	sz = H.size();
+	for (auto& p : H) { sx += p.x; sy += p.y; }
+	Pii cen = { (int)(sx / sz), (int)(sy / sz) };
+	int best_idx = -1;
+	ll min_dist = 4e18;
+	sz = T.size();
+	for (int i = 0; i < sz; i++) {
+		ll d = sq((ll)T[i].x - cen.x) + sq((ll)T[i].y - cen.y);
+		if (d < min_dist) {
+			min_dist = d;
+			best_idx = i;
+		}
+	}
+	if (best_idx == -1) return false;
+	Pii p = T[best_idx];
+	Vpii BT = T;
+	Vpii BH = H;
+	T.erase(T.begin() + best_idx);
+	ld best_inc = 1e18;
+	int best_pos = 0;
+	int h_sz = H.size();
+	for (int i = 0; i < h_sz; i++) {
+		Pii u = H[i];
+		Pii v = H[(i + 1) % h_sz];
+		ld inc = (u - p).mag() + (p - v).mag() - (u - v).mag();
+		if (inc < best_inc) {
+			best_inc = inc;
+			best_pos = i;
+		}
+	}
+	H.insert(H.begin() + best_pos + 1, p);
+	optimize_2opt_single(tx, ty);
+	optimize_2opt_single(hx, hy);
+
+	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
+	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
+
+	ld old_t_dist = 0; for (int i = 0; i < BT.size(); i++) old_t_dist += (BT[i] - BT[(i + 1) % BT.size()]).mag();
+	ld old_h_dist = 0; for (int i = 0; i < BH.size(); i++) old_h_dist += (BH[i] - BH[(i + 1) % BH.size()]).mag();
+
+	ld old_max = std::max(old_t_dist, old_h_dist);
+	ld new_max = std::max(new_t_dist, new_h_dist);
+
+	if (new_max < old_max - 1e-5) {
+		return 1;
+	}
+	else {
+		clst[tx][ty] = BT;
+		clst[hx][hy] = BH;
+		return 0;
+	}
+}
+//void balancing_step() {
+//	double max_d = -1;
+//	int tx = -1, ty = -1;
+//
+//	for (int x = 0; x < DX; x++) {
+//		for (int y = 0; y < DY; y++) {
+//			if (dist > max_d) { max_d = dist; tx = x; ty = y; }
+//		}
+//	}
+//
+//	Pii target_center = get_centroid(tx, ty);
+//	double min_d = 1e18;
+//	int hx = -1, hy = -1;
+//
+//	for (int x = 0; x < DX; x++) {
+//		for (int y = 0; y < DY; y++) {
+//			if (x == tx && y == ty) continue;
+//
+//			// 중심 거리가 가까운지 확인 (이웃 판별)
+//			ll center_dist = sq((ll)clst[x][y].x - target_center.x) + sq((ll)clst[x][y].y - target_center.y);
+//			if (center_dist > 25000LL * 25000LL) continue; // 너무 멀면 이웃 아님
+//
+//			// 그중에서 점수가 가장 낮은(여유로운) 녀석 선택
+//			double d = /* 그룹 거리 */;
+//			if (d < min_d) { min_d = d; hx = x; hy = y; }
+//		}
+//	}
+//
+//	// 3. 점 이동 시도
+//	if (hx != -1) {
+//		if (try_move_point(tx, ty, hx, hy)) {
+//			// 이동 성공했으면, 두 그룹에 대해 2-opt 다시 수행 (모양 다듬기)
+//			// optimize_2opt_single(tx, ty);
+//			// optimize_2opt_single(hx, hy);
+//		}
+//	}
+//}
+
 void reset_data() {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
@@ -760,6 +928,7 @@ ld run_solver() {
 	for (int i = 0; i < N; i++) P[i].i = i;
 	first_clustering(P);
 	init_hilbert_paths(P);
+	optimize_2opt();
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;
@@ -811,6 +980,7 @@ void solve() {
 		max_score = std::max(max_score, score);
 	}
 	std::cout << "======================================\n";
+	std::cout << "2-opt:\n";
 	std::cout << "Total Score: " << total_score << "\n";
 	std::cout << "Average Score: " << total_score / 50.0 << "\n";
 	std::cout << "Worst Case   : " << max_score << "\n";

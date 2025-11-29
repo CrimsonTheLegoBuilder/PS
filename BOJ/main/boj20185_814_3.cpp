@@ -38,6 +38,9 @@ inline ll gcd(ll x, ll y, ll z) {
 	return gcd(w, z);
 }
 
+bool DEBUG = 0;
+bool HILBERT_ONLY = 0;
+
 /*
 
 tested in range -1e6 < x, y < 1e6;
@@ -47,6 +50,8 @@ I'm : stupid
 
 */
 
+const int N_ = 8000;
+const int K_ = 140;
 const int DX = 14;
 const int DY = 10;
 
@@ -600,126 +605,6 @@ private:
 		}
 	}
 };
-struct Linear {//ps[0] -> ps[1] ::
-	Pos ps[2];
-	Pos dir_;
-	const Pos& operator [] (const int& i) const { return ps[i]; }
-	const Pos& dir() const { return dir_; }
-	Linear(Pos a = Pos(0, 0), Pos b = Pos(0, 0)) {
-		ps[0] = a;
-		ps[1] = b;
-		//dir_ = (ps[1] - ps[0]).unit();
-		dir_ = (ps[1] - ps[0]);
-	}
-	bool include(const Pos& p) const { return sign(dir_ / (p - ps[0])) > 0; }
-	friend bool parallel(const Linear& l0, const Linear& l1) { return zero(l0.dir() / l1.dir()); }
-	friend bool same_dir(const Linear& l0, const Linear& l1) { return parallel(l0, l1) && l0.dir() * l1.dir() > 0; }
-	bool operator < (const Linear& l0) const {
-		if (same_dir(*this, l0)) return l0.include(ps[0]);
-		else return cmpq(this->dir(), l0.dir());
-	}
-};
-typedef std::vector<Linear> VHP;
-Pos intersection(const Linear& l1, const Linear& l2) { return intersection(l1[0], l1[1], l2[0], l2[1]); }
-void init(std::vector<Linear>& HP, const ld& mx = 5e9) {
-	HP.push_back(Linear(Pos(-mx, -mx), Pos(mx, -mx)));
-	HP.push_back(Linear(Pos(mx, -mx), Pos(mx, mx)));
-	HP.push_back(Linear(Pos(mx, mx), Pos(-mx, mx)));
-	HP.push_back(Linear(Pos(-mx, mx), Pos(-mx, -mx)));
-	return;
-}
-struct Seg {
-	Pos s, e, dir;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
-	//bool operator < (const Seg& l) const { return s == l.s ? e < l.e : s < l.s; }
-	bool inner(const Pos& p) const { return sign(dir / (p - s)) > 0; }
-	friend bool parallel(const Seg& l0, const Seg& l1) { return zero(l0.dir / l1.dir); }
-	friend bool same_dir(const Seg& l0, const Seg& l1) { return parallel(l0, l1) && l0.dir * l1.dir > 0; }
-	friend Pos intersection_(const Seg& s1, const Seg& s2) {
-		const Pos& p1 = s1.s, & p2 = s1.e;
-		const Pos& q1 = s2.s, & q2 = s2.e;
-		ld a1 = cross(q1, q2, p1);
-		ld a2 = -cross(q1, q2, p2);
-		return (p1 * a2 + p2 * a1) / (a1 + a2);
-	}
-	bool operator < (const Seg& l) const {
-		if (same_dir(*this, l)) return l.inner(s);
-		bool f0 = O < dir;
-		bool f1 = O < l.dir;
-		if (f0 != f1) return f1;
-		return sign(dir / l.dir) > 0;
-	}
-	//bool operator == (const Seg& l) const { return s == l.s && e == l.e; }
-	Pos p(const ld& rt = .5) const { return s + (e - s) * rt; }
-	ld green(const ld& lo = 0, const ld& hi = 1) const {
-		ld d = hi - lo;
-		ld ratio = (lo + hi) * .5;
-		Pos m = p(ratio);
-		return m.y * d * (s.x - e.x);
-	}
-};
-typedef std::vector<Seg> Segs;
-ld dot(const Seg& p, const Seg& q) { return dot(p.s, p.e, q.s, q.e); }
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = 0) {
-	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
-	ld det = (q2 - q1) / (p2 - p1);
-	if (zero(det)) return -1;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (f == 1) return fit(a1, 0, 1);
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
-}
-Segs half_plane_intersection(Segs& HP, const bool& srt = 1) {
-	auto check = [&](Seg& u, Seg& v, Seg& w) -> bool {
-		return w.inner(intersection_(u, v));
-		};
-	if (srt) std::sort(HP.begin(), HP.end());
-	std::deque<Seg> dq;
-	int sz = HP.size();
-	for (int i = 0; i < sz; ++i) {
-		if (i && same_dir(HP[i], HP[(i - 1) % sz])) continue;
-		while (dq.size() > 1 && !check(dq[dq.size() - 2], dq[dq.size() - 1], HP[i])) dq.pop_back();
-		while (dq.size() > 1 && !check(dq[1], dq[0], HP[i])) dq.pop_front();
-		dq.push_back(HP[i]);
-	}
-	while (dq.size() > 2 && !check(dq[dq.size() - 2], dq[dq.size() - 1], dq[0])) dq.pop_back();
-	while (dq.size() > 2 && !check(dq[1], dq[0], dq[dq.size() - 1])) dq.pop_front();
-	sz = dq.size();
-	if (sz < 3) return {};
-	std::vector<Seg> HPI;
-	for (int i = 0; i < sz; ++i) HPI.push_back(dq[i]);
-	return HPI;
-}
-Segs half_plane_intersection(const Segs& P, const Segs& Q) {
-	//Segs HP;
-	//int sz;
-	//sz = P.size();
-	//for (int i = 0; i < sz; i++) HP.push_back(P[i]);
-	//sz = Q.size();
-	//for (int i = 0; i < sz; i++) HP.push_back(Q[i]);
-	Segs HP(P.size() + Q.size());
-	std::merge(P.begin(), P.end(), Q.begin(), Q.end(), HP.begin());
-	return half_plane_intersection(HP, 0);
-}
-Segs cell(std::vector<Pos>& C, const int& idx, const int f = 1) {
-	int sz = C.size();
-	ld mx = 1e9;
-	Segs HP = {
-		Seg(Pos(-mx, -mx), Pos(mx, -mx)),
-		Seg(Pos(mx, -mx), Pos(mx, mx)),
-		Seg(Pos(mx, mx), Pos(-mx, mx)),
-		Seg(Pos(-mx, mx), Pos(-mx, -mx))
-	};
-	for (int i = 0; i < sz; i++) {
-		if (i == idx) continue;
-		Pos v = ~(C[i] - C[idx]);
-		v *= f;
-		Pos m = (C[i] + C[idx]) * .5;
-		HP.push_back(Seg(m, m + v));
-	}
-	return half_plane_intersection(HP);
-}
 struct Order {
 	ll o;
 	int i;
@@ -743,18 +628,20 @@ ll hilbert_order(const Pii& p, int pow2) {
 	return d;
 }
 Vpii clst[DX][DY];
-int clst_cnt[DX][DY];
+int clst_cnt[K_], clst_cnt_2d[DX][DY];
 int fst_belt_cnt[DX];
 int grp[LEN];
 Vint dt[LEN];
+int prv[LEN], nxt[LEN];//graph
+bool F[K_];
 void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
-		if (!((i + 1) % 7)) clst_cnt[i / DY][i % DY] = 58;
-		else clst_cnt[i / DY][i % DY] = 57;
+		if (!((i + 1) % 7)) clst_cnt[i] = clst_cnt_2d[i / DY][i % DY] = 58;
+		else clst_cnt[i] = clst_cnt_2d[i / DY][i % DY] = 57;
 	}
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
-			fst_belt_cnt[x] += clst_cnt[x][y];
+			fst_belt_cnt[x] += clst_cnt_2d[x][y];
 		}
 	}
 	int prv_x = 0;
@@ -767,12 +654,12 @@ void first_clustering(Vpii& P) {
 		std::sort(C.begin(), C.end(), cmpy);
 		int prv_y = 0;
 		for (int y = 0; y < DY; y++) {
-			for (int i = 0; i < clst_cnt[x][y]; i++) {
+			for (int i = 0; i < clst_cnt_2d[x][y]; i++) {
 				grp[C[prv_y + i].i] = g;
 				clst[x][y].push_back(C[prv_y + i]);
 			}
 			g++;
-			prv_y += clst_cnt[x][y];
+			prv_y += clst_cnt_2d[x][y];
 		}
 		prv_x += fst_belt_cnt[x];
 	}
@@ -782,7 +669,7 @@ void first_clustering(Vpii& P) {
 void init_hilbert_paths(Vpii& P) {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
-			if (clst[x][y].empty()) continue;
+			//if (clst[x][y].empty()) continue;
 			std::vector<Order> V;
 			int min_x = 1e9, min_y = 1e9;
 			int max_x = -1e9, max_y = -1e9;
@@ -798,19 +685,40 @@ void init_hilbert_paths(Vpii& P) {
 			int ty = max_y - min_y;
 			int t = std::max(tx, ty);
 			while (pow2 <= t) pow2 <<= 1;
-			for (int i = 0; i < clst_cnt[x][y]; i++) {
-				clst[x][y][i].x -= min_x;
-				clst[x][y][i].y -= min_y;
-			}
-			for (int i = 0; i < clst_cnt[x][y]; i++) {
+			for (int i = 0; i < clst_cnt_2d[x][y]; i++) {
 				Pii p = clst[x][y][i] - Pii(min_x, min_y);
 				V.push_back({ hilbert_order(p, pow2), clst[x][y][i].i });
 			}
 			std::sort(V.begin(), V.end());
-
-			//hilbert path
+			for (int i = 0, i0, i2; i < sz; i++) {
+				i0 = (i - 1 + sz) % sz;
+				i2 = (i + 1) % sz;
+				prv[V[i].i] = V[i0].i;
+				nxt[V[i].i] = V[i2].i;
+			}
 		}
 	}
+	if (HILBERT_ONLY) {
+		ld D[K_];
+		for (int x = 0; x < DX; x++) {
+			for (int y = 0; y < DY; y++) {
+				//if (clst[x][y].empty()) continue;
+				int s = clst[x][y][0].i;
+				int u = s;
+				ld d = 0;
+				do {
+					int v = nxt[u];
+					d += (P[u] - P[v]).mag();
+					u = v;
+				} while (u != s);
+				D[x * DY + y] = d;
+			}
+		}
+		std::cout << "HILBERT ONLY::\n";
+		for (int i = 0; i < K_; i++) std::cout << D[i] << "\n";
+		std::cout << "HILBERT ONLY::\n";
+	}
+	return;
 }
 void delaunay_triagulation(const Vpii& P) {
 	int sz = P.size();

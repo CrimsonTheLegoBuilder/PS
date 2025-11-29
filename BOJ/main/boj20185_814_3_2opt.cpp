@@ -637,12 +637,37 @@ int grp[LEN];
 Vint dt[LEN];
 int prv[LEN], nxt[LEN];//graph
 bool F[K_];
-Pii get_centroid(int x, int y) {
+struct ClusterMeta {
+	ld d;
+	ll sx;
+	ll sy;
+} meta[DX][DY];
+void update_meta(int x, int y) {
+	const Vpii& path = clst[x][y];
+	int sz = path.size();
+	if (sz == 0) { meta[x][y] = { 0.0, 0, 0 }; return; }
+	ld d = 0;
+	ll sx = 0, sy = 0;
+	for (int i = 0; i < sz; i++) {
+		const Pii& p0 = path[i], & p1 = path[(i + 1) % sz];
+		d += (p0 - p1).mag();
+		sx += p0.x; sy += p0.y;
+	}
+	meta[x][y] = { d, sx, sy };
+	return;
+}
+void init_all_meta() { for (int x = 0; x < DX; x++) for (int y = 0; y < DY; y++) update_meta(x, y); }
+Pii centroid(int x, int y) {
 	ll sx = 0, sy = 0;
 	int sz = clst[x][y].size();
 	if (sz == 0) return { -1, -1 };
 	for (const Pii& p : clst[x][y]) { sx += p.x; sy += p.y; }
 	return { (int)(sx / sz), (int)(sy / sz) };
+}
+Pii centroid_fast(int x, int y) {
+	int sz = clst[x][y].size();
+	if (sz == 0) return { -1, -1 };
+	return { (int)(meta[x][y].sx / sz), (int)(meta[x][y].sy / sz) };
 }
 void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
@@ -728,6 +753,7 @@ void init_hilbert_paths(Vpii& P) {
 		for (int i = 0; i < K_; i++) std::cout << D[i] << "\n";
 		std::cout << "HILBERT ONLY::\n";
 	}
+	init_all_meta();
 	return;
 }
 void delaunay_triagulation(const Vpii& P) {
@@ -809,6 +835,7 @@ void optimize_2opt(int thr = 100000) {
 			}
 		}
 	}
+	init_all_meta();
 	return;
 }
 bool try_move_point(int tx, int ty, int hx, int hy) {
@@ -860,53 +887,41 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	ld old_max = std::max(old_t_dist, old_h_dist);
 	ld new_max = std::max(new_t_dist, new_h_dist);
 
-	if (new_max < old_max - 1e-5) {
-		return 1;
-	}
+	if (new_max < old_max - 1e-5) return 1;
 	else {
 		clst[tx][ty] = BT;
 		clst[hx][hy] = BH;
 		return 0;
 	}
 }
-//void balancing_step() {
-//	double max_d = -1;
-//	int tx = -1, ty = -1;
-//
-//	for (int x = 0; x < DX; x++) {
-//		for (int y = 0; y < DY; y++) {
-//			if (dist > max_d) { max_d = dist; tx = x; ty = y; }
-//		}
-//	}
-//
-//	Pii target_center = get_centroid(tx, ty);
-//	double min_d = 1e18;
-//	int hx = -1, hy = -1;
-//
-//	for (int x = 0; x < DX; x++) {
-//		for (int y = 0; y < DY; y++) {
-//			if (x == tx && y == ty) continue;
-//
-//			// 중심 거리가 가까운지 확인 (이웃 판별)
-//			ll center_dist = sq((ll)clst[x][y].x - target_center.x) + sq((ll)clst[x][y].y - target_center.y);
-//			if (center_dist > 25000LL * 25000LL) continue; // 너무 멀면 이웃 아님
-//
-//			// 그중에서 점수가 가장 낮은(여유로운) 녀석 선택
-//			double d = /* 그룹 거리 */;
-//			if (d < min_d) { min_d = d; hx = x; hy = y; }
-//		}
-//	}
-//
-//	// 3. 점 이동 시도
-//	if (hx != -1) {
-//		if (try_move_point(tx, ty, hx, hy)) {
-//			// 이동 성공했으면, 두 그룹에 대해 2-opt 다시 수행 (모양 다듬기)
-//			// optimize_2opt_single(tx, ty);
-//			// optimize_2opt_single(hx, hy);
-//		}
-//	}
-//}
+void balancing_step() {
+	ld mx = -1;
+	int tx = -1, ty = -1;
+	for (int x = 0; x < DX; x++) {
+		for (int y = 0; y < DY; y++) {
+			//if (dist > max_d) { max_d = dist; tx = x; ty = y; }
+		}
+	}
 
+	Pii target_center = centroid(tx, ty);
+	double min_d = 1e18;
+	int hx = -1, hy = -1;
+
+	for (int x = 0; x < DX; x++) {
+		for (int y = 0; y < DY; y++) {
+			if (x == tx && y == ty) continue;
+			//double d = /* 그룹 거리 */;
+			//if (d < min_d) { min_d = d; hx = x; hy = y; }
+		}
+	}
+	if (hx != -1) {
+		if (try_move_point(tx, ty, hx, hy)) {
+			// optimize_2opt_single(tx, ty);
+			// optimize_2opt_single(hx, hy);
+		}
+	}
+	return;
+}
 void reset_data() {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {

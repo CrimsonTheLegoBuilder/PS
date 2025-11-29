@@ -821,7 +821,7 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	for (auto& p : H) { sx += p.x; sy += p.y; }
 	Pii cen = { (int)(sx / sz), (int)(sy / sz) };
 	int best_idx = -1;
-	ll min_dist = 4e18;
+	ll min_dist = INF;
 	sz = T.size();
 	for (int i = 0; i < sz; i++) {
 		ll d = sq((ll)T[i].x - cen.x) + sq((ll)T[i].y - cen.y);

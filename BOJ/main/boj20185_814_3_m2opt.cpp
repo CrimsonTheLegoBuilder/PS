@@ -1098,7 +1098,7 @@ ld run_solver() {
 	first_clustering(P);
 	init_hilbert_paths(P);
 	optimize_2opt();
-	optimize_3opt(100000);
+	optimize_3opt();
 	//auto start_time = std::chrono::steady_clock::now();
 	//while (1) {
 	//	auto now = std::chrono::steady_clock::now();

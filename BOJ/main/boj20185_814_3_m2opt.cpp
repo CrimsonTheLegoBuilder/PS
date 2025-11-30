@@ -1098,13 +1098,13 @@ ld run_solver() {
 	first_clustering(P);
 	init_hilbert_paths(P);
 	optimize_2opt();
-	optimize_3opt();
-	auto start_time = std::chrono::steady_clock::now();
-	while (1) {
-		auto now = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
-		balancing_step();
-	}
+	optimize_3opt(100000);
+	//auto start_time = std::chrono::steady_clock::now();
+	//while (1) {
+	//	auto now = std::chrono::steady_clock::now();
+	//	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
+	//	balancing_step();
+	//}
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;

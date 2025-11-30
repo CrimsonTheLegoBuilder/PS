@@ -22,7 +22,7 @@ typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
-const ld TOL = 1e-9;
+const ld TOL = 1e-5;
 const ld PI = acos(-1);
 const int LEN = 1e4;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
@@ -770,7 +770,10 @@ void delaunay_triagulation(const Vpii& P) {
 		dt[b].push_back(a); dt[b].push_back(c);
 		dt[c].push_back(a); dt[c].push_back(b);
 	}
-	for (int i = 0; i < sz; i++) std::sort(dt[i].begin(), dt[i].end());
+	for (int i = 0; i < sz; i++) {
+		std::sort(dt[i].begin(), dt[i].end());
+		dt[i].erase(unique(dt[i].begin(), dt[i].end()), dt[i].end());
+	}
 	return;
 }
 void optimize_2opt_single(int x, int y, int thr = 50) {
@@ -839,42 +842,166 @@ void optimize_2opt(int thr = 100000) {
 	init_all_meta();
 	return;
 }
+void optimize_3opt_single(int x, int y, int thr = 100000) {
+	Vpii& path = clst[x][y];
+	int sz = path.size();
+	if (sz < 6) return;
+
+	bool imp = true;
+	while (imp && thr) {
+		imp = false;
+
+		for (int i = 0; i < sz - 1; i++) {
+			for (int j = i + 2; j < sz - 1; j++) {
+				for (int k = j + 2; k < sz; k++) {
+					if (thr-- < 0) return;
+					if (i == 0 && k == sz - 1) continue;
+					Pii A = path[i], B = path[i + 1];
+					Pii C = path[j], D = path[j + 1];
+					Pii E = path[k], F = path[(k + 1) % sz];
+
+					ld d0 = (A - B).mag() + (C - D).mag() + (E - F).mag();
+					ld d1 = (A - C).mag() + (B - D).mag() + (E - F).mag();
+					ld d2 = (A - B).mag() + (C - E).mag() + (D - F).mag();
+					ld d3 = (A - D).mag() + (E - B).mag() + (C - F).mag();
+					ld d4 = (A - D).mag() + (E - C).mag() + (B - F).mag();
+					ld d5 = (A - E).mag() + (D - B).mag() + (C - F).mag();
+					ld d6 = (A - C).mag() + (B - E).mag() + (D - F).mag();
+					ld d7 = (A - E).mag() + (D - C).mag() + (B - F).mag();
+
+					ld min_d = d0;
+					int best_case = 0;
+
+					if (d1 < min_d - TOL) { min_d = d1; best_case = 1; }
+					if (d2 < min_d - TOL) { min_d = d2; best_case = 2; }
+					if (d3 < min_d - TOL) { min_d = d3; best_case = 3; }
+					if (d4 < min_d - TOL) { min_d = d4; best_case = 4; }
+					if (d5 < min_d - TOL) { min_d = d5; best_case = 5; }
+					if (d6 < min_d - TOL) { min_d = d6; best_case = 6; }
+					if (d7 < min_d - TOL) { min_d = d7; best_case = 7; }
+
+					if (best_case > 0) {
+						imp = true;
+
+						// Case 1, 2: 2-opt (Reverse)
+						if (best_case == 1) {
+							std::reverse(path.begin() + i + 1, path.begin() + j + 1);
+						}
+						else if (best_case == 2) {
+							std::reverse(path.begin() + j + 1, path.begin() + k + 1);
+						}
+						// Case 3 ~ 7: 3-opt (Reconstruction)
+						else {
+							Vpii new_order;
+							new_order.reserve(sz);
+
+							Vpii s1, s2;
+							s1.reserve(j - i);
+							s2.reserve(k - j);
+
+							for (int t = i + 1; t <= j; t++) s1.push_back(path[t]);
+							for (int t = j + 1; t <= k; t++) s2.push_back(path[t]);
+
+							for (int t = 0; t <= i; t++) new_order.push_back(path[t]);
+
+							switch (best_case) {
+							case 3: // d3: A -> S2 -> S1(rev) -> F
+								for (const auto& p : s2) new_order.push_back(p);
+								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
+								break;
+							case 4: // d4: A -> S2 -> S1 -> F
+								for (const auto& p : s2) new_order.push_back(p);
+								for (const auto& p : s1) new_order.push_back(p);
+								break;
+							case 5: // d5: A -> S2(rev) -> S1(rev) -> F
+								for (int t = s2.size() - 1; t >= 0; t--) new_order.push_back(s2[t]);
+								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
+								break;
+							case 6: // d6: A -> S1(rev) -> S2 -> F
+								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
+								for (const auto& p : s2) new_order.push_back(p);
+								break;
+							case 7: // d7: A -> S2(rev) -> S1 -> F
+								for (int t = s2.size() - 1; t >= 0; t--) new_order.push_back(s2[t]);
+								for (const auto& p : s1) new_order.push_back(p);
+								break;
+							}
+
+							for (int t = k + 1; t < sz; t++) new_order.push_back(path[t]);
+
+							path = std::move(new_order);
+						}
+					}
+				}
+			}
+		}
+	}
+	for (int i = 0; i < sz; i++) {
+		int u = path[i].i;
+		int v = path[(i + 1) % sz].i;
+		int w = path[(i - 1 + sz) % sz].i;
+		nxt[u] = v;
+		prv[u] = w;
+	}
+}
+void optimize_3opt(int thr = 25000) {
+	for (int x = 0; x < DX; x++) {
+		for (int y = 0; y < DY; y++) {
+			optimize_3opt_single(x, y, thr);
+			//std::cout << "	x: " << x << " y: " << y << " done\n";
+		}
+	}
+	init_all_meta();
+	return;
+}
 bool try_move_point(int tx, int ty, int hx, int hy) {
 	Vpii& T = clst[tx][ty];
 	Vpii& H = clst[hx][hy];
-	int sz = T.size();
-	if (sz <= 3) return 0;
-	if (H.empty()) return 0;
-	Pii cen = { (int)(meta[hx][hy].sx / sz), (int)(meta[hx][hy].sy / sz) };
+
+	if (T.size() <= 3) return false;
+
+	Pii cen = { (int)(meta[hx][hy].sx / H.size()), (int)(meta[hx][hy].sy / H.size()) };
+
 	int best_idx = -1;
-	ll min_dist = 4e18;
-	sz = T.size();
-	for (int i = 0; i < sz; i++) {
-		ll d = sq((ll)T[i].x - cen.x) + sq((ll)T[i].y - cen.y);
-		if (d < min_dist) {
-			min_dist = d;
+	ll min_center_dist = 4e18;// long long max
+
+	for (int i = 0; i < T.size(); i++) {
+		ll d = (T[i] - cen).Euc();
+		if (d < min_center_dist) {
+			min_center_dist = d;
 			best_idx = i;
 		}
 	}
-	if (best_idx == -1) return 0;
-	Vpii BT = T;//backup
-	Vpii BH = H;//backup
+	if (best_idx == -1) return false;
+
+	Vpii BT = T;
+	Vpii BH = H;
+
 	Pii p = T[best_idx];
 	T.erase(T.begin() + best_idx);
+
 	ld best_inc = 1e18;
 	int best_pos = 0;
-	sz = H.size();
-	for (int i = 0; i < sz; i++) {
-		const Pii& u = H[i], & v = H[(i + 1) % sz];
-		ld inc = (u - p).mag() + (p - v).mag() - (u - v).mag();
-		if (inc < best_inc) {
-			best_inc = inc;
-			best_pos = i;
+	int h_sz = H.size();
+
+	if (h_sz == 0) best_pos = -1;
+	else {
+		for (int i = 0; i < h_sz; i++) {
+			Pii u = H[i];
+			Pii v = H[(i + 1) % h_sz];
+			ld inc = (u - p).mag() + (p - v).mag() - (u - v).mag();
+			if (inc < best_inc) {
+				best_inc = inc;
+				best_pos = i;
+			}
 		}
 	}
 	H.insert(H.begin() + best_pos + 1, p);
-	optimize_2opt_single(tx, ty);
-	optimize_2opt_single(hx, hy);
+
+	optimize_2opt_single(tx, ty, 2000);
+	optimize_3opt_single(tx, ty, 100000);
+	optimize_2opt_single(hx, hy, 2000);
+	optimize_3opt_single(hx, hy, 100000);
 
 	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
 	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
@@ -883,10 +1010,15 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	ld new_max = std::max(new_t_dist, new_h_dist);
 
 	if (new_max < old_max - 1e-5) {
-		//optimize_2opt_single(tx, ty);
-		update_meta(tx, ty);
-		//optimize_2opt_single(hx, hy);
-		update_meta(hx, hy);
+		meta[tx][ty].d = new_t_dist;
+		meta[tx][ty].sx -= p.x; meta[tx][ty].sy -= p.y;
+
+		meta[hx][hy].d = new_h_dist;
+		meta[hx][hy].sx += p.x; meta[hx][hy].sy += p.y;
+
+		// ★ 점의 소속 정보 갱신 (필수) ★
+		grp[p.i] = hx * DY + hy;
+
 		return 1;
 	}
 	clst[tx][ty] = BT;
@@ -894,36 +1026,51 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	return 0;
 }
 void balancing_step() {
-	ld mx = -1;
+	ld max_dist = -1.0;
 	int tx = -1, ty = -1;
+
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
-			if (meta[x][y].d > mx) {
-				mx = meta[x][y].d;
+			if (meta[x][y].d > max_dist) {
+				max_dist = meta[x][y].d;
 				tx = x; ty = y;
 			}
 		}
 	}
-	Pii cen = centroid_fast(tx, ty);
-	ld mn = 1e18;
+
+	std::cout << "tx:: " << tx << "\n";
+	if (tx == -1 || clst[tx][ty].size() <= 3) return;
+
+	int target_gid = tx * DY + ty;
+	Vpii& target_path = clst[tx][ty];
+
+	std::set<int> neighbors;
+
+	for (const Pii& p : target_path) {
+		int u = p.i;
+		for (int v : dt[u]) {
+			int neighbor_gid = grp[v];
+			if (neighbor_gid != target_gid) neighbors.insert(neighbor_gid);
+		}
+	}
+
+	ld min_dist = 1e18;
 	int hx = -1, hy = -1;
-	for (int x = 0; x < DX; x++) {
-		for (int y = 0; y < DY; y++) {
-			if (x == tx && y == ty) continue;
-			Pii c = centroid_fast(x, y);
-			ll d = (cen - c).Euc();
-			if (d > 25000LL * 25000LL) continue;
-			if (meta[x][y].d < mn) {
-				mn = meta[x][y].d;
-				hx = x; hy = y;
+
+	for (int n_gid : neighbors) {
+		int nx = n_gid / DY;
+		int ny = n_gid % DY;
+		if (meta[nx][ny].d < max_dist) {
+			if (meta[nx][ny].d < min_dist) {
+				min_dist = meta[nx][ny].d;
+				hx = nx; hy = ny;
 			}
 		}
 	}
+
 	if (hx != -1) {
-		if (try_move_point(tx, ty, hx, hy)) {
-			optimize_2opt_single(tx, ty);
-			optimize_2opt_single(hx, hy);
-		}
+		bool f = try_move_point(tx, ty, hx, hy);
+		//std::cout << "	f:: " << f << "\n";
 	}
 	return;
 }
@@ -933,6 +1080,7 @@ void reset_data() {
 			clst[x][y].clear();
 		}
 	}
+	for (int i = 0; i < N_; i++) dt[i].clear();
 	memset(clst_cnt, 0, sizeof(clst_cnt));
 	memset(clst_cnt_2d, 0, sizeof(clst_cnt_2d));
 	memset(fst_belt_cnt, 0, sizeof(fst_belt_cnt));
@@ -946,11 +1094,13 @@ ld run_solver() {
 	Vpii P(N);
 	for (Pii& p : P) std::cin >> p;
 	for (int i = 0; i < N; i++) P[i].i = i;
+	delaunay_triagulation(P);
 	first_clustering(P);
 	init_hilbert_paths(P);
 	optimize_2opt();
+	optimize_3opt();
 	auto start_time = std::chrono::steady_clock::now();
-	while (true) {
+	while (1) {
 		auto now = std::chrono::steady_clock::now();
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
 		balancing_step();
@@ -995,7 +1145,8 @@ void solve() {
 	ld total_score = 0;
 	ld max_score = 0;
 	std::cout << "========= [LOCAL TEST START] =========\n";
-	for (int i = 1; i <= 50; i++) {
+	//for (int i = 1; i <= 50; i++) {
+	for (int i = 1; i <= 1; i++) {
 		std::string filename = (i < 10 ? "0" : "") + std::to_string(i) + ".in";
 		std::string path = "../../tests/814_3/" + filename;
 		if (freopen(path.c_str(), "r", stdin) == NULL) { std::cout << "File Not Found: " << path << "\n"; continue; }

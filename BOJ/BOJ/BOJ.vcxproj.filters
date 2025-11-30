@@ -171,7 +171,16 @@
     <ClCompile Include="..\library\fastio_optimize_gcc.cpp">
       <Filter>소스 파일\_tools</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\boj20185_814_3.cpp">
+    <ClCompile Include="..\library\random_generator.cpp">
+      <Filter>소스 파일\_tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\boj20185_814_3_hilb.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\boj20185_814_3_2opt.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\boj20185_814_3_m2opt.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>

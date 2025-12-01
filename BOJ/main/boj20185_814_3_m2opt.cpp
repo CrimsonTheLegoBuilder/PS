@@ -640,8 +640,7 @@ int prv[LEN], nxt[LEN];//graph
 bool F[K_];
 struct ClusterMeta {
 	ld d;
-	ll sx;
-	ll sy;
+	ll sx, sy;
 } meta[DX][DY];
 void update_meta(int x, int y) {
 	const Vpii& path = clst[x][y];
@@ -663,12 +662,14 @@ Pii centroid(int x, int y) {
 	int sz = clst[x][y].size();
 	if (sz == 0) return { -1, -1 };
 	for (const Pii& p : clst[x][y]) { sx += p.x; sy += p.y; }
-	return { (int)(sx / sz), (int)(sy / sz) };
+	return { (int)(1. * sx / sz), (int)(1. * sy / sz) };
+	//return { (int)(1.L * sx / sz), (int)(1.L * sy / sz) };
 }
 Pii centroid_fast(int x, int y) {
 	int sz = clst[x][y].size();
 	if (sz == 0) return { -1, -1 };
-	return { (int)(meta[x][y].sx / sz), (int)(meta[x][y].sy / sz) };
+	return { (int)(1. * meta[x][y].sx / sz), (int)(1. * meta[x][y].sy / sz) };
+	//return { (int)(1.L * meta[x][y].sx / sz), (int)(1.L * meta[x][y].sy / sz) };
 }
 void first_clustering(Vpii& P) {
 	for (int i = 0; i < K; i++) {
@@ -846,11 +847,9 @@ void optimize_3opt_single(int x, int y, int thr = 100000) {
 	Vpii& path = clst[x][y];
 	int sz = path.size();
 	if (sz < 6) return;
-
-	bool imp = true;
+	bool imp = 1;
 	while (imp && thr) {
-		imp = false;
-
+		imp = 0;
 		for (int i = 0; i < sz - 1; i++) {
 			for (int j = i + 2; j < sz - 1; j++) {
 				for (int k = j + 2; k < sz; k++) {
@@ -881,7 +880,7 @@ void optimize_3opt_single(int x, int y, int thr = 100000) {
 					if (d7 < min_d - TOL) { min_d = d7; best_case = 7; }
 
 					if (best_case > 0) {
-						imp = true;
+						imp = 1;
 
 						// Case 1, 2: 2-opt (Reverse)
 						if (best_case == 1) {
@@ -943,6 +942,7 @@ void optimize_3opt_single(int x, int y, int thr = 100000) {
 		nxt[u] = v;
 		prv[u] = w;
 	}
+	return;
 }
 void optimize_3opt(int thr = 25000) {
 	for (int x = 0; x < DX; x++) {

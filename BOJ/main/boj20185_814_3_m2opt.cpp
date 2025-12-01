@@ -626,7 +626,7 @@ ll hilbert_order(const Pii& p, int pow2) {
 				x = pow2 - 1 - x;
 				y = pow2 - 1 - y;
 			}
-			int temp = x; x = y; y = temp;
+			std::swap(x, y);
 		}
 	}
 	return d;

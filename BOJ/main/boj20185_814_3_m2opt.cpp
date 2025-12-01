@@ -1144,9 +1144,9 @@ void solve() {
 #ifdef LOCAL_TEST
 	ld total_score = 0;
 	ld max_score = 0;
+	int tc = 1;
 	std::cout << "========= [LOCAL TEST START] =========\n";
-	//for (int i = 1; i <= 50; i++) {
-	for (int i = 1; i <= 1; i++) {
+	for (int i = 1; i <= tc; i++) {
 		std::string filename = (i < 10 ? "0" : "") + std::to_string(i) + ".in";
 		std::string path = "../../tests/814_3/" + filename;
 		if (freopen(path.c_str(), "r", stdin) == NULL) { std::cout << "File Not Found: " << path << "\n"; continue; }

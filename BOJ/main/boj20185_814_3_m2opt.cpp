@@ -843,29 +843,40 @@ void optimize_2opt(int thr = 100000) {
 	init_all_meta();
 	return;
 }
-void optimize_3opt_single(int x, int y, int thr = 100000) {
+void optimize_3opt_single(int x, int y, int thr = 2500) {
 	Vpii& path = clst[x][y];
 	int sz = path.size();
 	if (sz < 6) return;
 	bool imp = 1;
-	while (imp && thr) {
+	while (imp && thr--) {
 		imp = 0;
 		for (int i = 0; i < sz - 1; i++) {
 			for (int j = i + 2; j < sz - 1; j++) {
 				for (int k = j + 2; k < sz; k++) {
-					if (thr-- < 0) return;
 					if (i == 0 && k == sz - 1) continue;
-					Pii A = path[i], B = path[i + 1];
-					Pii C = path[j], D = path[j + 1];
-					Pii E = path[k], F = path[(k + 1) % sz];
+					Pii A = path[i];        Pii B = path[i + 1];
+					Pii C = path[j];        Pii D = path[j + 1];
+					Pii E = path[k];        Pii F = path[(k + 1) % sz];
 
 					ld d0 = (A - B).mag() + (C - D).mag() + (E - F).mag();
+
 					ld d1 = (A - C).mag() + (B - D).mag() + (E - F).mag();
-					ld d2 = (A - B).mag() + (C - E).mag() + (D - F).mag();
+					ld d2 = (A - B).mag() + (C - E).mag() + (D - F).mag(); 
+
+					// [3-opt 계열: 이동 및 스왑]
+					// d3: A->S2->S1->F (통째로 순서 교환)
 					ld d3 = (A - D).mag() + (E - B).mag() + (C - F).mag();
+
+					// d4: A->S2->S1(rev)->F
 					ld d4 = (A - D).mag() + (E - C).mag() + (B - F).mag();
+
+					// d5: A->S2(rev)->S1->F
 					ld d5 = (A - E).mag() + (D - B).mag() + (C - F).mag();
+
+					// d6: A->S1(rev)->S2(rev)->F (d1+d2 동시에 하는 것과 다름)
 					ld d6 = (A - C).mag() + (B - E).mag() + (D - F).mag();
+
+					// d7: A->S2(rev)->S1(rev)->F
 					ld d7 = (A - E).mag() + (D - C).mag() + (B - F).mag();
 
 					ld min_d = d0;
@@ -904,47 +915,51 @@ void optimize_3opt_single(int x, int y, int thr = 100000) {
 							for (int t = 0; t <= i; t++) new_order.push_back(path[t]);
 
 							switch (best_case) {
-							case 3: // d3: A -> S2 -> S1(rev) -> F
-								for (const auto& p : s2) new_order.push_back(p);
-								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
-								break;
-							case 4: // d4: A -> S2 -> S1 -> F
+							case 3: // d3: A -> S2 -> S1 -> F
 								for (const auto& p : s2) new_order.push_back(p);
 								for (const auto& p : s1) new_order.push_back(p);
 								break;
-							case 5: // d5: A -> S2(rev) -> S1(rev) -> F
-								for (int t = s2.size() - 1; t >= 0; t--) new_order.push_back(s2[t]);
-								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
-								break;
-							case 6: // d6: A -> S1(rev) -> S2 -> F
-								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
+
+							case 4: // d4: A -> S2 -> S1(rev) -> F
 								for (const auto& p : s2) new_order.push_back(p);
+								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
 								break;
-							case 7: // d7: A -> S2(rev) -> S1 -> F
+
+							case 5: // d5: A -> S2(rev) -> S1 -> F
 								for (int t = s2.size() - 1; t >= 0; t--) new_order.push_back(s2[t]);
 								for (const auto& p : s1) new_order.push_back(p);
+								break;
+
+							case 6: // d6: A -> S1(rev) -> S2(rev) -> F
+								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
+								for (int t = s2.size() - 1; t >= 0; t--) new_order.push_back(s2[t]);
+								break;
+
+							case 7: // d7: A -> S2(rev) -> S1(rev) -> F
+								for (int t = s2.size() - 1; t >= 0; t--) new_order.push_back(s2[t]);
+								for (int t = s1.size() - 1; t >= 0; t--) new_order.push_back(s1[t]);
 								break;
 							}
 
 							for (int t = k + 1; t < sz; t++) new_order.push_back(path[t]);
 
-							path = std::move(new_order);
+							clst[x][y] = new_order;
 						}
 					}
 				}
 			}
 		}
 	}
+
+	Vpii& final_path = clst[x][y];
 	for (int i = 0; i < sz; i++) {
-		int u = path[i].i;
-		int v = path[(i + 1) % sz].i;
-		int w = path[(i - 1 + sz) % sz].i;
-		nxt[u] = v;
-		prv[u] = w;
+		int u = final_path[i].i;
+		int v = final_path[(i + 1) % sz].i;
+		int w = final_path[(i - 1 + sz) % sz].i;
+		nxt[u] = v; prv[u] = w;
 	}
-	return;
 }
-void optimize_3opt(int thr = 25000) {
+void optimize_3opt(int thr = 250000) {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
 			optimize_3opt_single(x, y, thr);
@@ -1016,13 +1031,26 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 		meta[hx][hy].d = new_h_dist;
 		meta[hx][hy].sx += p.x; meta[hx][hy].sy += p.y;
 
-		// ★ 점의 소속 정보 갱신 (필수) ★
 		grp[p.i] = hx * DY + hy;
 
 		return 1;
 	}
 	clst[tx][ty] = BT;
+	int sz = BT.size();
+	for (int i = 0; i < sz; i++) {
+		int u = BT[i].i;
+		int v = BT[(i + 1) % sz].i;
+		int w = BT[(i - 1 + sz) % sz].i;
+		nxt[u] = v; prv[u] = w;
+	}
 	clst[hx][hy] = BH;
+	sz = BH.size();
+	for (int i = 0; i < sz; i++) {
+		int u = BH[i].i;
+		int v = BH[(i + 1) % sz].i;
+		int w = BH[(i - 1 + sz) % sz].i;
+		nxt[u] = v; prv[u] = w;
+	}
 	return 0;
 }
 void balancing_step() {
@@ -1038,7 +1066,7 @@ void balancing_step() {
 		}
 	}
 
-	std::cout << "tx:: " << tx << "\n";
+	//std::cout << "tx:: " << tx << "\n";
 	if (tx == -1 || clst[tx][ty].size() <= 3) return;
 
 	int target_gid = tx * DY + ty;
@@ -1099,12 +1127,12 @@ ld run_solver() {
 	init_hilbert_paths(P);
 	optimize_2opt();
 	optimize_3opt();
-	//auto start_time = std::chrono::steady_clock::now();
-	//while (1) {
-	//	auto now = std::chrono::steady_clock::now();
-	//	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
-	//	balancing_step();
-	//}
+	auto start_time = std::chrono::steady_clock::now();
+	while (1) {
+		auto now = std::chrono::steady_clock::now();
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 40000) break;
+		balancing_step();
+	}
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;
@@ -1144,7 +1172,7 @@ void solve() {
 #ifdef LOCAL_TEST
 	ld total_score = 0;
 	ld max_score = 0;
-	int tc = 1;
+	int tc = 50;
 	std::cout << "========= [LOCAL TEST START] =========\n";
 	for (int i = 1; i <= tc; i++) {
 		std::string filename = (i < 10 ? "0" : "") + std::to_string(i) + ".in";

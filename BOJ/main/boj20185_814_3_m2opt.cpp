@@ -1128,14 +1128,15 @@ ld run_solver() {
 	optimize_2opt();
 	optimize_3opt();
 	auto start_time = std::chrono::steady_clock::now();
-	while (1) {
-		auto now = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 40000) break;
-		balancing_step();
-	}
+	//while (1) {
+	//	auto now = std::chrono::steady_clock::now();
+	//	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
+	//	balancing_step();
+	//}
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;
+	int cnt = 0;
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
 			if (clst[x][y].empty()) continue;
@@ -1144,6 +1145,7 @@ ld run_solver() {
 			ld cur_dist = 0;
 			int safety = 0;
 			do {
+				cnt++;
 				min_idx = std::min(min_idx, u);
 				max_idx = std::max(max_idx, u);
 				S.insert(u);
@@ -1160,6 +1162,7 @@ ld run_solver() {
 	std::cout << "min:: " << min_idx << "\n";
 	std::cout << "max:: " << max_idx << "\n";
 	std::cout << "sz :: " << S.size() << "\n";
+	std::cout << "cnt:: " << cnt << "\n";
 	std::cout << "DEBUG::\n";
 #endif
 	return max_dist;

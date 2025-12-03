@@ -22,7 +22,7 @@ typedef std::vector<ll> Vll;
 typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ld INF = 1e18;
-const ld TOL = 1e-5;
+const ld TOL = 1e-9;
 const ld PI = acos(-1);
 const int LEN = 1e4;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
@@ -46,7 +46,9 @@ inline ll gcd(ll x, ll y, ll z) {
 bool DEBUG = 0;
 bool HILBERT_ONLY = 0;
 
-int TRY_LIMIT = 100;
+const int TRY_LIMIT = 200;
+
+const ld BIAS_FACTOR = 1.5;
 
 //SA
 double TEMPERATURE = 0.0;
@@ -1014,7 +1016,6 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	//}
 
 	ld diff = new_max - old_max;
-	ld BIAS_FACTOR = 0.5;
 	ld adjusted_diff = diff - (geo_gain * BIAS_FACTOR);
 
 	bool acc = 0;
@@ -1140,17 +1141,35 @@ bool try_swap_point(int tx, int ty, int hx, int hy) {
 	//}
 
 	ld diff = new_max - old_max;
+
+	ll dist_p1_T = sq((ll)p1.x - meta[tx][ty].sx / (ll)BT.size()) + sq((ll)p1.y - meta[tx][ty].sy / (ll)BT.size());
+	ll dist_p1_H = sq((ll)p1.x - meta[hx][hy].sx / (ll)BH.size()) + sq((ll)p1.y - meta[hx][hy].sy / (ll)BH.size());
+	ld gain1 = (dist_p1_H < dist_p1_T) ? (sqrt(dist_p1_T) - sqrt(dist_p1_H)) : 0;
+
+	ll dist_p2_H = sq((ll)p2.x - meta[hx][hy].sx / (ll)BH.size()) + sq((ll)p2.y - meta[hx][hy].sy / (ll)BH.size());
+	ll dist_p2_T = sq((ll)p2.x - meta[tx][ty].sx / (ll)BT.size()) + sq((ll)p2.y - meta[tx][ty].sy / (ll)BT.size());
+	ld gain2 = (dist_p2_T < dist_p2_H) ? (sqrt(dist_p2_H) - sqrt(dist_p2_T)) : 0;
+
+	ld total_geo_gain = gain1 + gain2;
+
+	ld adjusted_diff = diff - (total_geo_gain * BIAS_FACTOR);
+
 	bool acc = 0;
-	if (diff < -1e-5) {
+	if (diff < -TOL) {
 		acc = 1;
 	}
 	else if (diff < old_max * 0.1) {
 		ld old_sum = meta[tx][ty].d + meta[hx][hy].d;
 		ld new_sum = new_t_dist + new_h_dist;
-		if (new_sum < old_sum - 1e-5) acc = 1;
+		ld sum_diff = new_sum - old_sum;
+
+		ld adjusted_sum_diff = sum_diff - (total_geo_gain * BIAS_FACTOR);
+
+		if (adjusted_sum_diff < -TOL) {
+			acc = 1;
+		}
 		else if (TEMPERATURE > 0.001) {
-			ld sum_diff = new_sum - old_sum;
-			if (dist_real(gen) < exp(-sum_diff / TEMPERATURE)) {
+			if (dist_real(gen) < exp(-adjusted_sum_diff / TEMPERATURE)) {
 				acc = 1;
 			}
 		}
@@ -1255,39 +1274,35 @@ void balancing_step() {
 
 	int try_limit = TRY_LIMIT;
 
-	for (int _ = 0; _ < 2; _++) {
-		for (auto& cand : cands) {
-			if (try_limit-- <= 0) break;
+	for (auto& cand : cands) {
+		if (try_limit-- <= 0) break;
 
-			int t_gid = cand.second;
-			int tx = t_gid / DY, ty = t_gid % DY;
+		int t_gid = cand.second;
+		int tx = t_gid / DY, ty = t_gid % DY;
 
-			std::set<int> neighbors;
-			for (const auto& p : clst[tx][ty]) {
-				for (int v : dt[p.i]) if (grp[v] != t_gid) neighbors.insert(grp[v]);
-			}
+		std::set<int> neighbors;
+		for (const auto& p : clst[tx][ty]) {
+			for (int v : dt[p.i]) if (grp[v] != t_gid) neighbors.insert(grp[v]);
+		}
 
-			int best_h = -1;
-			ld min_d = 1e18;
+		int best_h = -1;
+		ld min_d = 1e18;
 
-			for (int h_gid : neighbors) {
-				int hx = h_gid / DY, hy = h_gid % DY;
-				if (meta[hx][hy].d < meta[tx][ty].d) {
-					if (meta[hx][hy].d < min_d) {
-						min_d = meta[hx][hy].d;
-						best_h = h_gid;
-					}
+		for (int h_gid : neighbors) {
+			int hx = h_gid / DY, hy = h_gid % DY;
+			if (meta[hx][hy].d < meta[tx][ty].d) {
+				if (meta[hx][hy].d < min_d) {
+					min_d = meta[hx][hy].d;
+					best_h = h_gid;
 				}
 			}
-
-			if (best_h != -1) {
-				int hx = best_h / DY, hy = best_h % DY;
-				if (try_move_point(tx, ty, hx, hy)) continue;
-				try_swap_point(tx, ty, hx, hy);
-			}
 		}
-		try_limit = TRY_LIMIT;
-		std::reverse(cands.begin(), cands.end());
+
+		if (best_h != -1) {
+			int hx = best_h / DY, hy = best_h % DY;
+			if (try_move_point(tx, ty, hx, hy)) continue;
+			try_swap_point(tx, ty, hx, hy);
+		}
 	}
 	return;
 }

@@ -861,9 +861,9 @@ void optimize_3opt_single(int x, int y, int thr = 2500) {
 			for (int j = i + 2; j < sz - 1; j++) {
 				for (int k = j + 2; k < sz; k++) {
 					if (i == 0 && k == sz - 1) continue;
-					Pii A = path[i];        Pii B = path[i + 1];
-					Pii C = path[j];        Pii D = path[j + 1];
-					Pii E = path[k];        Pii F = path[(k + 1) % sz];
+					Pii A = path[i], B = path[i + 1];
+					Pii C = path[j], D = path[j + 1];
+					Pii E = path[k], F = path[(k + 1) % sz];
 
 					ld d0 = (A - B).mag() + (C - D).mag() + (E - F).mag();
 

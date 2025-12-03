@@ -802,6 +802,13 @@ void optimize_2opt_single(int x, int y, int thr = 50) {
 			}
 		}
 	}
+	for (int i = 0; i < sz; i++) {
+		int u = path[i].i;
+		int v = path[(i + 1) % sz].i;
+		int w = path[(i - 1 + sz) % sz].i;
+		nxt[u] = v;
+		prv[u] = w;
+	}
 	return;
 }
 void optimize_2opt(int thr = 100000) {
@@ -951,13 +958,14 @@ void optimize_3opt_single(int x, int y, int thr = 2500) {
 		}
 	}
 
-	Vpii& final_path = clst[x][y];
 	for (int i = 0; i < sz; i++) {
-		int u = final_path[i].i;
-		int v = final_path[(i + 1) % sz].i;
-		int w = final_path[(i - 1 + sz) % sz].i;
-		nxt[u] = v; prv[u] = w;
+		int u = path[i].i;
+		int v = path[(i + 1) % sz].i;
+		int w = path[(i - 1 + sz) % sz].i;
+		nxt[u] = v;
+		prv[u] = w;
 	}
+	return;
 }
 void optimize_3opt(int thr = 250000) {
 	for (int x = 0; x < DX; x++) {

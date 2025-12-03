@@ -866,24 +866,12 @@ void optimize_3opt_single(int x, int y, int thr = 2500) {
 					Pii E = path[k], F = path[(k + 1) % sz];
 
 					ld d0 = (A - B).mag() + (C - D).mag() + (E - F).mag();
-
 					ld d1 = (A - C).mag() + (B - D).mag() + (E - F).mag();
 					ld d2 = (A - B).mag() + (C - E).mag() + (D - F).mag(); 
-
-					// [3-opt 계열: 이동 및 스왑]
-					// d3: A->S2->S1->F (통째로 순서 교환)
 					ld d3 = (A - D).mag() + (E - B).mag() + (C - F).mag();
-
-					// d4: A->S2->S1(rev)->F
 					ld d4 = (A - D).mag() + (E - C).mag() + (B - F).mag();
-
-					// d5: A->S2(rev)->S1->F
 					ld d5 = (A - E).mag() + (D - B).mag() + (C - F).mag();
-
-					// d6: A->S1(rev)->S2(rev)->F (d1+d2 동시에 하는 것과 다름)
 					ld d6 = (A - C).mag() + (B - E).mag() + (D - F).mag();
-
-					// d7: A->S2(rev)->S1(rev)->F
 					ld d7 = (A - E).mag() + (D - C).mag() + (B - F).mag();
 
 					ld min_d = d0;

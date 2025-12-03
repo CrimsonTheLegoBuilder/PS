@@ -40,10 +40,18 @@ inline ll gcd(ll x, ll y, ll z) {
 	return gcd(w, z);
 }
 
+//MACRO
+#define LOCAL_TEST
+
 bool DEBUG = 0;
 bool HILBERT_ONLY = 0;
 
-#define LOCAL_TEST
+int TRY_LIMIT = 100;
+
+//SA
+double TEMPERATURE = 0.0;
+std::mt19937 gen(std::chrono::steady_clock::now().time_since_epoch().count());
+std::uniform_real_distribution<double> dist_real(0.0, 1.0);
 
 /*
 
@@ -638,10 +646,7 @@ int grp[LEN];
 Vint dt[LEN];
 int prv[LEN], nxt[LEN];//graph
 bool F[K_];
-struct ClusterMeta {
-	ld d;
-	ll sx, sy;
-} meta[DX][DY];
+struct ClusterMeta { ld d; ll sx, sy; } meta[DX][DY];
 void update_meta(int x, int y) {
 	const Vpii& path = clst[x][y];
 	int sz = path.size();
@@ -777,7 +782,7 @@ void delaunay_triagulation(const Vpii& P) {
 	}
 	return;
 }
-void optimize_2opt_single(int x, int y, int thr = 50) {
+void optimize_2opt_single(int x, int y, int thr = 100000) {
 	Vpii& path = clst[x][y];
 	int sz = path.size();
 	if (sz < 3) return;
@@ -814,43 +819,13 @@ void optimize_2opt_single(int x, int y, int thr = 50) {
 void optimize_2opt(int thr = 100000) {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
-			Vpii& path = clst[x][y];
-			int sz = path.size();
-			if (sz < 3) continue;
-			bool imp = 1;
-			while (imp && thr--) {
-				imp = 0;
-				for (int i = 0; i < sz - 1; i++) {
-					for (int j = i + 2; j < sz; j++) {
-						if (j == sz - 1 && i == 0) continue;
-						Pii p1 = path[i];
-						Pii p2 = path[i + 1];
-						Pii p3 = path[j];
-						Pii p4 = path[(j + 1) % sz];
-						ld d12 = (p1 - p2).mag();
-						ld d34 = (p3 - p4).mag();
-						ld d13 = (p1 - p3).mag();
-						ld d24 = (p2 - p4).mag();
-						if (d13 + d24 < d12 + d34 - TOL) {
-							std::reverse(path.begin() + i + 1, path.begin() + j + 1);
-							imp = true;
-						}
-					}
-				}
-			}
-			for (int i = 0; i < sz; i++) {
-				int u = path[i].i;
-				int v = path[(i + 1) % sz].i;
-				int w = path[(i - 1 + sz) % sz].i;
-				nxt[u] = v;
-				prv[u] = w;
-			}
+			optimize_2opt_single(x, y, thr);
 		}
 	}
 	init_all_meta();
 	return;
 }
-void optimize_3opt_single(int x, int y, int thr = 2500) {
+void optimize_3opt_single(int x, int y, int thr = 250000) {
 	Vpii& path = clst[x][y];
 	int sz = path.size();
 	if (sz < 6) return;
@@ -945,7 +920,6 @@ void optimize_3opt_single(int x, int y, int thr = 2500) {
 			}
 		}
 	}
-
 	for (int i = 0; i < sz; i++) {
 		int u = path[i].i;
 		int v = path[(i + 1) % sz].i;
@@ -969,7 +943,7 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	Vpii& T = clst[tx][ty];
 	Vpii& H = clst[hx][hy];
 
-	if (T.size() <= 3) return false;
+	if (T.size() <= 3) return 0;
 
 	Pii cen = { (int)(meta[hx][hy].sx / H.size()), (int)(meta[hx][hy].sy / H.size()) };
 
@@ -983,13 +957,20 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 			best_idx = i;
 		}
 	}
-	if (best_idx == -1) return false;
+	if (best_idx == -1) return 0;
 
 	Vpii BT = T;
 	Vpii BH = H;
 
 	Pii p = T[best_idx];
 	T.erase(T.begin() + best_idx);
+
+	ll dist_to_my_cen = sq((ll)p.x - meta[tx][ty].sx / (ll)T.size()) + sq((ll)p.y - meta[tx][ty].sy / (ll)T.size());
+	ll dist_to_other_cen = sq((ll)p.x - meta[hx][hy].sx / (ll)H.size()) + sq((ll)p.y - meta[hx][hy].sy / (ll)H.size());
+	ld geo_gain = 0;
+	if (dist_to_other_cen < dist_to_my_cen) {
+		geo_gain = sqrt(dist_to_my_cen) - sqrt(dist_to_other_cen);
+	}
 
 	ld best_inc = 1e18;
 	int best_pos = 0;
@@ -1009,10 +990,10 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	}
 	H.insert(H.begin() + best_pos + 1, p);
 
-	optimize_2opt_single(tx, ty, 2000);
-	optimize_3opt_single(tx, ty, 100000);
-	optimize_2opt_single(hx, hy, 2000);
-	optimize_3opt_single(hx, hy, 100000);
+	optimize_2opt_single(tx, ty, 10000);
+	//optimize_3opt_single(tx, ty, 100000);
+	optimize_2opt_single(hx, hy, 10000);
+	//optimize_3opt_single(hx, hy, 100000);
 
 	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
 	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
@@ -1020,7 +1001,34 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	ld old_max = std::max(meta[tx][ty].d, meta[hx][hy].d);
 	ld new_max = std::max(new_t_dist, new_h_dist);
 
-	if (new_max < old_max - 1e-5) {
+	//if (new_max < old_max - TOL) {
+	//	meta[tx][ty].d = new_t_dist;
+	//	meta[tx][ty].sx -= p.x; meta[tx][ty].sy -= p.y;
+
+	//	meta[hx][hy].d = new_h_dist;
+	//	meta[hx][hy].sx += p.x; meta[hx][hy].sy += p.y;
+
+	//	grp[p.i] = hx * DY + hy;
+
+	//	return 1;
+	//}
+
+	ld diff = new_max - old_max;
+	ld BIAS_FACTOR = 0.5;
+	ld adjusted_diff = diff - (geo_gain * BIAS_FACTOR);
+
+	bool acc = 0;
+	//if (diff < TOL) {
+	if (adjusted_diff < TOL) {
+		acc = 1;
+	}
+	else if (TEMPERATURE > 0.001) {
+		ld prob = exp(-adjusted_diff / TEMPERATURE);
+		if (dist_real(gen) < prob) {
+			acc = 1;
+		}
+	}
+	if (acc) {
 		meta[tx][ty].d = new_t_dist;
 		meta[tx][ty].sx -= p.x; meta[tx][ty].sy -= p.y;
 
@@ -1028,9 +1036,9 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 		meta[hx][hy].sx += p.x; meta[hx][hy].sy += p.y;
 
 		grp[p.i] = hx * DY + hy;
-
 		return 1;
 	}
+
 	clst[tx][ty] = BT;
 	int sz = BT.size();
 	for (int i = 0; i < sz; i++) {
@@ -1049,55 +1057,241 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	}
 	return 0;
 }
+bool try_swap_point(int tx, int ty, int hx, int hy) {
+	Vpii& T = clst[tx][ty];
+	Vpii& H = clst[hx][hy];
+
+	if (T.size() <= 3 || H.size() <= 3) return 0;
+
+	Pii t_cen = centroid_fast(tx, ty);
+	Pii h_cen = centroid_fast(hx, hy);
+
+	int best_t_idx = -1;
+	ll min_dist_t = 4e18;
+	for (int i = 0; i < T.size(); i++) {
+		ll d = sq((ll)T[i].x - h_cen.x) + sq((ll)T[i].y - h_cen.y);
+		if (d < min_dist_t) { min_dist_t = d; best_t_idx = i; }
+	}
+
+	int best_h_idx = -1;
+	ll min_dist_h = 4e18;
+	for (int i = 0; i < H.size(); i++) {
+		ll d = sq((ll)H[i].x - t_cen.x) + sq((ll)H[i].y - t_cen.y);
+		if (d < min_dist_h) { min_dist_h = d; best_h_idx = i; }
+	}
+
+	if (best_t_idx == -1 || best_h_idx == -1) return 0;
+
+	Vpii BT = T;
+	Vpii BH = H;
+	Pii p1 = T[best_t_idx];
+	Pii p2 = H[best_h_idx];
+
+	T.erase(T.begin() + best_t_idx);
+	H.erase(H.begin() + best_h_idx);
+
+	int sz;
+	sz = T.size();
+	ld best_inc_t = 1e18; int pos_t = 0;
+	for (int i = 0; i < sz; i++) {
+		ld inc = (T[i] - p2).mag() + (p2 - T[(i + 1) % sz]).mag() - (T[i] - T[(i + 1) % sz]).mag();
+		if (inc < best_inc_t) { best_inc_t = inc; pos_t = i; }
+	}
+	T.insert(T.begin() + pos_t + 1, p2);
+
+	sz = H.size();
+	ld best_inc_h = 1e18; int pos_h = 0;
+	for (int i = 0; i < sz; i++) {
+		ld inc = (H[i] - p1).mag() + (p1 - H[(i + 1) % sz]).mag() - (H[i] - H[(i + 1) % sz]).mag();
+		if (inc < best_inc_h) { best_inc_h = inc; pos_h = i; }
+	}
+	H.insert(H.begin() + pos_h + 1, p1);
+
+	optimize_2opt_single(tx, ty, 10000);
+	optimize_2opt_single(hx, hy, 10000);
+
+	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
+	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
+
+	ld old_max = std::max(meta[tx][ty].d, meta[hx][hy].d);
+	ld new_max = std::max(new_t_dist, new_h_dist);
+
+	//bool imp = (new_max < old_max - TOL);
+	////if (!imp && new_max < old_max + TOL) {
+	//if (!imp && new_max < old_max * 1.1) {
+	//	ld old_sum = meta[tx][ty].d + meta[hx][hy].d;
+	//	ld new_sum = new_t_dist + new_h_dist;
+	//	if (new_sum < old_sum - TOL) imp = 1;
+	//}
+
+	//if (imp) {
+	//	meta[tx][ty].d = new_t_dist;
+	//	meta[tx][ty].sx = meta[tx][ty].sx - p1.x + p2.x;
+	//	meta[tx][ty].sy = meta[tx][ty].sy - p1.y + p2.y;
+
+	//	meta[hx][hy].d = new_h_dist;
+	//	meta[hx][hy].sx = meta[hx][hy].sx - p2.x + p1.x;
+	//	meta[hx][hy].sy = meta[hx][hy].sy - p2.y + p1.y;
+
+	//	grp[p1.i] = hx * DY + hy;
+	//	grp[p2.i] = tx * DY + ty;
+
+	//	return 1;
+	//}
+
+	ld diff = new_max - old_max;
+	bool acc = 0;
+	if (diff < -1e-5) {
+		acc = 1;
+	}
+	else if (diff < old_max * 0.1) {
+		ld old_sum = meta[tx][ty].d + meta[hx][hy].d;
+		ld new_sum = new_t_dist + new_h_dist;
+		if (new_sum < old_sum - 1e-5) acc = 1;
+		else if (TEMPERATURE > 0.001) {
+			ld sum_diff = new_sum - old_sum;
+			if (dist_real(gen) < exp(-sum_diff / TEMPERATURE)) {
+				acc = 1;
+			}
+		}
+	}
+	if (acc) {
+		meta[tx][ty].d = new_t_dist;
+		meta[tx][ty].sx = meta[tx][ty].sx - p1.x + p2.x;
+		meta[tx][ty].sy = meta[tx][ty].sy - p1.y + p2.y;
+
+		meta[hx][hy].d = new_h_dist;
+		meta[hx][hy].sx = meta[hx][hy].sx - p2.x + p1.x;
+		meta[hx][hy].sy = meta[hx][hy].sy - p2.y + p1.y;
+
+		grp[p1.i] = hx * DY + hy;
+		grp[p2.i] = tx * DY + ty;
+
+		return 1;
+	}
+
+	clst[tx][ty] = BT;
+	sz = BT.size();
+	for (int i = 0; i < sz; i++) {
+		int u = BT[i].i;
+		int v = BT[(i + 1) % sz].i;
+		int w = BT[(i - 1 + sz) % sz].i;
+		nxt[u] = v; prv[u] = w;
+	}
+	clst[hx][hy] = BH;
+	sz = BH.size();
+	for (int i = 0; i < sz; i++) {
+		int u = BH[i].i;
+		int v = BH[(i + 1) % sz].i;
+		int w = BH[(i - 1 + sz) % sz].i;
+		nxt[u] = v; prv[u] = w;
+	}
+	return 0;
+}
+
+//void balancing_step() {
+//	ld max_dist = -1.0;
+//	int tx = -1, ty = -1;
+//
+//	for (int x = 0; x < DX; x++) {
+//		for (int y = 0; y < DY; y++) {
+//			if (meta[x][y].d > max_dist) {
+//				max_dist = meta[x][y].d;
+//				tx = x; ty = y;
+//			}
+//		}
+//	}
+//
+//	//std::cout << "tx:: " << tx << "\n";
+//	if (tx == -1 || clst[tx][ty].size() <= 3) return;
+//
+//	int target_gid = tx * DY + ty;
+//	Vpii& target_path = clst[tx][ty];
+//
+//	std::set<int> neighbors;
+//
+//	for (const Pii& p : target_path) {
+//		int u = p.i;
+//		for (int v : dt[u]) {
+//			int neighbor_gid = grp[v];
+//			if (neighbor_gid != target_gid) neighbors.insert(neighbor_gid);
+//		}
+//	}
+//
+//	ld min_dist = 1e18;
+//	int hx = -1, hy = -1;
+//
+//	for (int n_gid : neighbors) {
+//		int nx = n_gid / DY;
+//		int ny = n_gid % DY;
+//		if (meta[nx][ny].d < max_dist) {
+//			if (meta[nx][ny].d < min_dist) {
+//				min_dist = meta[nx][ny].d;
+//				hx = nx; hy = ny;
+//			}
+//		}
+//	}
+//
+//	if (hx != -1) {
+//		//bool f = try_move_point(tx, ty, hx, hy);
+//		bool f = try_swap_point(tx, ty, hx, hy);
+//		//std::cout << "	f:: " << f << "\n";
+//	}
+//	return;
+//}
+
 void balancing_step() {
-	ld max_dist = -1.0;
-	int tx = -1, ty = -1;
+	ld total = 0;
+	for (int x = 0; x < DX; x++) for (int y = 0; y < DY; y++) total += meta[x][y].d;
+	ld avg = total / K;
 
-	for (int x = 0; x < DX; x++) {
-		for (int y = 0; y < DY; y++) {
-			if (meta[x][y].d > max_dist) {
-				max_dist = meta[x][y].d;
-				tx = x; ty = y;
+	std::vector<std::pair<ld, int>> cands;
+	for (int i = 0; i < K; i++) {
+		int x = i / DY, y = i % DY;
+		if (meta[x][y].d > avg) cands.push_back({ -meta[x][y].d, i });
+		//cands.push_back({ -meta[x][y].d, i });
+	}
+	std::sort(cands.begin(), cands.end());
+
+	int try_limit = TRY_LIMIT;
+
+	for (int _ = 0; _ < 2; _++) {
+		for (auto& cand : cands) {
+			if (try_limit-- <= 0) break;
+
+			int t_gid = cand.second;
+			int tx = t_gid / DY, ty = t_gid % DY;
+
+			std::set<int> neighbors;
+			for (const auto& p : clst[tx][ty]) {
+				for (int v : dt[p.i]) if (grp[v] != t_gid) neighbors.insert(grp[v]);
+			}
+
+			int best_h = -1;
+			ld min_d = 1e18;
+
+			for (int h_gid : neighbors) {
+				int hx = h_gid / DY, hy = h_gid % DY;
+				if (meta[hx][hy].d < meta[tx][ty].d) {
+					if (meta[hx][hy].d < min_d) {
+						min_d = meta[hx][hy].d;
+						best_h = h_gid;
+					}
+				}
+			}
+
+			if (best_h != -1) {
+				int hx = best_h / DY, hy = best_h % DY;
+				if (try_move_point(tx, ty, hx, hy)) continue;
+				try_swap_point(tx, ty, hx, hy);
 			}
 		}
-	}
-
-	//std::cout << "tx:: " << tx << "\n";
-	if (tx == -1 || clst[tx][ty].size() <= 3) return;
-
-	int target_gid = tx * DY + ty;
-	Vpii& target_path = clst[tx][ty];
-
-	std::set<int> neighbors;
-
-	for (const Pii& p : target_path) {
-		int u = p.i;
-		for (int v : dt[u]) {
-			int neighbor_gid = grp[v];
-			if (neighbor_gid != target_gid) neighbors.insert(neighbor_gid);
-		}
-	}
-
-	ld min_dist = 1e18;
-	int hx = -1, hy = -1;
-
-	for (int n_gid : neighbors) {
-		int nx = n_gid / DY;
-		int ny = n_gid % DY;
-		if (meta[nx][ny].d < max_dist) {
-			if (meta[nx][ny].d < min_dist) {
-				min_dist = meta[nx][ny].d;
-				hx = nx; hy = ny;
-			}
-		}
-	}
-
-	if (hx != -1) {
-		bool f = try_move_point(tx, ty, hx, hy);
-		//std::cout << "	f:: " << f << "\n";
+		try_limit = TRY_LIMIT;
+		std::reverse(cands.begin(), cands.end());
 	}
 	return;
 }
+
 void reset_data() {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
@@ -1124,11 +1318,29 @@ ld run_solver() {
 	optimize_2opt();
 	optimize_3opt();
 	auto start_time = std::chrono::steady_clock::now();
-	//while (1) {
-	//	auto now = std::chrono::steady_clock::now();
-	//	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
-	//	balancing_step();
-	//}
+
+	//SA
+	ld start_temp = 2000.0;
+	ld end_temp = 0.01;
+	ld cooling_rate = 0.99;
+	TEMPERATURE = start_temp;
+	ld time_limit = 4500;
+
+	int iter = 0;
+	while (1) {
+		auto now = std::chrono::steady_clock::now();
+		ld elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+		if (elapsed > time_limit) break;
+		ld ratio = elapsed / time_limit;
+		TEMPERATURE = start_temp * pow(end_temp / start_temp, ratio);
+		balancing_step();
+	}
+
+	std::cout << "TEMP:: " << TEMPERATURE << "\n";
+
+	TEMPERATURE = 0;
+	balancing_step();
+	optimize_3opt();
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;

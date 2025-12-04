@@ -1160,7 +1160,7 @@ bool try_swap_point(int tx, int ty, int hx, int hy) {
 	if (diff < -TOL) {
 		acc = 1;
 	}
-	else if (diff < old_max * 0.1) {
+	else if (diff < old_max * 0.01) {
 		ld old_sum = meta[tx][ty].d + meta[hx][hy].d;
 		ld new_sum = new_t_dist + new_h_dist;
 		ld sum_diff = new_sum - old_sum;
@@ -1301,7 +1301,6 @@ void balancing_step() {
 					}
 				}
 			}
-
 			if (best_h != -1) {
 				int hx = best_h / DY, hy = best_h % DY;
 				if (try_move_point(tx, ty, hx, hy)) continue;
@@ -1329,7 +1328,7 @@ void reset_data() {
 	memset(nxt, -1, sizeof(nxt));
 	return;
 }
-ld run_solver() {
+std::pair<ld, ld> run_solver() {
 	std::cin >> N >> K;
 	Vpii P(N);
 	for (Pii& p : P) std::cin >> p;
@@ -1346,7 +1345,7 @@ ld run_solver() {
 	ld end_temp = 0.01;
 	ld cooling_rate = 0.99;
 	TEMPERATURE = start_temp;
-	ld time_limit = 4500;
+	ld time_limit = 4000;
 	int cnt = 0;
 	int iter = 0;
 	while (1) {
@@ -1366,6 +1365,7 @@ ld run_solver() {
 	balancing_step();
 	optimize_3opt();
 	ld max_dist = 0;
+	ld min_dist = INF;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;
 	cnt = 0;
@@ -1386,7 +1386,9 @@ ld run_solver() {
 				u = v;
 				safety++;
 			} while (u != s && safety < N + 5);
+			std::cout << "dist:: " << cur_dist << "\n";
 			max_dist = std::max(max_dist, cur_dist);
+			min_dist = std::min(min_dist, cur_dist);
 		}
 	}
 #ifdef LOCAL_TEST
@@ -1397,7 +1399,7 @@ ld run_solver() {
 	std::cout << "cnt:: " << cnt << "\n";
 	std::cout << "DEBUG::\n";
 #endif
-	return max_dist;
+	return { max_dist, min_dist };
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -1407,22 +1409,22 @@ void solve() {
 #ifdef LOCAL_TEST
 	ld total_score = 0;
 	ld max_score = 0;
-	int tc = 50;
+	int tc = 5;
 	std::cout << "========= [LOCAL TEST START] =========\n";
 	for (int i = 1; i <= tc; i++) {
 		std::string filename = (i < 10 ? "0" : "") + std::to_string(i) + ".in";
 		std::string path = "../../tests/814_3/" + filename;
 		if (freopen(path.c_str(), "r", stdin) == NULL) { std::cout << "File Not Found: " << path << "\n"; continue; }
 		reset_data();
-		ld score = run_solver();
-		std::cout << "Test " << filename << " : " << score << "\n";
-		total_score += score;
-		max_score = std::max(max_score, score);
+		auto score = run_solver();
+		std::cout << "Test " << filename << " :: max: " << score.first << " min: " << score.second<< "\n";
+		total_score += score.first;
+		max_score = std::max(max_score, score.first);
 	}
 	std::cout << "======================================\n";
 	std::cout << "2-opt:\n";
 	std::cout << "Total Score: " << total_score << "\n";
-	std::cout << "Average Score: " << total_score / 50.0 << "\n";
+	std::cout << "Average Score: " << total_score / tc << "\n";
 	std::cout << "Worst Case   : " << max_score << "\n";
 	std::cout << "======================================\n";
 #else

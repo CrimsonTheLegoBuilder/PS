@@ -949,12 +949,12 @@ ld run_solver() {
 	first_clustering(P);
 	init_hilbert_paths(P);
 	optimize_2opt();
-	auto start_time = std::chrono::steady_clock::now();
-	while (true) {
-		auto now = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
-		balancing_step();
-	}
+	//auto start_time = std::chrono::steady_clock::now();
+	//while (true) {
+	//	auto now = std::chrono::steady_clock::now();
+	//	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() > 4000) break;
+	//	balancing_step();
+	//}
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;
@@ -962,7 +962,7 @@ ld run_solver() {
 		for (int y = 0; y < DY; y++) {
 			if (clst[x][y].empty()) continue;
 			std::cout << clst[x][y].size() << "\n";
-			for (const Pii& p : clst[x][y]) std::cout << p.i << " ";
+			for (const Pii& p : clst[x][y]) std::cout << p.i + 1 << " ";
 			std::cout << "\n";
 			//int s = clst[x][y][0].i;
 			//int u = s;

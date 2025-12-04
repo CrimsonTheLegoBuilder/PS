@@ -183,5 +183,8 @@
     <ClCompile Include="..\main\boj20185_814_3_m2opt.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\boj20185_814_3_hilb_2opt_4kick.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

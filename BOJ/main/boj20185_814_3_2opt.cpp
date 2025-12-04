@@ -43,7 +43,7 @@ inline ll gcd(ll x, ll y, ll z) {
 bool DEBUG = 0;
 bool HILBERT_ONLY = 0;
 
-#define LOCAL_TEST
+//#define LOCAL_TEST
 
 /*
 
@@ -961,20 +961,23 @@ ld run_solver() {
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
 			if (clst[x][y].empty()) continue;
-			int s = clst[x][y][0].i;
-			int u = s;
-			ld cur_dist = 0;
-			int safety = 0;
-			do {
-				min_idx = std::min(min_idx, u);
-				max_idx = std::max(max_idx, u);
-				S.insert(u);
-				int v = nxt[u];
-				cur_dist += sqrt(pow(P[u].x - P[v].x, 2) + pow(P[u].y - P[v].y, 2));
-				u = v;
-				safety++;
-			} while (u != s && safety < N + 5);
-			max_dist = std::max(max_dist, cur_dist);
+			std::cout << clst[x][y].size() << "\n";
+			for (const Pii& p : clst[x][y]) std::cout << p.i << " ";
+			std::cout << "\n";
+			//int s = clst[x][y][0].i;
+			//int u = s;
+			//ld cur_dist = 0;
+			//int safety = 0;
+			//do {
+			//	min_idx = std::min(min_idx, u);
+			//	max_idx = std::max(max_idx, u);
+			//	S.insert(u);
+			//	int v = nxt[u];
+			//	cur_dist += sqrt(pow(P[u].x - P[v].x, 2) + pow(P[u].y - P[v].y, 2));
+			//	u = v;
+			//	safety++;
+			//} while (u != s && safety < N + 5);
+			//max_dist = std::max(max_dist, cur_dist);
 		}
 	}
 #ifdef LOCAL_TEST

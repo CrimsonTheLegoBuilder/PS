@@ -646,7 +646,7 @@ int clst_cnt[K_], clst_cnt_2d[DX][DY];
 int fst_belt_cnt[DX];
 int grp[LEN];
 Vint dt[LEN];
-int prv[LEN], nxt[LEN];//graph
+//int prv[LEN], nxt[LEN];//graph
 bool F[K_];
 struct ClusterMeta { ld d; ll sx, sy; } meta[DX][DY];
 void update_meta(int x, int y) {
@@ -734,34 +734,34 @@ void init_hilbert_paths(Vpii& P) {
 				V.push_back({ hilbert_order(p, pow2), clst[x][y][i].i });
 			}
 			std::sort(V.begin(), V.end());
-			for (int i = 0, i0, i2; i < sz; i++) {
-				i0 = (i - 1 + sz) % sz;
-				i2 = (i + 1) % sz;
-				prv[V[i].i] = V[i0].i;
-				nxt[V[i].i] = V[i2].i;
-			}
+			//for (int i = 0, i0, i2; i < sz; i++) {
+			//	i0 = (i - 1 + sz) % sz;
+			//	i2 = (i + 1) % sz;
+			//	prv[V[i].i] = V[i0].i;
+			//	nxt[V[i].i] = V[i2].i;
+			//}
 		}
 	}
-	if (HILBERT_ONLY) {
-		ld D[K_];
-		for (int x = 0; x < DX; x++) {
-			for (int y = 0; y < DY; y++) {
-				//if (clst[x][y].empty()) continue;
-				int s = clst[x][y][0].i;
-				int u = s;
-				ld d = 0;
-				do {
-					int v = nxt[u];
-					d += (P[u] - P[v]).mag();
-					u = v;
-				} while (u != s);
-				D[x * DY + y] = d;
-			}
-		}
-		std::cout << "HILBERT ONLY::\n";
-		for (int i = 0; i < K_; i++) std::cout << D[i] << "\n";
-		std::cout << "HILBERT ONLY::\n";
-	}
+	//if (HILBERT_ONLY) {
+	//	ld D[K_];
+	//	for (int x = 0; x < DX; x++) {
+	//		for (int y = 0; y < DY; y++) {
+	//			//if (clst[x][y].empty()) continue;
+	//			int s = clst[x][y][0].i;
+	//			int u = s;
+	//			ld d = 0;
+	//			do {
+	//				int v = nxt[u];
+	//				d += (P[u] - P[v]).mag();
+	//				u = v;
+	//			} while (u != s);
+	//			D[x * DY + y] = d;
+	//		}
+	//	}
+	//	std::cout << "HILBERT ONLY::\n";
+	//	for (int i = 0; i < K_; i++) std::cout << D[i] << "\n";
+	//	std::cout << "HILBERT ONLY::\n";
+	//}
 	init_all_meta();
 	return;
 }
@@ -809,13 +809,13 @@ void optimize_2opt_single(int x, int y, int thr = 100000) {
 			}
 		}
 	}
-	for (int i = 0; i < sz; i++) {
-		int u = path[i].i;
-		int v = path[(i + 1) % sz].i;
-		int w = path[(i - 1 + sz) % sz].i;
-		nxt[u] = v;
-		prv[u] = w;
-	}
+	//for (int i = 0; i < sz; i++) {
+	//	int u = path[i].i;
+	//	int v = path[(i + 1) % sz].i;
+	//	int w = path[(i - 1 + sz) % sz].i;
+	//	nxt[u] = v;
+	//	prv[u] = w;
+	//}
 	return;
 }
 void optimize_2opt(int thr = 100000) {
@@ -922,13 +922,13 @@ void optimize_3opt_single(int x, int y, int thr = 250000) {
 			}
 		}
 	}
-	for (int i = 0; i < sz; i++) {
-		int u = path[i].i;
-		int v = path[(i + 1) % sz].i;
-		int w = path[(i - 1 + sz) % sz].i;
-		nxt[u] = v;
-		prv[u] = w;
-	}
+	//for (int i = 0; i < sz; i++) {
+	//	int u = path[i].i;
+	//	int v = path[(i + 1) % sz].i;
+	//	int w = path[(i - 1 + sz) % sz].i;
+	//	nxt[u] = v;
+	//	prv[u] = w;
+	//}
 	return;
 }
 void optimize_3opt(int thr = 250000) {
@@ -1041,21 +1041,21 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	}
 
 	clst[tx][ty] = BT;
-	int sz = BT.size();
-	for (int i = 0; i < sz; i++) {
-		int u = BT[i].i;
-		int v = BT[(i + 1) % sz].i;
-		int w = BT[(i - 1 + sz) % sz].i;
-		nxt[u] = v; prv[u] = w;
-	}
+	//int sz = BT.size();
+	//for (int i = 0; i < sz; i++) {
+	//	int u = BT[i].i;
+	//	int v = BT[(i + 1) % sz].i;
+	//	int w = BT[(i - 1 + sz) % sz].i;
+	//	nxt[u] = v; prv[u] = w;
+	//}
 	clst[hx][hy] = BH;
-	sz = BH.size();
-	for (int i = 0; i < sz; i++) {
-		int u = BH[i].i;
-		int v = BH[(i + 1) % sz].i;
-		int w = BH[(i - 1 + sz) % sz].i;
-		nxt[u] = v; prv[u] = w;
-	}
+	//sz = BH.size();
+	//for (int i = 0; i < sz; i++) {
+	//	int u = BH[i].i;
+	//	int v = BH[(i + 1) % sz].i;
+	//	int w = BH[(i - 1 + sz) % sz].i;
+	//	nxt[u] = v; prv[u] = w;
+	//}
 	return 0;
 }
 bool try_swap_point(int tx, int ty, int hx, int hy) {
@@ -1192,21 +1192,21 @@ bool try_swap_point(int tx, int ty, int hx, int hy) {
 	}
 
 	clst[tx][ty] = BT;
-	sz = BT.size();
-	for (int i = 0; i < sz; i++) {
-		int u = BT[i].i;
-		int v = BT[(i + 1) % sz].i;
-		int w = BT[(i - 1 + sz) % sz].i;
-		nxt[u] = v; prv[u] = w;
-	}
+	//sz = BT.size();
+	//for (int i = 0; i < sz; i++) {
+	//	int u = BT[i].i;
+	//	int v = BT[(i + 1) % sz].i;
+	//	int w = BT[(i - 1 + sz) % sz].i;
+	//	nxt[u] = v; prv[u] = w;
+	//}
 	clst[hx][hy] = BH;
-	sz = BH.size();
-	for (int i = 0; i < sz; i++) {
-		int u = BH[i].i;
-		int v = BH[(i + 1) % sz].i;
-		int w = BH[(i - 1 + sz) % sz].i;
-		nxt[u] = v; prv[u] = w;
-	}
+	//sz = BH.size();
+	//for (int i = 0; i < sz; i++) {
+	//	int u = BH[i].i;
+	//	int v = BH[(i + 1) % sz].i;
+	//	int w = BH[(i - 1 + sz) % sz].i;
+	//	nxt[u] = v; prv[u] = w;
+	//}
 	return 0;
 }
 
@@ -1324,8 +1324,8 @@ void reset_data() {
 	memset(clst_cnt_2d, 0, sizeof(clst_cnt_2d));
 	memset(fst_belt_cnt, 0, sizeof(fst_belt_cnt));
 	memset(grp, 0, sizeof(grp));
-	memset(prv, -1, sizeof(prv));
-	memset(nxt, -1, sizeof(nxt));
+	//memset(prv, -1, sizeof(prv));
+	//memset(nxt, -1, sizeof(nxt));
 	return;
 }
 std::pair<ld, ld> run_solver() {
@@ -1377,23 +1377,24 @@ std::pair<ld, ld> run_solver() {
 			int s = clst[x][y][0].i;
 			int u = s;
 			ld cur_dist = 0;
-			int safety = 0;
+			int safety = 0, sz = clst[x][y].size();
 #ifndef LOCAL_TEST
-			std::cout << clst[x][y].size() << " ";
+			std::cout << sz << " ";
+			for (const Pii& p : clst[x][y]) std::cout << p.i + 1 << " ";
 #endif
-			do {
-				cnt++;
-				min_idx = std::min(min_idx, u);
-				max_idx = std::max(max_idx, u);
-				S.insert(u);
-				int v = nxt[u];
-				cur_dist += sqrt(pow(P[u].x - P[v].x, 2) + pow(P[u].y - P[v].y, 2));
-				u = v;
-				safety++;
-#ifndef LOCAL_TEST
-				std::cout << P[u].i + 1 << " ";
-#endif
-			} while (u != s && safety < N + 5);
+//			do {
+//				cnt++;
+//				min_idx = std::min(min_idx, u);
+//				max_idx = std::max(max_idx, u);
+//				S.insert(u);
+//				int v = nxt[u];
+//				cur_dist += sqrt(pow(P[u].x - P[v].x, 2) + pow(P[u].y - P[v].y, 2));
+//				u = v;
+//				safety++;
+//#ifndef LOCAL_TEST
+//				std::cout << P[u].i + 1 << " ";
+//#endif
+//			} while (u != s && safety < N + 5);
 #ifndef LOCAL_TEST
 			std::cout << "\n";
 #endif

@@ -1329,6 +1329,7 @@ void reset_data() {
 	return;
 }
 std::pair<ld, ld> run_solver() {
+	auto start_time = std::chrono::steady_clock::now();
 	std::cin >> N >> K;
 	Vpii P(N);
 	for (Pii& p : P) std::cin >> p;
@@ -1338,14 +1339,13 @@ std::pair<ld, ld> run_solver() {
 	init_hilbert_paths(P);
 	optimize_2opt();
 	optimize_3opt();
-	auto start_time = std::chrono::steady_clock::now();
 
 	//SA
 	ld start_temp = 2000.0;
 	ld end_temp = 0.01;
 	ld cooling_rate = 0.99;
 	TEMPERATURE = start_temp;
-	ld time_limit = 4000;
+	ld time_limit = 2000;
 	int cnt = 0;
 	int iter = 0;
 	while (1) {
@@ -1358,8 +1358,10 @@ std::pair<ld, ld> run_solver() {
 		balancing_step();
 	}
 
+#ifdef LOCAL_TEST
 	std::cout << "TEMP:: " << TEMPERATURE << "\n";
 	std::cout << "cnt :: " << cnt << "\n";
+#endif
 
 	TEMPERATURE = 0;
 	balancing_step();
@@ -1376,6 +1378,9 @@ std::pair<ld, ld> run_solver() {
 			int u = s;
 			ld cur_dist = 0;
 			int safety = 0;
+#ifndef LOCAL_TEST
+			std::cout << clst[x][y].size() << " ";
+#endif
 			do {
 				cnt++;
 				min_idx = std::min(min_idx, u);
@@ -1385,8 +1390,16 @@ std::pair<ld, ld> run_solver() {
 				cur_dist += sqrt(pow(P[u].x - P[v].x, 2) + pow(P[u].y - P[v].y, 2));
 				u = v;
 				safety++;
+#ifndef LOCAL_TEST
+				std::cout << P[u].i + 1 << " ";
+#endif
 			} while (u != s && safety < N + 5);
+#ifndef LOCAL_TEST
+			std::cout << "\n";
+#endif
+#ifdef LOCAL_TEST
 			std::cout << "dist:: " << cur_dist << "\n";
+#endif
 			max_dist = std::max(max_dist, cur_dist);
 			min_dist = std::min(min_dist, cur_dist);
 		}
@@ -1406,6 +1419,8 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(10);
+	//std::string path = "../../tests/814_3/01.in";
+	//freopen(path.c_str(), "r", stdin);
 #ifdef LOCAL_TEST
 	ld total_score = 0;
 	ld max_score = 0;

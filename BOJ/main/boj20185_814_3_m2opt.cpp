@@ -46,7 +46,7 @@ inline ll gcd(ll x, ll y, ll z) {
 bool DEBUG = 0;
 bool HILBERT_ONLY = 0;
 
-const int TRY_LIMIT = 200;
+const int TRY_LIMIT = 150;
 
 const ld BIAS_FACTOR = 1.5;
 
@@ -993,9 +993,9 @@ bool try_move_point(int tx, int ty, int hx, int hy) {
 	H.insert(H.begin() + best_pos + 1, p);
 
 	optimize_2opt_single(tx, ty, 10000);
-	//optimize_3opt_single(tx, ty, 100000);
+	//optimize_3opt_single(tx, ty, 10000);
 	optimize_2opt_single(hx, hy, 10000);
-	//optimize_3opt_single(hx, hy, 100000);
+	//optimize_3opt_single(hx, hy, 10000);
 
 	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
 	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
@@ -1109,7 +1109,9 @@ bool try_swap_point(int tx, int ty, int hx, int hy) {
 	H.insert(H.begin() + pos_h + 1, p1);
 
 	optimize_2opt_single(tx, ty, 10000);
+	//optimize_3opt_single(tx, ty, 10000);
 	optimize_2opt_single(hx, hy, 10000);
+	//optimize_3opt_single(hx, hy, 10000);
 
 	ld new_t_dist = 0; for (int i = 0; i < T.size(); i++) new_t_dist += (T[i] - T[(i + 1) % T.size()]).mag();
 	ld new_h_dist = 0; for (int i = 0; i < H.size(); i++) new_h_dist += (H[i] - H[(i + 1) % H.size()]).mag();
@@ -1253,8 +1255,9 @@ bool try_swap_point(int tx, int ty, int hx, int hy) {
 //
 //	if (hx != -1) {
 //		//bool f = try_move_point(tx, ty, hx, hy);
-//		bool f = try_swap_point(tx, ty, hx, hy);
+//		//bool f = try_swap_point(tx, ty, hx, hy);
 //		//std::cout << "	f:: " << f << "\n";
+//		if (!try_move_point(tx, ty, hx, hy)) try_swap_point(tx, ty, hx, hy);
 //	}
 //	return;
 //}
@@ -1340,7 +1343,7 @@ ld run_solver() {
 	ld cooling_rate = 0.99;
 	TEMPERATURE = start_temp;
 	ld time_limit = 4500;
-
+	int cnt = 0;
 	int iter = 0;
 	while (1) {
 		auto now = std::chrono::steady_clock::now();
@@ -1348,10 +1351,12 @@ ld run_solver() {
 		if (elapsed > time_limit) break;
 		ld ratio = elapsed / time_limit;
 		TEMPERATURE = start_temp * pow(end_temp / start_temp, ratio);
+		cnt++;
 		balancing_step();
 	}
 
 	std::cout << "TEMP:: " << TEMPERATURE << "\n";
+	std::cout << "cnt :: " << cnt << "\n";
 
 	TEMPERATURE = 0;
 	balancing_step();
@@ -1359,7 +1364,7 @@ ld run_solver() {
 	ld max_dist = 0;
 	int min_idx = 1e9, max_idx = -1;
 	std::set<int> S;
-	int cnt = 0;
+	cnt = 0;
 	for (int x = 0; x < DX; x++) {
 		for (int y = 0; y < DY; y++) {
 			if (clst[x][y].empty()) continue;

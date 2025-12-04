@@ -46,7 +46,7 @@ inline ll gcd(ll x, ll y, ll z) {
 bool DEBUG = 0;
 bool HILBERT_ONLY = 0;
 
-const int TRY_LIMIT = 150;
+const int TRY_LIMIT = 100;
 
 const ld BIAS_FACTOR = 1.5;
 
@@ -1270,42 +1270,46 @@ void balancing_step() {
 	std::vector<std::pair<ld, int>> cands;
 	for (int i = 0; i < K; i++) {
 		int x = i / DY, y = i % DY;
-		if (meta[x][y].d > avg) cands.push_back({ -meta[x][y].d, i });
-		//cands.push_back({ -meta[x][y].d, i });
+		//if (meta[x][y].d > avg) cands.push_back({ -meta[x][y].d, i });
+		cands.push_back({ -meta[x][y].d, i });
 	}
 	std::sort(cands.begin(), cands.end());
 
 	int try_limit = TRY_LIMIT;
 
-	for (auto& cand : cands) {
-		if (try_limit-- <= 0) break;
+	for (int _ = 0; _ < 2; _++) {
+		for (auto& cand : cands) {
+			if (try_limit-- <= 0) break;
 
-		int t_gid = cand.second;
-		int tx = t_gid / DY, ty = t_gid % DY;
+			int t_gid = cand.second;
+			int tx = t_gid / DY, ty = t_gid % DY;
 
-		std::set<int> neighbors;
-		for (const auto& p : clst[tx][ty]) {
-			for (int v : dt[p.i]) if (grp[v] != t_gid) neighbors.insert(grp[v]);
-		}
+			std::set<int> neighbors;
+			for (const auto& p : clst[tx][ty]) {
+				for (int v : dt[p.i]) if (grp[v] != t_gid) neighbors.insert(grp[v]);
+			}
 
-		int best_h = -1;
-		ld min_d = 1e18;
+			int best_h = -1;
+			ld min_d = 1e18;
 
-		for (int h_gid : neighbors) {
-			int hx = h_gid / DY, hy = h_gid % DY;
-			if (meta[hx][hy].d < meta[tx][ty].d) {
-				if (meta[hx][hy].d < min_d) {
-					min_d = meta[hx][hy].d;
-					best_h = h_gid;
+			for (int h_gid : neighbors) {
+				int hx = h_gid / DY, hy = h_gid % DY;
+				if (meta[hx][hy].d < meta[tx][ty].d) {
+					if (meta[hx][hy].d < min_d) {
+						min_d = meta[hx][hy].d;
+						best_h = h_gid;
+					}
 				}
 			}
-		}
 
-		if (best_h != -1) {
-			int hx = best_h / DY, hy = best_h % DY;
-			if (try_move_point(tx, ty, hx, hy)) continue;
-			try_swap_point(tx, ty, hx, hy);
+			if (best_h != -1) {
+				int hx = best_h / DY, hy = best_h % DY;
+				if (try_move_point(tx, ty, hx, hy)) continue;
+				try_swap_point(tx, ty, hx, hy);
+			}
 		}
+		try_limit = TRY_LIMIT;
+		std::reverse(cands.begin(), cands.end());
 	}
 	return;
 }

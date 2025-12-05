@@ -39,18 +39,14 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	int x, yd, yu;
+	int xl, xr, y;
 	Pos s, e;
-	std::cin >> M >> N;
-	s.x = 0;
-	s.y = 0;
-	e.x = 0;
-	e.y = N + 1;
+	std::cin >> N >> s >> e;
 	std::vector<Pos> U(N), D(N);
-	for (int i = 1; i <= N; i++) {
-		std::cin >> yu >> yd;
-		U[i - 1] = Pos(yu, i);
-		D[i - 1] = Pos(yd, i);
+	for (int i = 0; i < N; i++) {
+		std::cin >> xl >> xr >> y;
+		U[i] = Pos(xr, y);
+		D[i] = Pos(xl, y);
 	}
 	std::deque<Pos> HU, HD;
 	HU.push_back(s); HU.push_back(U[0]);
@@ -80,13 +76,9 @@ void solve() {
 		}
 	}
 	ret.push_back(e);
-	//std::sort(ret.begin(), ret.end());
 	ret.erase(unique(ret.begin(), ret.end()), ret.end());
-	//for (const Pos& p : ret) std::cout << p << "\n";
-	int sz = ret.size();
-	ld d = 0;
-	for (int i = 0; i < sz - 1; i++) d += (ret[i] - ret[i + 1]).mag();
-	std::cout << d << "\n";
+	std::cout << ret.size() << "\n";
+	for (const Pos& p : ret) std::cout << p << "\n";
 	return;
 }
-int main() { solve(); return 0; }//GCPC 2021 F Flappy Bird boj25250
+int main() { solve(); return 0; }//boj15209

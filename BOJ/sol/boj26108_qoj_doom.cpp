@@ -188,32 +188,34 @@ void print_pq(priority_queue<event, vector<event>, greater<>> pq) {
 ld ans = 1e18;
 
 struct Sweep {
-	vector<pll> pts;
-	vector<vector<pll>> poly;
-	vector<event> knxt;
-	priority_queue<event, vector<event>, greater<>> pq;
-	vector<int> lp, rp, bot, top;
-	pll cur;
-	int clay = -1, cid = -1;
-	vector<pii> ord;
-	vector<vector<int>> pos;
+	vector<pll> pts;//점군
+	vector<vector<pll>> poly;//볼록껍질 관리
+	vector<event> knxt;//볼록껍질 선분 정렬 후 관리
+	priority_queue<event, vector<event>, greater<>> pq;//매번 가장 기울기가 덜 변하는 점 쌍들을 관리하는 자료구조
+	//이벤트 구조체를 순방향 정렬하는 pq, 2번째 인자는 원래 pq가 기본적으로 벡터로 구현되는데, 순서를 바꾸려면 c언어 특성상 앞 인자를 지정을 안 해주면 문제가 생겨서 넣었다고 함.
+	vector<int> lp, rp, bot, top;//아직 모르겠음 ?????
+	pll cur;//현재 기울기
+	int clay = -1, cid = -1;//현재 가장 앞부분에 있는 점의 층과 볼록껍질 점 번호
+	vector<pii> ord;//정렬된 순서, 껍질 번호 - 껍질 내 점 번호 순
+	vector<vector<int>> pos;//이건 또 뭐야 ?????
 
 	Sweep(vector<pll>& _p) : pts(_p), lp(K + 1, -1), rp(K + 1, -1), bot(K + 1, -1), top(K + 1, -1), cur(1, 0),
-		ord(K + 1), pos(K + 1) {
+		ord(K + 1), pos(K + 1) {//모든 점군은 K + 1 개를 넘지 않도록 미리 정리되며, 이는 양쪽에서 최대 300개 점을 제외한 벨트의 폭을 바로 구하기 위함임
 		poly.resize(K + 1);
-		make_convex_layer();
+		make_convex_layer();//볼록껍질 초기화
 		debug("OwO");
-		init();
+		init();//?
 	}
 
 	bool good(pll p) {
 		pll cp = poly[clay][cid];
-		return ori(cp, cp + cur, p) > 0 || (ori(cp, cp + cur, p) == 0 && dot(cur, p - cp) <= 0);
+		//ori 함수는 ccw 함수와 기능이 같음
+		return ori(cp, cp + cur, p) > 0 || (ori(cp, cp + cur, p) == 0 && dot(cur, p - cp) <= 0);//현재 기울기보다 안쪽에 있거나 앞쪽에 있다
 	}
 
 	void upd_ans(int p, Sweep& another) {
-		if (p < 0 || p > K) return;
-		if (cross(cur, pll(0, 1)) == 0) return;
+		if (p < 0 || p > K) return;//점의 수가 넘어가면 벡터 조회에서 에러가 나며 계산을 할 수 있는 조건도 아님
+		if (cross(cur, pll(0, 1)) == 0) return;//기울기가 마지막까지 도달한 상태
 		pll a = getp(ord[p]);
 		pll b = -another.getp(another.ord[K - p]);
 		ld tans = abs(intersect(Line(a, a + cur), Line(b, b + pll(0, 1))).Y - b.Y);
@@ -225,7 +227,7 @@ struct Sweep {
 		ans = min(ans, tans / 2);
 	}
 
-	void make_convex_layer() {
+	void make_convex_layer() {//볼록껍질 초기화
 		debug("convex");
 		vector<bool> use(n);
 		poly.resize(K + 1);
@@ -259,7 +261,7 @@ struct Sweep {
 		debug("convex ok");
 	}
 
-	pll get_nxt_vec() {
+	pll get_nxt_vec() {//더 바깥쪽을 향하는 벡터를 선정하는 함수
 		if (knxt.empty() && pq.empty()) return pll(0, 0);
 		if (knxt.empty()) return pq.top().v;
 		if (pq.empty()) return knxt.front().v;
@@ -268,17 +270,17 @@ struct Sweep {
 
 	void check_inter(int i) {
 		if (i <= 0 || i > K) return;
-		pll p1 = getp(ord[i]);
-		pll p2 = getp(ord[i - 1]);
+		pll p1 = getp(ord[i]);//어떤 껍질 내의 어떤 점을 꺼냄
+		pll p2 = getp(ord[i - 1]);//어떤 껍질 내의 어떤 점을 꺼냄
 		//debug("check_inter", i, p1, p2);
-		pll v = p2 - p1;
+		pll v = p2 - p1;//두 점 중 더 앞에 있는 점으로 향하는 벡터?
 		if (!cmp(cur, v)) return;
 		//debug("ok push", v);
-		pq.push(event({ v, 4, ord[i].ff, ord[i].ss }));
+		pq.push(event({ v, 4, ord[i].ff, ord[i].ss }));//2개의 이벤트로부터 만들어지는 기울기
 	}
 
 	void process_knxt(pll vec, Sweep& another) {
-		if (knxt.empty() || cmp(vec, knxt.front().v, pll(1, 0), false) != -1) return;
+		if (knxt.empty() || cmp(vec, knxt.front().v, pll(1, 0), false) != -1) return;//다음 이벤트가 없거나 기울기가 존재한다면 return?
 		/*debug("test", cur, "clay", clay, "cid", cid, "cp", poly[clay][cid]);
 		for(int i = 0; i <= K; i++) cerr << getp(ord[i]) << " ";
 		cerr << "\n";*/
@@ -394,7 +396,7 @@ struct Sweep {
 	}
 	pll getp(pii x) {
 		auto [lay, id] = x;
-		return poly[lay][id];
+		return poly[lay][id];//pii x 에는 볼록껍질의 번호와 그 껍질 내 점 번호가 들어있음
 	}
 
 	void init() {

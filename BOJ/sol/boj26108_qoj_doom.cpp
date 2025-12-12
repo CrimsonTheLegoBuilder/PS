@@ -292,10 +292,10 @@ struct Sweep {
 		for (auto [v, ty, lay, id] : knxt) {
 			//debug("event", v, ty, lay, id);
 			if (ty == 2) { // layer rotate
-				int topnxt = getnxt(lay, top[lay]);
-				int botnxt = getnxt(lay, bot[lay]);
-				pll vtop = poly[lay][top[lay]] - poly[lay][topnxt];
-				pll vbot = poly[lay][botnxt] - poly[lay][bot[lay]];
+				int topnxt = getnxt(lay, top[lay]);//볼록껍질의 맨 위 점
+				int botnxt = getnxt(lay, bot[lay]);//볼록껍질의 맨 아래 점
+				pll vtop = poly[lay][top[lay]] - poly[lay][topnxt];//캘리퍼스 작동 준비
+				pll vbot = poly[lay][botnxt] - poly[lay][bot[lay]];//캘리퍼스 작동 준비
 				bool bot_rot = cmp(vbot, v, pll(1, 0), false) == -1;
 				bool top_rot = cmp(vtop, v, pll(1, 0), false) == -1;
 				bool crot = false, allrot = false;
@@ -388,10 +388,10 @@ struct Sweep {
 		cerr << "\n";*/
 	}
 
-	int getnxt(int lay, int id) {
+	int getnxt(int lay, int id) {//볼록껍질의 다음 점을 찾는 함수
 		return (id + 1) % SZ(poly[lay]);
 	}
-	int getlst(int lay, int id) {
+	int getlst(int lay, int id) {//볼록껍질의 이전 점을 찾는 함수
 		return (id - 1 + SZ(poly[lay])) % SZ(poly[lay]);
 	}
 	pll getp(pii x) {

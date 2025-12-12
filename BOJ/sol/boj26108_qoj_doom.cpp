@@ -296,12 +296,12 @@ struct Sweep {
 				int botnxt = getnxt(lay, bot[lay]);//볼록껍질의 맨 아래 점
 				pll vtop = poly[lay][top[lay]] - poly[lay][topnxt];//캘리퍼스 작동 준비
 				pll vbot = poly[lay][botnxt] - poly[lay][bot[lay]];//캘리퍼스 작동 준비
-				bool bot_rot = cmp(vbot, v, pll(1, 0), false) == -1;
-				bool top_rot = cmp(vtop, v, pll(1, 0), false) == -1;
+				bool bot_rot = cmp(vbot, v, pll(1, 0), false) == -1;//pll(1,0)은 사분면을 반으로 나누기 위함. 내 정렬 방법이랑 비슷한데 구분선을 임의로 정해줄 수 있음
+				bool top_rot = cmp(vtop, v, pll(1, 0), false) == -1;//두 벡터가 같은가?를 본다. 지금 캘리퍼스의 턱이 도착한 순간 보는 이 기울기가 일치한다면, 돌아간다.
 				bool crot = false, allrot = false;
-				if (top_rot && pii(lay, top[lay]) == pii(clay, cid)) crot = true;
+				if (top_rot && pii(lay, top[lay]) == pii(clay, cid)) crot = true;//이건 지금 보는 기울기와 뭔가를 비교하는 모습
 				if (bot_rot && pii(lay, bot[lay]) == pii(clay, cid)) crot = true;
-				if (top_rot && lp[lay] == rp[lay] && lp[lay] == top[lay]) allrot = true;
+				if (top_rot && lp[lay] == rp[lay] && lp[lay] == top[lay]) allrot = true;//이건 뭘까?
 				if (bot_rot && lp[lay] == rp[lay] && lp[lay] == bot[lay]) allrot = true;
 
 				if (crot) {

@@ -134,5 +134,6 @@ void solve() {
 	while (1) {
 
 	}
+	return;
 }
 int main() { solve(); return 0; }//boj26108

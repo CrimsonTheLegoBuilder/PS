@@ -123,10 +123,15 @@ void solve() {
 		C.clear();
 		for (const Pos& t : tmp) if (!F[t.i]) C.push_back(t);
 	}
-	Pos vbot = Pos(0, -1), vtop = Pos(0, 1);
 	std::sort(P.begin(), P.end(), cmpx_rvs);
 	for (int i = 0, j; i < K + 1; i++) {
 		j = N - i - 1;
+		bot[i] = P[i].i;
+		top[i] = P[j].i;
+	}
+	Pos main_vec = Pos(0, -1);
+	Pos vbot = Pos(0, -1), vtop = Pos(0, 1);
+	while (1) {
 
 	}
 }

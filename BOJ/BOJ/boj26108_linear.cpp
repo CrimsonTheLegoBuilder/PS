@@ -29,6 +29,9 @@ inline ll sq(const ll& x) { return x * x; }
 #define STRONG 0
 #define WEAK 1
 
+#define TOP 0
+#define BOT 1
+
 const int N_ = 1 << 16;
 const int K_ = 1 << 8 | 1 << 6;
 
@@ -109,6 +112,15 @@ struct Event {
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
 std::priority_queue<Event> vpq, epq, bpq, tpq;
+Pos norm(const Pos& p, const bool& f = TOP) { return f == TOP ? p : -p; }
+bool get_vec(const Pos& s, const Pos& e, const Pos& cur, Pos& vec, const bool& f = TOP) {
+	Pos v = e - s;
+	v = norm(v, f);
+	int tq = cur / v, fc = cur * v;
+	if (tq > 0 || (!tq && fc > 0)) { vec = v; return 1; }
+	vec = O; return 0;
+}
+
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -149,10 +161,13 @@ void solve() {
 	Pos main_vec = Pos(0, -1);
 	Pos cur = Pos(0, -1), vbot = Pos(0, -1), vtop = Pos(0, 1);
 	int cnt = 3e7;
+	ld ret = INF;
 	while (cnt--) {//O(NKlogK)
-		//새로 시작하면 현재 이벤트 벡터 하나 깐다.
-		//반바퀴 다 돌았으면 나간다.
+		Event ev = vpq.top(); vpq.pop(); //새로 시작하면 현재 이벤트 벡터 하나 깐다.
+		if (cur / Pos(0, 1) > 0) break; //반바퀴 다 돌았으면 나간다.
 		//회전에 의해 점이 새로 들어오고 나간다. 이를 처리해야 한다.
+		
+
 		//정렬 후 새로 들어올 가능성이 있는 점과 맨 뒤에 있는 점에 대해 현재 이벤트 벡터와의 방향성을 검사한다.
 		//맨 뒤에 있는 점이 더 뒤에 있다고 판단한다면 점을 방출한 후 새로 넣는다.
 		//아마도? 1대1 교환이 이루어지긴 할 것임? 새로 들어올 후보 점을 다시 한 번 검사해서 또 들어올 수 있는지를 검사해야 한다.
@@ -167,6 +182,7 @@ void solve() {
 		//순서가 바뀐 두 점의 앞, 뒤를 새로 검사해서 이벤트를 새로 삽입한다. 힙에 넣으므로 자동으로 정렬된다.
 		//새로 넣는 이벤트는 현재 기울기보다 무조건 정렬 순서 상 큰 기울기를 가져야 한다.
 	}
+	std::cout << ret << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj26108

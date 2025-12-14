@@ -135,7 +135,7 @@ void solve() {
 	for (int i = 0, j; i < K + 1; i++) {
 		j = N - i - 1;
 		bot[i] = P[i].i;
-		top[i] = P[j].i;//No need to record. no effect rotating calipers
+		top[i] = P[j].i;
 	}
 	Pos b = bot[K];
 	Pos t = top[K];

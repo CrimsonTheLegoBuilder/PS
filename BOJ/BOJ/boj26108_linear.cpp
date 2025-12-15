@@ -105,13 +105,14 @@ Polygon monotone_chain(Polygon& C) {
 	return H;
 }
 int bot[K_], top[K_], lb[K_], rb[K_];//convex hull rotating calipers jaw data
+int bot_head[K_], top_head[K_];//convex hull rotating calipers jaw data
 struct Event {
 	Pos v;
 	int h, i;
 	Event(Pos v_ = Pos(), int h_ = -1, int i_ = -1) : v(v_), h(h_), i(i_) {}
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
-std::priority_queue<Event> vpq, epq, bpq, tpq;
+std::priority_queue<Event> vpq, epq, bhpq, thpq;
 Pos norm(const Pos& p, const bool& f = TOP) { return f == TOP ? p : -p; }
 bool get_vec(const Pos& s, const Pos& e, const Pos& cur, Pos& vec, const bool& f = TOP) {
 	Pos v = e - s;
@@ -120,7 +121,23 @@ bool get_vec(const Pos& s, const Pos& e, const Pos& cur, Pos& vec, const bool& f
 	if (tq > 0 || (!tq && fc > 0)) { vec = v; return 1; }
 	vec = O; return 0;
 }
+void head_rotate(const Pos& cur) {
+	while (1) {
+		Event b = bhpq.top();
+		//pq에서 나온 기울기의 유효성 검사: 점이 제외되어있는지 검사
+		if (1) { 
+			continue;
+		}
 
+	}
+	while (1) {
+		Event t = thpq.top();
+		//pq에서 나온 기울기의 유효성 검사: 점이 제외되어있는지 검사
+		if (1) {
+			continue;
+		}
+	}
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);

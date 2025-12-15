@@ -127,7 +127,8 @@ struct Jaw {
 	Pos C[K_LEN];//candidate
 	std::priority_queue<Event> EQ, CQ;
 	int t;
-	Jaw(int t_ = BOT) : t(t_) {}
+	Pos ref;
+	Jaw(int t_ = BOT) : t(t_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); }
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K, const Pos& cur = Pos(0, -1)) {
 		int sz = Q.size(); assert(N > K);
 		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
@@ -143,13 +144,11 @@ struct Jaw {
 		for (int i = 0, j; i < K; i++) {
 			j = i + 1;
 			vec = E[j] - E[i];
-			tq = cur / vec;
-			fc = cur * vec;
+			tq = cur / vec; fc = cur * vec;
 			if (tq > 0 || (!tq && fc > 0)) EQ.push(Event(vec, BE, i, j));
 			vec = C[j] - C[i];
-			tq = cur / vec;
-			fc = cur * vec;
-			if (tq > 0 || (!tq && fc > 0)) EQ.push(Event(vec, BC, i, j));
+			tq = cur / vec; fc = cur * vec;
+			if (tq > 0 || (!tq && fc > 0)) CQ.push(Event(vec, BC, i, j));
 		}
 		return;
 	}

@@ -29,18 +29,30 @@ inline ll sq(const ll& x) { return x * x; }
 #define STRONG 0
 #define WEAK 1
 
-#define TOP 0
-#define BOT 1
+#define TOP 0 //TOP
+#define BOT 1 //BOT
 
-const int N_ = 1 << 16;
-const int K_ = 1 << 8 | 1 << 6;
+#define TE 0 //TOP_E
+#define TC 1 //TOP_C
+#define BE 2 //BOT_E
+#define BC 3 //BOT_C
 
-int N, M, K, T, Q;
+#define LOWER 0
+#define UPPER 1
+#define WHOLE 2
+
+#define SORT 1
+#define NO_SORT 0
+
+const int N_LEN = 1 << 16;
+const int K_LEN = 1 << 8 | 1 << 6;
+
+int N, K;
 struct Pos {
 	int x, y;
 	//ll x, y;
-	int i, j;
-	Pos(int x_ = 0, int y_ = 0, int i_ = -1, int j_ = -1) : x(x_), y(y_), i(i_), j(j_) {}
+	int h, i, j;
+	Pos(int x_ = 0, int y_ = 0, int h_ = -1, int i_ = -1, int j_ = -1) : x(x_), y(y_), h(h_), i(i_), j(j_) {}
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -60,7 +72,6 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
-Polygon H[K_], LH[K_], UH[K_];
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpx_rvs(const Pos& p, const Pos& q) { return p.x == q.x ? p.y > q.y : p.x < q.x; }
 bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
@@ -82,128 +93,174 @@ bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
 int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	//std::sort(C.begin(), C.end());
-	//C.erase(unique(C.begin(), C.end()), C.end());
-	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
-	else {
+Polygon monotone_chain(Polygon& C, int t = WHOLE, bool s = NO_SORT) {
+	if (s == SORT) { std::sort(C.begin(), C.end()); C.erase(unique(C.begin(), C.end()), C.end()); }
+	Polygon L, U;
+	if (t != UPPER) {
 		for (int i = 0; i < C.size(); i++) {
-			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
+			while (L.size() > 1 && ccw(L[L.size() - 2], L[L.size() - 1], C[i]) <= 0)
+				L.pop_back();
+			L.push_back(C[i]);
 		}
-		H.pop_back();
-		int s = H.size() + 1;
-		for (int i = C.size() - 1; i >= 0; i--) {
-			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
-		}
-		H.pop_back();
+		if (t == LOWER) return L;
 	}
-	return H;
+	if (t != LOWER) {
+		for (int i = C.size() - 1; i >= 0; i--) {
+			while (U.size() > 1 && ccw(U[U.size() - 2], U[U.size() - 1], C[i]) <= 0)
+				U.pop_back();
+			U.push_back(C[i]);
+		}
+		if (t == UPPER) return U;
+	}
+	L.pop_back(); U.pop_back();
+	L.insert(L.end(), U.begin(), U.end());
+	return L;
 }
-int bot[K_], top[K_], lb[K_], rb[K_];//convex hull rotating calipers jaw data
-int bot_head[K_], top_head[K_];//convex hull rotating calipers jaw data
 struct Event {
 	Pos v;
-	int h, i;
-	Event(Pos v_ = Pos(), int h_ = -1, int i_ = -1) : v(v_), h(h_), i(i_) {}
+	int t, i, j;
+	Event(Pos v_ = Pos(), int t_ = -1, int i_ = -1, int j_ = -1) : v(v_), t(t_), i(i_), j(j_) {}
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
-std::priority_queue<Event> vpq, epq, bhpq, thpq;
-Pos norm(const Pos& p, const bool& f = TOP) { return f == TOP ? p : -p; }
-bool get_vec(const Pos& s, const Pos& e, const Pos& cur, Pos& vec, const bool& f = TOP) {
-	Pos v = e - s;
-	v = norm(v, f);
-	int tq = cur / v, fc = cur * v;
-	if (tq > 0 || (!tq && fc > 0)) { vec = v; return 1; }
-	vec = O; return 0;
-}
-void head_rotate(const Pos& cur) {
-	while (1) {
-		Event b = bhpq.top();
-		//pq에서 나온 기울기의 유효성 검사: 점이 제외되어있는지 검사
-		if (1) {
-			continue;
+struct Jaw {
+	Pos E[K_LEN];//excepted
+	Pos C[K_LEN];//candidate
+	std::priority_queue<Event> EQ, CQ;
+	int t;
+	Jaw(int t_ = BOT) : t(t_) {}
+	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K, const Pos& cur = Pos(0, -1)) {
+		int sz = Q.size(); assert(N > K);
+		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
+		else for (int i = 0; i <= K; i++) E[i] = Q[sz - i - 1];
+		for (int k = 0; k <= K; k++) {
+			int sz = H[k].size();
+			for (int i = 0; i < sz; i++) {
+				if (ccw(E[K], E[K] + cur, H[k][i]) > 0) { C[k] = H[k][i]; break; }
+			}
 		}
+		Pos vec;
+		int tq, fc;
+		for (int i = 0, j; i < K; i++) {
+			j = i + 1;
+			vec = E[j] - E[i];
+			tq = cur / vec;
+			fc = cur * vec;
+			if (tq > 0 || (!tq && fc > 0)) EQ.push(Event(vec, BE, i, j));
+			vec = C[j] - C[i];
+			tq = cur / vec;
+			fc = cur * vec;
+			if (tq > 0 || (!tq && fc > 0)) EQ.push(Event(vec, BC, i, j));
+		}
+		return;
+	}
+	bool candidate_insert_check(const Pos& cur) {
+		return 0;
+	}
+	bool candidate_update(const Polygon& H, const int& i) {//O(K)
 
 	}
-	while (1) {
-		Event t = thpq.top();
-		//pq에서 나온 기울기의 유효성 검사: 점이 제외되어있는지 검사
-		if (1) {
-			continue;
+	bool rotate(std::vector<Event>& V, const Polygon H[], const Pos& cur) {
+		bool f = 0;
+		while (1) {
+			Event ev = EQ.top(); EQ.pop();
+			//유효성 검사
+			std::swap(E[ev.i], E[ev.j]);
+			if (1) EQ.push(Event());
+			if (1) EQ.push(Event());
+			V.push_back(ev);
+			f = 1;
 		}
+		while (1) {
+			Event ev = CQ.top(); CQ.pop();
+			//유효성 검사
+			std::swap(E[ev.i], E[ev.j]);
+			if (1) CQ.push(Event());
+			if (1) CQ.push(Event());
+		}
+		if (candidate_insert_check(cur)) {//O(NK)
+			E[K] = C[0];
+			int h = E[K].h, i = E[i].i;
+			candidate_update(H[h], i);
+		}
+		return f;
 	}
-}
-void main_rotate() {
-	while (1) {
+};
+struct Calipers {
+	const Pos s = Pos(0, -1), e = Pos(0, 1);
+	int N, K, h;
+	Pos cur;
+	Polygon H[K_LEN], L[K_LEN], U[K_LEN];
+	Jaw bot = Jaw(BOT), top = Jaw(TOP);
+	Calipers() { N = -1, K = -1, h = 0; }
+	void init(Polygon& P, int n = -1, int k = -1, Pos c = Pos(0, -1)) {
+		N = n; K = k; cur = c;
+		std::sort(P.begin(), P.end());
+		Polygon Q = P;
+		Vbool F(N, 0);
+		for (int k = 0; k <= K; k++) {//O(NK)
+			Polygon tmp;
+			for (const Pos& q : Q) if (!F[q.i]) tmp.push_back(q);
+			if (tmp.empty()) break;
+			h++;
+			H[k] = monotone_chain(tmp, WHOLE);
+			L[k] = monotone_chain(tmp, LOWER);
+			U[k] = monotone_chain(tmp, UPPER);
+			for (const Pos& h : H[k]) F[h.i] = 1;
+			Q.clear();
+			for (const Pos& t : tmp) if (!F[t.i]) Q.push_back(t);
+		}
+		Q.clear(); for (int i = 0; i < N; i++) if (F[i]) Q.push_back(P[i]);
+		std::sort(Q.begin(), Q.end(), cmpx_rvs);
+		bot.init(Q, L, N, K, s); top.init(Q, U, N, K, e);
+	}
+	void rotate() {
+		Pos nxt;
+		//all pq top search
+		cur = nxt;
+		return;
+	}
+	ld dist(int b = -1, int t = -1) {
 
 	}
-}
-void solve() {
+	bool jaw_rotate(ld& d) {
+		int tq = e / cur;
+		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
+		std::vector<Event> ev;
+		bot.rotate(ev, L, cur);
+		top.rotate(ev, U, cur);
+		for (const Event& hij : ev) {
+			//cal_d
+		}
+		rotate();
+		return 1;
+	}
+} C;
+void solve() { 
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
 	std::cin >> N >> K;
 	Polygon P(N); for (Pos& p : P) std::cin >> p;
-	std::sort(P.begin(), P.end());
-	for (int i = 0; i < N; i++) P[i].i = i;
-	Vbool F(N, 0);
-	Polygon C = P;
-	int k_ = 0;
-	for (int k = 0; k < K + 1; k++) {//O(NK)
-		Polygon tmp;
-		for (const Pos& c : C) if (!F[c.i]) tmp.push_back(c);
-		if (tmp.empty()) break;
-		k_++;
-		H[k] = monotone_chain(tmp);
-		for (const Pos& h : H[k]) F[h.i] = 1;
-		C.clear();
-		for (const Pos& t : tmp) if (!F[t.i]) C.push_back(t);
-	}
-	std::sort(P.begin(), P.end(), cmpx_rvs);
-	for (int i = 0, j; i < K + 1; i++) {
-		j = N - i - 1;
-		bot[i] = P[i].i;
-		top[i] = P[j].i;
-	}
-	Pos b = bot[K];
-	Pos t = top[K];
-	for (int h = 0; h < K + 1; h++) {
-		int sz = H[h].size();
-
-		for (int i = 0; i < sz; i++) {
-
-		}
-	}
-	Pos main_vec = Pos(0, -1);
-	Pos cur = Pos(0, -1), vbot = Pos(0, -1), vtop = Pos(0, 1);
-	int cnt = 3e7;
+	C.init(P, N, K, Pos(0, -1));
 	ld ret = INF;
-	while (cnt--) {//O(NKlogK)
-		Event ev = vpq.top(); vpq.pop(); //새로 시작하면 현재 이벤트 벡터 하나 깐다.
-		if (cur / Pos(0, 1) > 0) break; //반바퀴 다 돌았으면 나간다.
-		//회전에 의해 점이 새로 들어오고 나간다. 이를 처리해야 한다.
-		
-
-		//정렬 후 새로 들어올 가능성이 있는 점과 맨 뒤에 있는 점에 대해 현재 이벤트 벡터와의 방향성을 검사한다.
-		//맨 뒤에 있는 점이 더 뒤에 있다고 판단한다면 점을 방출한 후 새로 넣는다.
-		//아마도? 1대1 교환이 이루어지긴 할 것임? 새로 들어올 후보 점을 다시 한 번 검사해서 또 들어올 수 있는지를 검사해야 한다.
-		//이벤트 벨트 안에 점이 정확히 K개 제외되는지 엄밀한 검사를 수행하는 로직이 필요함
-		//앞대가리에 있는 각 껍질의 점들을 바로 O(1)에 조회 가능한 방법이 필요함.
-		//한 번에 기록용 배열을 4개 가지고 있어야 하고, 메인 이벤트 말고 이벤트 앞대가리도 정렬이 되는 방식으로 구현을 해야할 수 있음
-		//이벤트야 벡터로 저장되니까 그려러니 하는데 앞에서 들어올 후보 점을 판단하는 로직은 어떻게 단순화를 시켜야할까?
-		//기울기가 같은 이벤트 벡터를 전부 힙에서 깐다.
-		//이벤트 벡터에서 읽어온 순서가 변하는 두 점들을 전부 처리한다.
-		//이벤트 벡터에서 읽어온 변한 순서의 점들을 대상으로 K 개 안에 있는 점들에 대해 계산한다.
-		//가장 위와 아래에 있는 두 점의 이벤트 벡터 수직 벡터 사영 성분 간 길이의 절반으로 최소값을 갱신한다.
-		//순서가 바뀐 두 점의 앞, 뒤를 새로 검사해서 이벤트를 새로 삽입한다. 힙에 넣으므로 자동으로 정렬된다.
-		//새로 넣는 이벤트는 현재 기울기보다 무조건 정렬 순서 상 큰 기울기를 가져야 한다.
-	}
+	while (C.jaw_rotate(ret)) {}//O(NKlogK)
+	//새로 시작하면 현재 이벤트 벡터 하나 깐다.
+	//반바퀴 다 돌았으면 나간다.
+	//회전에 의해 점이 새로 들어오고 나간다. 이를 처리해야 한다.
+	//정렬 후 새로 들어올 가능성이 있는 점과 맨 뒤에 있는 점에 대해 현재 이벤트 벡터와의 방향성을 검사한다.
+	//맨 뒤에 있는 점이 더 뒤에 있다고 판단한다면 점을 방출한 후 새로 넣는다.
+	//아마도? 1대1 교환이 이루어지긴 할 것임? 새로 들어올 후보 점을 다시 한 번 검사해서 또 들어올 수 있는지를 검사해야 한다.
+	//이벤트 벨트 안에 점이 정확히 K개 제외되는지 엄밀한 검사를 수행하는 로직이 필요함
+	//앞대가리에 있는 각 껍질의 점들을 바로 O(1)에 조회 가능한 방법이 필요함.
+	//한 번에 기록용 배열을 4개 가지고 있어야 하고, 메인 이벤트 말고 이벤트 앞대가리도 정렬이 되는 방식으로 구현을 해야할 수 있음
+	//이벤트야 벡터로 저장되니까 그려러니 하는데 앞에서 들어올 후보 점을 판단하는 로직은 어떻게 단순화를 시켜야할까?
+	//기울기가 같은 이벤트 벡터를 전부 힙에서 깐다.
+	//이벤트 벡터에서 읽어온 순서가 변하는 두 점들을 전부 처리한다.
+	//이벤트 벡터에서 읽어온 변한 순서의 점들을 대상으로 K 개 안에 있는 점들에 대해 계산한다.
+	//가장 위와 아래에 있는 두 점의 이벤트 벡터 수직 벡터 사영 성분 간 길이의 절반으로 최소값을 갱신한다.
+	//순서가 바뀐 두 점의 앞, 뒤를 새로 검사해서 이벤트를 새로 삽입한다. 힙에 넣으므로 자동으로 정렬된다.
+	//새로 넣는 이벤트는 현재 기울기보다 무조건 정렬 순서 상 큰 기울기를 가져야 한다.
 	std::cout << ret << "\n";
 	return;
 }

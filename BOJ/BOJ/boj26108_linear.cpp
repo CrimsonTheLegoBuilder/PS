@@ -125,7 +125,7 @@ void head_rotate(const Pos& cur) {
 	while (1) {
 		Event b = bhpq.top();
 		//pq에서 나온 기울기의 유효성 검사: 점이 제외되어있는지 검사
-		if (1) { 
+		if (1) {
 			continue;
 		}
 
@@ -136,6 +136,11 @@ void head_rotate(const Pos& cur) {
 		if (1) {
 			continue;
 		}
+	}
+}
+void main_rotate() {
+	while (1) {
+
 	}
 }
 void solve() {

@@ -11,23 +11,12 @@ typedef long long ll;
 typedef double ld;
 typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
-typedef std::vector<ld> Vld;
 typedef std::vector<bool> Vbool;
 const ll INF = 1e17;
 const int LEN = 1e5 + 1;
-const ld TOL = 1e-7;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !x; }
 inline ll sq(const ll& x) { return x * x; }
-
-#define LO x
-#define HI y
-
-#define LINE 1
-#define CIRCLE 2
-
-#define STRONG 0
-#define WEAK 1
 
 #define TOP 0 //TOP
 #define BOT 1 //BOT
@@ -36,13 +25,6 @@ inline ll sq(const ll& x) { return x * x; }
 #define TC 1 //TOP_C
 #define BE 2 //BOT_E
 #define BC 3 //BOT_C
-
-#define LOWER 0
-#define UPPER 1
-#define WHOLE 2
-
-#define SORT 1
-#define NO_SORT 0
 
 #define EXC 0
 #define CND 1
@@ -84,14 +66,10 @@ ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
-bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
-bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
 Polygon monotone_chain(Polygon& C) {
 	Polygon H;
-	std::sort(C.begin(), C.end());
-	C.erase(unique(C.begin(), C.end()), C.end());
+	//std::sort(C.begin(), C.end());
+	//C.erase(unique(C.begin(), C.end()), C.end());
 	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
 	else {
 		for (int i = 0; i < C.size(); i++) {

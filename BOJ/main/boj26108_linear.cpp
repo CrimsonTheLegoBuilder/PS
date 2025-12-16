@@ -58,6 +58,7 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
+Polygon P;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpx_rvs(const Pos& p, const Pos& q) { return p.x == q.x ? p.y > q.y : p.x < q.x; }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
@@ -95,10 +96,8 @@ struct Event {
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
 struct Jaw {
-	Pos E[K_LEN];//except
-	Polygon C;//candidate
 	std::priority_queue<Event> EQ, CQ;
-	int t, K, h, l, cnt[K_LEN];
+	int t, K, h, c, cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
 	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
@@ -106,50 +105,66 @@ struct Jaw {
 		memset(VE, 0, sizeof VE);
 		memset(VC, 0, sizeof VC);
 		memset(cnt, 0, sizeof cnt);
-		h = 0; l = 0;
+		memset(idx, -1, sizeof idx);
+		memset(cnd, -1, sizeof cnd);
+		memset(ord, -1, sizeof ord);
+		h = 0; c = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_;
 		int sz = Q.size(); assert(N > K);
-		C.reserve(K_LEN);
-		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
-		else for (int i = 0; i <= K; i++) {
-			E[i] = Q[sz - i - 1];
-			VE[E[i].pi] = 1;
-			cnt[E[i].hi]++;
+		if (t == BOT) {
+			for (int i = 0; i <= K; i++) {
+				idx[i] = Q[i].pi;
+				ord[Q[i].pi] = i;
+				cnt[Q[i].hi]++;
+			}
 		}
+		else {
+			for (int i = 0; i <= K; i++) {
+				idx[i] = Q[sz - i - 1].pi;
+				ord[Q[i].pi] = i;
+				cnt[Q[i].hi]++;
+				//VE[E[i].pi] = 1;
+			}
+		}
+		Polygon tmp;
 		for (int k = 0; k <= h; k++) {
 			int sz = H[k].size();
 			for (int i = 0; i < sz; i++) {
-				if (ccw(E[K], E[K] + cur, H[k][i]) > 0) {
-					C.push_back(H[k][i]);
-					VC[C[i].pi] = 1;
-					l++;
+				if (ccw(Q[idx[K]], Q[idx[K]] + cur, H[k][i]) > 0) {
+					tmp.push_back(H[k][i]);
+					c++;
+					//VC[C[i].pi] = 1;
 					break;
 				}
 			}
+		}
+		std::sort(tmp.begin(), tmp.end(), cmpx_rvs);
+		for (int i = 0; i < c; i++) {
+			cnd[i] = tmp[i].pi;
+			ord[tmp[i].pi] = i;
 		}
 		Pos vec;
 		int tq, fc;
 		for (int i = 0, j; i < K; i++) {
 			j = i + 1;
-			vec = E[j] - E[i];
+			vec = P[idx[j]] - P[idx[i]];
 			tq = cur / vec; fc = cur * vec;
 			if (tq > 0 || (!tq && fc > 0))
-				EQ.push(Event(vec, (t == BOT ? BE : TE), i, j));
+				EQ.push(Event(vec, (t == BOT ? BE : TE), idx[i], idx[j]));
 		}
-		sz = C.size();
-		for (int i = 0, j; i < sz - 1; i++) {
+		for (int i = 0, j; i < c - 1; i++) {
 			j = i + 1;
-			vec = C[j] - C[i];
+			vec = P[cnd[j]] - P[cnd[i]];
 			tq = sign(cur / vec); fc = sign(cur * vec);
 			if (tq > 0 || (!tq && fc > 0))
-				CQ.push(Event(vec, (t == BOT ? BC : TC), i, j));
+				CQ.push(Event(vec, (t == BOT ? BC : TC), cnd[i], cnd[j]));
 		}
 		return;
 	}
 	bool candidate_insert_check(const Pos& cur) {
-		const Pos& e = E[K], & c = C[0];
+		const Pos& e = P[idx[K]], & c = P[cnd[0]];
 		int tq = ccw(e, e + cur, c), fc = sign(cur * (c - e));
 		return tq < 0 || (!tq && fc > 0);
 	}
@@ -160,45 +175,52 @@ struct Jaw {
 		return tq > 0 || (!tq && fc > 0);
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
-		Polygon tmp;
-		int sz = C.size(), k = f;
+		int k = f;
 		if (VE[p.i]) {
 			if (f == INSERT) return 0;
-			for (; k < sz; k++) tmp.push_back(C[k]);
-			C = tmp;
+			for (; k < c; k++) cnd[k - 1] = cnd[k];
+			c--;
 			return 0;
 		}
+		Vint tmp;
 		VC[p.i] = 1;
-		for (; k < sz; k++) {
-			int tq = ccw(p, p + cur, C[k]), fc = sign(cur * (p - C[k]));
+		for (; k < c; k++) {
+			int tq = ccw(p, p + cur, P[cnd[k]]), fc = sign(cur * (p - P[cnd[k]]));
 			if (tq > 0 || (!tq && fc > 0)) break;
 		}
-		for (int i = f; i < k; i++) tmp.push_back(C[i]);
+		for (int i = f; i < k; i++) tmp.push_back(cnd[i]);
 		if (tmp.size()) {
-			Pos vec = p - tmp.back();
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, k - 1, k));
+			Pos vec = p - P[tmp.back()];
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, tmp.back(), p.pi));
 		}
-		tmp.push_back(p);
-		if (k < sz) {
-			Pos vec = p - tmp[k];
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, k, k + 1));
+		tmp.push_back(p.pi);
+		if (k < c) {
+			Pos vec = P[tmp[k]] - p;
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, p.pi, tmp[k]));
 		}
-		for (int i = k; i < sz; i++) tmp.push_back(C[i]);
-		C = tmp;
+		for (int i = k; i < c; i++) tmp.push_back(cnd[i]);
+		c = tmp.size();
+		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
 		return 1;
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;
 		if (g == EXC) {
-			if (!VE[E[ev.i].pi] || !VE[E[ev.j].pi]) return 2;
-			v = E[ev.j] - E[ev.i];
+			if (!VE[ev.i] || !VE[ev.j]) return 2;
+			v = P[ev.j] - P[ev.i];
 		}
 		if (g == CND) {
-			if (!VC[C[ev.i].pi] || !VC[C[ev.j].pi]) return 2;
-			v = C[ev.j] - C[ev.i];
+			if (!VC[ev.i] || !VC[ev.j]) return 2;
+			v = P[ev.j] - P[ev.i];
 		}
 		int tq = sign(cur / v), fc = sign(cur * v);
 		return !tq && fc > 0;
+	}
+	void swap(const int& i, const int& j, const int& t = EXC) {
+		int u = ord[i], v = ord[j];
+		if (t == EXC) { std::swap(idx[u], idx[v]); }
+		else { std::swap(cnd[u], cnd[v]); }
+		ord[i] = v; ord[j] = u;
 	}
 	bool rotate(std::vector<Event>& EV, const Polygon H[], const Pos& cur) {
 		bool f = 0;
@@ -208,14 +230,14 @@ struct Jaw {
 			if (!val) break;
 			EQ.pop();
 			if (val == 2) continue;
-			std::swap(E[ev.i], E[ev.j]);
-			if (ev.i > 0) {
-				Pos v = E[ev.i] - E[ev.i - 1];
-				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.i - 1, ev.i));
+			swap(ev.i, ev.j);
+			if (ord[ev.i] > 0) {
+				Pos v = P[ev.i] - P[idx[ord[ev.i] - 1]];
+				if (ccw_check(v, cur)) EQ.push(Event(v, t, idx[ord[ev.i] - 1], ev.i));
 			}
-			if (ev.j < K) {
-				Pos v = E[ev.j + 1] - E[ev.j];
-				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.j, ev.j + 1));
+			if (ord[ev.j] < K) {
+				Pos v = P[idx[ord[ev.j] + 1]] - P[ev.j];
+				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.j, idx[ord[ev.j] + 1]));
 			}
 			EV.push_back(ev);
 			f = 1;
@@ -226,29 +248,27 @@ struct Jaw {
 			if (!val) break;
 			CQ.pop();
 			if (val == 2) continue;
-			std::swap(C[ev.i], C[ev.j]);
-			if (ev.i > 0) {
-				Pos v = C[ev.i] - C[ev.i - 1];
-				if (ccw_check(v, cur)) CQ.push(Event(v, t, ev.i - 1, ev.i));
+			swap(ev.i, ev.j);
+			if (ord[ev.i] > 0) {
+				Pos v = P[ev.i] - P[cnd[ord[ev.i] - 1]];
+				if (ccw_check(v, cur)) CQ.push(Event(v, t, cnd[ord[ev.i] - 1], ev.i));
 			}
-			if (ev.j < K) {
-				Pos v = C[ev.j + 1] - C[ev.j];
-				if (ccw_check(v, cur)) CQ.push(Event(v, t, ev.j, ev.j + 1));
+			if (ord[ev.j] < c - 1) {
+				Pos v = P[cnd[ord[ev.j] + 1]] - P[ev.j];
+				if (ccw_check(v, cur)) CQ.push(Event(v, t, ev.j, cnd[ord[ev.j] + 1]));
 			}
 		}
 		if (candidate_insert_check(cur)) {//O(NK)
-			Pos bck = E[K];
-			VE[bck.i] = -1;
-			E[K] = C[0];
-			cnt[E[K].hi]++;
-			Pos v = E[K] - E[K - 1];
-			if (ccw_check(v, cur)) EQ.push(Event(v, t, K - 1, K));
-			int sz = H[E[K].hi].size();
-			Pos p = H[E[K].hi][(E[K].i + 1) % sz];
+			Pos bck = P[idx[K]];
+			VE[idx[K]] = -1;
+			idx[K] = cnd[0];
+			cnt[P[idx[K]].hi]++;
+			Pos v = P[idx[K]] - P[idx[K - 1]];
+			if (ccw_check(v, cur)) EQ.push(Event(v, t, idx[K - 1], idx[K]));
+			int sz = H[P[idx[K]].hi].size();
+			Pos p = H[P[idx[K]].hi][(P[idx[K]].i + 1) % sz];
 			candidate_update(p, cur, SWAP);
-			if (cnt[bck.hi] == H[bck.hi].size()) {
-				candidate_update(bck, cur, INSERT);
-			}
+			if (cnt[bck.hi] == H[bck.hi].size()) candidate_update(bck, cur, INSERT);
 			cnt[bck.hi]--;
 		}
 		return f;
@@ -261,7 +281,7 @@ struct Calipers {
 	Polygon H[K_LEN], L[K_LEN], U[K_LEN];
 	Jaw bot = Jaw(BOT), top = Jaw(TOP);
 	Calipers() { N = -1, K = -1, h = 0; }
-	void init(Polygon& P, int n = -1, int k = -1, Pos c = Pos(0, -1)) {
+	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
 		N = n; K = k; cur = c;
 		std::sort(P.begin(), P.end());
 		Polygon Q = P;
@@ -285,6 +305,11 @@ struct Calipers {
 		Q.clear(); for (int i = 0; i < N; i++) if (F[i]) Q.push_back(P[i]);
 		std::sort(Q.begin(), Q.end(), cmpx_rvs);
 		bot.init(Q, L, N, K, h, s); top.init(Q, U, N, K, h, e);
+		std::sort(P.begin(), P.end(), cmpx_rvs);
+		for (int k = 0; k < h; h++) {
+			for (const Pos& p : H[k]) P[p.pi].hi = p.hi, P[p.pi].i = p.i;
+		}
+		return;
 	}
 	bool rotate() {
 		Polygon V;
@@ -300,7 +325,7 @@ struct Calipers {
 	}
 	ld dist(const int& b = -1, const int& t = -1) {
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
-		return cross(bot.E[b], bot.E[b] + cur, top.E[t]) / cur.mag();
+		return cross(P[b], P[b] + cur, P[t]) / cur.mag();
 	}
 	bool jaw_rotate(ld& d) {
 		int tq = e / cur;
@@ -321,9 +346,11 @@ void solve() {
 	std::cout << std::fixed;
 	std::cout.precision(15);
 	std::cin >> N >> K;
-	Polygon P(N); for (Pos& p : P) std::cin >> p;
+	P.resize(N); for (Pos& p : P) std::cin >> p;
+	if (K == 0) { /*rotating calipers*/ return; }
+	std::sort(P.begin(), P.end(), cmpx_rvs);
 	for (int i = 0; i < N; i++) P[i].i = i;
-	C.init(P, N, K, Pos(0, -1));
+	C.init(N, K, Pos(0, -1));
 	ld ret = INF;
 	while (C.jaw_rotate(ret)) {}//O(NKlogK)
 	//새로 시작하면 현재 이벤트 벡터 하나 깐다.

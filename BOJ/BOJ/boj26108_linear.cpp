@@ -34,10 +34,8 @@ inline ll sq(const ll& x) { return x * x; }
 
 #define TE 0 //TOP_E
 #define TC 1 //TOP_C
-#define TB 2 //TOP_B
-#define BE 3 //BOT_E
-#define BC 4 //BOT_C
-#define BB 5 //BOT_B
+#define BE 2 //BOT_E
+#define BC 3 //BOT_C
 
 #define LOWER 0
 #define UPPER 1
@@ -130,7 +128,7 @@ struct Event {
 struct Jaw {
 	Pos E[K_LEN];//except
 	Polygon C;//candidate
-	std::priority_queue<Event> EQ, CQ, BQ;
+	std::priority_queue<Event> EQ, CQ;
 	int t, K, h, l, cnt[K_LEN];
 	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
@@ -179,10 +177,6 @@ struct Jaw {
 			if (tq > 0 || (!tq && fc > 0))
 				CQ.push(Event(vec, (t == BOT ? BC : TC), i, j));
 		}
-		vec = C[0] - E[K];
-		tq = sign(cur / vec); fc = sign(cur * vec);
-		if (tq > 0 || (!tq && fc > 0))
-			CQ.push(Event(vec, (t == BOT ? BB : TB), -1, -1));
 		return;
 	}
 	bool candidate_insert_check(const Pos& cur) {
@@ -322,7 +316,7 @@ struct Calipers {
 		if (bot.EQ.size()) V.push_back(bot.EQ.top().v);
 		if (bot.CQ.size()) V.push_back(bot.CQ.top().v);
 		if (top.EQ.size()) V.push_back(-top.EQ.top().v);
-		if (bot.CQ.size()) V.push_back(-top.CQ.top().v);
+		if (top.CQ.size()) V.push_back(-top.CQ.top().v);
 		if (V.empty()) { cur = Pos(0, 1); return 0; }
 		cur = V[0];
 		int sz = V.size();

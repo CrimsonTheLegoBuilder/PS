@@ -126,9 +126,9 @@ struct Jaw {
 	Pos E[K_LEN];//excepted
 	Pos C[K_LEN];//candidate
 	std::priority_queue<Event> EQ, CQ;
-	int t;
+	int t, K;
 	Pos ref;
-	Jaw(int t_ = BOT) : t(t_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); }
+	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); }
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K, const Pos& cur = Pos(0, -1)) {
 		int sz = Q.size(); assert(N > K);
 		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
@@ -153,10 +153,21 @@ struct Jaw {
 		return;
 	}
 	bool candidate_insert_check(const Pos& cur) {
-		return 0;
+		const Pos& e = E[K], & c = C[0];
+		int tq = ccw(e, e + cur, c), fc = sign(cur * (c - e));
+		return tq > 0 || (!tq && fc > 0);
 	}
-	bool candidate_update(const Polygon& H, const int& i) {//O(K)
-
+	bool candidate_update(const Polygon& H, const int& i, const Pos& cur) {//O(K)
+		int sz = H.size(), i1 = (i + 1) % sz;
+		for (int k = 1; k <= K; k++) {
+			int tq = ccw(C[k], C[k] + cur, H[i1]), fc = sign(cur * (H[i1] - C[k]));
+			if (tq > 0 || (!tq && fc > 0)) {
+				for (int k_ = 0; k_ < k; k++) C[k_] = C[k_ + 1];
+				C[k] = H[i1];
+				break;
+			}
+		}
+		return 0;
 	}
 	bool rotate(std::vector<Event>& V, const Polygon H[], const Pos& cur) {
 		bool f = 0;

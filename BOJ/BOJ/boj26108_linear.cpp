@@ -44,6 +44,9 @@ inline ll sq(const ll& x) { return x * x; }
 #define SORT 1
 #define NO_SORT 0
 
+#define EXC 0
+#define CND 1
+
 const int N_LEN = 1 << 16;
 const int K_LEN = 1 << 8 | 1 << 6;
 
@@ -93,29 +96,6 @@ bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
 int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
-//Polygon monotone_chain(Polygon& C, int t = WHOLE, bool s = NO_SORT) {
-//	if (s == SORT) { std::sort(C.begin(), C.end()); C.erase(unique(C.begin(), C.end()), C.end()); }
-//	Polygon L, U;
-//	if (t != UPPER) {
-//		for (int i = 0; i < C.size(); i++) {
-//			while (L.size() > 1 && ccw(L[L.size() - 2], L[L.size() - 1], C[i]) <= 0)
-//				L.pop_back();
-//			L.push_back(C[i]);
-//		}
-//		if (t == LOWER) return L;
-//	}
-//	if (t != LOWER) {
-//		for (int i = C.size() - 1; i >= 0; i--) {
-//			while (U.size() > 1 && ccw(U[U.size() - 2], U[U.size() - 1], C[i]) <= 0)
-//				U.pop_back();
-//			U.push_back(C[i]);
-//		}
-//		if (t == UPPER) return U;
-//	}
-//	L.pop_back(); U.pop_back();
-//	L.insert(L.end(), U.begin(), U.end());
-//	return L;
-//}
 Polygon monotone_chain(Polygon& C) {
 	Polygon H;
 	std::sort(C.begin(), C.end());
@@ -145,21 +125,28 @@ struct Event {
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
 struct Jaw {
-	Pos E[K_LEN];//excepted
+	Pos E[K_LEN];//except
 	Pos C[K_LEN];//candidate
 	std::priority_queue<Event> EQ, CQ;
-	int t, K;
+	int t, K, V[N_LEN];
 	Pos ref;
-	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); }
+	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); memset(V, -1, sizeof V); }
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const Pos& cur = Pos(0, -1)) {
 		K = K_;
 		int sz = Q.size(); assert(N > K);
 		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
-		else for (int i = 0; i <= K; i++) E[i] = Q[sz - i - 1];
+		else for (int i = 0; i <= K; i++) {
+			E[i] = Q[sz - i - 1];
+			V[E[i].pi] = EXC;
+		}
 		for (int k = 0; k <= K; k++) {
 			int sz = H[k].size();
 			for (int i = 0; i < sz; i++) {
-				if (ccw(E[K], E[K] + cur, H[k][i]) > 0) { C[k] = H[k][i]; break; }
+				if (ccw(E[K], E[K] + cur, H[k][i]) > 0) {
+					C[k] = H[k][i];
+					V[C[i].pi] = CND;
+					break;
+				}
 			}
 		}
 		Pos vec;
@@ -192,7 +179,20 @@ struct Jaw {
 		}
 		return 0;
 	}
-	bool valid(const Pos& vec, const Pos& cur) {
+	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
+		Pos v;
+		if (g == EXC) {
+			if (V[E[ev.i].pi] != EXC || V[E[ev.j].pi] != EXC) return 2;
+			v = E[ev.j] - E[ev.i];
+		}
+		if (g == CND) {
+			if (V[E[ev.i].pi] != CND || V[E[ev.j].pi] != CND) return 2;
+			v = E[ev.j] - E[ev.i];
+		}
+		int tq = sign(cur / v), fc = sign(cur * v);
+		return !tq && fc > 0;
+	}
+	bool ccw_check(const Pos& vec, const Pos& cur) {
 		int tq = sign(ref / vec), fc = ref * vec;
 		if (tq < 0 || (!tq && fc < 0)) return 0;
 		tq = sign(cur / vec), fc = cur * vec;
@@ -201,26 +201,38 @@ struct Jaw {
 	bool rotate(std::vector<Event>& V, const Polygon H[], const Pos& cur) {
 		bool f = 0;
 		while (1) {
-			Event ev = EQ.top(); EQ.pop();
-			//유효성 검사
+			Event ev = EQ.top();
+			int val = valid(ev, cur, EXC);
+			if (!val) break;
+			EQ.pop();
+			if (val == 2) continue;
 			std::swap(E[ev.i], E[ev.j]);
 			if (ev.i > 0) {
 				Pos v = E[ev.i] - E[ev.i - 1];
-				if (valid(v, cur)) EQ.push(Event(v, t, ev.i - 1, ev.i));
+				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.i - 1, ev.i));
 			}
 			if (ev.j < K) {
 				Pos v = E[ev.j + 1] - E[ev.j];
-				if (valid(v, cur)) EQ.push(Event(v, t, ev.j, ev.j + 1));
+				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.j, ev.j + 1));
 			}
 			V.push_back(ev);
 			f = 1;
 		}
 		while (1) {
-			Event ev = CQ.top(); CQ.pop();
-			//유효성 검사
-			std::swap(E[ev.i], E[ev.j]);
-			if (1) CQ.push(Event());
-			if (1) CQ.push(Event());
+			Event ev = CQ.top();
+			int val = valid(ev, cur, CND);
+			if (!val) break;
+			CQ.pop();
+			if (val == 2) continue;
+			std::swap(C[ev.i], C[ev.j]);
+			if (ev.i > 0) {
+				Pos v = C[ev.i] - C[ev.i - 1];
+				if (ccw_check(v, cur)) CQ.push(Event(v, t, ev.i - 1, ev.i));
+			}
+			if (ev.j < K) {
+				Pos v = C[ev.j + 1] - C[ev.j];
+				if (ccw_check(v, cur)) CQ.push(Event(v, t, ev.j, ev.j + 1));
+			}
 		}
 		if (candidate_insert_check(cur)) {//O(NK)
 			E[K] = C[0];
@@ -248,9 +260,6 @@ struct Calipers {
 			if (tmp.empty()) break;
 			h++;
 			H[k] = monotone_chain(tmp);
-			//H[k] = monotone_chain(tmp, WHOLE);
-			//L[k] = monotone_chain(tmp, LOWER);
-			//U[k] = monotone_chain(tmp, UPPER);
 			int sz = H[k].size();
 			for (int i = 0; i < sz; i++) H[k][i].hi = k, H[k][i].i = i;
 			int b = H[k][0].i;
@@ -277,17 +286,19 @@ struct Calipers {
 		for (int i = 1; i < sz; i++) if (cur / V[i] < 0) cur = V[i];
 		return 1;
 	}
-	ld dist(int b = -1, int t = -1) {
-
+	ld dist(const int& b = -1, const int& t = -1) {
+		if (b < 0 || K < b || t < 0 || K < t) return INF;
+		return cross(bot.E[b], bot.E[b] + cur, top.E[t]) / cur.mag();
 	}
 	bool jaw_rotate(ld& d) {
 		int tq = e / cur;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		std::vector<Event> ev;
 		bot.rotate(ev, L, cur);
-		top.rotate(ev, U, cur);
-		for (const Event& hij : ev) {
-			//cal_d
+		top.rotate(ev, U, -cur);
+		for (const Event& tij : ev) {
+			if (tij.t == BOT) d = std::min(d, dist(tij.i, K - tij.i));
+			else d = std::min(d, dist(K - tij.i, tij.i));
 		}
 		return rotate();
 	}

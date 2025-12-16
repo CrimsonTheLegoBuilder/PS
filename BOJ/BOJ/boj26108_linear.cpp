@@ -124,20 +124,21 @@ struct Event {
 };
 struct Jaw {
 	Pos E[K_LEN];//except
-	Pos C[K_LEN];//candidate
+	Polygon C;//candidate
 	std::priority_queue<Event> EQ, CQ;
-	int t, K, h;
+	int t, K, h, l;
 	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
 		memset(VE, 0, sizeof VE);
 		memset(VC, 0, sizeof VC);
-		h = 0;
+		h = 0; l = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_;
 		int sz = Q.size(); assert(N > K);
+		C.reserve(K_LEN);
 		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
 		else for (int i = 0; i <= K; i++) {
 			E[i] = Q[sz - i - 1];
@@ -147,8 +148,9 @@ struct Jaw {
 			int sz = H[k].size();
 			for (int i = 0; i < sz; i++) {
 				if (ccw(E[K], E[K] + cur, H[k][i]) > 0) {
-					C[k] = H[k][i];
+					C.push_back(H[k][i]);
 					VC[C[i].pi] = 1;
+					l++;
 					break;
 				}
 			}
@@ -160,6 +162,10 @@ struct Jaw {
 			vec = E[j] - E[i];
 			tq = cur / vec; fc = cur * vec;
 			if (tq > 0 || (!tq && fc > 0)) EQ.push(Event(vec, BE, i, j));
+		}
+		sz = C.size();
+		for (int i = 0, j; i < sz - 1; i++) {
+			j = i + 1;
 			vec = C[j] - C[i];
 			tq = cur / vec; fc = cur * vec;
 			if (tq > 0 || (!tq && fc > 0)) CQ.push(Event(vec, BC, i, j));

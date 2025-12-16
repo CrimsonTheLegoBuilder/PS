@@ -126,13 +126,14 @@ struct Jaw {
 	Pos E[K_LEN];//except
 	Polygon C;//candidate
 	std::priority_queue<Event> EQ, CQ;
-	int t, K, h, l;
+	int t, K, h, l, cnt[K_LEN];
 	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
 		memset(VE, 0, sizeof VE);
 		memset(VC, 0, sizeof VC);
+		memset(cnt, 0, sizeof cnt);
 		h = 0; l = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
@@ -143,6 +144,7 @@ struct Jaw {
 		else for (int i = 0; i <= K; i++) {
 			E[i] = Q[sz - i - 1];
 			VE[E[i].pi] = 1;
+			cnt[E[i].hi]++;
 		}
 		for (int k = 0; k <= h; k++) {
 			int sz = H[k].size();
@@ -251,6 +253,7 @@ struct Jaw {
 			}
 		}
 		if (candidate_insert_check(cur)) {//O(NK)
+			Pos out = E[K];
 			E[K] = C[0];
 			VE[E[K].pi] = -1;
 			int h = E[K].hi, i = E[i].i;

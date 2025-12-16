@@ -78,15 +78,6 @@ struct Pos {
 typedef std::vector<Pos> Polygon;
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpx_rvs(const Pos& p, const Pos& q) { return p.x == q.x ? p.y > q.y : p.x < q.x; }
-bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
-bool cmpy_rvs(const Pos& p, const Pos& q) { return p.y == q.y ? p.x > q.x : p.y < q.y; }
-bool cmpt(const Pos& p, const Pos& q) {
-	bool f0 = O < p;
-	bool f1 = O < q;
-	if (f0 != f1) return f0;
-	ll tq = p / q;
-	return !tq ? p.Euc() < q.Euc() : tq > 0;
-}
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
@@ -219,8 +210,8 @@ struct Jaw {
 			v = E[ev.j] - E[ev.i];
 		}
 		if (g == CND) {
-			if (!VC[E[ev.i].pi] || !VC[E[ev.j].pi]) return 2;
-			v = E[ev.j] - E[ev.i];
+			if (!VC[C[ev.i].pi] || !VC[C[ev.j].pi]) return 2;
+			v = C[ev.j] - C[ev.i];
 		}
 		int tq = sign(cur / v), fc = sign(cur * v);
 		return !tq && fc > 0;

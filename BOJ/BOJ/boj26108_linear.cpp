@@ -53,10 +53,8 @@ const int K_LEN = 1 << 8 | 1 << 6;
 int N, K;
 struct Pos {
 	int x, y;
-	//ll x, y;
 	int pi, hi, i;
 	Pos(int x_ = 0, int y_ = 0, int p_ = -1, int h_ = -1, int i_ = -1) : x(x_), y(y_), pi(p_), hi(h_), i(i_) {}
-	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -128,23 +126,29 @@ struct Jaw {
 	Pos E[K_LEN];//except
 	Pos C[K_LEN];//candidate
 	std::priority_queue<Event> EQ, CQ;
-	int t, K, V[N_LEN];
+	int t, K, h;
+	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
-	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); memset(V, -1, sizeof V); }
-	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const Pos& cur = Pos(0, -1)) {
-		K = K_;
+	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
+		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
+		memset(VE, 0, sizeof VE);
+		memset(VC, 0, sizeof VC);
+		h = 0;
+	}
+	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
+		K = K_; h = h_;
 		int sz = Q.size(); assert(N > K);
 		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
 		else for (int i = 0; i <= K; i++) {
 			E[i] = Q[sz - i - 1];
-			V[E[i].pi] = EXC;
+			VE[E[i].pi] = 1;
 		}
-		for (int k = 0; k <= K; k++) {
+		for (int k = 0; k <= h; k++) {
 			int sz = H[k].size();
 			for (int i = 0; i < sz; i++) {
 				if (ccw(E[K], E[K] + cur, H[k][i]) > 0) {
 					C[k] = H[k][i];
-					V[C[i].pi] = CND;
+					VC[C[i].pi] = 1;
 					break;
 				}
 			}
@@ -169,11 +173,17 @@ struct Jaw {
 	}
 	bool candidate_update(const Polygon& H, const int& i, const Pos& cur) {//O(K)
 		int sz = H.size(), i1 = (i + 1) % sz;
-		for (int k = 1; k <= K; k++) {
+		VC[C[0].pi] = 0;
+		if (sz == 1) {
+
+			return;
+		}
+		for (int k = 1; k < h; k++) {
 			int tq = ccw(C[k], C[k] + cur, H[i1]), fc = sign(cur * (H[i1] - C[k]));
 			if (tq > 0 || (!tq && fc > 0)) {
 				for (int k_ = 0; k_ < k; k++) C[k_] = C[k_ + 1];
 				C[k] = H[i1];
+				VC[C[K].pi] = 1;
 				break;
 			}
 		}
@@ -182,11 +192,11 @@ struct Jaw {
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;
 		if (g == EXC) {
-			if (V[E[ev.i].pi] != EXC || V[E[ev.j].pi] != EXC) return 2;
+			if (!VE[E[ev.i].pi] || !VE[E[ev.j].pi]) return 2;
 			v = E[ev.j] - E[ev.i];
 		}
 		if (g == CND) {
-			if (V[E[ev.i].pi] != CND || V[E[ev.j].pi] != CND) return 2;
+			if (!VC[E[ev.i].pi] || !VC[E[ev.j].pi]) return 2;
 			v = E[ev.j] - E[ev.i];
 		}
 		int tq = sign(cur / v), fc = sign(cur * v);
@@ -198,7 +208,7 @@ struct Jaw {
 		tq = sign(cur / vec), fc = cur * vec;
 		return tq > 0 || (!tq && fc > 0);
 	}
-	bool rotate(std::vector<Event>& V, const Polygon H[], const Pos& cur) {
+	bool rotate(std::vector<Event>& EV, const Polygon H[], const Pos& cur) {
 		bool f = 0;
 		while (1) {
 			Event ev = EQ.top();
@@ -215,7 +225,7 @@ struct Jaw {
 				Pos v = E[ev.j + 1] - E[ev.j];
 				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.j, ev.j + 1));
 			}
-			V.push_back(ev);
+			EV.push_back(ev);
 			f = 1;
 		}
 		while (1) {
@@ -236,6 +246,7 @@ struct Jaw {
 		}
 		if (candidate_insert_check(cur)) {//O(NK)
 			E[K] = C[0];
+			VE[E[K].pi] = -1;
 			int h = E[K].hi, i = E[i].i;
 			candidate_update(H[h], i, cur);
 		}
@@ -272,7 +283,7 @@ struct Calipers {
 		}
 		Q.clear(); for (int i = 0; i < N; i++) if (F[i]) Q.push_back(P[i]);
 		std::sort(Q.begin(), Q.end(), cmpx_rvs);
-		bot.init(Q, L, N, K, s); top.init(Q, U, N, K, e);
+		bot.init(Q, L, N, K, h, s); top.init(Q, U, N, K, h, e);
 	}
 	bool rotate() {
 		Polygon V;
@@ -293,12 +304,12 @@ struct Calipers {
 	bool jaw_rotate(ld& d) {
 		int tq = e / cur;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
-		std::vector<Event> ev;
-		bot.rotate(ev, L, cur);
-		top.rotate(ev, U, -cur);
-		for (const Event& tij : ev) {
-			if (tij.t == BOT) d = std::min(d, dist(tij.i, K - tij.i));
-			else d = std::min(d, dist(K - tij.i, tij.i));
+		std::vector<Event> EV;
+		bot.rotate(EV, L, cur);
+		top.rotate(EV, U, -cur);
+		for (const Event& ev : EV) {
+			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
+			else d = std::min(d, dist(K - ev.i, ev.i));
 		}
 		return rotate();
 	}

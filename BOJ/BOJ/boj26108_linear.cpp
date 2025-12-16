@@ -182,13 +182,19 @@ struct Jaw {
 		return tq > 0 || (!tq && fc > 0);
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
-		VC[p.i] = 1;
+		Polygon tmp;
 		int sz = C.size(), k = f;
+		if (VE[p.i]) {
+			if (f == INSERT) return 0;
+			for (; k < sz; k++) tmp.push_back(C[k]);
+			C = tmp;
+			return 0;
+		}
+		VC[p.i] = 1;
 		for (; k < sz; k++) {
 			int tq = ccw(p, p + cur, C[k]), fc = sign(cur * (p - C[k]));
 			if (tq > 0 || (!tq && fc > 0)) break;
 		}
-		Polygon tmp;
 		for (int i = f; i < k; i++) tmp.push_back(C[i]);
 		if (tmp.size()) {
 			Pos vec = p - tmp.back();
@@ -201,7 +207,7 @@ struct Jaw {
 		}
 		for (int i = k; i < sz; i++) tmp.push_back(C[i]);
 		C = tmp;
-		return 0;
+		return 1;
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;
@@ -261,9 +267,9 @@ struct Jaw {
 			if (ccw_check(v, cur)) EQ.push(Event(v, t, K - 1, K));
 			int sz = H[E[K].hi].size();
 			Pos p = H[E[K].hi][(E[K].i + 1) % sz];
-			candidate_update(p, cur);
+			candidate_update(p, cur, SWAP);
 			if (cnt[bck.hi] == H[bck.hi].size()) {
-				candidate_update(bck, cur);
+				candidate_update(bck, cur, INSERT);
 			}
 			cnt[bck.hi]--;
 		}

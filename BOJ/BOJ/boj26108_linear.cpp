@@ -169,14 +169,26 @@ struct Jaw {
 		}
 		return 0;
 	}
+	bool valid(const Pos& vec, const Pos& cur) {
+		int tq = sign(ref / vec), fc = ref * vec;
+		if (tq < 0 || (!tq && fc < 0)) return 0;
+		tq = sign(cur / vec), fc = cur * vec;
+		return tq > 0 || (!tq && fc > 0);
+	}
 	bool rotate(std::vector<Event>& V, const Polygon H[], const Pos& cur) {
 		bool f = 0;
 		while (1) {
 			Event ev = EQ.top(); EQ.pop();
 			//유효성 검사
 			std::swap(E[ev.i], E[ev.j]);
-			if (1) EQ.push(Event());
-			if (1) EQ.push(Event());
+			if (ev.i > 0) {
+				Pos v = E[ev.i] - E[ev.i - 1];
+				if (valid(v, cur)) EQ.push(Event(v, t, ev.i - 1, ev.i));
+			}
+			if (ev.j < K) {
+				Pos v = E[ev.j + 1] - E[ev.j];
+				if (valid(v, cur)) EQ.push(Event(v, t, ev.j, ev.j + 1));
+			}
 			V.push_back(ev);
 			f = 1;
 		}
@@ -190,7 +202,7 @@ struct Jaw {
 		if (candidate_insert_check(cur)) {//O(NK)
 			E[K] = C[0];
 			int h = E[K].h, i = E[i].i;
-			candidate_update(H[h], i);
+			candidate_update(H[h], i, cur);
 		}
 		return f;
 	}

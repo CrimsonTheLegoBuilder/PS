@@ -186,7 +186,7 @@
     <ClCompile Include="..\main\boj20185_814_3_hilb_2opt_4kick.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
-    <ClCompile Include="boj26108_linear.cpp">
+    <ClCompile Include="..\main\boj26108_linear.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
   </ItemGroup>

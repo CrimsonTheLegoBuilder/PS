@@ -269,7 +269,7 @@ struct Jaw {
 		}
 		return f;
 	}
-};//아직 메인과 후보군의 경계면을 관리하는 로직이 없음
+};
 struct Calipers {
 	const Pos s = Pos(0, -1), e = Pos(0, 1);
 	int N, K, h;

@@ -34,8 +34,10 @@ inline ll sq(const ll& x) { return x * x; }
 
 #define TE 0 //TOP_E
 #define TC 1 //TOP_C
-#define BE 2 //BOT_E
-#define BC 3 //BOT_C
+#define TB 2 //TOP_B
+#define BE 3 //BOT_E
+#define BC 4 //BOT_C
+#define BB 5 //BOT_B
 
 #define LOWER 0
 #define UPPER 1
@@ -46,6 +48,9 @@ inline ll sq(const ll& x) { return x * x; }
 
 #define EXC 0
 #define CND 1
+
+#define INSERT 0
+#define SWAP 1
 
 const int N_LEN = 1 << 16;
 const int K_LEN = 1 << 8 | 1 << 6;
@@ -125,7 +130,7 @@ struct Event {
 struct Jaw {
 	Pos E[K_LEN];//except
 	Polygon C;//candidate
-	std::priority_queue<Event> EQ, CQ;
+	std::priority_queue<Event> EQ, CQ, BQ;
 	int t, K, h, l, cnt[K_LEN];
 	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
@@ -163,38 +168,54 @@ struct Jaw {
 			j = i + 1;
 			vec = E[j] - E[i];
 			tq = cur / vec; fc = cur * vec;
-			if (tq > 0 || (!tq && fc > 0)) EQ.push(Event(vec, BE, i, j));
+			if (tq > 0 || (!tq && fc > 0))
+				EQ.push(Event(vec, (t == BOT ? BE : TE), i, j));
 		}
 		sz = C.size();
 		for (int i = 0, j; i < sz - 1; i++) {
 			j = i + 1;
 			vec = C[j] - C[i];
-			tq = cur / vec; fc = cur * vec;
-			if (tq > 0 || (!tq && fc > 0)) CQ.push(Event(vec, BC, i, j));
+			tq = sign(cur / vec); fc = sign(cur * vec);
+			if (tq > 0 || (!tq && fc > 0))
+				CQ.push(Event(vec, (t == BOT ? BC : TC), i, j));
 		}
+		vec = C[0] - E[K];
+		tq = sign(cur / vec); fc = sign(cur * vec);
+		if (tq > 0 || (!tq && fc > 0))
+			CQ.push(Event(vec, (t == BOT ? BB : TB), -1, -1));
 		return;
 	}
 	bool candidate_insert_check(const Pos& cur) {
 		const Pos& e = E[K], & c = C[0];
 		int tq = ccw(e, e + cur, c), fc = sign(cur * (c - e));
+		return tq < 0 || (!tq && fc > 0);
+	}
+	bool ccw_check(const Pos& vec, const Pos& cur) {
+		int tq = sign(ref / vec), fc = ref * vec;
+		if (tq < 0 || (!tq && fc < 0)) return 0;
+		tq = sign(cur / vec), fc = cur * vec;
 		return tq > 0 || (!tq && fc > 0);
 	}
-	bool candidate_update(const Polygon& H, const int& i, const Pos& cur) {//O(K)
-		int sz = H.size(), i1 = (i + 1) % sz;
-		VC[C[0].pi] = 0;
-		if (sz == 1) {
-
-			return;
+	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
+		VC[p.i] = 1;
+		int sz = C.size(), k = f;
+		for (; k < sz; k++) {
+			int tq = ccw(p, p + cur, C[k]), fc = sign(cur * (p - C[k]));
+			if (tq > 0 || (!tq && fc > 0)) break;
 		}
-		for (int k = 1; k < h; k++) {
-			int tq = ccw(C[k], C[k] + cur, H[i1]), fc = sign(cur * (H[i1] - C[k]));
-			if (tq > 0 || (!tq && fc > 0)) {
-				for (int k_ = 0; k_ < k; k++) C[k_] = C[k_ + 1];
-				C[k] = H[i1];
-				VC[C[K].pi] = 1;
-				break;
-			}
+		Polygon tmp;
+		for (int i = f; i < k; i++) tmp.push_back(C[i]);
+		if (tmp.size()) {
+			Pos vec = p - tmp.back();
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, k - 1, k));
 		}
+		tmp.push_back(p);
+		if (k < sz) {
+			Pos vec = p - tmp[k];
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, k, k + 1));
+		}
+		for (int i = k; i < sz; i++) tmp.push_back(C[i]);
+		C = tmp;
 		return 0;
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
@@ -209,12 +230,6 @@ struct Jaw {
 		}
 		int tq = sign(cur / v), fc = sign(cur * v);
 		return !tq && fc > 0;
-	}
-	bool ccw_check(const Pos& vec, const Pos& cur) {
-		int tq = sign(ref / vec), fc = ref * vec;
-		if (tq < 0 || (!tq && fc < 0)) return 0;
-		tq = sign(cur / vec), fc = cur * vec;
-		return tq > 0 || (!tq && fc > 0);
 	}
 	bool rotate(std::vector<Event>& EV, const Polygon H[], const Pos& cur) {
 		bool f = 0;
@@ -253,15 +268,23 @@ struct Jaw {
 			}
 		}
 		if (candidate_insert_check(cur)) {//O(NK)
-			Pos out = E[K];
+			Pos bck = E[K];
+			VE[bck.i] = -1;
 			E[K] = C[0];
-			VE[E[K].pi] = -1;
-			int h = E[K].hi, i = E[i].i;
-			candidate_update(H[h], i, cur);
+			cnt[E[K].hi]++;
+			Pos v = E[K] - E[K - 1];
+			if (ccw_check(v, cur)) EQ.push(Event(v, t, K - 1, K));
+			int sz = H[E[K].hi].size();
+			Pos p = H[E[K].hi][(E[K].i + 1) % sz];
+			candidate_update(p, cur);
+			if (cnt[bck.hi] == H[bck.hi].size()) {
+				candidate_update(bck, cur);
+			}
+			cnt[bck.hi]--;
 		}
 		return f;
 	}
-};
+};//아직 메인과 후보군의 경계면을 관리하는 로직이 없음
 struct Calipers {
 	const Pos s = Pos(0, -1), e = Pos(0, 1);
 	int N, K, h;

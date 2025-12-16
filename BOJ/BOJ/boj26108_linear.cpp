@@ -129,7 +129,8 @@ struct Jaw {
 	int t, K;
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) { ref = (t == BOT ? Pos(0, -1) : Pos(0, 1)); }
-	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K, const Pos& cur = Pos(0, -1)) {
+	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const Pos& cur = Pos(0, -1)) {
+		K = K_;
 		int sz = Q.size(); assert(N > K);
 		if (t == BOT) for (int i = 0; i <= K; i++) E[i] = Q[i];
 		else for (int i = 0; i <= K; i++) E[i] = Q[sz - i - 1];

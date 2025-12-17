@@ -97,7 +97,8 @@ struct Event {
 };
 struct Jaw {
 	std::priority_queue<Event> EQ, CQ;
-	int t, K, h, c, cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
+	int t, K, h, c, bnd;
+	int cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
 	bool VE[N_LEN], VC[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
@@ -108,7 +109,7 @@ struct Jaw {
 		memset(idx, -1, sizeof idx);
 		memset(cnd, -1, sizeof cnd);
 		memset(ord, -1, sizeof ord);
-		h = 0; c = 0;
+		h = 0; c = 0; bnd = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_;
@@ -139,6 +140,17 @@ struct Jaw {
 					break;
 				}
 			}
+			//여기서 모든 껍질의 점 하나씩을 후보로 올리고, 후보 점이 이벤트 라인 안에 있는 경우의 상한, 하한을 구한다.
+			//크기가 작은 껍질이 먹혀있는 경우도 있고 완전히 벗어나있는 경우도 있다. 이런 이벤트들도 모두 고려 대상이 된다.
+			//순서를 기록하는 배열에 의해 안정적으로 관리가 되고 있긴 하므로 잘 구분해서 구현하면 될 듯 함.
+			//캘리퍼스 jaw는 메인, 후보군 외에 K개의 껍질에 대해 모두 돌아가고 있어야 한다.
+			//후보군을 담당하는 큐와 껍질 회전을 담당하는 큐를 구분해서 사용하도록 한다.
+			//변수명이 좀 길어지더라도 안 헷갈리려면 전부 뭐가 뭔지 제대로 이름을 짓기는 해야할 듯
+			//메인, 앞대가리, 볼록껍질 큐 3개를 각각 관리하도록 하고
+			//먹혀있는 껍질도 외부에 있는 껍질도 jaw는 회전을 하되 후보군에는 잘 구분해서 빼놓는다.
+			//볼록껍질 큐는 말 그대로 볼록껍질의 jaw를 현재 이벤트 기울기보다 크도록 회전시켜준다.
+			//제외되는 점군에 점을 포함시키지 않은 껍질도 따라 돌도록 하고 있다가 가장 가까운 점이 삽입이 가능한가를 알도록 한다.
+			//외부에 있으면서 가장 가까이 있어서 언제든지 메인에 점을 삽입시킬 수 있는 껍질의 번호를 기억하도록 해준다.
 		}
 		std::sort(tmp.begin(), tmp.end(), cmpx_rvs);
 		for (int i = 0; i < c; i++) {
@@ -340,14 +352,30 @@ struct Calipers {
 		return rotate();
 	}
 } C;
-void solve() { 
+ld rotating_calipers(Polygon& P) {
+	Polygon H = monotone_chain(P);
+	int sz = H.size();
+	ld ret = INF;
+	for (int i = 0, j = 1; i < sz; i++) {
+		while (ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0) {
+			j = (j + 1) % sz;
+		}
+		Pos v = H[(i + 1) % sz] - H[i];
+		ld tq = cross(H[i], H[(i + 1) % sz], H[j]);
+		ret = std::min(ret, tq / v.mag());
+	}
+	return ret;
+}
+void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
 	std::cin >> N >> K;
 	P.resize(N); for (Pos& p : P) std::cin >> p;
-	if (K == 0) { /*rotating calipers*/ return; }
+	if (N < 3) { std::cout << "0.000000000\n"; return; }
+	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
+	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	std::sort(P.begin(), P.end(), cmpx_rvs);
 	for (int i = 0; i < N; i++) P[i].i = i;
 	C.init(N, K, Pos(0, -1));
@@ -369,6 +397,19 @@ void solve() {
 	//가장 위와 아래에 있는 두 점의 이벤트 벡터 수직 벡터 사영 성분 간 길이의 절반으로 최소값을 갱신한다.
 	//순서가 바뀐 두 점의 앞, 뒤를 새로 검사해서 이벤트를 새로 삽입한다. 힙에 넣으므로 자동으로 정렬된다.
 	//새로 넣는 이벤트는 현재 기울기보다 무조건 정렬 순서 상 큰 기울기를 가져야 한다.
+
+
+	//왜 볼록껍질들에 대해서도 관리가 필요한가 했는데
+	//처음에는 이벤트 구역에 걸쳐있지 않다가 회전 중에 걸치는 경우가 생긴다.
+	//구조체 재정의는 할 필요는 없을 거 같기는 한데... 이미 타입을 나타내는 멤버변수가 있다.
+	//문제는 어떻게 구현을 하는가 이다. jaw 안에 이중jaw를 구현해야한다.
+	//후보군의 정렬 순서를 기억하고 있게 하되
+	//완전히 먹힌 경우와
+	//아예 벗어나있는 경우를 각각 구분할 수 있도록 하여야 함.
+	//완전히 먹힌 경우는 현재 이벤트 벨트에 들어가있는 점의 수를 세기 때문에 원천 배제가 가능하다고 치고
+	//외부에 모든 껍질이 드러나있는 경우는 정렬 후 이벤트를 계속 돌려야 함.
+	//완전히 먹힌 경우도 마찬가지로 이벤트는 계속 만들어서 돌려야 함.
+
 	std::cout << ret << "\n";
 	return;
 }

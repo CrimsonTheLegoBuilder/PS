@@ -102,18 +102,16 @@ struct Jaw {
 	PQ EQ, CQ, HQ;
 	int t, K, h, c, bnd;
 	int cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
-	int hul[K_LEN];
-	bool VE[N_LEN], VC[N_LEN];
+	int hul[K_LEN], sts[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
-		memset(VE, 0, sizeof VE);
-		memset(VC, 0, sizeof VC);
 		memset(cnt, 0, sizeof cnt);
 		memset(idx, -1, sizeof idx);
 		memset(cnd, -1, sizeof cnd);
 		memset(ord, -1, sizeof ord);
 		memset(hul, 0, sizeof hul);
+		memset(sts, 0, sizeof sts);
 		h = 0; c = 0; bnd = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
@@ -203,14 +201,14 @@ struct Jaw {
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
 		int k = f;
-		if (VE[p.i]) {
+		if (sts[p.pi] == 0) {
 			if (f == INSERT) return 0;
 			for (; k < c; k++) cnd[k - 1] = cnd[k];
 			c--;
 			return 0;
 		}
 		Vint tmp;
-		VC[p.i] = 1;
+		sts[p.pi] = 1;
 		for (; k < c; k++) {
 			int tq = ccw(p, p + cur, P[cnd[k]]), fc = sign(cur * (p - P[cnd[k]]));
 			if (tq > 0 || (!tq && fc > 0)) break;
@@ -255,6 +253,7 @@ struct Jaw {
 			Event ev = HQ.top();
 			if (cur / ev.v < 0) continue;
 			if (cur / ev.v > 0) break;
+
 			HQ.pop();
 			const Pos& p = P[ev.i];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
@@ -262,15 +261,25 @@ struct Jaw {
 			HQ.push(Event(H[p.hi][p.i] - H[p.hi][i0], t, i0));
 			candidate_update_(p, cur);
 		}
+		return;
+	}
+	void candidate(const Pos& cur) {
+		while (1) {
+			Event ev = CQ.top();
+			if (cur / ev.v < 0) continue;
+			if (cur / ev.v > 0) break;
+		}
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;
 		if (g == EXC) {
-			if (!VE[ev.i] || !VE[ev.j]) return 2;
+			//if (!VE[ev.i] || !VE[ev.j]) return 2;
+			if (1) return 2;
 			v = P[ev.j] - P[ev.i];
 		}
 		if (g == CND) {
-			if (!VC[ev.i] || !VC[ev.j]) return 2;
+			//if (!VC[ev.i] || !VC[ev.j]) return 2;
+			if (1) return 2;
 			v = P[ev.j] - P[ev.i];
 		}
 		int tq = sign(cur / v), fc = sign(cur * v);
@@ -320,7 +329,7 @@ struct Jaw {
 		}
 		if (candidate_insert_check(cur)) {//O(NK)
 			Pos bck = P[idx[K]];
-			VE[idx[K]] = -1;
+			//VE[idx[K]] = -1;
 			idx[K] = cnd[0];
 			cnt[P[idx[K]].hi]++;
 			Pos v = P[idx[K]] - P[idx[K - 1]];

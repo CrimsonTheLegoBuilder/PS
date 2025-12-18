@@ -241,7 +241,10 @@ struct Jaw {
 				fc = sign(dot(p, p + cur, P[cnd[i]]));
 				if (tq > 0 || (!tq && fc < 0)) break;
 			}
-			for (int j = c; j > i; j--) ord[cnd[j]]++, cnd[j + 1] = cnd[j];
+			for (int j = c; j >= i; j--) ord[cnd[j]]++, cnd[j + 1] = cnd[j];
+			cnd[i] = p.pi;
+			ord[p.pi] = i;
+			//CQ push
 		}
 		return 1;
 	}
@@ -250,7 +253,8 @@ struct Jaw {
 	void hull_jaw_rotate(const Polygon H[], const Pos& cur) {
 		while (1) {
 			Event ev = HQ.top();
-			if (cur / ev.v) break;
+			if (cur / ev.v < 0) continue;
+			if (cur / ev.v > 0) break;
 			HQ.pop();
 			const Pos& p = P[ev.i];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;

@@ -132,13 +132,22 @@ struct Jaw {
 		Polygon tmp;
 		for (int k = 0; k <= h; k++) {
 			int sz = H[k].size();
+			bool f = 0;
+			int o = -1;
 			for (int i = 0; i < sz; i++) {
 				if (ccw(Q[idx[K]], Q[idx[K]] + cur, H[k][i]) > 0) {
 					tmp.push_back(H[k][i]);
 					c++;
+					o = i;
 					//VC[C[i].pi] = 1;
 					break;
 				}
+			}
+			if (f == 1) {
+
+			}
+			else {
+
 			}
 			//여기서 모든 껍질의 점 하나씩을 후보로 올리고, 후보 점이 이벤트 라인 안에 있는 경우의 상한, 하한을 구한다.
 			//크기가 작은 껍질이 먹혀있는 경우도 있고 완전히 벗어나있는 경우도 있다. 이런 이벤트들도 모두 고려 대상이 된다.

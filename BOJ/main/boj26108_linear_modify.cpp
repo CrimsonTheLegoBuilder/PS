@@ -97,8 +97,9 @@ struct Event {
 	Event(Pos v_ = Pos(), int t_ = -1, int i_ = -1, int j_ = -1) : v(v_), t(t_), i(i_), j(j_) {}
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
+typedef std::priority_queue<Event> PQ;
 struct Jaw {
-	std::priority_queue<Event> EQ, CQ, HQ;
+	PQ EQ, CQ, HQ;
 	int t, K, h, c, bnd;
 	int cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
 	int hul[K_LEN];
@@ -229,8 +230,16 @@ struct Jaw {
 		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
 		return 1;
 	}
-	bool candidate_update_(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
-
+	bool candidate_update_(const Pos& p, const Pos& cur, int f = -1/* f != -1 : SWAP */) {//O(K)
+		const Pos& b = P[idx[K]];
+		int tq = ccw(b, b + cur, p), fc = dot(b, b + cur, p);
+		if (tq < 0 || (!tq && fc < 0)) return 0;
+		if (f == -1) {
+			int i = 0;
+			for (; i < c; i++) {
+			}
+		}
+		return 1;
 	}
 	//candidate_update는 어차피 O(K) 짜리 함수니까
 	//삽입과 교체 임무, 교체 시 교체되어야 할 점의 번호만 알려주면 알아서 수행하도록 만드는 게 나을 거 같음

@@ -101,13 +101,13 @@ typedef std::priority_queue<Event> PQ;
 struct Jaw {
 	PQ EQ, CQ, HQ;
 	int t, K, h, c, bnd;
-	int cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
+	int cnt[K_LEN], exc[K_LEN], cnd[K_LEN], ord[N_LEN];
 	int hul[K_LEN], sts[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
 		memset(cnt, 0, sizeof cnt);
-		memset(idx, -1, sizeof idx);
+		memset(exc, -1, sizeof exc);
 		memset(cnd, -1, sizeof cnd);
 		memset(ord, -1, sizeof ord);
 		memset(hul, 0, sizeof hul);
@@ -119,7 +119,7 @@ struct Jaw {
 		int sz = Q.size(); assert(N > K);
 		if (t == BOT) {
 			for (int i = 0; i <= K; i++) {
-				idx[i] = Q[i].pi;
+				exc[i] = Q[i].pi;
 				ord[Q[i].pi] = i;
 				cnt[Q[i].hi]++;
 				hul[i] = H[i][0].i;
@@ -128,7 +128,7 @@ struct Jaw {
 		}
 		else {
 			for (int i = 0; i <= K; i++) {
-				idx[i] = Q[sz - i - 1].pi;
+				exc[i] = Q[sz - i - 1].pi;
 				ord[Q[i].pi] = i;
 				cnt[Q[i].hi]++;
 				hul[i] = H[i][0].i;
@@ -141,7 +141,7 @@ struct Jaw {
 			bool f = 0;
 			int o = -1;
 			for (int i = 0; i < sz; i++) {
-				if (ccw(Q[idx[K]], Q[idx[K]] + cur, H[k][i]) > 0) {
+				if (ccw(Q[exc[K]], Q[exc[K]] + cur, H[k][i]) > 0) {
 					tmp.push_back(H[k][i]);
 					o = i;
 					f = 1;
@@ -171,10 +171,10 @@ struct Jaw {
 		int tq, fc;
 		for (int i = 0, j; i < K; i++) {
 			j = i + 1;
-			vec = P[idx[j]] - P[idx[i]];
+			vec = P[exc[j]] - P[exc[i]];
 			tq = cur / vec; fc = cur * vec;
 			if (tq > 0 || (!tq && fc > 0))
-				EQ.push(Event(vec, (t == BOT ? BE : TE), idx[i], idx[j]));
+				EQ.push(Event(vec, (t == BOT ? BE : TE), exc[i], exc[j]));
 		}
 		for (int i = 0, j; i < c - 1; i++) {
 			j = i + 1;
@@ -189,7 +189,7 @@ struct Jaw {
 	//껍질 회전 -> 후보 회전 -> 메인 삽입 이 순서로 가야 문제가 없겠지?
 
 	bool candidate_insert_check(const Pos& cur) {
-		const Pos& e = P[idx[K]], & c = P[cnd[0]];
+		const Pos& e = P[exc[K]], & c = P[cnd[0]];
 		int tq = ccw(e, e + cur, c), fc = sign(cur * (c - e));
 		return tq < 0 || (!tq && fc > 0);
 	}
@@ -229,7 +229,7 @@ struct Jaw {
 		return 1;
 	}
 	bool candidate_update_(const Pos& p, const Pos& cur, int f = -1/* f != -1 : SWAP */) {//O(K)
-		const Pos& b = P[idx[K]];
+		const Pos& b = P[exc[K]];
 		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		if (tq < 0 || (!tq && fc < 0)) return 0;
 		if (f == -1) {
@@ -251,9 +251,8 @@ struct Jaw {
 	void hull_jaw_rotate(const Polygon H[], const Pos& cur) {
 		while (1) {
 			Event ev = HQ.top();
-			if (cur / ev.v < 0) continue;
+			if (cur / ev.v < 0) { HQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
-
 			HQ.pop();
 			const Pos& p = P[ev.i];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
@@ -263,12 +262,21 @@ struct Jaw {
 		}
 		return;
 	}
-	void candidate(const Pos& cur) {
+	void candidate_jaw_rotate(const Pos& cur) {
 		while (1) {
 			Event ev = CQ.top();
-			if (cur / ev.v < 0) continue;
+			if (cur / ev.v < 0) { CQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 		}
+		return;
+	}
+	void excepted_jaw_rotate(const Pos& cur) {
+		while (1) {
+			Event ev = CQ.top();
+			if (cur / ev.v < 0) { CQ.pop(); continue; }
+			if (cur / ev.v > 0) break;
+		}
+		return;
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;
@@ -287,55 +295,24 @@ struct Jaw {
 	}
 	void swap(const int& i, const int& j, const int& t = EXC) {
 		int u = ord[i], v = ord[j];
-		if (t == EXC) { std::swap(idx[u], idx[v]); }
+		if (t == EXC) { std::swap(exc[u], exc[v]); }
 		else { std::swap(cnd[u], cnd[v]); }
 		ord[i] = v; ord[j] = u;
 	}
-	bool rotate(std::vector<Event>& EV, const Polygon H[], const Pos& cur) {
+	bool jaw_rotate(std::vector<Event>& EV, const Polygon H[], const Pos& cur) {
 		bool f = 0;
-		while (1) {
-			Event ev = EQ.top();
-			int val = valid(ev, cur, EXC);
-			if (!val) break;
-			EQ.pop();
-			if (val == 2) continue;
-			swap(ev.i, ev.j);
-			if (ord[ev.i] > 0) {
-				Pos v = P[ev.i] - P[idx[ord[ev.i] - 1]];
-				if (ccw_check(v, cur)) EQ.push(Event(v, t, idx[ord[ev.i] - 1], ev.i));
-			}
-			if (ord[ev.j] < K) {
-				Pos v = P[idx[ord[ev.j] + 1]] - P[ev.j];
-				if (ccw_check(v, cur)) EQ.push(Event(v, t, ev.j, idx[ord[ev.j] + 1]));
-			}
-			EV.push_back(ev);
-			f = 1;
-		}
-		while (1) {
-			Event ev = CQ.top();
-			int val = valid(ev, cur, CND);
-			if (!val) break;
-			CQ.pop();
-			if (val == 2) continue;
-			swap(ev.i, ev.j);
-			if (ord[ev.i] > 0) {
-				Pos v = P[ev.i] - P[cnd[ord[ev.i] - 1]];
-				if (ccw_check(v, cur)) CQ.push(Event(v, t, cnd[ord[ev.i] - 1], ev.i));
-			}
-			if (ord[ev.j] < c - 1) {
-				Pos v = P[cnd[ord[ev.j] + 1]] - P[ev.j];
-				if (ccw_check(v, cur)) CQ.push(Event(v, t, ev.j, cnd[ord[ev.j] + 1]));
-			}
-		}
+		hull_jaw_rotate(H, cur);
+		candidate_jaw_rotate(cur);
+		excepted_jaw_rotate(cur);
 		if (candidate_insert_check(cur)) {//O(NK)
-			Pos bck = P[idx[K]];
+			Pos bck = P[exc[K]];
 			//VE[idx[K]] = -1;
-			idx[K] = cnd[0];
-			cnt[P[idx[K]].hi]++;
-			Pos v = P[idx[K]] - P[idx[K - 1]];
-			if (ccw_check(v, cur)) EQ.push(Event(v, t, idx[K - 1], idx[K]));
-			int sz = H[P[idx[K]].hi].size();
-			Pos p = H[P[idx[K]].hi][(P[idx[K]].i + 1) % sz];
+			exc[K] = cnd[0];
+			cnt[P[exc[K]].hi]++;
+			Pos v = P[exc[K]] - P[exc[K - 1]];
+			if (ccw_check(v, cur)) EQ.push(Event(v, t, exc[K - 1], exc[K]));
+			int sz = H[P[exc[K]].hi].size();
+			Pos p = H[P[exc[K]].hi][(P[exc[K]].i + 1) % sz];
 			candidate_update(p, cur, SWAP);
 			if (cnt[bck.hi] == H[bck.hi].size()) candidate_update(bck, cur, INSERT);
 			cnt[bck.hi]--;
@@ -380,7 +357,7 @@ struct Calipers {
 		}
 		return;
 	}
-	bool rotate() {
+	bool jaw_rotate() {
 		Polygon V;
 		if (bot.EQ.size()) V.push_back(bot.EQ.top().v);
 		if (bot.CQ.size()) V.push_back(bot.CQ.top().v);
@@ -396,17 +373,17 @@ struct Calipers {
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
 		return cross(P[b], P[b] + cur, P[t]) / cur.mag();
 	}
-	bool jaw_rotate(ld& d) {
+	bool rotate(ld& d) {
 		int tq = e / cur;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		std::vector<Event> EV;
-		bot.rotate(EV, L, cur);
-		top.rotate(EV, U, -cur);
+		bot.jaw_rotate(EV, L, cur);
+		top.jaw_rotate(EV, U, -cur);
 		for (const Event& ev : EV) {
 			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
 			else d = std::min(d, dist(K - ev.i, ev.i));
 		}
-		return rotate();
+		return jaw_rotate();
 	}
 } C;
 ld rotating_calipers(Polygon& P) {
@@ -437,7 +414,7 @@ void solve() {
 	for (int i = 0; i < N; i++) P[i].i = i;
 	C.init(N, K, Pos(0, -1));
 	ld ret = INF;
-	while (C.jaw_rotate(ret)) {}//O(NKlogK)
+	while (C.rotate(ret)) {}//O(NKlogK)
 	//새로 시작하면 현재 이벤트 벡터 하나 깐다.
 	//반바퀴 다 돌았으면 나간다.
 	//회전에 의해 점이 새로 들어오고 나간다. 이를 처리해야 한다.

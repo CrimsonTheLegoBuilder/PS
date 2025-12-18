@@ -21,10 +21,12 @@ inline ll sq(const ll& x) { return x * x; }
 #define TOP 0 //TOP
 #define BOT 1 //BOT
 
-#define TE 0 //TOP_E
-#define TC 1 //TOP_C
-#define BE 2 //BOT_E
-#define BC 3 //BOT_C
+#define TE 0 //TOP_EXCEPT
+#define TC 1 //TOP_CANDIDATE
+#define TH 2 //TOP_HULL_INSERT
+#define BE 3 //BOT_EXCEPT
+#define BC 4 //BOT_CANDIDATE
+#define BH 5 //BOT_HULL_INSERT
 
 #define EXC 0
 #define CND 1
@@ -248,9 +250,9 @@ struct Jaw {
 			Pos vec = P[tmp[k]] - p;
 			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, p.pi, tmp[k]));
 		}
-		for (int i = k; i < c; i++) tmp.push_back(cnd[i]);
+		for (int j = k; j < c; j++) tmp.push_back(cnd[j]);
 		c = tmp.size();
-		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
+		for (int j = 0; j < c; j++) cnd[j] = tmp[j], ord[tmp[i]] = j;
 		return 1;
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {

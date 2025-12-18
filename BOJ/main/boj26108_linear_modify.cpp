@@ -232,12 +232,16 @@ struct Jaw {
 	}
 	bool candidate_update_(const Pos& p, const Pos& cur, int f = -1/* f != -1 : SWAP */) {//O(K)
 		const Pos& b = P[idx[K]];
-		int tq = ccw(b, b + cur, p), fc = dot(b, b + cur, p);
+		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		if (tq < 0 || (!tq && fc < 0)) return 0;
 		if (f == -1) {
 			int i = 0;
 			for (; i < c; i++) {
+				tq = ccw(p, p + cur, P[cnd[i]]);
+				fc = sign(dot(p, p + cur, P[cnd[i]]));
+				if (tq > 0 || (!tq && fc < 0)) break;
 			}
+			for (int j = c; j > i; j--) ord[cnd[j]]++, cnd[j + 1] = cnd[j];
 		}
 		return 1;
 	}

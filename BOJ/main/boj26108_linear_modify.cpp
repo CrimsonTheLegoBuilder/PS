@@ -229,43 +229,21 @@ struct Jaw {
 		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
 		return 1;
 	}
-	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP, const int& hi = -1, const int& i = -1) {//O(K)
-		int k = f;
-		if (VE[p.i]) {
-			if (f == INSERT) return 0;
-			for (; k < c; k++) cnd[k - 1] = cnd[k];
-			c--;
-			return 0;
-		}
-		Vint tmp;
-		VC[p.i] = 1;
-		for (; k < c; k++) {
-			int tq = ccw(p, p + cur, P[cnd[k]]), fc = sign(cur * (p - P[cnd[k]]));
-			if (tq > 0 || (!tq && fc > 0)) break;
-		}
-		for (int j = f; j < k; j++) tmp.push_back(cnd[j]);
-		if (tmp.size()) {
-			Pos vec = p - P[tmp.back()];
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, tmp.back(), p.pi));
-		}
-		tmp.push_back(p.pi);
-		if (k < c) {
-			Pos vec = P[tmp[k]] - p;
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, p.pi, tmp[k]));
-		}
-		for (int j = k; j < c; j++) tmp.push_back(cnd[j]);
-		c = tmp.size();
-		for (int j = 0; j < c; j++) cnd[j] = tmp[j], ord[tmp[i]] = j;
-		return 1;
+	bool candidate_update_(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
+
 	}
 	//candidate_update는 어차피 O(K) 짜리 함수니까
 	//삽입과 교체 임무, 교체 시 교체되어야 할 점의 번호만 알려주면 알아서 수행하도록 만드는 게 나을 거 같음
-	void hull_jaw_rotate(const Pos& cur) {
+	void hull_jaw_rotate(const Polygon H[], const Pos& cur) {
 		while (1) {
 			Event ev = HQ.top();
 			if (cur / ev.v) break;
 			HQ.pop();
-			//candidate_update
+			const Pos& p = P[ev.i];
+			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
+			hul[p.hi] = H[p.hi][i0].pi;
+			HQ.push(Event(H[p.hi][p.i] - H[p.hi][i0], t, i0));
+			candidate_update_(p, cur);
 		}
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {

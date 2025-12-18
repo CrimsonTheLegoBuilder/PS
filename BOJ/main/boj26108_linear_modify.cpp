@@ -104,14 +104,14 @@ struct Jaw {
 	int cnt[K_LEN], exc[K_LEN], cnd[K_LEN], ord[N_LEN];
 	int hul[K_LEN], sts[N_LEN];
 	Pos ref;
-	Jaw(int t_ = BOT, int k_ = -1) : t(t_), K(k_) {
+	Jaw(int t_ = BOT, int k_ = 0) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
 		memset(cnt, 0, sizeof cnt);
 		memset(exc, -1, sizeof exc);
 		memset(cnd, -1, sizeof cnd);
 		memset(ord, -1, sizeof ord);
 		memset(hul, 0, sizeof hul);
-		memset(sts, 0, sizeof sts);
+		memset(sts, -1, sizeof sts);
 		h = 0; c = 0; bnd = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
@@ -122,8 +122,8 @@ struct Jaw {
 				exc[i] = Q[i].pi;
 				ord[Q[i].pi] = i;
 				cnt[Q[i].hi]++;
-				hul[i] = H[i][0].i;
-				//VE[E[i].pi] = 1;
+				hul[i] = H[i][0].pi;
+				sts[Q[i].pi] = EXC;
 			}
 		}
 		else {
@@ -131,36 +131,25 @@ struct Jaw {
 				exc[i] = Q[sz - i - 1].pi;
 				ord[Q[i].pi] = i;
 				cnt[Q[i].hi]++;
-				hul[i] = H[i][0].i;
-				//VE[E[i].pi] = 1;
+				hul[i] = H[i][0].pi;
+				sts[Q[i].pi] = EXC;
 			}
 		}
 		Polygon tmp;
 		for (int k = 0; k <= h; k++) {
 			int sz = H[k].size();
 			bool f = 0;
-			int o = -1;
 			for (int i = 0; i < sz; i++) {
-				if (ccw(Q[exc[K]], Q[exc[K]] + cur, H[k][i]) > 0) {
+				const Pos& p = Q[exc[K]];
+				int tq = ccw(p, p + cur, H[k][i]);
+				int fc = sign(dot(p, p + cur, H[k][i]));
+				if (tq > 0 || (!tq && fc < 0)) {
 					tmp.push_back(H[k][i]);
-					o = i;
 					f = 1;
-					//VC[C[i].pi] = 1;
 					break;
 				}
 			}
 			if (!f) c++;
-			//여기서 모든 껍질의 점 하나씩을 후보로 올리고, 후보 점이 이벤트 라인 안에 있는 경우의 상한, 하한을 구한다.
-			//크기가 작은 껍질이 먹혀있는 경우도 있고 완전히 벗어나있는 경우도 있다. 이런 이벤트들도 모두 고려 대상이 된다.
-			//순서를 기록하는 배열에 의해 안정적으로 관리가 되고 있긴 하므로 잘 구분해서 구현하면 될 듯 함.
-			//캘리퍼스 jaw는 메인, 후보군 외에 K개의 껍질에 대해 모두 돌아가고 있어야 한다.
-			//후보군을 담당하는 큐와 껍질 회전을 담당하는 큐를 구분해서 사용하도록 한다.
-			//변수명이 좀 길어지더라도 안 헷갈리려면 전부 뭐가 뭔지 제대로 이름을 짓기는 해야할 듯
-			//메인, 앞대가리, 볼록껍질 큐 3개를 각각 관리하도록 하고
-			//먹혀있는 껍질도 외부에 있는 껍질도 jaw는 회전을 하되 후보군에는 잘 구분해서 빼놓는다.
-			//볼록껍질 큐는 말 그대로 볼록껍질의 jaw를 현재 이벤트 기울기보다 크도록 회전시켜준다.
-			//제외되는 점군에 점을 포함시키지 않은 껍질도 따라 돌도록 하고 있다가 가장 가까운 점이 삽입이 가능한가를 알도록 한다.
-			//외부에 있으면서 가장 가까이 있어서 언제든지 메인에 점을 삽입시킬 수 있는 껍질의 번호를 기억하도록 해준다.
 		}
 		std::sort(tmp.begin(), tmp.end(), cmpx_rvs);
 		for (int i = 0; i < tmp.size(); i++) {

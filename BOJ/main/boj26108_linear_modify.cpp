@@ -102,17 +102,17 @@ typedef std::priority_queue<Event> PQ;
 struct Jaw {
 	PQ EQ, CQ, HQ;
 	int t, K, h, c, bnd;
-	int cnt[K_LEN], exc[K_LEN], cnd[K_LEN], ord[N_LEN];
-	int hul[K_LEN], sts[N_LEN];
+	int exc[K_LEN], cnd[K_LEN], hul[K_LEN], cnt[K_LEN];
+	int ord[N_LEN], sts[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = 0) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
-		memset(cnt, 0, sizeof cnt);
-		memset(exc, -1, sizeof exc);
-		memset(cnd, -1, sizeof cnd);
-		memset(ord, -1, sizeof ord);
-		memset(hul, 0, sizeof hul);
-		memset(sts, -1, sizeof sts);
+		memset(exc, -1, sizeof exc);//excepted points' idx
+		memset(cnd, -1, sizeof cnd);//candidate points' idx
+		memset(hul, -1, sizeof hul);//rotating calipers' bot's idx
+		memset(cnt, 0, sizeof cnt);//excepted points' num of each hull
+		memset(ord, -1, sizeof ord);//points' order of each jaw
+		memset(sts, -1, sizeof sts);//state of each point
 		h = 0; c = 0; bnd = 0;
 	}
 	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {

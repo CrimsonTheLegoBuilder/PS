@@ -374,13 +374,13 @@ void solve() {
 	P.resize(N); for (Pos& p : P) std::cin >> p;
 	if (N < 3) { std::cout << "0.000000000\n"; return; }
 	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
-	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
+	if (K == 0) { std::cout << rotating_calipers(P) * .5 << "\n"; return; }
 	std::sort(P.begin(), P.end(), cmpx_rvs);
 	for (int i = 0; i < N; i++) P[i].i = i;
 	C.init(N, K, Pos(0, -1));
 	ld ret = INF;
 	while (C.rotate(ret)) {}//O(NKlogK)
-	std::cout << ret << "\n";
+	std::cout << ret * .5 << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj26108

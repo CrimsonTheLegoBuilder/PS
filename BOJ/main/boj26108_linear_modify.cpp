@@ -28,6 +28,7 @@ inline ll sq(const ll& x) { return x * x; }
 #define BC 4 //BOT_CANDIDATE
 #define BH 5 //BOT_HULL_INSERT
 
+#define OUT (-1)
 #define EXC 0
 #define CND 1
 
@@ -93,8 +94,8 @@ Polygon monotone_chain(Polygon& C) {
 }
 struct Event {
 	Pos v;
-	int t, i, j;
-	Event(Pos v_ = Pos(), int t_ = -1, int i_ = -1, int j_ = -1) : v(v_), t(t_), i(i_), j(j_) {}
+	int i, j, t;
+	Event(Pos v_ = Pos(), int i_ = -1, int j_ = -1, int t_ = BOT) : v(v_), i(i_), j(j_), t(t_) {}
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
 typedef std::priority_queue<Event> PQ;
@@ -163,14 +164,22 @@ struct Jaw {
 			vec = P[exc[j]] - P[exc[i]];
 			tq = cur / vec; fc = cur * vec;
 			if (tq > 0 || (!tq && fc > 0))
-				EQ.push(Event(vec, (t == BOT ? BE : TE), exc[i], exc[j]));
+				EQ.push(Event(vec, exc[i], exc[j]));
 		}
 		for (int i = 0, j; i < c - 1; i++) {
 			j = i + 1;
 			vec = P[cnd[j]] - P[cnd[i]];
 			tq = sign(cur / vec); fc = sign(cur * vec);
 			if (tq > 0 || (!tq && fc > 0))
-				CQ.push(Event(vec, (t == BOT ? BC : TC), cnd[i], cnd[j]));
+				CQ.push(Event(vec, cnd[i], cnd[j]));
+		}
+		for (int i = 0; i <= K; i++) {
+			Pos p = P[hul[i]];
+			int sz = H[p.hi].size();
+			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
+			tq = sign(cur / vec); fc = sign(cur * vec);
+			if (tq > 0 || (!tq && fc > 0))
+				CQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}
 		return;
 	}
@@ -205,12 +214,12 @@ struct Jaw {
 		for (int i = f; i < k; i++) tmp.push_back(cnd[i]);
 		if (tmp.size()) {
 			Pos vec = p - P[tmp.back()];
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, tmp.back(), p.pi));
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, tmp.back(), p.pi));
 		}
 		tmp.push_back(p.pi);
 		if (k < c) {
 			Pos vec = P[tmp[k]] - p;
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, p.pi, tmp[k]));
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, p.pi, tmp[k]));
 		}
 		for (int i = k; i < c; i++) tmp.push_back(cnd[i]);
 		c = tmp.size();
@@ -299,7 +308,7 @@ struct Jaw {
 			exc[K] = cnd[0];
 			cnt[P[exc[K]].hi]++;
 			Pos v = P[exc[K]] - P[exc[K - 1]];
-			if (ccw_check(v, cur)) EQ.push(Event(v, t, exc[K - 1], exc[K]));
+			if (ccw_check(v, cur)) EQ.push(Event(v, exc[K - 1], exc[K]));
 			int sz = H[P[exc[K]].hi].size();
 			Pos p = H[P[exc[K]].hi][(P[exc[K]].i + 1) % sz];
 			candidate_update(p, cur, SWAP);

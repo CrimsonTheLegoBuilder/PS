@@ -224,6 +224,35 @@ struct Jaw {
 		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
 		return 1;
 	}
+	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP, const int& hi = -1, const int& i = -1) {//O(K)
+		int k = f;
+		if (VE[p.i]) {
+			if (f == INSERT) return 0;
+			for (; k < c; k++) cnd[k - 1] = cnd[k];
+			c--;
+			return 0;
+		}
+		Vint tmp;
+		VC[p.i] = 1;
+		for (; k < c; k++) {
+			int tq = ccw(p, p + cur, P[cnd[k]]), fc = sign(cur * (p - P[cnd[k]]));
+			if (tq > 0 || (!tq && fc > 0)) break;
+		}
+		for (int j = f; j < k; j++) tmp.push_back(cnd[j]);
+		if (tmp.size()) {
+			Pos vec = p - P[tmp.back()];
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, tmp.back(), p.pi));
+		}
+		tmp.push_back(p.pi);
+		if (k < c) {
+			Pos vec = P[tmp[k]] - p;
+			if (ccw_check(vec, cur)) CQ.push(Event(vec, t, p.pi, tmp[k]));
+		}
+		for (int i = k; i < c; i++) tmp.push_back(cnd[i]);
+		c = tmp.size();
+		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
+		return 1;
+	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;
 		if (g == EXC) {

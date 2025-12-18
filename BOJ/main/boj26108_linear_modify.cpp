@@ -21,13 +21,6 @@ inline ll sq(const ll& x) { return x * x; }
 #define TOP 0 //TOP
 #define BOT 1 //BOT
 
-#define TE 0 //TOP_EXCEPT
-#define TC 1 //TOP_CANDIDATE
-#define TH 2 //TOP_HULL_INSERT
-#define BE 3 //BOT_EXCEPT
-#define BC 4 //BOT_CANDIDATE
-#define BH 5 //BOT_HULL_INSERT
-
 #define OUT (-1)
 #define EXC 0
 #define CND 1
@@ -54,7 +47,6 @@ struct Pos {
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 	Pos operator - () const { return { -x, -y }; }
 	Pos operator ~ () const { return { -y, x }; }
-	ll xy() const { return (ll)x * y; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ld mag() const { return hypot(x, y); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }

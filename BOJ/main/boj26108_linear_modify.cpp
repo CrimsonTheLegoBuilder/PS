@@ -98,7 +98,7 @@ struct Event {
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
 struct Jaw {
-	std::priority_queue<Event> EQ, CQ;
+	std::priority_queue<Event> EQ, CQ, HQ;
 	int t, K, h, c, bnd;
 	int cnt[K_LEN], idx[K_LEN], cnd[K_LEN], ord[N_LEN];
 	int hul[K_LEN];
@@ -186,6 +186,9 @@ struct Jaw {
 		}
 		return;
 	}
+
+	//껍질 회전 -> 후보 회전 -> 메인 삽입 이 순서로 가야 문제가 없겠지?
+
 	bool candidate_insert_check(const Pos& cur) {
 		const Pos& e = P[idx[K]], & c = P[cnd[0]];
 		int tq = ccw(e, e + cur, c), fc = sign(cur * (c - e));
@@ -254,6 +257,16 @@ struct Jaw {
 		c = tmp.size();
 		for (int j = 0; j < c; j++) cnd[j] = tmp[j], ord[tmp[i]] = j;
 		return 1;
+	}
+	//candidate_update는 어차피 O(K) 짜리 함수니까
+	//삽입과 교체 임무, 교체 시 교체되어야 할 점의 번호만 알려주면 알아서 수행하도록 만드는 게 나을 거 같음
+	void hull_jaw_rotate(const Pos& cur) {
+		while (1) {
+			Event ev = HQ.top();
+			if (cur / ev.v) break;
+			HQ.pop();
+			//candidate_update
+		}
 	}
 	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
 		Pos v;

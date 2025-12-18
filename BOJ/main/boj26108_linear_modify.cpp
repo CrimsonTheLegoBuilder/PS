@@ -379,7 +379,7 @@ void solve() {
 	for (int i = 0; i < N; i++) P[i].i = i;
 	C.init(N, K, Pos(0, -1));
 	ld ret = INF;
-	while (C.rotate(ret)) {}//O(NKlogK)
+	while (C.rotate(ret)) {}
 	std::cout << ret * .5 << "\n";
 	return;
 }

@@ -95,7 +95,7 @@ Polygon monotone_chain(Polygon& C) {
 struct Event {
 	Pos v;
 	int i, j, t;
-	Event(Pos v_ = Pos(), int i_ = -1, int j_ = -1, int t_ = BOT) : v(v_), i(i_), j(j_), t(t_) {}
+	Event(Pos v_ = Pos(), int i_ = -1, int j_ = -1, int t_ = -1) : v(v_), i(i_), j(j_), t(t_) {}
 	bool operator < (const Event& o) const { return v / o.v > 0; }
 };
 typedef std::priority_queue<Event> PQ;
@@ -179,7 +179,7 @@ struct Jaw {
 			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
 			tq = sign(cur / vec); fc = sign(cur * vec);
 			if (tq > 0 || (!tq && fc > 0))
-				CQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
+				HQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}
 		return;
 	}
@@ -197,39 +197,13 @@ struct Jaw {
 		tq = sign(cur / vec), fc = cur * vec;
 		return tq > 0 || (!tq && fc > 0);
 	}
-	bool candidate_update(const Pos& p, const Pos& cur, int f = SWAP) {//O(K)
-		int k = f;
-		if (sts[p.pi] == 0) {
-			if (f == INSERT) return 0;
-			for (; k < c; k++) cnd[k - 1] = cnd[k];
-			c--;
-			return 0;
-		}
-		Vint tmp;
-		sts[p.pi] = 1;
-		for (; k < c; k++) {
-			int tq = ccw(p, p + cur, P[cnd[k]]), fc = sign(cur * (p - P[cnd[k]]));
-			if (tq > 0 || (!tq && fc > 0)) break;
-		}
-		for (int i = f; i < k; i++) tmp.push_back(cnd[i]);
-		if (tmp.size()) {
-			Pos vec = p - P[tmp.back()];
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, tmp.back(), p.pi));
-		}
-		tmp.push_back(p.pi);
-		if (k < c) {
-			Pos vec = P[tmp[k]] - p;
-			if (ccw_check(vec, cur)) CQ.push(Event(vec, p.pi, tmp[k]));
-		}
-		for (int i = k; i < c; i++) tmp.push_back(cnd[i]);
-		c = tmp.size();
-		for (int i = 0; i < c; i++) cnd[i] = tmp[i], ord[tmp[i]] = i;
-		return 1;
-	}
-	bool candidate_update_(const Pos& p, const Pos& cur, int f = -1/* f != -1 : SWAP */) {//O(K)
+	bool candidate_update(const Pos& p, const Pos& cur, int f = -1/* f != -1 : SWAP */) {//O(K)
 		const Pos& b = P[exc[K]];
 		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
-		if (tq < 0 || (!tq && fc < 0)) return 0;
+		if (tq < 0 || (!tq && fc < 0) || sts[p.pi] == EXC) {
+
+			return 0;
+		}
 		if (f == -1) {
 			int i = 0;
 			for (; i < c; i++) {
@@ -240,12 +214,22 @@ struct Jaw {
 			for (int j = c; j >= i; j--) ord[cnd[j]]++, cnd[j + 1] = cnd[j];
 			cnd[i] = p.pi;
 			ord[p.pi] = i;
-			//CQ push
+			sts[p.pi] = CND;
+			c++;
+			Pos v;
+			if (i < c - 1) {
+				v = P[cnd[i + 1]] - P[cnd[i]];
+				if (cur / v > 0) CQ.push(Event(v, cnd[i], cnd[i + 1]));
+			}
+			if (i > 0) {
+				v = P[cnd[i]] - P[cnd[i - 1]];
+				if (cur / v > 0) CQ.push(Event(v, cnd[i - 1], cnd[i]));
+			}
+			return 1;
 		}
+
 		return 1;
 	}
-	//candidate_update는 어차피 O(K) 짜리 함수니까
-	//삽입과 교체 임무, 교체 시 교체되어야 할 점의 번호만 알려주면 알아서 수행하도록 만드는 게 나을 거 같음
 	void hull_jaw_rotate(const Polygon H[], const Pos& cur) {
 		while (1) {
 			Event ev = HQ.top();
@@ -256,46 +240,37 @@ struct Jaw {
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			hul[p.hi] = H[p.hi][i0].pi;
 			HQ.push(Event(H[p.hi][p.i] - H[p.hi][i0], t, i0));
-			candidate_update_(p, cur);
+			candidate_update(p, cur);
 		}
 		return;
+	}
+	void swap(const int& i, const int& j, int A[]) {
+		int u = ord[i], v = ord[j];
+		std::swap(A[u], A[v]);
+		ord[i] = v; ord[j] = u;
 	}
 	void candidate_jaw_rotate(const Pos& cur) {
 		while (1) {
 			Event ev = CQ.top();
 			if (cur / ev.v < 0) { CQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
+			CQ.pop();
+			int i = ev.i, j = ev.j;
+			if (1) continue;
+			swap(i, j, cnd);
 		}
 		return;
 	}
 	void excepted_jaw_rotate(const Pos& cur) {
 		while (1) {
-			Event ev = CQ.top();
-			if (cur / ev.v < 0) { CQ.pop(); continue; }
+			Event ev = EQ.top();
+			if (cur / ev.v < 0) { EQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
+			EQ.pop();
+			int i = ev.i, j = ev.j;
+			swap(i, j, exc);
 		}
 		return;
-	}
-	int valid(const Event& ev, const Pos& cur, const int g = EXC) {
-		Pos v;
-		if (g == EXC) {
-			//if (!VE[ev.i] || !VE[ev.j]) return 2;
-			if (1) return 2;
-			v = P[ev.j] - P[ev.i];
-		}
-		if (g == CND) {
-			//if (!VC[ev.i] || !VC[ev.j]) return 2;
-			if (1) return 2;
-			v = P[ev.j] - P[ev.i];
-		}
-		int tq = sign(cur / v), fc = sign(cur * v);
-		return !tq && fc > 0;
-	}
-	void swap(const int& i, const int& j, const int& t = EXC) {
-		int u = ord[i], v = ord[j];
-		if (t == EXC) { std::swap(exc[u], exc[v]); }
-		else { std::swap(cnd[u], cnd[v]); }
-		ord[i] = v; ord[j] = u;
 	}
 	bool jaw_rotate(std::vector<Event>& EV, const Polygon H[], const Pos& cur) {
 		bool f = 0;

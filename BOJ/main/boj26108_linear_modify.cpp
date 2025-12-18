@@ -124,6 +124,7 @@ struct Jaw {
 				ord[Q[i].pi] = i;
 				cnt[Q[i].hi]++;
 				hul[i] = H[i][0].i;
+				//VE[E[i].pi] = 1;
 			}
 		}
 		else {
@@ -143,18 +144,13 @@ struct Jaw {
 			for (int i = 0; i < sz; i++) {
 				if (ccw(Q[idx[K]], Q[idx[K]] + cur, H[k][i]) > 0) {
 					tmp.push_back(H[k][i]);
-					c++;
 					o = i;
+					f = 1;
 					//VC[C[i].pi] = 1;
 					break;
 				}
 			}
-			if (f == 1) {
-
-			}
-			else {
-
-			}
+			if (!f) c++;
 			//여기서 모든 껍질의 점 하나씩을 후보로 올리고, 후보 점이 이벤트 라인 안에 있는 경우의 상한, 하한을 구한다.
 			//크기가 작은 껍질이 먹혀있는 경우도 있고 완전히 벗어나있는 경우도 있다. 이런 이벤트들도 모두 고려 대상이 된다.
 			//순서를 기록하는 배열에 의해 안정적으로 관리가 되고 있긴 하므로 잘 구분해서 구현하면 될 듯 함.
@@ -168,7 +164,7 @@ struct Jaw {
 			//외부에 있으면서 가장 가까이 있어서 언제든지 메인에 점을 삽입시킬 수 있는 껍질의 번호를 기억하도록 해준다.
 		}
 		std::sort(tmp.begin(), tmp.end(), cmpx_rvs);
-		for (int i = 0; i < c; i++) {
+		for (int i = 0; i < tmp.size(); i++) {
 			cnd[i] = tmp[i].pi;
 			ord[tmp[i].pi] = i;
 		}

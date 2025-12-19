@@ -53,7 +53,7 @@ struct Pos {
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
-Polygon P;
+Polygon P, H[K_LEN], L[K_LEN], U[K_LEN];
 bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
 bool cmpx_rvs(const Pos& p, const Pos& q) { return p.x == q.x ? p.y > q.y : p.x < q.x; }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
@@ -62,6 +62,13 @@ ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
+ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
+	if (ccw(p, p + cur, q) <= 0) return 0;
+	ld dx = q.x - p.x;
+	ld dy = dx / cur.x * cur.y;
+	ld y = p.y + dy;
+	return std::abs(q.y - y);
+}
 Polygon monotone_chain(Polygon& C) {
 	Polygon H;
 	//std::sort(C.begin(), C.end());
@@ -304,7 +311,7 @@ struct Jaw {
 		hull_jaw_rotate(H, cur);
 		candidate_jaw_rotate(cur);
 		excepted_jaw_rotate(cur, EV);
-		candidate_insert(H, cur);
+		//candidate_insert(H, cur);
 		const Pos& p0 = P[exc[K]], & p1 = P[cnd[0]];
 		Pos vec = p1 - p0;
 		if (valid(cur, vec)) SQ.push(Event(vec, exc[K], cnd[0]));
@@ -315,7 +322,6 @@ struct Calipers {
 	const Pos s = Pos(0, -1), e = Pos(0, 1);
 	int N, K, h;
 	Pos cur;
-	Polygon H[K_LEN], L[K_LEN], U[K_LEN];
 	Jaw bot = Jaw(BOT), top = Jaw(TOP);
 	Calipers() { N = -1, K = -1, h = 0; }
 	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
@@ -349,14 +355,7 @@ struct Calipers {
 	}
 	bool jaw_rotate() {
 		Polygon V;
-		if (bot.EQ.size()) V.push_back(bot.EQ.top().v);
-		if (bot.CQ.size()) V.push_back(bot.CQ.top().v);
-		if (bot.HQ.size()) V.push_back(bot.HQ.top().v);
-		if (bot.SQ.size()) V.push_back(bot.SQ.top().v);
-		if (top.EQ.size()) V.push_back(-top.EQ.top().v);
-		if (top.CQ.size()) V.push_back(-top.CQ.top().v);
-		if (top.HQ.size()) V.push_back(-top.HQ.top().v);
-		if (top.SQ.size()) V.push_back(-top.SQ.top().v);
+		//
 		if (V.empty()) { cur = Pos(0, 1); return 0; }
 		cur = V[0];
 		int sz = V.size();
@@ -365,7 +364,7 @@ struct Calipers {
 	}
 	ld dist(const int& b = -1, const int& t = -1) {
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
-		return cross(P[b], P[b] + cur, P[t]) / cur.mag();
+		return vertical_dist(P[b], P[b] + cur, P[t]);
 	}
 	bool rotate(ld& d) {
 		int tq = e / cur;
@@ -390,8 +389,7 @@ ld rotating_calipers(Polygon& P) {
 			j = (j + 1) % sz;
 		}
 		Pos v = H[(i + 1) % sz] - H[i];
-		ld tq = cross(H[i], H[(i + 1) % sz], H[j]);
-		ret = std::min(ret, tq / v.mag());
+		ret = std::min(ret, vertical_dist(H[i], v, H[j]));
 	}
 	return ret * .5;
 }
@@ -404,7 +402,7 @@ void solve() {
 	P.resize(N); for (Pos& p : P) std::cin >> p;
 	if (N < 3) { std::cout << "0.000000000\n"; return; }
 	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
-	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
+	if (K == 0) { std::sort(P.begin(), P.end()); std::cout << rotating_calipers(P) << "\n"; return; }
 	std::sort(P.begin(), P.end(), cmpx_rvs);
 	for (int i = 0; i < N; i++) P[i].pi = i;
 	C.init(N, K, Pos(0, -1));

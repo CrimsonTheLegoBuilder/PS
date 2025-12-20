@@ -20,8 +20,8 @@ inline ll sq(const ll& x) { return x * x; }
 #define TOP 0 //TOP
 #define BOT 1 //BOT
 
-#define OUT (-1)
-#define EXC 0
+#define IGN (-1)
+#define OUT 0
 #define HED 1
 #define TAL 1
 
@@ -97,7 +97,7 @@ struct Event {
 typedef std::priority_queue<Event> PQ;
 typedef std::vector<Event> Events;
 struct Jaw {
-	PQ EQ, CQ, HQ, SQ;
+	PQ EQ, HQ, TQ, JQ, SQ;
 	int t, K, h, hp, tp, bnd;
 	int outl[K_LEN], head[K_LEN], tail[K_LEN], jaw[K_LEN], cnt[K_LEN];
 	int ord[N_LEN], sts[N_LEN];
@@ -124,7 +124,7 @@ struct Jaw {
 			q = (t == BOT ? i : sz - i - 1);
 			outl[i] = Q[q].pi;
 			ord[Q[q].pi] = i;
-			sts[Q[q].pi] = EXC;
+			sts[Q[q].pi] = OUT;
 			cnt[Q[q].hi]++;
 			bnd = std::max(bnd, Q[q].hi);
 		}
@@ -134,55 +134,69 @@ struct Jaw {
 		Pos vec;
 		const Pos& p = P[outl[K]];
 		for (int k = 0; k <= h; k++) {
+			const Polygon& LH = (t == BOT ? L[k] : U[k]);
+			const Polygon& UH = (t == TOP ? L[k] : U[k]);
 			bool hf = 0, tf = 0;
-			sz = L[k].size();
+			sz = LH.size();
 			for (int i = 0; i < sz; i++) {
-				Pos vec = L[k][i] - p;
+				Pos vec = LH[i] - p;
 				if (valid(cur, vec)) {
-					if (t == BOT) hd.push_back(L[k][i]), hf = 1;
-					else tl.push_back(L[k][i]), tf = 1;
+					hd.push_back(LH[i]), hf = 1;
 					break;
 				}
 			}
-			sz = U[k].size();
-			for (int i = 0; i < sz; i++) {
-				Pos vec = U[k][i] - p;
+			sz = UH.size();
+			for (int i = sz - 1; i >= 0; i--) {
+				Pos vec = UH[i] - p;
 				if (valid(cur, vec)) {
-					if (t == TOP) hd.push_back(U[k][i]), hf = 1;
-					else tl.push_back(U[k][i]), tf = 1;
+					tl.push_back(U[k][i]), tf = 1;
 					break;
 				}
 			}
-			if (!hf) hp++;
-			if (!tf) tp++;
+			if (hf) hp++;
+			if (tf) tp++;
+			if (!hf) assert(!tf);
 		}
-		sz = tmp.size();
-		assert(sz == c);
-		std::sort(tmp.begin(), tmp.end(), cmpx_rvs);
+		std::sort(hd.begin(), hd.end(), cmpx_rvs);
+		sz = hd.size();
+		assert(sz == hp);
 		for (int i = 0; i < sz; i++) {
-			cnd[i] = tmp[i].pi;
-			ord[tmp[i].pi] = i;
+			head[i] = hd[i].pi;
+			ord[hd[i].pi] = i;
+		}
+		sz = tl.size();
+		assert(sz == tp);
+		std::sort(tl.rbegin(), tl.rend(), cmpx_rvs);
+		for (int i = 0; i < sz; i++) {
+			tail[i] = tl[i].pi;
+			ord[tl[i].pi] = i;
 		}
 		for (int i = 0, j = 1; i < K; i++, j++) {
-			vec = P[exc[j]] - P[exc[i]];
+			vec = P[outl[j]] - P[outl[i]];
 			if (valid(cur, vec))
-				EQ.push(Event(vec, exc[i], exc[j]));
+				EQ.push(Event(vec, outl[i], outl[j]));
 		}
-		for (int i = 0, j = 1; i < c - 1; i++, j++) {
-			vec = P[cnd[j]] - P[cnd[i]];
+		for (int i = 0, j = 1; i < hp - 1; i++, j++) {
+			vec = P[head[j]] - P[head[i]];
 			if (valid(cur, vec))
-				CQ.push(Event(vec, cnd[i], cnd[j]));
+				HQ.push(Event(vec, head[i], head[j]));
+		}
+		for (int i = 0, j = 1; i < tp - 1; i++, j++) {
+			vec = P[tail[j]] - P[tail[i]];
+			if (valid(cur, vec))
+				TQ.push(Event(vec, tail[i], tail[j]));
 		}
 		for (int i = 0; i < h; i++) {
-			Pos p = P[hul[i]];
+			Pos p = P[jaw[i]];
 			int sz = H[p.hi].size();
 			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
 			if (valid(cur, vec))
-				HQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
+				JQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}
+
 		return;
 	}
-	bool candidate_insert_check(const Pos& cur) { return valid(cur, P[cnd[0]] - P[exc[K]]); }
+	bool candidate_insert_check(const Pos& cur, int idx[]) { return valid(cur, P[idx[0]] - P[outl[K]]); }
 	//bool candidate_insert_check(const Pos& cur) {
 	//	const Pos& e = P[exc[K]], & c = P[cnd[0]];
 	//	Pos vec = c - e;

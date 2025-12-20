@@ -302,18 +302,16 @@ struct Jaw {
 		}
 		return 0;
 	}
-	void outlier_update(Events& EV) {
+	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
 		bool f = 0;
 		hull_jaw_rotate(cur);
-		//candidate_jaw_rotate(cur);
+		candidate_jaw_rotate(cur, HQ, HEAD);
+		candidate_jaw_rotate(cur, TQ, TAIL);
 		outlier_jaw_rotate(cur, EV);
-		//candidate_insert(H, cur);
-		//const Pos& p0 = P[exc[K]], & p1 = P[cnd[0]];
-		//Pos vec = p1 - p0;
-		//if (valid(cur, vec)) SQ.push(Event(vec, exc[K], cnd[0]));
+		outlier_candidate_swap(cur, EV);
 		return f;
 	}
 };

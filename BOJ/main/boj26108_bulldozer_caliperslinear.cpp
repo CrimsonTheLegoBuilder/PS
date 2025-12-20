@@ -9,11 +9,10 @@
 typedef long long ll;
 //typedef long double ld;
 typedef double ld;
-//typedef std::pair<int, int> pi;
 typedef std::vector<int> Vint;
 typedef std::vector<bool> Vbool;
 const ll INF = 1e17;
-const int LEN = 1e5 + 1;
+const int LEN = 5e4 + 1;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !x; }
 inline ll sq(const ll& x) { return x * x; }
@@ -23,13 +22,14 @@ inline ll sq(const ll& x) { return x * x; }
 
 #define OUT (-1)
 #define EXC 0
-#define CND 1
+#define HED 1
+#define TAL 1
 
 #define INSERT 0
 #define SWAP 1
 
 const int N_LEN = 1 << 16;
-const int K_LEN = 1 << 8 | 1 << 6;
+const int K_LEN = 1 << 9;
 
 int N, K;
 struct Pos {
@@ -46,7 +46,6 @@ struct Pos {
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
 	Pos operator - () const { return { -x, -y }; }
-	//Pos operator ~ () const { return { -y, x }; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	ld mag() const { return hypot(x, y); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
@@ -71,8 +70,6 @@ ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
 }
 Polygon monotone_chain(Polygon& C) {
 	Polygon H;
-	//std::sort(C.begin(), C.end());
-	//C.erase(unique(C.begin(), C.end()), C.end());
 	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
 	else {
 		for (int i = 0; i < C.size(); i++) {
@@ -101,53 +98,63 @@ typedef std::priority_queue<Event> PQ;
 typedef std::vector<Event> Events;
 struct Jaw {
 	PQ EQ, CQ, HQ, SQ;
-	int t, K, h, c, bnd;
-	int exc[K_LEN], cnd[K_LEN], hul[K_LEN], cnt[K_LEN];
+	int t, K, h, hp, tp, bnd;
+	int outl[K_LEN], head[K_LEN], tail[K_LEN], jaw[K_LEN], cnt[K_LEN];
 	int ord[N_LEN], sts[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = 0) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
-		memset(exc, -1, sizeof exc);//excepted points' idx
-		memset(cnd, -1, sizeof cnd);//candidate points' idx
-		memset(hul, -1, sizeof hul);//rotating calipers' bot's idx
+		memset(outl, -1, sizeof outl);//excepted points' idx
+		memset(head, -1, sizeof head);//candidate points' idx
+		memset(tail, -1, sizeof tail);//rotating calipers' bot's idx
+		memset(jaw, -1, sizeof jaw);//rotating calipers' bot's idx
 		memset(cnt, 0, sizeof cnt);//excepted points' num of each hull
 		memset(ord, -1, sizeof ord);//points' order of each jaw
 		memset(sts, -1, sizeof sts);//state of each point
-		h = 0; c = 0; bnd = 0;
+		h = 0; hp = 0; tp = 0; bnd = 0;
 	}
 	bool valid(const Pos& cur, const Pos& vec) {
 		ll tq = cur / vec, fc = cur * vec;
 		return tq > 0 || (!tq && fc > 0);
 	}
-	void init(const Polygon& Q, const Polygon H[], const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
+	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_; bnd = 0;
 		int sz = Q.size(); assert(N > K);
 		for (int i = 0, q; i <= K; i++) {
 			q = (t == BOT ? i : sz - i - 1);
-			exc[i] = Q[q].pi;
+			outl[i] = Q[q].pi;
 			ord[Q[q].pi] = i;
 			sts[Q[q].pi] = EXC;
 			cnt[Q[q].hi]++;
 			bnd = std::max(bnd, Q[q].hi);
 		}
-		for (int k = 0; k <= h; k++) hul[k] = H[k][0].pi;
-		Polygon tmp;
-		int tq, fc;
+		for (int k = 0; k <= h; k++) jaw[k] = t == BOT ? L[k][0].pi : U[k][0].pi;
+		Polygon hd, tl;
+		int tq = -1, fc = -1;
 		Pos vec;
-		const Pos& p = P[exc[K]];
+		const Pos& p = P[outl[K]];
 		for (int k = 0; k <= h; k++) {
-			sz = H[k].size();
-			bool f = 0;
+			bool hf = 0, tf = 0;
+			sz = L[k].size();
 			for (int i = 0; i < sz; i++) {
-				Pos vec = H[k][i] - p;
-				//if (tq > 0 || (!tq && fc > 0)) {
+				Pos vec = L[k][i] - p;
 				if (valid(cur, vec)) {
-					tmp.push_back(H[k][i]);
-					f = 1;
+					if (t == BOT) hd.push_back(L[k][i]), hf = 1;
+					else tl.push_back(L[k][i]), tf = 1;
 					break;
 				}
 			}
-			if (!f) c++;
+			sz = U[k].size();
+			for (int i = 0; i < sz; i++) {
+				Pos vec = U[k][i] - p;
+				if (valid(cur, vec)) {
+					if (t == TOP) hd.push_back(U[k][i]), hf = 1;
+					else tl.push_back(U[k][i]), tf = 1;
+					break;
+				}
+			}
+			if (!hf) hp++;
+			if (!tf) tp++;
 		}
 		sz = tmp.size();
 		assert(sz == c);
@@ -158,15 +165,11 @@ struct Jaw {
 		}
 		for (int i = 0, j = 1; i < K; i++, j++) {
 			vec = P[exc[j]] - P[exc[i]];
-			//tq = cur / vec; fc = cur * vec;
-			//if (tq > 0 || (!tq && fc > 0))
 			if (valid(cur, vec))
 				EQ.push(Event(vec, exc[i], exc[j]));
 		}
 		for (int i = 0, j = 1; i < c - 1; i++, j++) {
 			vec = P[cnd[j]] - P[cnd[i]];
-			//tq = sign(cur / vec); fc = sign(cur * vec);
-			//if (tq > 0 || (!tq && fc > 0))
 			if (valid(cur, vec))
 				CQ.push(Event(vec, cnd[i], cnd[j]));
 		}
@@ -174,8 +177,6 @@ struct Jaw {
 			Pos p = P[hul[i]];
 			int sz = H[p.hi].size();
 			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
-			//tq = sign(cur / vec); fc = sign(cur * vec);
-			//if (tq > 0 || (!tq && fc > 0))
 			if (valid(cur, vec))
 				HQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}

@@ -21,9 +21,10 @@ inline ll sq(const ll& x) { return x * x; }
 #define BOT 1 //BOT
 
 #define IGN (-1)
-#define OUT 0
-#define HED 1
-#define TAL 1
+#define OUTL 0
+#define HEAD 1
+#define TAIL 2
+#define BOTH 3
 
 #define INSERT 0
 #define SWAP 1
@@ -124,7 +125,7 @@ struct Jaw {
 			q = (t == BOT ? i : sz - i - 1);
 			outl[i] = Q[q].pi;
 			ord[Q[q].pi] = i;
-			sts[Q[q].pi] = OUT;
+			sts[Q[q].pi] = OUTL;
 			cnt[Q[q].hi]++;
 			bnd = std::max(bnd, Q[q].hi);
 		}
@@ -209,39 +210,39 @@ struct Jaw {
 		return tq > 0 || (!tq && fc > 0);
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, int o = -1) {//O(K)
-		const Pos& b = P[exc[K]];
-		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
-		int i = 0;
-		if (o != -1) {
-			for (i = o; i < c; i++) cnd[i] = cnd[i + 1], ord[cnd[i]]--;
-			c--;
-		}
-		if (!valid(cur, p - b) || sts[p.pi] == EXC) return 0;
-		//if (o >= 0) sts[p.pi] = OUT;
-		for (i = 0; i < c; i++) if (valid(cur, P[cnd[i]] - p)) break;
-		for (int j = c - 1; j >= i; j--) cnd[j + 1] = cnd[j], ord[cnd[j + 1]]--;
-		c++;
-		cnd[i] == p.pi, ord[p.pi] = i; sts[p.pi] = CND;
-		if (i > 0 && valid(cur, P[cnd[i]] - P[cnd[i - 1]]))
-			CQ.push(Event(P[cnd[i]] - P[cnd[i - 1]], cnd[i - 1], cnd[i]));
-		if (i < c - 1 && valid(cur, P[cnd[i + 1]] - P[cnd[i]]))
-			CQ.push(Event(P[cnd[i + 1]] - P[cnd[i]], cnd[i], cnd[i + 1]));
+		//const Pos& b = P[exc[K]];
+		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
+		//int i = 0;
+		//if (o != -1) {
+		//	for (i = o; i < c; i++) cnd[i] = cnd[i + 1], ord[cnd[i]]--;
+		//	c--;
+		//}
+		//if (!valid(cur, p - b) || sts[p.pi] == EXC) return 0;
+		////if (o >= 0) sts[p.pi] = OUT;
+		//for (i = 0; i < c; i++) if (valid(cur, P[cnd[i]] - p)) break;
+		//for (int j = c - 1; j >= i; j--) cnd[j + 1] = cnd[j], ord[cnd[j + 1]]--;
+		//c++;
+		//cnd[i] == p.pi, ord[p.pi] = i; sts[p.pi] = CND;
+		//if (i > 0 && valid(cur, P[cnd[i]] - P[cnd[i - 1]]))
+		//	CQ.push(Event(P[cnd[i]] - P[cnd[i - 1]], cnd[i - 1], cnd[i]));
+		//if (i < c - 1 && valid(cur, P[cnd[i + 1]] - P[cnd[i]]))
+		//	CQ.push(Event(P[cnd[i + 1]] - P[cnd[i]], cnd[i], cnd[i + 1]));
 		return 1;
 	}
-	void hull_jaw_rotate(const Polygon H[], const Pos& cur) {
+	void hull_jaw_rotate(const Pos& cur) {
 		while (1) {
 			Event ev = HQ.top();
 			if (cur / ev.v < 0) { HQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 			HQ.pop();
-			const Pos& p = P[ev.j];
-			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
-			hul[p.hi] = H[p.hi][i0].pi;
-			Pos vec = H[p.hi][i0] - p;
-			if (valid(ref, vec)) {
-				HQ.push(Event(vec, ev.i, H[p.hi][i0].pi));
-				candidate_update(p, cur, ord[p.pi]);
-			}
+			//const Pos& p = P[ev.j];
+			//int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
+			//hul[p.hi] = H[p.hi][i0].pi;
+			//Pos vec = H[p.hi][i0] - p;
+			//if (valid(ref, vec)) {
+			//	HQ.push(Event(vec, ev.i, H[p.hi][i0].pi));
+			//	candidate_update(p, cur, ord[p.pi]);
+			//}
 		}
 		return;
 	}
@@ -251,7 +252,7 @@ struct Jaw {
 		ord[i] = v; ord[j] = u;
 		return;
 	}
-	void candidate_jaw_rotate(const Pos& cur) {
+	void candidate_jaw_rotate(const Pos& cur, PQ& CQ, const int& f = HEAD) {
 		Pos vec;
 		while (1) {
 			Event ev = CQ.top();
@@ -259,21 +260,21 @@ struct Jaw {
 			if (cur / ev.v > 0) break;
 			CQ.pop();
 			int i = ev.i, j = ev.j;
-			if (sts[i] != CND || sts[j] != CND) continue;
-			swap(i, j, cnd);
-			int u = ord[i], v = ord[j];
-			if (u < c - 1) {
-				vec = P[cnd[i + 1]] - P[cnd[i]];
-				if (valid(cur, vec)) CQ.push(Event(vec, cnd[i], cnd[i + 1]));
-			}
-			if (0 < v) {
-				vec = P[cnd[j]] - P[cnd[j - 1]];
-				if (valid(cur, vec)) CQ.push(Event(vec, cnd[j - 1], cnd[j]));
-			}
+			if (!(sts[i] | f) || !(sts[j] | 1)) continue;
+			//swap(i, j, cnd);
+			//int u = ord[i], v = ord[j];
+			//if (u < c - 1) {
+			//	vec = P[cnd[i + 1]] - P[cnd[i]];
+			//	if (valid(cur, vec)) CQ.push(Event(vec, cnd[i], cnd[i + 1]));
+			//}
+			//if (0 < v) {
+			//	vec = P[cnd[j]] - P[cnd[j - 1]];
+			//	if (valid(cur, vec)) CQ.push(Event(vec, cnd[j - 1], cnd[j]));
+			//}
 		}
 		return;
 	}
-	void excepted_jaw_rotate(const Pos& cur, Events& EV) {
+	void outlier_jaw_rotate(const Pos& cur, Events& EV) {
 		Pos vec;
 		while (1) {
 			Event ev = EQ.top();
@@ -281,18 +282,9 @@ struct Jaw {
 			if (cur / ev.v > 0) break;
 			EQ.pop();
 			int i = ev.i, j = ev.j;
-			if (sts[i] != EXC || sts[j] != EXC) continue;
+			if (sts[i] != OUTL || sts[j] != OUTL) continue;
 			EV.push_back(Event(cur, i, j, t));
-			swap(i, j, exc);
-			int u = ord[i], v = ord[j];
-			if (u < c - 1) {
-				vec = P[exc[i + 1]] - P[exc[i]];
-				if (valid(cur, vec)) CQ.push(Event(vec, exc[i], exc[i + 1]));
-			}
-			if (0 < v) {
-				vec = P[exc[j]] - P[exc[j - 1]];
-				if (valid(cur, vec)) CQ.push(Event(vec, exc[j - 1], exc[j]));
-			}
+
 		}
 		return;
 	}
@@ -304,32 +296,24 @@ struct Jaw {
 			if (cur / ev.v > 0) break;
 			SQ.pop();
 			int i = ev.i, j = ev.j;
-			if (sts[i] != EXC || sts[j] != CND) continue;
-			if (i != exc[K] || j != cnd[0]) continue;
-			Pos bck = P[exc[K]];
-			exc[K] = cnd[0];
-			ord[exc[K]] = K;
-			cnt[P[exc[K]].hi]++;
-			sts[exc[K]] = EXC;
-			vec = P[exc[K]] - P[exc[K - 1]];
-			if (ccw_check(vec, cur)) EQ.push(Event(vec, exc[K - 1], exc[K]));
-			int sz = H[P[exc[K]].hi].size();
-			Pos p = H[P[exc[K]].hi][(P[exc[K]].i + 1) % sz];
-			candidate_update(p, cur, SWAP);
-			if (cnt[bck.hi] == H[bck.hi].size()) candidate_update(bck, cur, INSERT);
-			cnt[bck.hi]--;
+			//if (sts[i] != EXC || sts[j] != CND) continue;
+			//if (i != exc[K] || j != cnd[0]) continue;
+
 		}
 		return 0;
 	}
-	bool jaw_rotate(Events& EV, const Polygon H[], const Pos& cur) {
+	void outlier_update(Events& EV) {
+
+	}
+	bool jaw_rotate(Events& EV, const Pos& cur) {
 		bool f = 0;
-		hull_jaw_rotate(H, cur);
-		candidate_jaw_rotate(cur);
-		excepted_jaw_rotate(cur, EV);
+		hull_jaw_rotate(cur);
+		//candidate_jaw_rotate(cur);
+		outlier_jaw_rotate(cur, EV);
 		//candidate_insert(H, cur);
-		const Pos& p0 = P[exc[K]], & p1 = P[cnd[0]];
-		Pos vec = p1 - p0;
-		if (valid(cur, vec)) SQ.push(Event(vec, exc[K], cnd[0]));
+		//const Pos& p0 = P[exc[K]], & p1 = P[cnd[0]];
+		//Pos vec = p1 - p0;
+		//if (valid(cur, vec)) SQ.push(Event(vec, exc[K], cnd[0]));
 		return f;
 	}
 };
@@ -362,7 +346,7 @@ struct Calipers {
 		}
 		std::sort(P.begin(), P.end(), cmpx_rvs);
 		Q.clear(); for (const Pos& p : P) if (F[p.pi]) Q.push_back(p);
-		bot.init(Q, L, N, K, h, s); top.init(Q, U, N, K, h, e);
+		bot.init(Q, N, K, h, s); top.init(Q, N, K, h, e);
 		for (int k = 0; k < h; k++) {
 			for (const Pos& p : H[k]) P[p.pi].hi = p.hi, P[p.pi].i = p.i;
 		}
@@ -385,8 +369,8 @@ struct Calipers {
 		int tq = e / cur;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		std::vector<Event> EV;
-		bot.jaw_rotate(EV, L, cur);
-		top.jaw_rotate(EV, U, -cur);
+		bot.jaw_rotate(EV, cur);
+		top.jaw_rotate(EV, -cur);
 		for (const Event& ev : EV) {
 			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
 			else d = std::min(d, dist(K - ev.i, ev.i));

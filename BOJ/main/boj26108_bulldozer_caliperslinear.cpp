@@ -17,8 +17,8 @@ inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !x; }
 inline ll sq(const ll& x) { return x * x; }
 
-#define TOP 0 //TOP
-#define BOT 1 //BOT
+#define TOP 0
+#define BOT 1
 
 #define IGN (-1)
 #define OUTL 0
@@ -101,15 +101,15 @@ struct Jaw {
 	PQ EQ, HQ, TQ, JQ, SQ;
 	int t, K, h, hp, tp, bnd;
 	int outl[K_LEN], head[K_LEN], tail[K_LEN], jaw[K_LEN], cnt[K_LEN];
-	int ord[N_LEN], sts[N_LEN];
+	int ord[N_LEN][3], sts[N_LEN];
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = 0) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
-		memset(outl, -1, sizeof outl);//excepted points' idx
-		memset(head, -1, sizeof head);//candidate points' idx
-		memset(tail, -1, sizeof tail);//rotating calipers' bot's idx
+		memset(outl, -1, sizeof outl);//outlier points' idx
+		memset(head, -1, sizeof head);//candidate points' idx (head)
+		memset(tail, -1, sizeof tail);//candidate points' idx (tail)
 		memset(jaw, -1, sizeof jaw);//rotating calipers' bot's idx
-		memset(cnt, 0, sizeof cnt);//excepted points' num of each hull
+		memset(cnt, 0, sizeof cnt);//outlier points' num of each hull
 		memset(ord, -1, sizeof ord);//points' order of each jaw
 		memset(sts, -1, sizeof sts);//state of each point
 		h = 0; hp = 0; tp = 0; bnd = 0;
@@ -124,17 +124,17 @@ struct Jaw {
 		for (int i = 0, q; i <= K; i++) {
 			q = (t == BOT ? i : sz - i - 1);
 			outl[i] = Q[q].pi;
-			ord[Q[q].pi] = i;
+			ord[Q[q].pi][OUTL] = i;
 			sts[Q[q].pi] = OUTL;
 			cnt[Q[q].hi]++;
 			bnd = std::max(bnd, Q[q].hi);
 		}
-		for (int k = 0; k <= h; k++) jaw[k] = t == BOT ? L[k][0].pi : U[k][0].pi;
+		for (int k = 0; k < h; k++) jaw[k] = (t == BOT ? L[k][0].pi : U[k][0].pi);
 		Polygon hd, tl;
 		int tq = -1, fc = -1;
 		Pos vec;
 		const Pos& p = P[outl[K]];
-		for (int k = 0; k <= h; k++) {
+		for (int k = 0; k < h; k++) {
 			const Polygon& LH = (t == BOT ? L[k] : U[k]);
 			const Polygon& UH = (t == TOP ? L[k] : U[k]);
 			bool hf = 0, tf = 0;
@@ -142,7 +142,8 @@ struct Jaw {
 			for (int i = 0; i < sz; i++) {
 				Pos vec = LH[i] - p;
 				if (valid(cur, vec)) {
-					hd.push_back(LH[i]), hf = 1;
+					hd.push_back(LH[i]);
+					hf = 1;
 					break;
 				}
 			}
@@ -150,7 +151,8 @@ struct Jaw {
 			for (int i = sz - 1; i >= 0; i--) {
 				Pos vec = UH[i] - p;
 				if (valid(cur, vec)) {
-					tl.push_back(U[k][i]), tf = 1;
+					tl.push_back(UH[i]);
+					tf = 1;
 					break;
 				}
 			}
@@ -163,14 +165,18 @@ struct Jaw {
 		assert(sz == hp);
 		for (int i = 0; i < sz; i++) {
 			head[i] = hd[i].pi;
-			ord[hd[i].pi] = i;
+			ord[hd[i].pi][HEAD] = i;
+			if (sts[hd[i].pi] == -1) sts[hd[i].pi] = HEAD;
+			else sts[hd[i].pi] |= HEAD;
 		}
 		sz = tl.size();
 		assert(sz == tp);
 		std::sort(tl.rbegin(), tl.rend(), cmpx_rvs);
 		for (int i = 0; i < sz; i++) {
 			tail[i] = tl[i].pi;
-			ord[tl[i].pi] = i;
+			ord[tl[i].pi][TAIL] = i;
+			if (sts[tl[i].pi] == -1) sts[tl[i].pi] = TAIL;
+			else sts[tl[i].pi] |= TAIL;
 		}
 		for (int i = 0, j = 1; i < K; i++, j++) {
 			vec = P[outl[j]] - P[outl[i]];
@@ -188,13 +194,21 @@ struct Jaw {
 				TQ.push(Event(vec, tail[i], tail[j]));
 		}
 		for (int i = 0; i < h; i++) {
-			Pos p = P[jaw[i]];
+			const Pos& p = P[jaw[i]];
 			int sz = H[p.hi].size();
 			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
 			if (valid(cur, vec))
 				JQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}
-
+		const Pos& e = P[outl[K]];
+		const Pos& ch = P[head[0]];
+		const Pos& ct = P[tail[0]];
+		vec = e - ch;
+		if (valid(cur, vec))
+			SQ.push(Event(vec, ch.pi, e.pi));
+		vec = e - ct;
+		if (valid(cur, vec))
+			SQ.push(Event(vec, ct.pi, e.pi));
 		return;
 	}
 	bool candidate_insert_check(const Pos& cur, int idx[]) { return valid(cur, P[idx[0]] - P[outl[K]]); }
@@ -203,6 +217,10 @@ struct Jaw {
 	//	Pos vec = c - e;
 	//	return valid(cur, P[cnd[0]] - P[exc[K]]);
 	//}
+	bool candidate_insert_check(const Event& ev, const Pos& cur, int idx[]) {
+		if (P[idx[0]].pi != ev.i || P[outl[K]].pi != ev.j) return 0;
+		return valid(cur, P[idx[0]] - P[outl[K]]);
+	}
 	bool ccw_check(const Pos& vec, const Pos& cur) {
 		int tq = sign(ref / vec), fc = ref * vec;
 		if (tq < 0 || (!tq && fc < 0)) return 0;

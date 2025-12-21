@@ -217,13 +217,14 @@ struct Jaw {
 	//	return valid(cur, P[idx[0]] - P[outl[K]]);
 	//}
 	bool candidate_update(const Pos& p, const Pos& cur, int idx[], const int& f = HEAD, int o = -1) {//O(K)
-		//const Pos& b = P[exc[K]];
-		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
-		//int i = 0;
-		//if (o != -1) {
-		//	for (i = o; i < c; i++) cnd[i] = cnd[i + 1], ord[cnd[i]]--;
-		//	c--;
-		//}
+		const Pos& b = P[outl[K]];
+		int i = 0;
+		int& c = (f == HEAD ? hp : tp);
+		if (o != -1) {
+			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
+			c--;
+		}
+		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		//if (!valid(cur, p - b) || sts[p.pi] == EXC) return 0;
 		////if (o >= 0) sts[p.pi] = OUT;
 		//for (i = 0; i < c; i++) if (valid(cur, P[cnd[i]] - p)) break;

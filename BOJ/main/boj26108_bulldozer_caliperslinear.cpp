@@ -225,12 +225,14 @@ struct Jaw {
 			c--;
 		}
 		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
-		//if (!valid(cur, p - b) || sts[p.pi] == EXC) return 0;
-		////if (o >= 0) sts[p.pi] = OUT;
-		//for (i = 0; i < c; i++) if (valid(cur, P[cnd[i]] - p)) break;
-		//for (int j = c - 1; j >= i; j--) cnd[j + 1] = cnd[j], ord[cnd[j + 1]]--;
-		//c++;
-		//cnd[i] == p.pi, ord[p.pi] = i; sts[p.pi] = CND;
+		if (!valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
+		if (o >= 0) sts[p.pi] = -1;
+		for (i = 0; i < c; i++) if (valid(cur, P[idx[i]] - p)) break;
+		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]--;
+		c++;
+		idx[i] == p.pi, idx[p.pi] = i;
+		if (sts[p.pi] == -1) sts[p.pi] = f;
+		else sts[p.pi] != f;
 		//if (i > 0 && valid(cur, P[cnd[i]] - P[cnd[i - 1]]))
 		//	CQ.push(Event(P[cnd[i]] - P[cnd[i - 1]], cnd[i - 1], cnd[i]));
 		//if (i < c - 1 && valid(cur, P[cnd[i + 1]] - P[cnd[i]]))

@@ -214,11 +214,6 @@ struct Jaw {
 			SQ.push(Event(vec, ct.pi, e.pi));
 		return;
 	}
-	//bool candidate_insert_check(const Pos& cur, int idx[]) { return valid(cur, P[idx[0]] - P[outl[K]]); }
-	//bool candidate_insert_check(const Event& ev, const Pos& cur, int idx[]) {
-	//	if (P[idx[0]].pi != ev.i || P[outl[K]].pi != ev.j) return 0;
-	//	return valid(cur, P[idx[0]] - P[outl[K]]);
-	//}
 	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1) {//O(K)
 		const Pos& b = P[outl[K]];
 		int i = 0;
@@ -328,8 +323,15 @@ struct Jaw {
 			if (cur / ev.v < 0) { SQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 			SQ.pop();
-			int i = ev.i, j = ev.j;
-
+			int i = ev.i, j = ev.j, typ = ev.t;
+			if (typ == HEAD) {
+				if (P[head[0]] != ev.i || P[outl[K]] != ev.j) continue;
+				//swap
+			}
+			else if (typ == TAIL) {
+				if (P[tail[0]] != ev.i || P[outl[K]] != ev.j) continue;
+				//swap
+			}
 		}
 		return;
 	}

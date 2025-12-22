@@ -116,7 +116,10 @@ struct Jaw {
 	}
 	bool valid(const Pos& cur, const Pos& vec) {
 		ll tq = cur / vec, fc = cur * vec;
-		return tq > 0 || (!tq && fc > 0);
+		bool f1 = tq > 0 || (!tq && fc > 0);
+		tq = ref / vec, fc = ref * vec;
+		bool f2 = tq > 0 || (!tq && fc > 0);
+		return f1 && f2;
 	}
 	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_; bnd = 0;
@@ -216,29 +219,31 @@ struct Jaw {
 	//	if (P[idx[0]].pi != ev.i || P[outl[K]].pi != ev.j) return 0;
 	//	return valid(cur, P[idx[0]] - P[outl[K]]);
 	//}
-	bool candidate_update(const Pos& p, const Pos& cur, int idx[], const int& f = HEAD, int o = -1) {//O(K)
+	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1) {//O(K)
 		const Pos& b = P[outl[K]];
 		int i = 0;
 		int& c = (f == HEAD ? hp : tp);
 		if (o != -1) {
 			int x = idx[o];
-			if (sts[x] | f) {}
+			if (sts[x] == f) { sts[x] = -1; }
+			else { sts[x] ^= f; }
+			ord[x][f] = -1;
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
 		}
 		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		if (!valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
-		if (o >= 0) sts[p.pi] = -1;
-		for (i = 0; i < c; i++) if (valid(cur, P[idx[i]] - p)) break;
-		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]--;
+		for (i = 0; i < c; i++)
+			if (valid(cur, P[idx[i]] - p)) break;
+		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]++;
 		c++;
-		idx[i] == p.pi, idx[p.pi] = i;
+		idx[i] == p.pi, ord[p.pi][f] = i;
 		if (sts[p.pi] == -1) sts[p.pi] = f;
-		else sts[p.pi] != f;
-		//if (i > 0 && valid(cur, P[cnd[i]] - P[cnd[i - 1]]))
-		//	CQ.push(Event(P[cnd[i]] - P[cnd[i - 1]], cnd[i - 1], cnd[i]));
-		//if (i < c - 1 && valid(cur, P[cnd[i + 1]] - P[cnd[i]]))
-		//	CQ.push(Event(P[cnd[i + 1]] - P[cnd[i]], cnd[i], cnd[i + 1]));
+		else sts[p.pi] |= f;
+		if (i > 0 && valid(cur, P[idx[i]] - P[idx[i - 1]]))
+			CQ.push(Event(P[idx[i]] - P[idx[i - 1]], idx[i - 1], idx[i]));
+		if (i < c - 1 && valid(cur, P[idx[i + 1]] - P[idx[i]]))
+			CQ.push(Event(P[idx[i + 1]] - P[idx[i]], idx[i], idx[i + 1]));
 		return 1;
 	}
 	void hull_jaw_rotate(const Pos& cur) {
@@ -251,9 +256,9 @@ struct Jaw {
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			const Pos& p1 = H[p.hi][i0];
 			if ((sts[p.pi] | HEAD) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL))
-				candidate_update(p, cur, head, HEAD, ord[p.pi][HEAD]);
+				candidate_update(p, cur, HQ, head, HEAD, ord[p.pi][HEAD]);
 			if ((sts[p.pi] | TAIL) && (sts[p1.pi] == -1 || sts[p1.pi] == HEAD))
-				candidate_update(p, cur, tail, TAIL, ord[p.pi][TAIL]);
+				candidate_update(p, cur, TQ, tail, TAIL, ord[p.pi][TAIL]);
 			jaw[p.hi] = p1.pi;
 			Pos vec = p1 - p;
 			if (valid(ref, vec)) JQ.push(Event(vec, ev.j, p1.pi));
@@ -313,7 +318,19 @@ struct Jaw {
 		return;
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
+		Pos vec;
+		vec = P[outl[K]] - P[head[0]];
+		if (valid(cur, vec)) SQ.push(Event(vec, head[0], outl[K], HEAD));
+		vec = P[outl[K]] - P[tail[0]];
+		if (valid(cur, vec)) SQ.push(Event(vec, tail[0], outl[K], TAIL));
+		while (1) {
+			Event ev = SQ.top();
+			if (cur / ev.v < 0) { SQ.pop(); continue; }
+			if (cur / ev.v > 0) break;
+			SQ.pop();
+			int i = ev.i, j = ev.j;
 
+		}
 		return;
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
@@ -367,12 +384,12 @@ struct Calipers {
 		if (bot.JQ.size()) V.push_back(bot.JQ.top().v);
 		if (bot.HQ.size()) V.push_back(bot.HQ.top().v);
 		if (bot.TQ.size()) V.push_back(bot.TQ.top().v);
-		//if (bot.SQ.size()) V.push_back(bot.SQ.top().v);
+		if (bot.SQ.size()) V.push_back(bot.SQ.top().v);
 		if (top.OQ.size()) V.push_back(-top.OQ.top().v);
 		if (top.JQ.size()) V.push_back(-top.JQ.top().v);
 		if (top.HQ.size()) V.push_back(-top.HQ.top().v);
 		if (top.TQ.size()) V.push_back(-top.TQ.top().v);
-		//if (top.SQ.size()) V.push_back(-top.SQ.top().v);
+		if (top.SQ.size()) V.push_back(-top.SQ.top().v);
 		if (V.empty()) { cur = Pos(0, 1); return 0; }
 		cur = V[0];
 		int sz = V.size();

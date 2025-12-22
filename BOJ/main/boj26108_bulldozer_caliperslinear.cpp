@@ -221,6 +221,8 @@ struct Jaw {
 		int i = 0;
 		int& c = (f == HEAD ? hp : tp);
 		if (o != -1) {
+			int x = idx[o];
+			if (sts[x] | f) {}
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
 		}

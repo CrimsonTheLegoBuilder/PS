@@ -406,7 +406,7 @@ struct Calipers {
 		return vertical_dist(P[b], P[b] + cur, P[t]);
 	}
 	bool rotate(ld& d) {
-		int tq = e / cur;
+		int tq = sign(e / cur);
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		std::vector<Event> EV;
 		bot.jaw_rotate(EV, cur);

@@ -63,6 +63,7 @@ ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
 ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
+	if (!cur.x) return INF;
 	if (ccw(p, p + cur, q) <= 0) return 0;
 	ld dx = q.x - p.x;
 	ld dy = dx / cur.x * cur.y;

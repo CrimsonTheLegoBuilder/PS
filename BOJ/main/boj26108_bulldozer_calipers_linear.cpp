@@ -418,6 +418,7 @@ struct Calipers {
 	}
 } C;
 ld rotating_calipers(Polygon& P) {
+	std::sort(P.begin(), P.end());
 	Polygon H = monotone_chain(P);
 	int sz = H.size();
 	if (sz < 3) return 0;
@@ -440,7 +441,7 @@ void solve() {
 	P.resize(N); for (Pos& p : P) std::cin >> p;
 	if (N < 3) { std::cout << "0.000000000\n"; return; }
 	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
-	if (K == 0) { std::sort(P.begin(), P.end()); std::cout << rotating_calipers(P) << "\n"; return; }
+	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	C.init(N, K, Pos(0, -1));
 	ld ret = INF;
 	while (C.rotate(ret)) {}

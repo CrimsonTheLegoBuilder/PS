@@ -123,7 +123,7 @@ struct Jaw {
 		return f1 && f2;
 	}
 	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
-		K = K_; h = h_; bnd = 0;
+		K = K_; h = h_;//bnd = 0;
 		int sz = Q.size(); assert(N > K);
 		for (int i = 0, q; i <= K; i++) {
 			q = (t == BOT ? i : sz - i - 1);
@@ -131,20 +131,20 @@ struct Jaw {
 			ord[Q[q].pi][OUTL] = i;
 			sts[Q[q].pi] = OUTL;
 			cnt[Q[q].hi]++;
-			bnd = std::max(bnd, Q[q].hi);
+			//bnd = std::max(bnd, Q[q].hi);
 		}
 		for (int k = 0; k < h; k++) jaw[k] = (t == BOT ? L[k][0].pi : U[k][0].pi);
 		Polygon hd, tl;
 		int tq = -1, fc = -1;
 		Pos vec;
-		const Pos& p = P[outl[K]];
+		const Pos& b = P[outl[K]];
 		for (int k = 0; k < h; k++) {
 			const Polygon& LH = (t == BOT ? L[k] : U[k]);
-			const Polygon& UH = (t == TOP ? L[k] : U[k]);
+			const Polygon& UH = (t == BOT ? U[k] : L[k]);
 			bool hf = 0, tf = 0;
 			sz = LH.size();
 			for (int i = 0; i < sz; i++) {
-				Pos vec = LH[i] - p;
+				Pos vec = LH[i] - b;
 				if (valid(cur, vec)) {
 					hd.push_back(LH[i]);
 					hf = 1;
@@ -153,7 +153,7 @@ struct Jaw {
 			}
 			sz = UH.size();
 			for (int i = sz - 1; i >= 0; i--) {
-				Pos vec = UH[i] - p;
+				Pos vec = UH[i] - b;
 				if (valid(cur, vec)) {
 					tl.push_back(UH[i]);
 					tf = 1;
@@ -165,20 +165,24 @@ struct Jaw {
 			if (!hf) assert(!tf);
 		}
 		std::sort(hd.begin(), hd.end(), cmpx_rvs);
+		if (t == TOP) std::reverse(hd.begin(), hd.end());
 		sz = hd.size();
 		assert(sz == hp);
 		for (int i = 0; i < sz; i++) {
 			head[i] = hd[i].pi;
 			ord[hd[i].pi][HEAD] = i;
+			assert(sts[hd[i].pi]);
 			if (sts[hd[i].pi] == -1) sts[hd[i].pi] = HEAD;
 			else sts[hd[i].pi] |= HEAD;
 		}
 		std::sort(tl.rbegin(), tl.rend(), cmpx_rvs);
+		if (t == TOP) std::reverse(tl.begin(), tl.end());
 		sz = tl.size();
 		assert(sz == tp);
 		for (int i = 0; i < sz; i++) {
 			tail[i] = tl[i].pi;
 			ord[tl[i].pi][TAIL] = i;
+			assert(sts[tl[i].pi]);
 			if (sts[tl[i].pi] == -1) sts[tl[i].pi] = TAIL;
 			else sts[tl[i].pi] |= TAIL;
 		}
@@ -204,15 +208,15 @@ struct Jaw {
 			if (valid(cur, vec))
 				JQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}
-		const Pos& e = P[outl[K]];
+		//const Pos& b = P[outl[K]];
 		const Pos& ch = P[head[0]];
 		const Pos& ct = P[tail[0]];
-		vec = e - ch;
+		vec = ch - b;
 		if (valid(cur, vec))
-			SQ.push(Event(vec, ch.pi, e.pi));
-		vec = e - ct;
+			SQ.push(Event(vec, b.pi, ch.pi, HEAD)); 
+		vec = ct - b;
 		if (valid(cur, vec))
-			SQ.push(Event(vec, ct.pi, e.pi));
+			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
 		return;
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1) {//O(K)
@@ -227,7 +231,7 @@ struct Jaw {
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
 		}
-		int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
+		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		if (!valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
 		for (i = 0; i < c; i++)
 			if (valid(cur, P[idx[i]] - p)) break;
@@ -245,9 +249,9 @@ struct Jaw {
 	void hull_jaw_rotate(const Pos& cur) {
 		while (1) {
 			Event ev = JQ.top();
-			if (cur / ev.v < 0) { JQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 			JQ.pop();
+			if (cur / ev.v < 0) continue;
 			const Pos& p = P[ev.j];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			const Pos& p1 = H[p.hi][i0];

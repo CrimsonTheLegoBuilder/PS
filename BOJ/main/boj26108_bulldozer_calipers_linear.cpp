@@ -173,9 +173,9 @@ struct Jaw {
 			if (sts[hd[i].pi] == -1) sts[hd[i].pi] = HEAD;
 			else sts[hd[i].pi] |= HEAD;
 		}
+		std::sort(tl.rbegin(), tl.rend(), cmpx_rvs);
 		sz = tl.size();
 		assert(sz == tp);
-		std::sort(tl.rbegin(), tl.rend(), cmpx_rvs);
 		for (int i = 0; i < sz; i++) {
 			tail[i] = tl[i].pi;
 			ord[tl[i].pi][TAIL] = i;

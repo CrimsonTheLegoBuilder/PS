@@ -353,6 +353,8 @@ struct Calipers {
 	Calipers() { N = -1, K = -1, h = 0; }
 	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
 		N = n; K = k; cur = c;
+		std::sort(P.begin(), P.end(), cmpx_rvs);
+		for (int i = 0; i < N; i++) P[i].pi = i;
 		std::sort(P.begin(), P.end());
 		Polygon Q = P;
 		Vbool F(N, 0);
@@ -439,8 +441,6 @@ void solve() {
 	if (N < 3) { std::cout << "0.000000000\n"; return; }
 	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
 	if (K == 0) { std::sort(P.begin(), P.end()); std::cout << rotating_calipers(P) << "\n"; return; }
-	std::sort(P.begin(), P.end(), cmpx_rvs);
-	for (int i = 0; i < N; i++) P[i].pi = i;
 	C.init(N, K, Pos(0, -1));
 	ld ret = INF;
 	while (C.rotate(ret)) {}

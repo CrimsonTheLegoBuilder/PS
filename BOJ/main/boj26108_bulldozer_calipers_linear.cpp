@@ -122,6 +122,7 @@ struct Jaw {
 		bool f2 = tq > 0 || (!tq && fc > 0);
 		return f1 && f2;
 	}
+	bool nxt_check(const Pos& cur, const Pos& vec) { return cur / vec > 0 && ref / vec > 0; }
 	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_;//bnd = 0;
 		int sz = Q.size(); assert(N > K);
@@ -286,12 +287,12 @@ struct Jaw {
 			u = ord[i][f], v = ord[j][f];
 			const int& c = (f == HEAD ? hp : tp);
 			if (u < c - 1) {
-				vec = P[idx[i + 1]] - P[idx[i]];
-				if (valid(cur, vec)) CQ.push(Event(vec, idx[i], idx[i + 1]));
+				vec = P[idx[u + 1]] - P[idx[u]];
+				if (valid(cur, vec)) CQ.push(Event(vec, idx[u], idx[u + 1]));
 			}
 			if (0 < v) {
-				vec = P[idx[j]] - P[idx[j - 1]];
-				if (valid(cur, vec)) CQ.push(Event(vec, idx[j - 1], idx[j]));
+				vec = P[idx[v]] - P[idx[v - 1]];
+				if (valid(cur, vec)) CQ.push(Event(vec, idx[v - 1], idx[v]));
 			}
 		}
 		return;
@@ -300,21 +301,23 @@ struct Jaw {
 		Pos vec;
 		while (1) {
 			Event ev = OQ.top();
-			if (cur / ev.v < 0) { OQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 			OQ.pop();
+			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j;
 			if (sts[i] != OUTL || sts[j] != OUTL) continue;
+			int u = ord[i][OUTL], v = ord[j][OUTL];
+			if (u + 1 != v) continue;
 			EV.push_back(Event(cur, i, j, t));
 			swap(i, j, outl, OUTL);
-			int u = ord[i][OUTL], v = ord[j][OUTL];
+			u = ord[i][OUTL], v = ord[j][OUTL];
 			if (u < K) {
-				vec = P[outl[i + 1]] - P[outl[i]];
-				if (valid(cur, vec)) OQ.push(Event(vec, outl[i], outl[i + 1]));
+				vec = P[outl[u + 1]] - P[outl[u]];
+				if (valid(cur, vec)) OQ.push(Event(vec, outl[u], outl[u + 1]));
 			}
 			if (0 < v) {
-				vec = P[outl[j]] - P[outl[j - 1]];
-				if (valid(cur, vec)) OQ.push(Event(vec, outl[j - 1], outl[j]));
+				vec = P[outl[v]] - P[outl[v - 1]];
+				if (valid(cur, vec)) OQ.push(Event(vec, outl[v - 1], outl[v]));
 			}
 		}
 		return;
@@ -327,17 +330,20 @@ struct Jaw {
 		if (valid(cur, vec)) SQ.push(Event(vec, tail[0], outl[K], TAIL));
 		while (1) {
 			Event ev = SQ.top();
-			if (cur / ev.v < 0) { SQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 			SQ.pop();
+			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j, typ = ev.t;
 			if (typ == HEAD) {
 				if (P[head[0]] != ev.i || P[outl[K]] != ev.j) continue;
-				//swap
+				Pos ph = P[head[0]], ed = P[outl[K]];
+				int hi = ph.hi, o = ord[ph.pi][HEAD];
+
 			}
 			else if (typ == TAIL) {
 				if (P[tail[0]] != ev.i || P[outl[K]] != ev.j) continue;
-				//swap
+				Pos pt = P[tail[0]], ed = P[outl[K]];
+				
 			}
 		}
 		return;

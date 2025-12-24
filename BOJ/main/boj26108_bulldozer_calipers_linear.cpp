@@ -275,14 +275,16 @@ struct Jaw {
 		Pos vec;
 		while (1) {
 			Event ev = CQ.top();
-			if (cur / ev.v < 0) { CQ.pop(); continue; }
 			if (cur / ev.v > 0) break;
 			CQ.pop();
+			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j;
 			if (sts[i] != f || sts[j] != f) continue;
-			swap(i, j, idx, f);
 			int u = ord[i][f], v = ord[j][f];
-			int c = (f == HEAD ? hp : tp);
+			if (u + 1 != v) continue;
+			swap(i, j, idx, f);
+			u = ord[i][f], v = ord[j][f];
+			const int& c = (f == HEAD ? hp : tp);
 			if (u < c - 1) {
 				vec = P[idx[i + 1]] - P[idx[i]];
 				if (valid(cur, vec)) CQ.push(Event(vec, idx[i], idx[i + 1]));

@@ -322,6 +322,15 @@ struct Jaw {
 		}
 		return;
 	}
+	void pop(const Pos& p) {
+		if (sts[p.pi] == OUTL) sts[p.pi] = -1;
+		else return;
+		int o = ord[p.pi][OUTL];
+		assert(o == K);
+		ord[p.pi][OUTL] = -1;
+		outl[o] = -1;
+		return;
+	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 		Pos vec;
 		vec = P[outl[K]] - P[head[0]];
@@ -336,14 +345,36 @@ struct Jaw {
 			int i = ev.i, j = ev.j, typ = ev.t;
 			if (typ == HEAD) {
 				if (P[head[0]] != ev.i || P[outl[K]] != ev.j) continue;
-				Pos ph = P[head[0]], ed = P[outl[K]];
-				int hi = ph.hi, o = ord[ph.pi][HEAD];
-
+				Pos ph = P[head[0]], px = P[outl[K]];
+				int phi = ph.hi;
+				int xhi = px.hi;
+				pop(px);
+				int sz = H[px.hi].size();
+				const Pos& pt = H[px.hi][(px.i - 1 + sz) % sz];
+				if (cnt[px.hi] == H[px.hi].size()) {
+					candidate_update(px, cur, TQ, tail, TAIL, -1);
+					candidate_update(px, cur, HQ, head, HEAD, -1);
+					cnt[px.hi]--;
+				}
+				else if (sts[pt.pi] | TAIL) {
+					candidate_update(px, cur, TQ, tail, TAIL, ord[pt.pi][TAIL]);
+					cnt[px.hi]--;
+				}
+				sz = H[ph.hi].size();
+				const Pos& nxt = H[ph.hi][(ph.i + 1) % sz];
+				candidate_update(nxt, cur, HQ, head, HEAD, ord[ph.pi][HEAD]);
 			}
 			else if (typ == TAIL) {
 				if (P[tail[0]] != ev.i || P[outl[K]] != ev.j) continue;
-				Pos pt = P[tail[0]], ed = P[outl[K]];
-				
+				Pos pt = P[tail[0]], px = P[outl[K]];
+				pop(px);
+				int sz = H[px.hi].size();
+				const Pos& pt = H[px.hi][(px.i - 1 + sz) % sz];
+				if (cnt[px.hi] == H[px.hi].size()) {
+					candidate_update(px, cur, TQ, tail, TAIL, -1);
+					candidate_update(px, cur, HQ, head, HEAD, -1);
+					cnt[px.hi]--;
+				}
 			}
 		}
 		return;

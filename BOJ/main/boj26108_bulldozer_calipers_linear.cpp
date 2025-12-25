@@ -220,7 +220,7 @@ struct Jaw {
 			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
 		return;
 	}
-	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1) {//O(K)
+	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pp = 0) {//O(K)
 		const Pos& b = P[outl[K]];
 		int i = 0;
 		int& c = (f == HEAD ? hp : tp);
@@ -233,7 +233,7 @@ struct Jaw {
 			c--;
 		}
 		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
-		if (!valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
+		if (pp || !valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
 		for (i = 0; i < c; i++)
 			if (valid(cur, P[idx[i]] - p)) break;
 		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]++;
@@ -343,39 +343,35 @@ struct Jaw {
 			SQ.pop();
 			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j, typ = ev.t;
+
+			//머리인지 꼬리인지 구분만 하고 나면 나머지는 똑같이 돌아감
+			//후보군에서 꺼낸 다음 제외 점군과 교체
+			//새로 꺼낸 점군이 후보군에 들어갈 수 있는지 검사 후 후보군 갱신
+			//새로 꺼낸 점이 아니라 교체한 점군의 껍질 다음 점이 후보군으로 들어가는지를 확인한 후 교체하는 로직이 필요
+			//이렇게만 돌아가면 반례가 없는 거 같음
+
+			Pos c, x = P[outl[K]];
+			int hi = x.hi;
 			if (typ == HEAD) {
-				if (P[head[0]] != ev.i || P[outl[K]] != ev.j) continue;
-				Pos ph = P[head[0]], px = P[outl[K]];
-				int phi = ph.hi;
-				int xhi = px.hi;
-				pop(px);
-				int sz = H[px.hi].size();
-				const Pos& pt = H[px.hi][(px.i - 1 + sz) % sz];
-				if (cnt[px.hi] == H[px.hi].size()) {
-					candidate_update(px, cur, TQ, tail, TAIL, -1);
-					candidate_update(px, cur, HQ, head, HEAD, -1);
-					cnt[px.hi]--;
-				}
-				else if (sts[pt.pi] | TAIL) {
-					candidate_update(px, cur, TQ, tail, TAIL, ord[pt.pi][TAIL]);
-					cnt[px.hi]--;
-				}
-				sz = H[ph.hi].size();
-				const Pos& nxt = H[ph.hi][(ph.i + 1) % sz];
-				candidate_update(nxt, cur, HQ, head, HEAD, ord[ph.pi][HEAD]);
+				if (head[0] != ev.i || outl[K] != ev.j) continue;
+				c = P[head[0]];
+				if (sts[c.pi] == HEAD) candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+				
 			}
 			else if (typ == TAIL) {
-				if (P[tail[0]] != ev.i || P[outl[K]] != ev.j) continue;
-				Pos pt = P[tail[0]], px = P[outl[K]];
-				pop(px);
-				int sz = H[px.hi].size();
-				const Pos& pt = H[px.hi][(px.i - 1 + sz) % sz];
-				if (cnt[px.hi] == H[px.hi].size()) {
-					candidate_update(px, cur, TQ, tail, TAIL, -1);
-					candidate_update(px, cur, HQ, head, HEAD, -1);
-					cnt[px.hi]--;
-				}
+				if (tail[0] != ev.i || outl[K] != ev.j) continue;
+				c = P[tail[0]];
 			}
+
+			if (sts[c.pi] | HEAD) {
+				candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+			}
+			if (sts[c.pi] | TAIL) {
+				candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+			}
+			pop(x);
+
+
 		}
 		return;
 	}

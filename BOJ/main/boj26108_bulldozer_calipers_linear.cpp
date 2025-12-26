@@ -379,6 +379,9 @@ struct Jaw {
 				if (sts[pre.pi] | TAIL) {
 					candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
 				}
+				if (sts[pre.pi] | HEAD) {
+					candidate_update(x, cur, HQ, head, HEAD, ord[pre.pi][HEAD]);
+				}
 			}
 		}
 		return;

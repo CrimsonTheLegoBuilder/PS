@@ -94,9 +94,24 @@ struct Event {
 	Pos v;
 	int i, j, t;
 	Event(Pos v_ = Pos(), int i_ = -1, int j_ = -1, int t_ = -1) : v(v_), i(i_), j(j_), t(t_) {}
-	bool operator < (const Event& o) const { return v / o.v > 0; }
+	bool operator < (const Event& o) const { return v / o.v < 0; }
 };
 typedef std::priority_queue<Event> PQ;
+void print_event(const Event& e) {
+	std::cout << "	[v:(" << e.v.x << "," << e.v.y << ") " << "i:" << e.i << " P[i]: (" << P[e.i].x << "," << P[e.i].y << ") j:" << e.j << " P[j]: (" << P[e.j].x << "," << P[e.j].y << ") t:" << e.t << "]";
+}
+void debug_pq(PQ pq, const char* name = "PQ") {
+	std::cout << "--- DEBUG:: [" << name << "] (Size: " << pq.size() << ") ---\n";
+	int idx = 0;
+	while (!pq.empty()) {
+		Event e = pq.top();
+		pq.pop();
+		std::cout << "#" << idx++ << ": ";
+		print_event(e);
+		std::cout << "\n";
+	}
+	std::cout << "--- DEBUG:: ------------------------\n";
+}
 typedef std::vector<Event> Events;
 struct Jaw {
 	PQ OQ, HQ, TQ, JQ, SQ;
@@ -126,6 +141,7 @@ struct Jaw {
 	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_;//bnd = 0;
 		int sz = Q.size(); assert(N > K);
+		//std::cout << "jaw init start::\n";
 		for (int i = 0, q; i <= K; i++) {
 			q = (t == BOT ? i : sz - i - 1);
 			outl[i] = Q[q].pi;
@@ -134,7 +150,10 @@ struct Jaw {
 			cnt[Q[q].hi]++;
 			//bnd = std::max(bnd, Q[q].hi);
 		}
+		//std::cout << "outl done::\n";
+		//std::cout << "h:: " << h << "\n";
 		for (int k = 0; k < h; k++) jaw[k] = (t == BOT ? L[k][0].pi : U[k][0].pi);
+		//std::cout << "jaw numbering done::\n";
 		Polygon hd, tl;
 		int tq = -1, fc = -1;
 		Pos vec;
@@ -165,6 +184,7 @@ struct Jaw {
 			if (tf) tp++;
 			if (!hf) assert(!tf);
 		}
+		//std::cout << "head, tail get done::\n";
 		std::sort(hd.begin(), hd.end(), cmpx_rvs);
 		if (t == TOP) std::reverse(hd.begin(), hd.end());
 		sz = hd.size();
@@ -176,8 +196,12 @@ struct Jaw {
 			if (sts[hd[i].pi] == -1) sts[hd[i].pi] = HEAD;
 			else sts[hd[i].pi] |= HEAD;
 		}
-		std::sort(tl.rbegin(), tl.rend(), cmpx_rvs);
+		//std::cout << "head numbering done::\n";
+		std::sort(tl.begin(), tl.end(), cmpx_rvs);
 		if (t == TOP) std::reverse(tl.begin(), tl.end());
+		std::cout << "DEBUG:: tl:: \n";
+		for (const Pos& tt : tl) std::cout << "	" << tt << "\n";
+		std::cout << "DEBUG:: tl:: \n";
 		sz = tl.size();
 		assert(sz == tp);
 		for (int i = 0; i < sz; i++) {
@@ -187,28 +211,34 @@ struct Jaw {
 			if (sts[tl[i].pi] == -1) sts[tl[i].pi] = TAIL;
 			else sts[tl[i].pi] |= TAIL;
 		}
+		//std::cout << "tail numbering done::\n";
 		for (int i = 0, j = 1; i < K; i++, j++) {
 			vec = P[outl[j]] - P[outl[i]];
 			if (valid(cur, vec))
 				OQ.push(Event(vec, outl[i], outl[j]));
 		}
+		//std::cout << "OQ init done::\n";
 		for (int i = 0, j = 1; i < hp - 1; i++, j++) {
 			vec = P[head[j]] - P[head[i]];
 			if (valid(cur, vec))
 				HQ.push(Event(vec, head[i], head[j]));
 		}
+		//std::cout << "HQ init done::\n";
 		for (int i = 0, j = 1; i < tp - 1; i++, j++) {
 			vec = P[tail[j]] - P[tail[i]];
 			if (valid(cur, vec))
 				TQ.push(Event(vec, tail[i], tail[j]));
 		}
+		//std::cout << "TQ init done::\n";
 		for (int i = 0; i < h; i++) {
 			const Pos& p = P[jaw[i]];
+			//std::cout << "p.hi:: " << p.hi << "\n";
 			int sz = H[p.hi].size();
 			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
 			if (valid(cur, vec))
 				JQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
 		}
+		//std::cout << "JQ init done::\n";
 		//const Pos& b = P[outl[K]];
 		const Pos& ch = P[head[0]];
 		const Pos& ct = P[tail[0]];
@@ -218,6 +248,12 @@ struct Jaw {
 		vec = ct - b;
 		if (valid(cur, vec))
 			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
+		std::cout << (t == BOT ? "BOT::\n" : "TOP::\n");
+		debug_pq(OQ, "OQ");
+		debug_pq(HQ, "HQ");
+		debug_pq(TQ, "TQ");
+		debug_pq(JQ, "JQ");
+		debug_pq(SQ, "SQ");
 		return;
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pp = 0) {//O(K)
@@ -409,6 +445,7 @@ struct Calipers {
 		std::sort(P.begin(), P.end());
 		Polygon Q = P;
 		Vbool F(N, 0);
+		//std::cout << "init start::\n";
 		for (int k = 0; k <= K; k++) {//O(NK)
 			Polygon tmp;
 			for (const Pos& q : Q) if (!F[q.pi]) tmp.push_back(q);
@@ -420,17 +457,36 @@ struct Calipers {
 			int b = H[k][0].i;
 			for (int i = 0; i < sz; i++) if (H[k][b] < H[k][i]) b = i;
 			for (int i = 0; i <= b; i++) L[k].push_back(H[k][i]);
-			for (int i = b; i < sz; i++) U[k].push_back(H[k][i]);
+			for (int i = b; i <= sz; i++) U[k].push_back(H[k][i % sz]);
 			for (const Pos& h : H[k]) F[h.pi] = 1;
 			Q.clear();
 			for (const Pos& t : tmp) if (!F[t.pi]) Q.push_back(t);
 		}
+		//std::cout << "hull done::\n";
 		std::sort(P.begin(), P.end(), cmpx_rvs);
-		Q.clear(); for (const Pos& p : P) if (F[p.pi]) Q.push_back(p);
-		bot.init(Q, N, K, h, s); top.init(Q, N, K, h, e);
 		for (int k = 0; k < h; k++) {
 			for (const Pos& p : H[k]) P[p.pi].hi = p.hi, P[p.pi].i = p.i;
 		}
+		//std::cout << "numbering done::\n";
+		Q.clear(); for (const Pos& p : P) if (F[p.pi]) Q.push_back(p);
+		for (int h_ = 0; h_ < h; h_++) {
+			const Polygon& L = H[h_];
+			std::cout << "Layer[" << h_ << "]::\n";
+			for (const Pos& p : L) std::cout << "	" << p << "\n";
+			std::cout << "Layer[" << h_ << "]::\n";
+		}
+		for (int h_ = 0; h_ < h; h_++) {
+			const Polygon& LH = L[h_];
+			std::cout << "LH[" << h_ << "]::\n";
+			for (const Pos& p : LH) std::cout << "	" << p << "\n";
+			std::cout << "LH[" << h_ << "]::\n";
+			const Polygon& UH = U[h_];
+			std::cout << "UH[" << h_ << "]::\n";
+			for (const Pos& p : UH) std::cout << "	" << p << "\n";
+			std::cout << "UH[" << h_ << "]::\n";
+		}
+		bot.init(Q, N, K, h, s); top.init(Q, N, K, h, e);
+		//std::cout << "bot, top done::\n";
 		return;
 	}
 	bool jaw_rotate() {
@@ -494,6 +550,15 @@ void solve() {
 	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	C.init(N, K, Pos(0, -1));
+	std::cout << "init done::\n";
+	int h = C.h;
+	for (int h_ = 0; h_ < h; h_++) {
+		const Polygon& L = H[h_];
+		std::cout << "Layer[" << h_ << "]::\n";
+		for (const Pos& p : L) std::cout << "	" << p << "\n";
+		std::cout << "Layer[" << h_ << "]::\n";
+	}
+	return;
 	ld ret = INF;
 	while (C.rotate(ret)) {}
 	std::cout << std::max(.0, ret * .5) << "\n";

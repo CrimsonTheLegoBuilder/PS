@@ -343,35 +343,43 @@ struct Jaw {
 			SQ.pop();
 			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j, typ = ev.t;
-
 			//머리인지 꼬리인지 구분만 하고 나면 나머지는 똑같이 돌아감
 			//후보군에서 꺼낸 다음 제외 점군과 교체
 			//새로 꺼낸 점군이 후보군에 들어갈 수 있는지 검사 후 후보군 갱신
 			//새로 꺼낸 점이 아니라 교체한 점군의 껍질 다음 점이 후보군으로 들어가는지를 확인한 후 교체하는 로직이 필요
 			//이렇게만 돌아가면 반례가 없는 거 같음
-
 			Pos c, x = P[outl[K]];
-			int hi = x.hi;
+			int hi = c.hi, sz = H[hi].size();
+			const Pos& nxt = H[c.hi][(c.i + 1) % sz];
 			if (typ == HEAD) {
 				if (head[0] != ev.i || outl[K] != ev.j) continue;
 				c = P[head[0]];
-				if (sts[c.pi] == HEAD) candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
-				
 			}
 			else if (typ == TAIL) {
 				if (tail[0] != ev.i || outl[K] != ev.j) continue;
 				c = P[tail[0]];
 			}
-
 			if (sts[c.pi] | HEAD) {
-				candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+				//candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+				candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
 			}
 			if (sts[c.pi] | TAIL) {
-				candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+				//candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+				candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 			}
 			pop(x);
-
-
+			if (cnt[x.hi] == H[x.hi].size()) {
+				cnt[x.hi]--;
+				candidate_update(x, cur, HQ, head, HEAD, -1);
+				candidate_update(x, cur, TQ, tail, TAIL, -1);
+			}
+			else {
+				cnt[x.hi]--;
+				const Pos& pre = H[x.hi][(x.i - 1 + sz) % sz];
+				if (sts[pre.pi] | TAIL) {
+					candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
+				}
+			}
 		}
 		return;
 	}

@@ -374,7 +374,7 @@ struct Jaw {
 			OQ.pop();
 			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j;
-			std::cout << "outl swap:: i:: " << i << " j:: " << j << "\n";
+			//std::cout << "outl swap:: i:: " << i << " j:: " << j << "\n";
 			if (sts[i] != OUTL || sts[j] != OUTL) continue;
 			int u = ord[i][OUTL], v = ord[j][OUTL];
 			if (u + 1 != v) continue;
@@ -409,10 +409,10 @@ struct Jaw {
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 		Pos vec;
-		//std::cout << "head[0]:: " << head[0] << "\n";
+		std::cout << "head[0]:: " << head[0] << "\n";
 		vec = P[head[0]] - P[outl[K]];
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], head[0], HEAD));
-		//std::cout << "tail[0]:: " << tail[0] << "\n";
+		std::cout << "tail[0]:: " << tail[0] << "\n";
 		vec = P[tail[0]] - P[outl[K]];
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], tail[0], TAIL));
 		//std::cout << "loop start::\n";
@@ -425,8 +425,8 @@ struct Jaw {
 			if (cur / ev.v < 0) continue;
 			//std::cout << "ev.v:: " << ev.v << "\n";
 			int i = ev.i, j = ev.j, typ = ev.t;
-			//std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
-			//std::cout << "outl[K]:: " << outl[K] << "\n";
+			std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
+			std::cout << "outl[K]:: " << outl[K] << "\n";
 			Pos c, x = P[outl[K]];
 			//std::cout << "x:: " << x << "\n";
 			if (typ == HEAD) {
@@ -443,17 +443,15 @@ struct Jaw {
 			const Pos& nxt = H[c.hi][(c.i + 1) % sz];
 			//std::cout << "nxt:: " << nxt << "\n";
 			//std::cout << "c.pi:: " << c.pi << "\n";
-			if (sts[c.pi] | HEAD) {
-				//candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
-				candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-			}
-			if (sts[c.pi] | TAIL) {
-				//candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
-				candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-			}
+			if (sts[c.pi] | HEAD) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+			else if (sts[c.pi] | TAIL) candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 			//std::cout << "candi update done\n";
 			pop(x);
 			push(c);
+			vec = P[outl[K]] - P[outl[K - 1]];
+			if (valid(cur, vec)) {
+				OQ.push(Event(vec, outl[K - 1], outl[K]));
+			}
 			//std::cout << "x pop and c push\n";
 			if (cnt[x.hi] == H[x.hi].size()) {
 				//std::cout << "cnt[x] == H[x].sz::\n";

@@ -164,8 +164,13 @@ struct Jaw {
 			bool hf = 0, tf = 0;
 			sz = LH.size();
 			for (int i = 0; i < sz; i++) {
-				Pos vec = LH[i] - b;
-				if (valid(cur, vec)) {
+				//Pos vec = LH[i] - b;
+				//if (valid(cur, vec)) {
+				//	hd.push_back(LH[i]);
+				//	hf = 1;
+				//	break;
+				//}
+				if (sts[LH[i].pi] != OUTL) {
 					hd.push_back(LH[i]);
 					hf = 1;
 					break;
@@ -173,8 +178,13 @@ struct Jaw {
 			}
 			sz = UH.size();
 			for (int i = sz - 1; i >= 0; i--) {
-				Pos vec = UH[i] - b;
-				if (valid(cur, vec)) {
+				//Pos vec = UH[i] - b;
+				//if (valid(cur, vec)) {
+				//	tl.push_back(UH[i]);
+				//	tf = 1;
+				//	break;
+				//}
+				if (sts[UH[i].pi] != OUTL) {
 					tl.push_back(UH[i]);
 					tf = 1;
 					break;
@@ -440,9 +450,9 @@ struct Calipers {
 	Calipers() { N = -1, K = -1, h = 0; }
 	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
 		N = n; K = k; cur = c;
-		std::sort(P.begin(), P.end(), cmpx_rvs);
+		//std::sort(P.begin(), P.end(), cmpx_rvs);//굳이 역오름차순 정렬을 해야할 이유가?
+		std::sort(P.begin(), P.end());//이 정렬 기준으로 정렬하면 초기에 무시해야하는 이벤트 기울기를 뛰어넘고 시작하는 게 가능함
 		for (int i = 0; i < N; i++) P[i].pi = i;
-		std::sort(P.begin(), P.end());
 		Polygon Q = P;
 		Vbool F(N, 0);
 		//std::cout << "init start::\n";
@@ -463,7 +473,8 @@ struct Calipers {
 			for (const Pos& t : tmp) if (!F[t.pi]) Q.push_back(t);
 		}
 		//std::cout << "hull done::\n";
-		std::sort(P.begin(), P.end(), cmpx_rvs);
+		//std::sort(P.begin(), P.end(), cmpx_rvs);
+		std::sort(P.begin(), P.end());
 		for (int k = 0; k < h; k++) {
 			for (const Pos& p : H[k]) P[p.pi].hi = p.hi, P[p.pi].i = p.i;
 		}

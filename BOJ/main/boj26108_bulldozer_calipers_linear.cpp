@@ -428,6 +428,7 @@ struct Jaw {
 			std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
 			std::cout << "outl[K]:: " << outl[K] << "\n";
 			Pos c, x = P[outl[K]];
+
 			//std::cout << "x:: " << x << "\n";
 			if (typ == HEAD) {
 				if (outl[K] != ev.i || head[0] != ev.j) continue;
@@ -593,10 +594,22 @@ struct Calipers {
 		for (int k = 0; k <= bot.K; k++) {
 			std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ")\n";
 		}
+		for (int k = 0; k < bot.hp; k++) {
+			std::cout << "	bot.head[" << k << "]:: (" << P[bot.head[k]].x << ", " << P[bot.head[k]].y << ")\n";
+		}
+		for (int k = 0; k < bot.tp; k++) {
+			std::cout << "	bot.tail[" << k << "]:: (" << P[bot.tail[k]].x << ", " << P[bot.tail[k]].y << ")\n";
+		}
 		std::cout << "DEBUG:: BOT::\n";
 		std::cout << "DEBUG:: TOP::\n";
-		for (int k = 0; k <= bot.K; k++) {
+		for (int k = 0; k <= top.K; k++) {
 			std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ")\n";
+		}
+		for (int k = 0; k < top.hp; k++) {
+			std::cout << "	top.head[" << k << "]:: (" << P[top.head[k]].x << ", " << P[top.head[k]].y << ")\n";
+		}
+		for (int k = 0; k < top.tp; k++) {
+			std::cout << "	top.tail[" << k << "]:: (" << P[top.tail[k]].x << ", " << P[top.tail[k]].y << ")\n";
 		}
 		std::cout << "\n\n";
 		for (const Event& ev : EV) {

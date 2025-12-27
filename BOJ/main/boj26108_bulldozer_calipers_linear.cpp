@@ -29,6 +29,8 @@ inline ll sq(const ll& x) { return x * x; }
 #define INSERT 0
 #define SWAP 1
 
+#define LIMIT 3
+
 const int N_LEN = 1 << 16;
 const int K_LEN = 1 << 9;
 
@@ -379,22 +381,23 @@ struct Jaw {
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 		Pos vec;
-		vec = P[outl[K]] - P[head[0]];
-		if (valid(cur, vec)) SQ.push(Event(vec, head[0], outl[K], HEAD));
-		vec = P[outl[K]] - P[tail[0]];
-		if (valid(cur, vec)) SQ.push(Event(vec, tail[0], outl[K], TAIL));
+		std::cout << "head[0]:: " << head[0] << "\n";
+		vec = P[head[0]] - P[outl[K]];
+		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], head[0], HEAD));
+		std::cout << "tail[0]:: " << tail[0] << "\n";
+		vec = P[tail[0]] - P[outl[K]];
+		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], tail[0], TAIL));
+		std::cout << "loop start::\n";
 		while (1) {
 			Event ev = SQ.top();
 			if (cur / ev.v > 0) break;
 			SQ.pop();
 			if (cur / ev.v < 0) continue;
+			std::cout << "ev.v:: " << ev.v << "\n";
 			int i = ev.i, j = ev.j, typ = ev.t;
-			//머리인지 꼬리인지 구분만 하고 나면 나머지는 똑같이 돌아감
-			//후보군에서 꺼낸 다음 제외 점군과 교체
-			//새로 꺼낸 점군이 후보군에 들어갈 수 있는지 검사 후 후보군 갱신
-			//새로 꺼낸 점이 아니라 교체한 점군의 껍질 다음 점이 후보군으로 들어가는지를 확인한 후 교체하는 로직이 필요
-			//이렇게만 돌아가면 반례가 없는 거 같음
+			std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
 			Pos c, x = P[outl[K]];
+			std::cout << "x:: " << x << "\n";
 			int hi = c.hi, sz = H[hi].size();
 			const Pos& nxt = H[c.hi][(c.i + 1) % sz];
 			if (typ == HEAD) {
@@ -434,11 +437,22 @@ struct Jaw {
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
 		bool f = 0;
+		std::cout << "DEBUG:: cur:: " << cur << "\n";
+		debug_pq(OQ, "OQ");
 		hull_jaw_rotate(cur);
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
+		debug_pq(HQ, "HQ");
 		candidate_jaw_rotate(cur, HQ, head, HEAD);
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
+		debug_pq(TQ, "TQ");
 		candidate_jaw_rotate(cur, TQ, tail, TAIL);
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
+		debug_pq(JQ, "JQ");
 		outlier_jaw_rotate(cur, EV);
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
+		debug_pq(SQ, "SQ");
 		outlier_candidate_swap(cur, EV);
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
 		return f;
 	}
 };
@@ -523,15 +537,22 @@ struct Calipers {
 		return vertical_dist(P[b], P[b] + cur, P[t]);
 	}
 	bool rotate(ld& d) {
+		static int CNT = 0;
+		CNT++;
 		int tq = sign(e / cur);
+		if (CNT == LIMIT) return 0;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		std::vector<Event> EV;
+		std::cout << "now rotate::\n";
 		bot.jaw_rotate(EV, cur);
+		std::cout << "bot rotate::\n";
 		top.jaw_rotate(EV, -cur);
+		std::cout << "top rotate::\n";
 		for (const Event& ev : EV) {
 			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
 			else d = std::min(d, dist(K - ev.i, ev.i));
 		}
+		std::cout << "rotate rotate::\n";
 		return jaw_rotate();
 	}
 } C;
@@ -569,7 +590,6 @@ void solve() {
 		for (const Pos& p : L) std::cout << "	" << p << "\n";
 		std::cout << "Layer[" << h_ << "]::\n";
 	}
-	return;
 	ld ret = INF;
 	while (C.rotate(ret)) {}
 	std::cout << std::max(.0, ret * .5) << "\n";

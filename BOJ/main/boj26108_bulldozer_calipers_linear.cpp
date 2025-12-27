@@ -292,17 +292,28 @@ struct Jaw {
 		}
 		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		if (pp || !valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
-		for (i = 0; i < c; i++)
+		for (i = 0; i < c; i++) {
+			std::cout << "	DEBUG:: idx[i]:: " << idx[i] << "\n";
 			if (valid(cur, P[idx[i]] - p)) break;
+		}
 		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]++;
 		c++;
-		idx[i] == p.pi, ord[p.pi][f] = i;
+		std::cout << "FUCK::\n";
+		idx[i] = p.pi, ord[p.pi][f] = i;
+		std::cout << "DEBUG:: p  :: " << p << "\n";
+		std::cout << "DEBUG:: idx[i]  :: " << idx[i] << "\n";
 		if (sts[p.pi] == -1) sts[p.pi] = f;
 		else sts[p.pi] |= f;
-		if (i > 0 && valid(cur, P[idx[i]] - P[idx[i - 1]]))
+		if (i > 0 && valid(cur, P[idx[i]] - P[idx[i - 1]])) {
+			std::cout << "	DEBUG:: idx[i-1]:: " << idx[i - 1] << "\n";
+			std::cout << "	DEBUG:: idx[i]  :: " << idx[i] << "\n";
 			CQ.push(Event(P[idx[i]] - P[idx[i - 1]], idx[i - 1], idx[i]));
-		if (i < c - 1 && valid(cur, P[idx[i + 1]] - P[idx[i]]))
+		}
+		if (i < c - 1 && valid(cur, P[idx[i + 1]] - P[idx[i]])) {
+			std::cout << "	DEBUG:: idx[i]  :: " << idx[i] << "\n";
+			std::cout << "	DEBUG:: idx[i+1]:: " << idx[i + 1] << "\n";
 			CQ.push(Event(P[idx[i + 1]] - P[idx[i]], idx[i], idx[i + 1]));
+		}
 		return 1;
 	}
 	void hull_jaw_rotate(const Pos& cur) {
@@ -389,6 +400,12 @@ struct Jaw {
 		outl[o] = -1;
 		return;
 	}
+	void push(const Pos& p) {
+		ord[p.pi][OUTL] = K;
+		outl[K] = p.pi;
+		sts[p.pi] = OUTL;
+		return;
+	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 		Pos vec;
 		//std::cout << "head[0]:: " << head[0] << "\n";
@@ -435,7 +452,8 @@ struct Jaw {
 			}
 			std::cout << "candi update done\n";
 			pop(x);
-			std::cout << "x pop\n";
+			push(c);
+			std::cout << "x pop and c push\n";
 			if (cnt[x.hi] == H[x.hi].size()) {
 				std::cout << "cnt[x] == H[x].sz::\n";
 				cnt[x.hi]--;

@@ -276,7 +276,7 @@ struct Jaw {
 		//debug_pq(SQ, "SQ");
 		return;
 	}
-	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pp = 0) {//O(K)
+	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {//O(K)
 		//std::cout << "candidate update::\n";
 		//std::cout << "	outl[K]:: " << outl[K] << "\n";
 		const Pos& b = P[outl[K]];
@@ -291,7 +291,8 @@ struct Jaw {
 			c--;
 		}
 		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
-		if (pp || !valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
+		//if (pp || !valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
+		if (pop_ || sts[p.pi] == OUTL) return 0;
 		for (i = 0; i < c; i++) {
 			//std::cout << "	DEBUG:: idx[i]:: " << idx[i] << "\n";
 			if (valid(cur, P[idx[i]] - p)) break;
@@ -399,12 +400,14 @@ struct Jaw {
 		assert(o == K);
 		ord[p.pi][OUTL] = -1;
 		outl[o] = -1;
+		cnt[p.pi]--;
 		return;
 	}
 	void push(const Pos& p) {
 		ord[p.pi][OUTL] = K;
 		outl[K] = p.pi;
 		sts[p.pi] = OUTL;
+		cnt[p.pi]++;
 		return;
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
@@ -444,6 +447,23 @@ struct Jaw {
 				if (outl[K] != ev.i || tail[0] != ev.j) continue;
 				c = P[tail[0]];
 			}
+			pop(x);
+			int sz = H[c.hi].size();
+			Pos pre = H[c.hi][(c.i - 1 + sz) % sz];
+			Pos nxt = H[c.hi][(c.i + 1) % sz];
+			if (cnt[c.hi] == H[c.hi].size() - 1) {
+				candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+				candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+			}
+			else if (cnt[c.hi] == H[c.hi].size() - 2) {
+
+			}
+			else {
+				if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | HEAD) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+				if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | TAIL) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+			}
+			
+			/*
 			int hi = c.hi;
 			//std::cout << "hi:: " << hi << "\n";
 			int sz = H[hi].size();
@@ -477,6 +497,7 @@ struct Jaw {
 					candidate_update(x, cur, HQ, head, HEAD, ord[pre.pi][HEAD]);
 				}
 			}
+			*/
 		}
 		return;
 	}

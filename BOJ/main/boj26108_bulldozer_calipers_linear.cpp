@@ -29,7 +29,7 @@ inline ll sq(const ll& x) { return x * x; }
 #define INSERT 0
 #define SWAP 1
 
-#define LIMIT 3
+#define LIMIT 8
 
 const int N_LEN = 1 << 16;
 const int K_LEN = 1 << 9;
@@ -65,11 +65,19 @@ ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
 ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	//std::cout << "	vertical dist:: p  :: " << p << "\n";
+	//std::cout << "	vertical dist:: q  :: " << q << "\n";
+	//std::cout << "	vertical dist:: cur:: " << cur << "\n";
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
 	if (!cur.x) return INF;
 	if (ccw(p, p + cur, q) <= 0) return 0;
 	ld dx = q.x - p.x;
 	ld dy = dx / cur.x * cur.y;
 	ld y = p.y + dy;
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	//std::cout << "vertical dist:: " << q.y - y << "\n";
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
 	return std::abs(q.y - y);
 }
 Polygon monotone_chain(Polygon& C) {
@@ -211,9 +219,9 @@ struct Jaw {
 		//std::cout << "head numbering done::\n";
 		std::sort(tl.begin(), tl.end(), cmpx_rvs);
 		if (t == TOP) std::reverse(tl.begin(), tl.end());
-		std::cout << "DEBUG:: tl:: \n";
-		for (const Pos& tt : tl) std::cout << "	" << tt << "\n";
-		std::cout << "DEBUG:: tl:: \n";
+		//std::cout << "DEBUG:: tl:: \n";
+		//for (const Pos& tt : tl) std::cout << "	" << tt << "\n";
+		//std::cout << "DEBUG:: tl:: \n";
 		sz = tl.size();
 		assert(sz == tp);
 		for (int i = 0; i < sz; i++) {
@@ -260,12 +268,12 @@ struct Jaw {
 		vec = ct - b;
 		if (valid(cur, vec))
 			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
-		std::cout << (t == BOT ? "BOT::\n" : "TOP::\n");
-		debug_pq(OQ, "OQ");
-		debug_pq(HQ, "HQ");
-		debug_pq(TQ, "TQ");
-		debug_pq(JQ, "JQ");
-		debug_pq(SQ, "SQ");
+		//std::cout << (t == BOT ? "BOT::\n" : "TOP::\n");
+		//debug_pq(OQ, "OQ");
+		//debug_pq(HQ, "HQ");
+		//debug_pq(TQ, "TQ");
+		//debug_pq(JQ, "JQ");
+		//debug_pq(SQ, "SQ");
 		return;
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pp = 0) {//O(K)
@@ -296,7 +304,7 @@ struct Jaw {
 		return 1;
 	}
 	void hull_jaw_rotate(const Pos& cur) {
-		while (1) {
+		while (JQ.size()) {
 			Event ev = JQ.top();
 			if (cur / ev.v > 0) break;
 			JQ.pop();
@@ -322,7 +330,7 @@ struct Jaw {
 	}
 	void candidate_jaw_rotate(const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD) {
 		Pos vec;
-		while (1) {
+		while (CQ.size()) {
 			Event ev = CQ.top();
 			if (cur / ev.v > 0) break;
 			CQ.pop();
@@ -347,7 +355,7 @@ struct Jaw {
 	}
 	void outlier_jaw_rotate(const Pos& cur, Events& EV) {
 		Pos vec;
-		while (1) {
+		while (OQ.size()) {
 			Event ev = OQ.top();
 			if (cur / ev.v > 0) break;
 			OQ.pop();
@@ -381,23 +389,23 @@ struct Jaw {
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 		Pos vec;
-		std::cout << "head[0]:: " << head[0] << "\n";
+		//std::cout << "head[0]:: " << head[0] << "\n";
 		vec = P[head[0]] - P[outl[K]];
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], head[0], HEAD));
-		std::cout << "tail[0]:: " << tail[0] << "\n";
+		//std::cout << "tail[0]:: " << tail[0] << "\n";
 		vec = P[tail[0]] - P[outl[K]];
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], tail[0], TAIL));
-		std::cout << "loop start::\n";
-		while (1) {
+		//std::cout << "loop start::\n";
+		while (SQ.size()) {
 			Event ev = SQ.top();
 			if (cur / ev.v > 0) break;
 			SQ.pop();
 			if (cur / ev.v < 0) continue;
-			std::cout << "ev.v:: " << ev.v << "\n";
+			//std::cout << "ev.v:: " << ev.v << "\n";
 			int i = ev.i, j = ev.j, typ = ev.t;
-			std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
+			//std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
 			Pos c, x = P[outl[K]];
-			std::cout << "x:: " << x << "\n";
+			//std::cout << "x:: " << x << "\n";
 			int hi = c.hi, sz = H[hi].size();
 			const Pos& nxt = H[c.hi][(c.i + 1) % sz];
 			if (typ == HEAD) {
@@ -437,22 +445,22 @@ struct Jaw {
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
 		bool f = 0;
-		std::cout << "DEBUG:: cur:: " << cur << "\n";
-		debug_pq(OQ, "OQ");
+		//std::cout << "DEBUG:: cur:: " << cur << "\n";
+		//debug_pq(OQ, "OQ");
 		hull_jaw_rotate(cur);
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
-		debug_pq(HQ, "HQ");
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
+		//debug_pq(HQ, "HQ");
 		candidate_jaw_rotate(cur, HQ, head, HEAD);
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
-		debug_pq(TQ, "TQ");
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
+		//debug_pq(TQ, "TQ");
 		candidate_jaw_rotate(cur, TQ, tail, TAIL);
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
-		debug_pq(JQ, "JQ");
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
+		//debug_pq(JQ, "JQ");
 		outlier_jaw_rotate(cur, EV);
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
-		debug_pq(SQ, "SQ");
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
+		//debug_pq(SQ, "SQ");
 		outlier_candidate_swap(cur, EV);
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
 		return f;
 	}
 };
@@ -494,22 +502,22 @@ struct Calipers {
 		}
 		//std::cout << "numbering done::\n";
 		Q.clear(); for (const Pos& p : P) if (F[p.pi]) Q.push_back(p);
-		for (int h_ = 0; h_ < h; h_++) {
-			const Polygon& L = H[h_];
-			std::cout << "Layer[" << h_ << "]::\n";
-			for (const Pos& p : L) std::cout << "	" << p << "\n";
-			std::cout << "Layer[" << h_ << "]::\n";
-		}
-		for (int h_ = 0; h_ < h; h_++) {
-			const Polygon& LH = L[h_];
-			std::cout << "LH[" << h_ << "]::\n";
-			for (const Pos& p : LH) std::cout << "	" << p << "\n";
-			std::cout << "LH[" << h_ << "]::\n";
-			const Polygon& UH = U[h_];
-			std::cout << "UH[" << h_ << "]::\n";
-			for (const Pos& p : UH) std::cout << "	" << p << "\n";
-			std::cout << "UH[" << h_ << "]::\n";
-		}
+		//for (int h_ = 0; h_ < h; h_++) {
+		//	const Polygon& L = H[h_];
+		//	std::cout << "Layer[" << h_ << "]::\n";
+		//	for (const Pos& p : L) std::cout << "	" << p << "\n";
+		//	std::cout << "Layer[" << h_ << "]::\n";
+		//}
+		//for (int h_ = 0; h_ < h; h_++) {
+		//	const Polygon& LH = L[h_];
+		//	std::cout << "LH[" << h_ << "]::\n";
+		//	for (const Pos& p : LH) std::cout << "	" << p << "\n";
+		//	std::cout << "LH[" << h_ << "]::\n";
+		//	const Polygon& UH = U[h_];
+		//	std::cout << "UH[" << h_ << "]::\n";
+		//	for (const Pos& p : UH) std::cout << "	" << p << "\n";
+		//	std::cout << "UH[" << h_ << "]::\n";
+		//}
 		bot.init(Q, N, K, h, s); top.init(Q, N, K, h, e);
 		//std::cout << "bot, top done::\n";
 		return;
@@ -534,25 +542,37 @@ struct Calipers {
 	}
 	ld dist(const int& b = -1, const int& t = -1) {
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
-		return vertical_dist(P[b], P[b] + cur, P[t]);
+		return vertical_dist(P[bot.outl[b]], P[bot.outl[b]] + cur, P[top.outl[t]]);
 	}
 	bool rotate(ld& d) {
 		static int CNT = 0;
 		CNT++;
 		int tq = sign(e / cur);
-		if (CNT == LIMIT) return 0;
+		//if (CNT == LIMIT) return 0;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
+		std::cout << "cur.vec:: " << cur << "\n";
+		std::cout << "DEBUG:: BOT::\n";
+		for (int k = 0; k <= bot.K; k++) {
+			std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ")\n";
+		}
+		std::cout << "DEBUG:: BOT::\n";
+		std::cout << "DEBUG:: TOP::\n";
+		for (int k = 0; k <= bot.K; k++) {
+			std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ")\n";
+		}
+		std::cout << "DEBUG:: TOP::\n";
 		std::vector<Event> EV;
-		std::cout << "now rotate::\n";
+		//std::cout << "now rotate::\n";
 		bot.jaw_rotate(EV, cur);
-		std::cout << "bot rotate::\n";
+		//std::cout << "bot rotate::\n";
 		top.jaw_rotate(EV, -cur);
-		std::cout << "top rotate::\n";
+		//std::cout << "top rotate::\n";
+		//std::cout << "EV.size:: " << EV.size() << "\n";
 		for (const Event& ev : EV) {
 			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
 			else d = std::min(d, dist(K - ev.i, ev.i));
 		}
-		std::cout << "rotate rotate::\n";
+		//std::cout << "rotate rotate::\n";
 		return jaw_rotate();
 	}
 } C;
@@ -582,15 +602,18 @@ void solve() {
 	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	C.init(N, K, Pos(0, -1));
-	std::cout << "init done::\n";
-	int h = C.h;
-	for (int h_ = 0; h_ < h; h_++) {
-		const Polygon& L = H[h_];
-		std::cout << "Layer[" << h_ << "]::\n";
-		for (const Pos& p : L) std::cout << "	" << p << "\n";
-		std::cout << "Layer[" << h_ << "]::\n";
-	}
+	//std::cout << "init done::\n";
+	//int h = C.h;
+	//for (int h_ = 0; h_ < h; h_++) {
+	//	const Polygon& L = H[h_];
+	//	std::cout << "Layer[" << h_ << "]::\n";
+	//	for (const Pos& p : L) std::cout << "	" << p << "\n";
+	//	std::cout << "Layer[" << h_ << "]::\n";
+	//}
 	ld ret = INF;
+	//std::cout << "\n\n\n\n\n";
+	//std::cout << "ret:: " << ret << "\n";
+	//std::cout << "\n\n\n\n\n";
 	while (C.rotate(ret)) {}
 	std::cout << std::max(.0, ret * .5) << "\n";
 	return;

@@ -277,9 +277,9 @@ struct Jaw {
 		return;
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {//O(K)
-		//std::cout << "candidate update::\n";
+		std::cout << "candidate update::\n";
 		//std::cout << "	outl[K]:: " << outl[K] << "\n";
-		const Pos& b = P[outl[K]];
+		//const Pos& b = P[outl[K]];
 		int i = 0;
 		int& c = (f == HEAD ? hp : tp);
 		if (o != -1) {
@@ -400,14 +400,14 @@ struct Jaw {
 		assert(o == K);
 		ord[p.pi][OUTL] = -1;
 		outl[o] = -1;
-		cnt[p.pi]--;
+		cnt[p.hi]--;
 		return;
 	}
 	void push(const Pos& p) {
 		ord[p.pi][OUTL] = K;
 		outl[K] = p.pi;
 		sts[p.pi] = OUTL;
-		cnt[p.pi]++;
+		cnt[p.hi]++;
 		return;
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
@@ -438,7 +438,7 @@ struct Jaw {
 			//튀어나온 점이 어디로 가야하는지를 파악해주어야 함
 			//이게 좀 귀찮기는 함. 이 조건 분기를 생각해보자.
 
-			//std::cout << "x:: " << x << "\n";
+			std::cout << "x:: " << x << "\n";
 			if (typ == HEAD) {
 				if (outl[K] != ev.i || head[0] != ev.j) continue;
 				c = P[head[0]];
@@ -447,23 +447,105 @@ struct Jaw {
 				if (outl[K] != ev.i || tail[0] != ev.j) continue;
 				c = P[tail[0]];
 			}
+			EV.push_back(Event(cur, ord[x.pi][OUTL], -1, t));
 			pop(x);
+			std::cout << "pop::\n";
 			int sz = H[c.hi].size();
 			Pos pre = H[c.hi][(c.i - 1 + sz) % sz];
 			Pos nxt = H[c.hi][(c.i + 1) % sz];
-			if (cnt[c.hi] == H[c.hi].size() - 1) {
-				candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
-				candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+			std::cout << "pre, nxt::\n";
+			std::cout << "c.pi  :: " << c.pi << "\n";
+			std::cout << "c     :: " << c << "\n";
+			std::cout << "pre.pi:: " << pre.pi << "\n";
+			std::cout << "nxt.pi:: " << nxt.pi << "\n";
+			if (sts[c.pi] & HEAD) {
+				if (sts[nxt.pi] != OUTL) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+				else candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
 			}
-			else if (cnt[c.hi] == H[c.hi].size() - 2) {
+			std::cout << "HEAD done\n";
+			if (sts[c.pi] & TAIL) {
+				if (sts[pre.pi] == OUTL && sts[nxt.pi] != OUTL && !(sts[nxt.pi] & TAIL)) {
+					std::cout << "FUCK:: 1\n";
+					candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+				}
+				else if (sts[pre.pi] != OUTL) {
+					std::cout << "FUCK:: 2\n";
+					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+				}
+				else {
+					std::cout << "FUCK:: 3\n";
+					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+				}
+			}
+			std::cout << "head, tail update::\n";
 
+			for (int k = 0; k < hp; k++) {
+				std::cout << "	" << (t == BOT ? "bot" : "top") << ".head[" << k << "]:: (" << P[head[k]].x << ", " << P[head[k]].y << ")\n";
 			}
-			else {
-				if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | HEAD) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-				if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | TAIL) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+			for (int k = 0; k < tp; k++) {
+				std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
 			}
+
+			push(c);
+			std::cout << "push::\n";
+			vec = P[outl[K]] - P[outl[K - 1]];
+			if (valid(cur, vec)) {
+				OQ.push(Event(vec, outl[K - 1], outl[K]));
+			}
+			std::cout << "get vec::\n";
+			sz = H[x.hi].size();
+			pre = H[x.hi][(x.i - 1 + sz) % sz];
+			nxt = H[x.hi][(x.i + 1) % sz];
+			if (cnt[x.hi] + 1 == sz) {
+				candidate_update(x, cur, TQ, tail, TAIL, -1);
+			}
+			else if (sts[pre.pi] & TAIL) {
+				std::cout << "FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
+				candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
+			}
+			vec = x - P[outl[K]];
+			std::cout << "get x-vec::\n";
+			std::cout << "cnt[x.hi]:: " << cnt[x.hi] << "\n";
+			std::cout << "sz       :: " << sz << "\n";
+			std::cout << "x        :: " << x << "\n";
+			std::cout << "P[outl[K]]: " << P[outl[K]] << "\n";
+			if (cnt[x.hi] + 1 == sz) {
+				candidate_update(x, cur, HQ, head, HEAD, -1);
+			}
+			//else if ((sts[nxt.pi] | HEAD) && valid(cur, vec)) {
+			else if ((sts[nxt.pi] & HEAD)) {
+				std::cout << "head prev update FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
+				candidate_update(x, cur, HQ, head, HEAD, ord[nxt.pi][HEAD]);
+			}
+			//else if (sts[pre.pi] | HEAD) candidate_update(x, cur, HQ, head, HEAD, ord[pre.pi][HEAD]);
+
+			for (int k = 0; k < hp; k++) {
+				std::cout << "	" << (t == BOT ? "bot" : "top") << ".head[" << k << "]:: (" << P[head[k]].x << ", " << P[head[k]].y << ")\n";
+			}
+			for (int k = 0; k < tp; k++) {
+				std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
+			}
+
+			//if (cnt[c.hi] == H[c.hi].size() - 1) {
+			//	candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+			//	candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+			//}
+			//else if (cnt[c.hi] == H[c.hi].size() - 2) {
+			//}
+			//else {
+			//	if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | HEAD) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+			//	if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | TAIL) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+			//}
 			
 			/*
+			if (typ == HEAD) {
+				if (outl[K] != ev.i || head[0] != ev.j) continue;
+				c = P[head[0]];
+			}
+			else if (typ == TAIL) {
+				if (outl[K] != ev.i || tail[0] != ev.j) continue;
+				c = P[tail[0]];
+			}
 			int hi = c.hi;
 			//std::cout << "hi:: " << hi << "\n";
 			int sz = H[hi].size();
@@ -599,6 +681,7 @@ struct Calipers {
 		return 1;
 	}
 	ld dist(const int& b = -1, const int& t = -1) {
+		std::cout << "get vertical dist:::: b:: " << b << " t:: " << t << "\n";
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
 		return vertical_dist(P[bot.outl[b]], P[bot.outl[b]] + cur, P[top.outl[t]]);
 	}
@@ -610,13 +693,14 @@ struct Calipers {
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		//std::cout << "DEBUG:: TOP::\n";
 		std::vector<Event> EV;
+		std::cout << "\n\ncur.vec:: " << cur << "\n";
 		//std::cout << "now rotate::\n";
 		bot.jaw_rotate(EV, cur);
 		//std::cout << "bot rotate::\n";
 		top.jaw_rotate(EV, -cur);
 		//std::cout << "top rotate::\n";
 		//std::cout << "EV.size:: " << EV.size() << "\n";
-		std::cout << "\n\ncur.vec:: " << cur << "\n";
+		std::cout << "DEBUG:: cur:: (" << cur.x << ", " << cur.y << ")\n";
 		std::cout << "DEBUG:: BOT::\n";
 		for (int k = 0; k <= bot.K; k++) {
 			std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ")\n";
@@ -644,6 +728,7 @@ struct Calipers {
 			else d = std::min(d, dist(K - ev.i, ev.i));
 		}
 		//std::cout << "rotate rotate::\n";
+		std::cout << "ret update:: " << d << "\n\n\n";
 		return jaw_rotate();
 	}
 } C;

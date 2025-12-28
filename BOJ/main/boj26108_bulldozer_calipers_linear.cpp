@@ -526,7 +526,7 @@ struct Jaw {
 			std::cout << "  x:: " << x << "\n";
 			std::cout << "pre:: " << pre << " sts:: " << sts[pre.pi] << "\n";
 			std::cout << "nxt:: " << nxt << " sts:: " << sts[nxt.pi] << "\n";
-			if ((sts[x.pi] != -1 && !(sts[x.pi] & TAIL)) && cnt[x.hi] + 1 == sz) {
+			if ((sts[x.pi] == -1 || (sts[x.pi] != -1 && !(sts[x.pi] & TAIL))) && cnt[x.hi] + 1 == sz) {
 				std::cout << "TAIL 1:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
 				std::cout << "       sz:: " << sz << "\n";
 				std::cout << "     x.hi:: " << x.hi << "\n";
@@ -543,7 +543,7 @@ struct Jaw {
 			std::cout << "sz       :: " << sz << "\n";
 			std::cout << "x        :: " << x << "\n";
 			std::cout << "P[outl[K]]: " << P[outl[K]] << "\n";
-			if ((sts[x.pi] != -1 && !(sts[x.pi] & HEAD)) && cnt[x.hi] + 1 == sz) {
+			if ((sts[x.pi] == -1 || (sts[x.pi] != -1 && !(sts[x.pi] & HEAD))) && cnt[x.hi] + 1 == sz) {
 				candidate_update(x, cur, HQ, head, HEAD, -1);
 			}
 			//else if ((sts[nxt.pi] | HEAD) && valid(cur, vec)) {

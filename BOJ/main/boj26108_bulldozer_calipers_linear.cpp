@@ -370,7 +370,8 @@ struct Jaw {
 			CQ.pop();
 			if (cur / ev.v < 0) continue;
 			int i = ev.i, j = ev.j;
-			if (sts[i] != f || sts[j] != f) continue;
+			if (sts[i] == -1 || sts[j] == -1) continue;
+			if (!(sts[i] & f) || !(sts[j] & f)) continue;
 			int u = ord[i][f], v = ord[j][f];
 			if (u + 1 != v) continue;
 			swap(i, j, idx, f);
@@ -522,6 +523,9 @@ struct Jaw {
 			sz = H[x.hi].size();
 			pre = H[x.hi][(x.i - 1 + sz) % sz];
 			nxt = H[x.hi][(x.i + 1) % sz];
+			std::cout << "  x:: " << x << "\n";
+			std::cout << "pre:: " << pre << " sts:: " << sts[pre.pi] << "\n";
+			std::cout << "nxt:: " << nxt << " sts:: " << sts[nxt.pi] << "\n";
 			if (cnt[x.hi] + 1 == sz) {
 				std::cout << "TAIL 1:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
 				candidate_update(x, cur, TQ, tail, TAIL, -1);

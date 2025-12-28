@@ -75,9 +75,13 @@ ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
 	ld dx = q.x - p.x;
 	ld dy = dx / cur.x * cur.y;
 	ld y = p.y + dy;
-	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
-	//std::cout << "vertical dist:: " << q.y - y << "\n";
-	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	std::cout << "vertical dist:: dx  :: " << dx << "\n";
+	std::cout << "vertical dist:: dy  :: " << dy << "\n";
+	std::cout << "vertical dist:: cur :: " << cur << "\n";
+	std::cout << "vertical dist:: y   :: " << y << "\n";
+	std::cout << "vertical dist:: diff:: " << q.y - y << "\n";
+	std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
 	return std::abs(q.y - y);
 }
 Polygon monotone_chain(Polygon& C) {
@@ -140,11 +144,11 @@ struct Jaw {
 		memset(sts, -1, sizeof sts);//state of each point
 		h = 0; hp = 0; tp = 0; bnd = 0;
 	}
-	bool valid(const Pos& cur, const Pos& vec) {
+	bool valid(const Pos& cur, const Pos& vec, const bool& evt = 1) {
 		ll tq = cur / vec, fc = cur * vec;
 		bool f1 = tq > 0 || (!tq && fc > 0);
 		tq = ref / vec, fc = ref * vec;
-		bool f2 = tq > 0 || (!tq && fc > 0);
+		bool f2 = evt ? tq > 0 || (!tq && fc > 0) : 1;
 		return f1 && f2;
 	}
 	bool nxt_check(const Pos& cur, const Pos& vec) { return cur / vec > 0 && ref / vec > 0; }
@@ -290,13 +294,22 @@ struct Jaw {
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
 		}
+		std::cout << "candi update:: c:: " << c << "\n";
+		std::cout << "candi update:: o:: " << o << "\n";
+		for (int j = 0; j < c; j++) {
+			std::cout << (f == HEAD ? "head[" : "tail[") << j << "]:: " << idx[j] << " P[idx[" << j << "]]:: " << P[idx[j]] << "\n";
+		}
 		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		//if (pp || !valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
 		if (pop_ || sts[p.pi] == OUTL) return 0;
 		for (i = 0; i < c; i++) {
-			//std::cout << "	DEBUG:: idx[i]:: " << idx[i] << "\n";
-			if (valid(cur, P[idx[i]] - p)) break;
+			std::cout << "	DEBUG:: idx[i]:: " << idx[i] << "\n";
+			std::cout << "	DEBUG:: cur   :: " << cur << "\n";
+			std::cout << "	DEBUG:: vec   :: " << P[idx[i]] - p << "\n";
+			std::cout << "	DEBUG:: valid :: " << valid(cur, P[idx[i]] - p, 0) << "\n";
+			if (valid(cur, P[idx[i]] - p, 0)) break;
 		}
+		std::cout << "candi update:: i:: " << i << "\n";
 		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]++;
 		c++;
 		//std::cout << "FUCK::\n";
@@ -323,16 +336,23 @@ struct Jaw {
 			if (cur / ev.v > 0) break;
 			JQ.pop();
 			if (cur / ev.v < 0) continue;
-			const Pos& p = P[ev.j];
+			const Pos& p = P[ev.i];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			const Pos& p1 = H[p.hi][i0];
-			if ((sts[p.pi] | HEAD) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL))
-				candidate_update(p, cur, HQ, head, HEAD, ord[p.pi][HEAD]);
-			if ((sts[p.pi] | TAIL) && (sts[p1.pi] == -1 || sts[p1.pi] == HEAD))
-				candidate_update(p, cur, TQ, tail, TAIL, ord[p.pi][TAIL]);
+			std::cout << "hull rotate::\n";
+			std::cout << "        cur::" << cur << "\n";
+			std::cout << "          p::" << p << "\n";
+			std::cout << "         p1::" << p1 << "\n";
+			if ((sts[p.pi] != -1 && (sts[p.pi] & HEAD)) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL)) {
+				candidate_update(p1, cur, HQ, head, HEAD, ord[p.pi][HEAD]);
+			}
+			if ((sts[p.pi] != -1 && (sts[p.pi] & TAIL)) && (sts[p1.pi] == -1 || sts[p1.pi] == HEAD)) {
+				candidate_update(p1, cur, TQ, tail, TAIL, ord[p.pi][TAIL]);
+			}
 			jaw[p.hi] = p1.pi;
-			Pos vec = p1 - p;
-			if (valid(ref, vec)) JQ.push(Event(vec, ev.j, p1.pi));
+			const Pos& p2 = H[p.hi][(i0 + 1) % sz];
+			Pos vec = p2 - p1;
+			if (valid(ref, vec)) JQ.push(Event(vec, p1.pi, p2.pi));
 		}
 		return;
 	}
@@ -379,7 +399,7 @@ struct Jaw {
 			if (sts[i] != OUTL || sts[j] != OUTL) continue;
 			int u = ord[i][OUTL], v = ord[j][OUTL];
 			if (u + 1 != v) continue;
-			EV.push_back(Event(cur, i, j, t));
+			EV.push_back(Event(cur, u, v, t));
 			swap(i, j, outl, OUTL);
 			u = ord[i][OUTL], v = ord[j][OUTL];
 			if (u < K) {
@@ -458,18 +478,24 @@ struct Jaw {
 			std::cout << "c     :: " << c << "\n";
 			std::cout << "pre.pi:: " << pre.pi << "\n";
 			std::cout << "nxt.pi:: " << nxt.pi << "\n";
-			if (sts[c.pi] & HEAD) {
+			std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
+			if (sts[c.pi] != -1 && sts[c.pi] & HEAD) {
+			//if (sts[c.pi] & HEAD) {
 				if (sts[nxt.pi] != OUTL) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
 				else candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
 			}
 			std::cout << "HEAD done\n";
-			if (sts[c.pi] & TAIL) {
+			std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
+			if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
+			//if (sts[c.pi] & TAIL) {
 				if (sts[pre.pi] == OUTL && sts[nxt.pi] != OUTL && !(sts[nxt.pi] & TAIL)) {
 					std::cout << "FUCK:: 1\n";
 					candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 				}
 				else if (sts[pre.pi] != OUTL) {
 					std::cout << "FUCK:: 2\n";
+					std::cout << "              c:: " << c << "\n";
+					std::cout << "ord[c.pi][TAIL]:: " << ord[c.pi][TAIL] << "\n";
 					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 				}
 				else {
@@ -497,10 +523,11 @@ struct Jaw {
 			pre = H[x.hi][(x.i - 1 + sz) % sz];
 			nxt = H[x.hi][(x.i + 1) % sz];
 			if (cnt[x.hi] + 1 == sz) {
+				std::cout << "TAIL 1:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
 				candidate_update(x, cur, TQ, tail, TAIL, -1);
 			}
 			else if (sts[pre.pi] & TAIL) {
-				std::cout << "FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
+				std::cout << "TAIL 2:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
 				candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
 			}
 			vec = x - P[outl[K]];
@@ -588,19 +615,19 @@ struct Jaw {
 		//std::cout << "DEBUG:: cur:: " << cur << "\n";
 		//debug_pq(OQ, "OQ");
 		hull_jaw_rotate(cur);
-		//std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
 		//debug_pq(HQ, "HQ");
 		candidate_jaw_rotate(cur, HQ, head, HEAD);
-		//std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
 		//debug_pq(TQ, "TQ");
 		candidate_jaw_rotate(cur, TQ, tail, TAIL);
-		//std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
 		//debug_pq(JQ, "JQ");
 		outlier_jaw_rotate(cur, EV);
-		//std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
 		//debug_pq(SQ, "SQ");
 		outlier_candidate_swap(cur, EV);
-		//std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
+		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
 		return f;
 	}
 };
@@ -683,7 +710,8 @@ struct Calipers {
 	ld dist(const int& b = -1, const int& t = -1) {
 		std::cout << "get vertical dist:::: b:: " << b << " t:: " << t << "\n";
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
-		return vertical_dist(P[bot.outl[b]], P[bot.outl[b]] + cur, P[top.outl[t]]);
+		std::cout << "P[bot[outl[b]]:: " << P[bot.outl[b]] << " P[top.outl[t]]:: " << P[top.outl[t]] << "\n";
+		return vertical_dist(P[bot.outl[b]], cur, P[top.outl[t]]);
 	}
 	bool rotate(ld& d) {
 		static int CNT = 0;
@@ -703,24 +731,24 @@ struct Calipers {
 		std::cout << "DEBUG:: cur:: (" << cur.x << ", " << cur.y << ")\n";
 		std::cout << "DEBUG:: BOT::\n";
 		for (int k = 0; k <= bot.K; k++) {
-			std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ")\n";
+			std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ") " << bot.sts[bot.outl[k]] << "\n";
 		}
 		for (int k = 0; k < bot.hp; k++) {
-			std::cout << "	bot.head[" << k << "]:: (" << P[bot.head[k]].x << ", " << P[bot.head[k]].y << ")\n";
+			std::cout << "	bot.head[" << k << "]:: (" << P[bot.head[k]].x << ", " << P[bot.head[k]].y << ") " << bot.sts[bot.head[k]] << "\n";
 		}
 		for (int k = 0; k < bot.tp; k++) {
-			std::cout << "	bot.tail[" << k << "]:: (" << P[bot.tail[k]].x << ", " << P[bot.tail[k]].y << ")\n";
+			std::cout << "	bot.tail[" << k << "]:: (" << P[bot.tail[k]].x << ", " << P[bot.tail[k]].y << ") " << bot.sts[bot.tail[k]] << "\n";
 		}
 		std::cout << "DEBUG:: BOT::\n";
 		std::cout << "DEBUG:: TOP::\n";
 		for (int k = 0; k <= top.K; k++) {
-			std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ")\n";
+			std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ") " << top.sts[top.outl[k]] << "\n";
 		}
 		for (int k = 0; k < top.hp; k++) {
-			std::cout << "	top.head[" << k << "]:: (" << P[top.head[k]].x << ", " << P[top.head[k]].y << ")\n";
+			std::cout << "	top.head[" << k << "]:: (" << P[top.head[k]].x << ", " << P[top.head[k]].y << ") " << top.sts[top.head[k]] << "\n";
 		}
 		for (int k = 0; k < top.tp; k++) {
-			std::cout << "	top.tail[" << k << "]:: (" << P[top.tail[k]].x << ", " << P[top.tail[k]].y << ")\n";
+			std::cout << "	top.tail[" << k << "]:: (" << P[top.tail[k]].x << ", " << P[top.tail[k]].y << ") " << top.sts[top.tail[k]] << "\n";
 		}
 		std::cout << "\n\n";
 		for (const Event& ev : EV) {

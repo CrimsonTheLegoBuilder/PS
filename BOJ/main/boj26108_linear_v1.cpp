@@ -417,7 +417,7 @@ struct Jaw {
 			sz = H[x.hi].size();
 			pre = H[x.hi][(x.i - 1 + sz) % sz];
 			nxt = H[x.hi][(x.i + 1) % sz];
-			//assert(sts[x.pi] == -1);
+			assert(sts[x.pi] == -1);
 
 			if (cnt[x.hi] + 1 == sz) {
 				candidate_update(x, cur, TQ, tail, TAIL, -1);

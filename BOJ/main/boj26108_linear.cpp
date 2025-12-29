@@ -36,9 +36,9 @@ const int K_LEN = 1 << 9;
 
 int N, K;
 struct Pos {
-	int x, y;
+	ll x, y;
 	int pi, hi, i;
-	Pos(int x_ = 0, int y_ = 0, int p_ = -1, int h_ = -1, int i_ = -1) : x(x_), y(y_), pi(p_), hi(h_), i(i_) {}
+	Pos(ll x_ = 0, ll y_ = 0, int p_ = -1, int h_ = -1, int i_ = -1) : x(x_), y(y_), pi(p_), hi(h_), i(i_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -69,7 +69,8 @@ ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
 	//std::cout << "	vertical dist:: p  :: " << p << "\n";
 	//std::cout << "	vertical dist:: q  :: " << q << "\n";
 	//std::cout << "	vertical dist:: cur:: " << cur << "\n";
-	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	//std::cout << "	vertical dist:: ccw:: " << ccw(p, p + cur, q) << "\n";
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n\n";
 	if (!cur.x) return INF;
 	if (ccw(p, p + cur, q) <= 0) return 0;
 	ld dx = q.x - p.x;
@@ -80,8 +81,8 @@ ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
 	//std::cout << "vertical dist:: dy  :: " << dy << "\n";
 	//std::cout << "vertical dist:: cur :: " << cur << "\n";
 	//std::cout << "vertical dist:: y   :: " << y << "\n";
-	//std::cout << "vertical dist:: diff:: " << q.y - y << "\n";
-	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	//std::cout << "vertical dist:: diff:: " << std::abs(q.y - y) << "\n";
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n\n";
 	return std::abs(q.y - y);
 }
 Polygon monotone_chain(Polygon& C) {
@@ -764,10 +765,17 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
+	//freopen("../../tests/G_LinearRegression/data/secret/2RND05.in", "r", stdin);
 	std::cin >> N >> K;
+	//std::cout << N << " " << K << "\n";
 	P.resize(N); for (Pos& p : P) std::cin >> p;
-	if (N < 3) { std::cout << "0.000000000\n"; return; }
-	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
+	if (N == 1) { std::cout << "0.000000000\n"; return; }
+	if (N == 2 && K == 1) { std::cout << "0.000000000\n"; return; }
+	if (N == 2 && K == 0) {
+		if (P[0].x == P[1].x) std::cout << std::abs(P[0].y - P[1].y) * .5 << "\n";
+		else std::cout << "0.000000000\n";
+		return;
+	}
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	C.init(N, K, Pos(0, -1));
 	//std::cout << "init done::\n";
@@ -787,6 +795,34 @@ int main() { solve(); return 0; }//boj26108
 
 
 /*
+
+6 2
+0 6
+4 0
+10 4
+6 10
+3 5
+7 5
+
+18 9
+0 10
+1 3
+3 1
+10 0
+17 1
+19 3
+20 10
+19 17
+17 19
+10 20
+3 19
+1 17
+4 4
+16 4
+16 16
+4 16
+11 6
+12 5
 
 4 2
 0 0

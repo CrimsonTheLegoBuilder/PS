@@ -751,8 +751,10 @@ void solve() {
 	std::cout.precision(15);
 	std::cin >> N >> K;
 	P.resize(N); for (Pos& p : P) std::cin >> p;
-	if (N < 3) { std::cout << "0.000000000\n"; return; }
-	if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
+	if (N == 1) { std::cout << "0.000000000\n"; return; }
+	if (N == 2 && K == 1) { std::cout << "0.000000000\n"; return; }
+	if (N == 2 && K == 0) { std::cout << std::abs(P[0].y - P[1].y) * .5 << "\n"; return; }
+	//if (N <= 3 && K == 1) { std::cout << "0.000000000\n"; return; }
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	C.init(N, K, Pos(0, -1));
 	//std::cout << "init done::\n";

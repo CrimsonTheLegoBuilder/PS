@@ -75,13 +75,13 @@ ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
 	ld dx = q.x - p.x;
 	ld dy = dx / cur.x * cur.y;
 	ld y = p.y + dy;
-	std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
-	std::cout << "vertical dist:: dx  :: " << dx << "\n";
-	std::cout << "vertical dist:: dy  :: " << dy << "\n";
-	std::cout << "vertical dist:: cur :: " << cur << "\n";
-	std::cout << "vertical dist:: y   :: " << y << "\n";
-	std::cout << "vertical dist:: diff:: " << q.y - y << "\n";
-	std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
+	//std::cout << "vertical dist:: dx  :: " << dx << "\n";
+	//std::cout << "vertical dist:: dy  :: " << dy << "\n";
+	//std::cout << "vertical dist:: cur :: " << cur << "\n";
+	//std::cout << "vertical dist:: y   :: " << y << "\n";
+	//std::cout << "vertical dist:: diff:: " << q.y - y << "\n";
+	//std::cout << "DEBUG::\nDEBUG::\nDEBUG::\n";
 	return std::abs(q.y - y);
 }
 Polygon monotone_chain(Polygon& C) {
@@ -111,21 +111,21 @@ struct Event {
 	bool operator < (const Event& o) const { return v / o.v < 0; }
 };
 typedef std::priority_queue<Event> PQ;
-void print_event(const Event& e) {
-	std::cout << "	[v:(" << e.v.x << "," << e.v.y << ") " << "i:" << e.i << " P[i]: (" << P[e.i].x << "," << P[e.i].y << ") j:" << e.j << " P[j]: (" << P[e.j].x << "," << P[e.j].y << ") t:" << e.t << "]";
-}
-void debug_pq(PQ pq, const char* name = "PQ") {
-	std::cout << "--- DEBUG:: [" << name << "] (Size: " << pq.size() << ") ---\n";
-	int idx = 0;
-	while (!pq.empty()) {
-		Event e = pq.top();
-		pq.pop();
-		std::cout << "#" << idx++ << ": ";
-		print_event(e);
-		std::cout << "\n";
-	}
-	std::cout << "--- DEBUG:: ------------------------\n";
-}
+//void print_event(const Event& e) {
+//	std::cout << "	[v:(" << e.v.x << "," << e.v.y << ") " << "i:" << e.i << " P[i]: (" << P[e.i].x << "," << P[e.i].y << ") j:" << e.j << " P[j]: (" << P[e.j].x << "," << P[e.j].y << ") t:" << e.t << "]";
+//}
+//void debug_pq(PQ pq, const char* name = "PQ") {
+//	std::cout << "--- DEBUG:: [" << name << "] (Size: " << pq.size() << ") ---\n";
+//	int idx = 0;
+//	while (!pq.empty()) {
+//		Event e = pq.top();
+//		pq.pop();
+//		std::cout << "#" << idx++ << ": ";
+//		print_event(e);
+//		std::cout << "\n";
+//	}
+//	std::cout << "--- DEBUG:: ------------------------\n";
+//}
 typedef std::vector<Event> Events;
 struct Jaw {
 	PQ OQ, HQ, TQ, JQ, SQ;
@@ -282,7 +282,7 @@ struct Jaw {
 		return;
 	}
 	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {//O(K)
-		std::cout << "candidate update::\n";
+		//std::cout << "candidate update::\n";
 		//std::cout << "	outl[K]:: " << outl[K] << "\n";
 		//const Pos& b = P[outl[K]];
 		int i = 0;
@@ -295,22 +295,22 @@ struct Jaw {
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
 		}
-		std::cout << "candi update:: c:: " << c << "\n";
-		std::cout << "candi update:: o:: " << o << "\n";
-		for (int j = 0; j < c; j++) {
-			std::cout << (f == HEAD ? "head[" : "tail[") << j << "]:: " << idx[j] << " P[idx[" << j << "]]:: " << P[idx[j]] << "\n";
-		}
+		//std::cout << "candi update:: c:: " << c << "\n";
+		//std::cout << "candi update:: o:: " << o << "\n";
+		//for (int j = 0; j < c; j++) {
+		//	std::cout << (f == HEAD ? "head[" : "tail[") << j << "]:: " << idx[j] << " P[idx[" << j << "]]:: " << P[idx[j]] << "\n";
+		//}
 		//int tq = ccw(b, b + cur, p), fc = sign(dot(b, b + cur, p));
 		//if (pp || !valid(cur, p - b) || sts[p.pi] == OUTL) return 0;
 		if (pop_ || sts[p.pi] == OUTL) return 0;
 		for (i = 0; i < c; i++) {
-			std::cout << "	DEBUG:: idx[i]:: " << idx[i] << "\n";
-			std::cout << "	DEBUG:: cur   :: " << cur << "\n";
-			std::cout << "	DEBUG:: vec   :: " << P[idx[i]] - p << "\n";
-			std::cout << "	DEBUG:: valid :: " << valid(cur, P[idx[i]] - p, 0) << "\n";
+			//std::cout << "	DEBUG:: idx[i]:: " << idx[i] << "\n";
+			//std::cout << "	DEBUG:: cur   :: " << cur << "\n";
+			//std::cout << "	DEBUG:: vec   :: " << P[idx[i]] - p << "\n";
+			//std::cout << "	DEBUG:: valid :: " << valid(cur, P[idx[i]] - p, 0) << "\n";
 			if (valid(cur, P[idx[i]] - p, 0)) break;
 		}
-		std::cout << "candi update:: i:: " << i << "\n";
+		//std::cout << "candi update:: i:: " << i << "\n";
 		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]++;
 		c++;
 		//std::cout << "FUCK::\n";
@@ -341,10 +341,10 @@ struct Jaw {
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			if (sz < 2) continue;
 			const Pos& p1 = H[p.hi][i0];
-			std::cout << "hull rotate::\n";
-			std::cout << "        cur::" << cur << "\n";
-			std::cout << "          p::" << p << "\n";
-			std::cout << "         p1::" << p1 << "\n";
+			//std::cout << "hull rotate::\n";
+			//std::cout << "        cur::" << cur << "\n";
+			//std::cout << "          p::" << p << "\n";
+			//std::cout << "         p1::" << p1 << "\n";
 			if ((sts[p.pi] != -1 && (sts[p.pi] & HEAD)) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL)) {
 				candidate_update(p1, cur, HQ, head, HEAD, ord[p.pi][HEAD]);
 			}
@@ -435,10 +435,10 @@ struct Jaw {
 	}
 	void outlier_candidate_swap(const Pos& cur, Events& EV) {
 		Pos vec;
-		std::cout << "head[0]:: " << head[0] << "\n";
+		//std::cout << "head[0]:: " << head[0] << "\n";
 		vec = P[head[0]] - P[outl[K]];
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], head[0], HEAD));
-		std::cout << "tail[0]:: " << tail[0] << "\n";
+		//std::cout << "tail[0]:: " << tail[0] << "\n";
 		vec = P[tail[0]] - P[outl[K]];
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], tail[0], TAIL));
 		//std::cout << "loop start::\n";
@@ -451,8 +451,8 @@ struct Jaw {
 			if (cur / ev.v < 0) continue;
 			//std::cout << "ev.v:: " << ev.v << "\n";
 			int i = ev.i, j = ev.j, typ = ev.t;
-			std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
-			std::cout << "outl[K]:: " << outl[K] << "\n";
+			//std::cout << "i:: " << i << " j:: " << j << " type:: " << (typ == HEAD ? "HEAD" : "TAIL") << "\n";
+			//std::cout << "outl[K]:: " << outl[K] << "\n";
 			Pos c, x = P[outl[K]];
 
 			//이벤트가 머리에서 일어나는지 꼬리에서 일어나는지는 중요하지 않다.
@@ -461,7 +461,7 @@ struct Jaw {
 			//튀어나온 점이 어디로 가야하는지를 파악해주어야 함
 			//이게 좀 귀찮기는 함. 이 조건 분기를 생각해보자.
 
-			std::cout << "x:: " << x << "\n";
+			//std::cout << "x:: " << x << "\n";
 			if (typ == HEAD) {
 				if (outl[K] != ev.i || head[0] != ev.j) continue;
 				c = P[head[0]];
@@ -472,97 +472,97 @@ struct Jaw {
 			}
 			EV.push_back(Event(cur, ord[x.pi][OUTL], -1, t));
 			pop(x);
-			std::cout << "pop::\n";
+			//std::cout << "pop::\n";
 			int sz = H[c.hi].size();
 			Pos pre = H[c.hi][(c.i - 1 + sz) % sz];
 			Pos nxt = H[c.hi][(c.i + 1) % sz];
-			std::cout << "pre, nxt::\n";
-			std::cout << "c.pi  :: " << c.pi << "\n";
-			std::cout << "c     :: " << c << "\n";
-			std::cout << "pre.pi:: " << pre.pi << "\n";
-			std::cout << "nxt.pi:: " << nxt.pi << "\n";
-			std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
+			//std::cout << "pre, nxt::\n";
+			//std::cout << "c.pi  :: " << c.pi << "\n";
+			//std::cout << "c     :: " << c << "\n";
+			//std::cout << "pre.pi:: " << pre.pi << "\n";
+			//std::cout << "nxt.pi:: " << nxt.pi << "\n";
+			//std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
 			if (sts[c.pi] != -1 && sts[c.pi] & HEAD) {
 			//if (sts[c.pi] & HEAD) {
 				if (H[c.hi].size() == 1) { candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1); }
 				else if (sts[nxt.pi] != OUTL) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
 				else candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
 			}
-			std::cout << "HEAD done\n";
-			std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
+			//std::cout << "HEAD done\n";
+			//std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
 			if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
 			//if (sts[c.pi] & TAIL) {
 				if (H[c.hi].size() == 1) { candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1); }
 				else if (sts[pre.pi] == OUTL && sts[nxt.pi] != OUTL && !(sts[nxt.pi] & TAIL)) {
-					std::cout << "FUCK:: 1\n";
+					//std::cout << "FUCK:: 1\n";
 					candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 				}
 				else if (sts[pre.pi] != OUTL) {
-					std::cout << "FUCK:: 2\n";
-					std::cout << "              c:: " << c << "\n";
-					std::cout << "ord[c.pi][TAIL]:: " << ord[c.pi][TAIL] << "\n";
+					//std::cout << "FUCK:: 2\n";
+					//std::cout << "              c:: " << c << "\n";
+					//std::cout << "ord[c.pi][TAIL]:: " << ord[c.pi][TAIL] << "\n";
 					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 				}
 				else {
-					std::cout << "FUCK:: 3\n";
+					//std::cout << "FUCK:: 3\n";
 					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
 				}
 			}
-			std::cout << "head, tail update::\n";
+			//std::cout << "head, tail update::\n";
 
-			for (int k = 0; k < hp; k++) {
-				std::cout << "	" << (t == BOT ? "bot" : "top") << ".head[" << k << "]:: (" << P[head[k]].x << ", " << P[head[k]].y << ")\n";
-			}
-			for (int k = 0; k < tp; k++) {
-				std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
-			}
+			//for (int k = 0; k < hp; k++) {
+			//	std::cout << "	" << (t == BOT ? "bot" : "top") << ".head[" << k << "]:: (" << P[head[k]].x << ", " << P[head[k]].y << ")\n";
+			//}
+			//for (int k = 0; k < tp; k++) {
+			//	std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
+			//}
 
 			push(c);
-			std::cout << "push::\n";
+			//std::cout << "push::\n";
 			vec = P[outl[K]] - P[outl[K - 1]];
 			if (valid(cur, vec)) {
 				OQ.push(Event(vec, outl[K - 1], outl[K]));
 			}
-			std::cout << "get vec::\n";
+			//std::cout << "get vec::\n";
 			sz = H[x.hi].size();
 			pre = H[x.hi][(x.i - 1 + sz) % sz];
 			nxt = H[x.hi][(x.i + 1) % sz];
-			std::cout << "  x:: " << x << "\n";
-			std::cout << "pre:: " << pre << " sts:: " << sts[pre.pi] << "\n";
-			std::cout << "nxt:: " << nxt << " sts:: " << sts[nxt.pi] << "\n";
+			//std::cout << "  x:: " << x << "\n";
+			//std::cout << "pre:: " << pre << " sts:: " << sts[pre.pi] << "\n";
+			//std::cout << "nxt:: " << nxt << " sts:: " << sts[nxt.pi] << "\n";
 			if ((sts[x.pi] == -1 || (sts[x.pi] != -1 && !(sts[x.pi] & TAIL))) && cnt[x.hi] + 1 == sz) {
-				std::cout << "TAIL 1:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
-				std::cout << "       sz:: " << sz << "\n";
-				std::cout << "     x.hi:: " << x.hi << "\n";
-				std::cout << "cnt[x.hi]:: " << cnt[x.hi] << "\n";
+				//std::cout << "TAIL 1:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
+				//std::cout << "       sz:: " << sz << "\n";
+				//std::cout << "     x.hi:: " << x.hi << "\n";
+				//std::cout << "cnt[x.hi]:: " << cnt[x.hi] << "\n";
 				candidate_update(x, cur, TQ, tail, TAIL, -1);
 			}
 			else if (sts[pre.pi] != -1 && (sts[pre.pi] & TAIL)) {
-				std::cout << "TAIL 2:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
+				//std::cout << "TAIL 2:: FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
 				candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
 			}
 			vec = x - P[outl[K]];
-			std::cout << "get x-vec::\n";
-			std::cout << "cnt[x.hi]:: " << cnt[x.hi] << "\n";
-			std::cout << "sz       :: " << sz << "\n";
-			std::cout << "x        :: " << x << "\n";
-			std::cout << "P[outl[K]]: " << P[outl[K]] << "\n";
+			//std::cout << "get x-vec::\n";
+			//std::cout << "cnt[x.hi]:: " << cnt[x.hi] << "\n";
+			//std::cout << "sz       :: " << sz << "\n";
+			//std::cout << "x        :: " << x << "\n";
+			//std::cout << "P[outl[K]]: " << P[outl[K]] << "\n";
 			if ((sts[x.pi] == -1 || (sts[x.pi] != -1 && !(sts[x.pi] & HEAD))) && cnt[x.hi] + 1 == sz) {
 				candidate_update(x, cur, HQ, head, HEAD, -1);
 			}
 			//else if ((sts[nxt.pi] | HEAD) && valid(cur, vec)) {
 			else if (sts[nxt.pi] != -1 && (sts[nxt.pi] & HEAD)) {
-				std::cout << "head prev update FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
+				//std::cout << "head prev update FUCK::FUCK::FUCK::FUCK::FUCK::FUCK::\n";
 				candidate_update(x, cur, HQ, head, HEAD, ord[nxt.pi][HEAD]);
 			}
 			//else if (sts[pre.pi] | HEAD) candidate_update(x, cur, HQ, head, HEAD, ord[pre.pi][HEAD]);
 
-			for (int k = 0; k < hp; k++) {
-				std::cout << "	" << (t == BOT ? "bot" : "top") << ".head[" << k << "]:: (" << P[head[k]].x << ", " << P[head[k]].y << ")\n";
-			}
-			for (int k = 0; k < tp; k++) {
-				std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
-			}
+			//for (int k = 0; k < hp; k++) {
+			//	std::cout << "	" << (t == BOT ? "bot" : "top") << ".head[" << k << "]:: (" << P[head[k]].x << ", " << P[head[k]].y << ")\n";
+			//}
+			//for (int k = 0; k < tp; k++) {
+			//	std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
+			//}
 
 			//if (cnt[c.hi] == H[c.hi].size() - 1) {
 			//	candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
@@ -625,19 +625,19 @@ struct Jaw {
 		bool f = 0;
 		//std::cout << "DEBUG:: cur:: " << cur << "\n";
 		//debug_pq(HQ, "HQ");
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "candi head rotate::\n";
 		candidate_jaw_rotate(cur, HQ, head, HEAD);
 		//debug_pq(TQ, "TQ");
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "candi tail rotate::\n";
 		candidate_jaw_rotate(cur, TQ, tail, TAIL);
 		//debug_pq(OQ, "OQ");
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier rotate::\n";
 		outlier_jaw_rotate(cur, EV);
 		//debug_pq(SQ, "SQ");
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "outlier candi swap::\n";
 		outlier_candidate_swap(cur, EV);
 		//debug_pq(JQ, "JQ");
-		std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
+		//std::cout << (t == BOT ? "BOT " : "TOP ") << "hull rotate::\n";
 		hull_jaw_rotate(cur);
 		return f;
 	}
@@ -719,9 +719,9 @@ struct Calipers {
 		return 1;
 	}
 	ld dist(const int& b = -1, const int& t = -1) {
-		std::cout << "get vertical dist:::: b:: " << b << " t:: " << t << "\n";
+		//std::cout << "get vertical dist:::: b:: " << b << " t:: " << t << "\n";
 		if (b < 0 || K < b || t < 0 || K < t) return INF;
-		std::cout << "P[bot[outl[b]]:: " << P[bot.outl[b]] << " P[top.outl[t]]:: " << P[top.outl[t]] << "\n";
+		//std::cout << "P[bot[outl[b]]:: " << P[bot.outl[b]] << " P[top.outl[t]]:: " << P[top.outl[t]] << "\n";
 		return vertical_dist(P[bot.outl[b]], cur, P[top.outl[t]]);
 	}
 	bool rotate(ld& d) {
@@ -732,48 +732,48 @@ struct Calipers {
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
 		//std::cout << "DEBUG:: TOP::\n";
 		std::vector<Event> EV;
-		std::cout << "\n\ncur.vec:: " << cur << "\n";
+		//std::cout << "\n\ncur.vec:: " << cur << "\n";
 		//std::cout << "now rotate::\n";
 		bot.jaw_rotate(EV, cur);
 		//std::cout << "bot rotate::\n";
 		top.jaw_rotate(EV, -cur);
 		//std::cout << "top rotate::\n";
 		//std::cout << "EV.size:: " << EV.size() << "\n";
-		std::cout << "DEBUG:: cur:: (" << cur.x << ", " << cur.y << ")\n";
-		std::cout << "DEBUG:: BOT::\n";
-		for (int k = 0; k <= bot.K; k++) {
-			std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ") " << bot.sts[bot.outl[k]] << "\n";
-		}
-		for (int k = 0; k < bot.hp; k++) {
-			std::cout << "	bot.head[" << k << "]:: (" << P[bot.head[k]].x << ", " << P[bot.head[k]].y << ") " << bot.sts[bot.head[k]] << "\n";
-		}
-		for (int k = 0; k < bot.tp; k++) {
-			std::cout << "	bot.tail[" << k << "]:: (" << P[bot.tail[k]].x << ", " << P[bot.tail[k]].y << ") " << bot.sts[bot.tail[k]] << "\n";
-		}
-		for (int k = 0; k < bot.h; k++) {
-			std::cout << "	bot.cnt[" << k << "]:: " << bot.cnt[k] << "\n";
-		}
-		std::cout << "DEBUG:: BOT::\n";
-		std::cout << "DEBUG:: TOP::\n";
-		for (int k = 0; k <= top.K; k++) {
-			std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ") " << top.sts[top.outl[k]] << "\n";
-		}
-		for (int k = 0; k < top.hp; k++) {
-			std::cout << "	top.head[" << k << "]:: (" << P[top.head[k]].x << ", " << P[top.head[k]].y << ") " << top.sts[top.head[k]] << "\n";
-		}
-		for (int k = 0; k < top.tp; k++) {
-			std::cout << "	top.tail[" << k << "]:: (" << P[top.tail[k]].x << ", " << P[top.tail[k]].y << ") " << top.sts[top.tail[k]] << "\n";
-		}
-		for (int k = 0; k < top.h; k++) {
-			std::cout << "	top.cnt[" << k << "]:: " << top.cnt[k] << "\n";
-		}
-		std::cout << "\n\n";
+		//std::cout << "DEBUG:: cur:: (" << cur.x << ", " << cur.y << ")\n";
+		//std::cout << "DEBUG:: BOT::\n";
+		//for (int k = 0; k <= bot.K; k++) {
+		//	std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ") " << bot.sts[bot.outl[k]] << "\n";
+		//}
+		//for (int k = 0; k < bot.hp; k++) {
+		//	std::cout << "	bot.head[" << k << "]:: (" << P[bot.head[k]].x << ", " << P[bot.head[k]].y << ") " << bot.sts[bot.head[k]] << "\n";
+		//}
+		//for (int k = 0; k < bot.tp; k++) {
+		//	std::cout << "	bot.tail[" << k << "]:: (" << P[bot.tail[k]].x << ", " << P[bot.tail[k]].y << ") " << bot.sts[bot.tail[k]] << "\n";
+		//}
+		//for (int k = 0; k < bot.h; k++) {
+		//	std::cout << "	bot.cnt[" << k << "]:: " << bot.cnt[k] << "\n";
+		//}
+		//std::cout << "DEBUG:: BOT::\n";
+		//std::cout << "DEBUG:: TOP::\n";
+		//for (int k = 0; k <= top.K; k++) {
+		//	std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ") " << top.sts[top.outl[k]] << "\n";
+		//}
+		//for (int k = 0; k < top.hp; k++) {
+		//	std::cout << "	top.head[" << k << "]:: (" << P[top.head[k]].x << ", " << P[top.head[k]].y << ") " << top.sts[top.head[k]] << "\n";
+		//}
+		//for (int k = 0; k < top.tp; k++) {
+		//	std::cout << "	top.tail[" << k << "]:: (" << P[top.tail[k]].x << ", " << P[top.tail[k]].y << ") " << top.sts[top.tail[k]] << "\n";
+		//}
+		//for (int k = 0; k < top.h; k++) {
+		//	std::cout << "	top.cnt[" << k << "]:: " << top.cnt[k] << "\n";
+		//}
+		//std::cout << "\n\n";
 		for (const Event& ev : EV) {
 			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
 			else d = std::min(d, dist(K - ev.i, ev.i));
 		}
 		//std::cout << "rotate rotate::\n";
-		std::cout << "ret update:: " << d << "\n\n\n";
+		//std::cout << "ret update:: " << d << "\n\n\n";
 		return jaw_rotate();
 	}
 } C;
@@ -824,11 +824,29 @@ int main() { solve(); return 0; }//boj26108
 
 /*
 
+4 2
+0 0
+3 -3
+3 3
+2 0
+
 4 1
 0 0
 3 -3
 3 3
 2 0
+
+10 5
+3 3
+2 3
+4 2
+4 4
+1 3
+5 5
+5 1
+0 3
+6 0
+6 6
 
 */
 

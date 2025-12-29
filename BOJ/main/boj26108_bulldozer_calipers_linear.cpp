@@ -563,62 +563,15 @@ struct Jaw {
 			//for (int k = 0; k < tp; k++) {
 			//	std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
 			//}
-
-			//if (cnt[c.hi] == H[c.hi].size() - 1) {
-			//	candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
-			//	candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
-			//}
-			//else if (cnt[c.hi] == H[c.hi].size() - 2) {
-			//}
-			//else {
-			//	if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | HEAD) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-			//	if (cnt[c.hi] <= H[c.hi].size() - 1 && sts[c.pi] | TAIL) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-			//}
-			
-			/*
-			if (typ == HEAD) {
-				if (outl[K] != ev.i || head[0] != ev.j) continue;
-				c = P[head[0]];
-			}
-			else if (typ == TAIL) {
-				if (outl[K] != ev.i || tail[0] != ev.j) continue;
-				c = P[tail[0]];
-			}
-			int hi = c.hi;
-			//std::cout << "hi:: " << hi << "\n";
-			int sz = H[hi].size();
-			const Pos& nxt = H[c.hi][(c.i + 1) % sz];
-			//std::cout << "nxt:: " << nxt << "\n";
-			//std::cout << "c.pi:: " << c.pi << "\n";
-			if (sts[c.pi] | HEAD) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-			else if (sts[c.pi] | TAIL) candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-			//std::cout << "candi update done\n";
-			pop(x);
-			push(c);
-			vec = P[outl[K]] - P[outl[K - 1]];
-			if (valid(cur, vec)) {
-				OQ.push(Event(vec, outl[K - 1], outl[K]));
-			}
-			//std::cout << "x pop and c push\n";
-			if (cnt[x.hi] == H[x.hi].size()) {
-				//std::cout << "cnt[x] == H[x].sz::\n";
-				cnt[x.hi]--;
-				candidate_update(x, cur, HQ, head, HEAD, -1);
-				candidate_update(x, cur, TQ, tail, TAIL, -1);
-			}
-			else {
-				//std::cout << "cnt[x] != H[x].sz!!::\n";
-				cnt[x.hi]--;
-				const Pos& pre = H[x.hi][(x.i - 1 + sz) % sz];
-				if (sts[pre.pi] | TAIL) {
-					candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
-				}
-				if (sts[pre.pi] | HEAD) {
-					candidate_update(x, cur, HQ, head, HEAD, ord[pre.pi][HEAD]);
-				}
-			}
-			*/
 		}
+		return;
+	}
+	void get_events(Event& o_h, Event& o_t) {
+		Pos vec;
+		vec = P[head[0]] - P[outl[K]];
+		o_h = Event(vec, outl[K], head[0], HEAD);
+		vec = P[tail[0]] - P[outl[K]];
+		o_t = Event(vec, outl[K], tail[0], TAIL);
 		return;
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
@@ -725,8 +678,7 @@ struct Calipers {
 		return vertical_dist(P[bot.outl[b]], cur, P[top.outl[t]]);
 	}
 	bool rotate(ld& d) {
-		static int CNT = 0;
-		CNT++;
+		//static int CNT = 0; CNT++;
 		int tq = sign(e / cur);
 		//if (CNT == LIMIT) return 0;
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
@@ -812,9 +764,6 @@ void solve() {
 	//	std::cout << "Layer[" << h_ << "]::\n";
 	//}
 	ld ret = INF;
-	//std::cout << "\n\n\n\n\n";
-	//std::cout << "ret:: " << ret << "\n";
-	//std::cout << "\n\n\n\n\n";
 	while (C.rotate(ret)) {}
 	std::cout << std::max(.0, ret * .5) << "\n";
 	return;

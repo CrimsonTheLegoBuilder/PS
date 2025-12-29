@@ -564,14 +564,17 @@ struct Jaw {
 			//	std::cout << "	" << (t == BOT ? "bot" : "top") << ".tail[" << k << "]:: (" << P[tail[k]].x << ", " << P[tail[k]].y << ")\n";
 			//}
 		}
+		while (SQ.size()) SQ.pop();
 		return;
 	}
 	void get_events(Event& o_h, Event& o_t) {
 		Pos vec;
 		vec = P[head[0]] - P[outl[K]];
-		o_h = Event(vec, outl[K], head[0], HEAD);
+		if (valid(ref, vec, 0)) o_h = Event(vec, outl[K], head[0], HEAD);
+		else o_h = Event(Pos(0, 0));
 		vec = P[tail[0]] - P[outl[K]];
-		o_t = Event(vec, outl[K], tail[0], TAIL);
+		if (valid(ref, vec, 0)) o_t = Event(vec, outl[K], tail[0], TAIL);
+		else o_t = Event(Pos(0, 0));
 		return;
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
@@ -600,6 +603,7 @@ struct Calipers {
 	int N, K, h;
 	Pos cur;
 	Jaw bot = Jaw(BOT), top = Jaw(TOP);
+	Events VB, VT;
 	Calipers() { N = -1, K = -1, h = 0; }
 	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
 		N = n; K = k; cur = c;
@@ -653,8 +657,19 @@ struct Calipers {
 		//std::cout << "bot, top done::\n";
 		return;
 	}
+	void get_events() {
+		Event hev, tev;
+		bot.get_events(hev, tev);
+		if (hev.v != Pos(0, 0)) bot.SQ.push(hev);
+		if (tev.v != Pos(0, 0)) bot.SQ.push(tev);
+		top.get_events(hev, tev);
+		if (hev.v != Pos(0, 0)) top.SQ.push(hev);
+		if (tev.v != Pos(0, 0)) top.SQ.push(tev);
+		return;
+	}
 	bool jaw_rotate() {
 		Polygon V;
+		get_events();
 		if (bot.OQ.size()) V.push_back(bot.OQ.top().v);
 		if (bot.JQ.size()) V.push_back(bot.JQ.top().v);
 		if (bot.HQ.size()) V.push_back(bot.HQ.top().v);

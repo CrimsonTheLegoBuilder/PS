@@ -258,6 +258,7 @@ struct Jaw {
 			const Pos& p = P[jaw[i]];
 			//std::cout << "p.hi:: " << p.hi << "\n";
 			int sz = H[p.hi].size();
+			if (sz < 2) continue;
 			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
 			if (valid(cur, vec))
 				JQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
@@ -338,6 +339,7 @@ struct Jaw {
 			if (cur / ev.v < 0) continue;
 			const Pos& p = P[ev.i];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
+			if (sz < 2) continue;
 			const Pos& p1 = H[p.hi][i0];
 			std::cout << "hull rotate::\n";
 			std::cout << "        cur::" << cur << "\n";
@@ -482,14 +484,16 @@ struct Jaw {
 			std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
 			if (sts[c.pi] != -1 && sts[c.pi] & HEAD) {
 			//if (sts[c.pi] & HEAD) {
-				if (sts[nxt.pi] != OUTL) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+				if (H[c.hi].size() == 1) { candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1); }
+				else if (sts[nxt.pi] != OUTL) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
 				else candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
 			}
 			std::cout << "HEAD done\n";
 			std::cout << "sts[c.pi]:: " << sts[c.pi] << "\n";
 			if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
 			//if (sts[c.pi] & TAIL) {
-				if (sts[pre.pi] == OUTL && sts[nxt.pi] != OUTL && !(sts[nxt.pi] & TAIL)) {
+				if (H[c.hi].size() == 1) { candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1); }
+				else if (sts[pre.pi] == OUTL && sts[nxt.pi] != OUTL && !(sts[nxt.pi] & TAIL)) {
 					std::cout << "FUCK:: 1\n";
 					candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 				}
@@ -816,6 +820,17 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj26108
+
+
+/*
+
+4 1
+0 0
+3 -3
+3 3
+2 0
+
+*/
 
 
 //새로 시작하면 현재 이벤트 벡터 하나 깐다.

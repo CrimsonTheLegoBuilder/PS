@@ -7,9 +7,7 @@
 #include <vector>
 #include <queue>
 typedef long long ll;
-//typedef long double ld;
 typedef double ld;
-typedef std::vector<int> Vint;
 typedef std::vector<bool> Vbool;
 const ll INF = 1e17;
 const int LEN = 5e4 + 1;
@@ -24,13 +22,8 @@ inline ll sq(const ll& x) { return x * x; }
 #define HEAD 1
 #define TAIL 2
 
-#define INSERT 0
-#define SWAP 1
-
-#define LIMIT 8
-
-const int N_LEN = 50001;
-const int K_LEN = 301;
+const int N_LEN = 50005;
+const int K_LEN = 305;
 
 int N, K;
 struct Pos {
@@ -478,7 +471,6 @@ struct Calipers {
 			Q.clear();
 			for (const Pos& t : tmp) if (!F[t.pi]) Q.push_back(t);
 		}
-		std::sort(P.begin(), P.end());
 		for (int k = 0; k < h; k++) {
 			for (const Pos& p : H[k]) P[p.pi].hi = p.hi, P[p.pi].i = p.i;
 		}

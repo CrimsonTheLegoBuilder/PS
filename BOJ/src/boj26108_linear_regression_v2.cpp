@@ -82,10 +82,12 @@ Polygon monotone_chain(Polygon& C) {
 	return H;
 }
 struct Event {
-	Pos v;
+	ll x, y;
 	int i, j, t;
-	Event(Pos v_ = Pos(), int i_ = -1, int j_ = -1, int t_ = -1) : v(v_), i(i_), j(j_), t(t_) {}
-	bool operator < (const Event& o) const { return v / o.v < 0; }
+	Event(Pos p = Pos(0, 0), int i_ = -1, int j_ = -1, int t_ = -1) : x(p.x), y(p.y), i(i_), j(j_), t(t_) {}
+	Pos v() const { return Pos(x, y); }
+	//bool operator < (const Event& o) const { return v() / o.v() < 0; }
+	bool operator < (const Event& o) const { return x * o.y - o.x * y < 0; }
 };
 typedef std::priority_queue<Event> PQ;
 typedef std::vector<Event> Events;
@@ -244,9 +246,9 @@ struct Jaw {
 	void hull_jaw_rotate(const Pos& cur) {
 		while (JQ.size()) {
 			Event ev = JQ.top();
-			if (cur / ev.v > 0) break;
+			if (cur / ev.v() > 0) break;
 			JQ.pop();
-			if (cur / ev.v < 0) continue;
+			if (cur / ev.v() < 0) continue;
 			const Pos& p = P[ev.i];
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			if (sz < 2) continue;
@@ -274,9 +276,9 @@ struct Jaw {
 		Pos vec;
 		while (CQ.size()) {
 			Event ev = CQ.top();
-			if (cur / ev.v > 0) break;
+			if (cur / ev.v() > 0) break;
 			CQ.pop();
-			if (cur / ev.v < 0) continue;
+			if (cur / ev.v() < 0) continue;
 			int i = ev.i, j = ev.j;
 			if (sts[i] == -1 || sts[j] == -1) continue;
 			if (!(sts[i] & f) || !(sts[j] & f)) continue;
@@ -300,9 +302,9 @@ struct Jaw {
 		Pos vec;
 		while (OQ.size()) {
 			Event ev = OQ.top();
-			if (cur / ev.v > 0) break;
+			if (cur / ev.v() > 0) break;
 			OQ.pop();
-			if (cur / ev.v < 0) continue;
+			if (cur / ev.v() < 0) continue;
 			int i = ev.i, j = ev.j;
 			if (sts[i] != OUTL || sts[j] != OUTL) continue;
 			int u = ord[i][OUTL], v = ord[j][OUTL];
@@ -346,9 +348,9 @@ struct Jaw {
 		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], tail[0], TAIL));
 		while (SQ.size()) {
 			Event ev = SQ.top();
-			if (cur / ev.v > 0) break;
+			if (cur / ev.v() > 0) break;
 			SQ.pop();
-			if (cur / ev.v < 0) continue;
+			if (cur / ev.v() < 0) continue;
 			int i = ev.i, j = ev.j, typ = ev.t;
 			Pos c, x = P[outl[K]];
 			if (typ == HEAD) {
@@ -481,26 +483,26 @@ struct Calipers {
 	void get_events() {
 		Event hev, tev;
 		bot.get_events(hev, tev);
-		if (hev.v != Pos(0, 0)) bot.SQ.push(hev);
-		if (tev.v != Pos(0, 0)) bot.SQ.push(tev);
+		if (hev.v() != Pos(0, 0)) bot.SQ.push(hev);
+		if (tev.v() != Pos(0, 0)) bot.SQ.push(tev);
 		top.get_events(hev, tev);
-		if (hev.v != Pos(0, 0)) top.SQ.push(hev);
-		if (tev.v != Pos(0, 0)) top.SQ.push(tev);
+		if (hev.v() != Pos(0, 0)) top.SQ.push(hev);
+		if (tev.v() != Pos(0, 0)) top.SQ.push(tev);
 		return;
 	}
 	bool jaw_rotate() {
 		Polygon V;
 		get_events();
-		if (bot.OQ.size()) V.push_back(bot.OQ.top().v);
-		if (bot.JQ.size()) V.push_back(bot.JQ.top().v);
-		if (bot.HQ.size()) V.push_back(bot.HQ.top().v);
-		if (bot.TQ.size()) V.push_back(bot.TQ.top().v);
-		if (bot.SQ.size()) V.push_back(bot.SQ.top().v);
-		if (top.OQ.size()) V.push_back(-top.OQ.top().v);
-		if (top.JQ.size()) V.push_back(-top.JQ.top().v);
-		if (top.HQ.size()) V.push_back(-top.HQ.top().v);
-		if (top.TQ.size()) V.push_back(-top.TQ.top().v);
-		if (top.SQ.size()) V.push_back(-top.SQ.top().v);
+		if (bot.OQ.size()) V.push_back(bot.OQ.top().v());
+		if (bot.JQ.size()) V.push_back(bot.JQ.top().v());
+		if (bot.HQ.size()) V.push_back(bot.HQ.top().v());
+		if (bot.TQ.size()) V.push_back(bot.TQ.top().v());
+		if (bot.SQ.size()) V.push_back(bot.SQ.top().v());
+		if (top.OQ.size()) V.push_back(-top.OQ.top().v());
+		if (top.JQ.size()) V.push_back(-top.JQ.top().v());
+		if (top.HQ.size()) V.push_back(-top.HQ.top().v());
+		if (top.TQ.size()) V.push_back(-top.TQ.top().v());
+		if (top.SQ.size()) V.push_back(-top.SQ.top().v());
 		if (V.empty()) { cur = Pos(0, 1); return 0; }
 		cur = V[0];
 		int sz = V.size();

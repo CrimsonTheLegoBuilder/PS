@@ -232,6 +232,12 @@ struct Jaw {
 			ord[x][f] = -1;
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
+			if (o > 0 && o < c) {
+				Pos vec = P[idx[o]] - P[idx[o - 1]];
+				if (valid(cur, vec)) {
+					CQ.push(Event(vec, idx[o - 1], idx[o]));
+				}
+			}
 		}
 		if (pop_ || sts[p.pi] == OUTL) return 0;
 		for (i = 0; i < c; i++) {
@@ -419,15 +425,15 @@ struct Jaw {
 			sz = H[x.hi].size();
 			pre = H[x.hi][(x.i - 1 + sz) % sz];
 			nxt = H[x.hi][(x.i + 1) % sz];
-			assert(sts[x.pi] == -1);
+			//assert(sts[x.pi] == -1);
 
-			if (cnt[x.hi] + 1 == sz) {
+			if ((sts[x.pi] == -1 || !(sts[x.pi] & TAIL)) && cnt[x.hi] + 1 == sz) {
 				candidate_update(x, cur, TQ, tail, TAIL, -1);
 			}
 			else if (sts[pre.pi] != -1 && (sts[pre.pi] & TAIL)) {
 				candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
 			}
-			if (cnt[x.hi] + 1 == sz) {
+			if ((sts[x.pi] == -1 || !(sts[x.pi] & HEAD)) && cnt[x.hi] + 1 == sz) {
 				candidate_update(x, cur, HQ, head, HEAD, -1);
 			}
 			else if (sts[nxt.pi] != -1 && (sts[nxt.pi] & HEAD)) {
@@ -532,6 +538,35 @@ struct Calipers {
 		std::vector<Event> EV;
 		bot.jaw_rotate(EV, cur);
 		top.jaw_rotate(EV, -cur);
+		//std::cout << "DEBUG:: cur:: (" << cur.x << ", " << cur.y << ")\n";
+		//std::cout << "DEBUG:: BOT::\n";
+		//for (int k = 0; k <= bot.K; k++) {
+		//	std::cout << "	bot[" << k << "]:: (" << P[bot.outl[k]].x << ", " << P[bot.outl[k]].y << ") " << bot.sts[bot.outl[k]] << "\n";
+		//}
+		//for (int k = 0; k < bot.hp; k++) {
+		//	std::cout << "	bot.head[" << k << "]:: (" << P[bot.head[k]].x << ", " << P[bot.head[k]].y << ") " << bot.sts[bot.head[k]] << "\n";
+		//}
+		//for (int k = 0; k < bot.tp; k++) {
+		//	std::cout << "	bot.tail[" << k << "]:: (" << P[bot.tail[k]].x << ", " << P[bot.tail[k]].y << ") " << bot.sts[bot.tail[k]] << "\n";
+		//}
+		//for (int k = 0; k < bot.h; k++) {
+		//	std::cout << "	bot.cnt[" << k << "]:: " << bot.cnt[k] << "\n";
+		//}
+		//std::cout << "DEBUG:: BOT::\n";
+		//std::cout << "DEBUG:: TOP::\n";
+		//for (int k = 0; k <= top.K; k++) {
+		//	std::cout << "	top[" << k << "]:: (" << P[top.outl[k]].x << ", " << P[top.outl[k]].y << ") " << top.sts[top.outl[k]] << "\n";
+		//}
+		//for (int k = 0; k < top.hp; k++) {
+		//	std::cout << "	top.head[" << k << "]:: (" << P[top.head[k]].x << ", " << P[top.head[k]].y << ") " << top.sts[top.head[k]] << "\n";
+		//}
+		//for (int k = 0; k < top.tp; k++) {
+		//	std::cout << "	top.tail[" << k << "]:: (" << P[top.tail[k]].x << ", " << P[top.tail[k]].y << ") " << top.sts[top.tail[k]] << "\n";
+		//}
+		//for (int k = 0; k < top.h; k++) {
+		//	std::cout << "	top.cnt[" << k << "]:: " << top.cnt[k] << "\n";
+		//}
+		//std::cout << "\n\n";
 		for (const Event& ev : EV) {
 			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
 			else d = std::min(d, dist(K - ev.i, ev.i));
@@ -559,8 +594,9 @@ void solve() {
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	//freopen("../../tests/G_LinearRegression/data/secret/2RND05.in", "r", stdin);
-	freopen("../../tests/G_LinearRegression/data/secret/1CRF42.in", "r", stdin);
+	//freopen("../../tests/G_LinearRegression/data/secret/2RND01.in", "r", stdin);
+	freopen("../../tests/G_LinearRegression/data/secret/1CRF30.in", "r", stdin);
+	//freopen("../../tests/G_LinearRegression/data/debug.txt", "w", stdout);
 	std::cin >> N >> K;
 	std::cout << N << " " << K << "\n";
 	P.resize(N); for (Pos& p : P) std::cin >> p;

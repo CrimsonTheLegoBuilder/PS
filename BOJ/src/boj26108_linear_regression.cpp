@@ -122,7 +122,6 @@ struct Jaw {
 		bool f2 = evt ? tq > 0 || (!tq && fc > 0) : 1;
 		return f1 && f2;
 	}
-	bool nxt_check(const Pos& cur, const Pos& vec) { return cur / vec > 0 && ref / vec > 0; }
 	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
 		K = K_; h = h_;
 		int sz = Q.size(); assert(N > K);

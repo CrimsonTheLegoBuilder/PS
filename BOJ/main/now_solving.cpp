@@ -16,69 +16,12 @@ int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 
 int N, M, Q, T;
-struct Pos {
-	int x, y;
-	Pos(int X = 0, int Y = 0) : x(X), y(Y) {}
-	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
-	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	ll operator * (const Pos& p) const { return { (ll)x * p.x + (ll)y * p.y }; }
-	ll operator / (const Pos& p) const { return { (ll)x * p.y - (ll)y * p.x }; }
-	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	ld mag() const { return hypot(x, y); }
-	inline friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
-	inline friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
-typedef std::vector<Pos> Polygon;
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(9);
-	int xl, xr, y;
-	Pos s, e;
-	std::cin >> N >> s >> e;
-	std::vector<Pos> U(N), D(N);
-	for (int i = 0; i < N; i++) {
-		std::cin >> xl >> xr >> y;
-		U[i] = Pos(xr, y);
-		D[i] = Pos(xl, y);
-	}
-	std::deque<Pos> HU, HD;
-	HU.push_back(s); HU.push_back(U[0]);
-	U.push_back(e);
-	HD.push_back(s); HD.push_back(D[0]);
-	D.push_back(e);
 
-	std::vector<Pos> ret;
-	ret.push_back(s);
-	for (int i = 1; i <= N; i++) {
-		while (HU.size() > 1 && ccw(HU[HU.size() - 2], HU.back(), U[i]) <= 0) HU.pop_back();
-		HU.push_back(U[i]);
-		while (HD.size() > 1 && ccw(HD[HD.size() - 2], HD.back(), D[i]) >= 0) HD.pop_back();
-		HD.push_back(D[i]);
-		if (HU.size() <= 2 && HD.size() <= 2) continue;
-		else if (HU.size() == 2) {
-			if (ccw(HU[0], HU[1], HD[1]) <= 0) continue;
-			while (HD.size() > 1 && ccw(HD[0], HD[1], HU[1]) <= 0) ret.push_back(HD[0]), HD.pop_front();
-			ret.push_back(HD[0]);
-			HU[0] = HD[0];
-		}
-		else if (HD.size() == 2) {
-			if (ccw(HD[0], HD[1], HU[1]) >= 0) continue;
-			while (HU.size() > 1 && ccw(HU[0], HU[1], HD[1]) >= 0) ret.push_back(HU[0]), HU.pop_front();
-			ret.push_back(HU[0]);
-			HD[0] = HU[0];
-		}
-	}
-	ret.push_back(e);
-	ret.erase(unique(ret.begin(), ret.end()), ret.end());
-	std::cout << ret.size() << "\n";
-	for (const Pos& p : ret) std::cout << p << "\n";
 	return;
 }
-int main() { solve(); return 0; }//boj15209
+int main() { solve(); return 0; }

@@ -227,7 +227,7 @@ struct Jaw {
 			ord[x][f] = -1;
 			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
 			c--;
-			if (o > 0 && o < c) {
+			if (0 < o && o < c) {
 				Pos vec = P[idx[o]] - P[idx[o - 1]];
 				if (valid(cur, vec)) {
 					CQ.push(Event(vec, idx[o - 1], idx[o]));

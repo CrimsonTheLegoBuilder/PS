@@ -29,8 +29,8 @@ inline ll sq(const ll& x) { return x * x; }
 
 #define LIMIT 8
 
-const int N_LEN = 1 << 16;
-const int K_LEN = 1 << 9;
+const int N_LEN = 50001;
+const int K_LEN = 301;
 
 int N, K;
 struct Pos {
@@ -54,8 +54,6 @@ struct Pos {
 }; const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
 Polygon P, H[K_LEN], L[K_LEN], U[K_LEN];
-bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
-bool cmpx_rvs(const Pos& p, const Pos& q) { return p.x == q.x ? p.y > q.y : p.x < q.x; }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
@@ -161,7 +159,7 @@ struct Jaw {
 			if (tf) tp++;
 			if (!hf) assert(!tf);
 		}
-		std::sort(hd.begin(), hd.end(), cmpx);
+		std::sort(hd.begin(), hd.end());
 		if (t == TOP) std::reverse(hd.begin(), hd.end());
 		sz = hd.size();
 		assert(sz == hp);
@@ -172,7 +170,7 @@ struct Jaw {
 			if (sts[hd[i].pi] == -1) sts[hd[i].pi] = HEAD;
 			else sts[hd[i].pi] |= HEAD;
 		}
-		std::sort(tl.begin(), tl.end(), cmpx);
+		std::sort(tl.begin(), tl.end());
 		if (t == TOP) std::reverse(tl.begin(), tl.end());
 		sz = tl.size();
 		assert(sz == tp);
@@ -457,7 +455,6 @@ struct Calipers {
 	int N, K, h;
 	Pos cur;
 	Jaw bot = Jaw(BOT), top = Jaw(TOP);
-	Events VB, VT;
 	Calipers() { N = -1, K = -1, h = 0; }
 	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
 		N = n; K = k; cur = c;
@@ -525,7 +522,7 @@ struct Calipers {
 	bool rotate(ld& d) {
 		int tq = sign(e / cur);
 		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
-		std::vector<Event> EV;
+		Events EV;
 		bot.jaw_rotate(EV, cur);
 		top.jaw_rotate(EV, -cur);
 		for (const Event& ev : EV) {
@@ -576,3 +573,4 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj26108
+//https://www.acmicpc.net/problem/26108 Linear Regression

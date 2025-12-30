@@ -374,7 +374,9 @@ struct Jaw {
 			Pos pre = H[c.hi][(c.i - 1 + sz) % sz];
 			Pos nxt = H[c.hi][(c.i + 1) % sz];
 
-			if (sts[c.pi] != -1 && (sts[c.pi] & HEAD)) {
+			assert(sts[c.pi] != -1);
+			assert(sts[c.pi] != 0);
+			if (sts[c.pi] & HEAD) {
 				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
 					candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);//pop candi
 				}

@@ -1,3 +1,5 @@
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
@@ -8,9 +10,10 @@
 #include <queue>
 typedef long long ll;
 typedef double ld;
-typedef std::vector<bool> Vbool;
 const ll INF = 1e17;
 const int LEN = 5e4 + 1;
+const int N_LEN = 50005;
+const int K_LEN = 305;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !x; }
 inline ll sq(const ll& x) { return x * x; }
@@ -21,9 +24,6 @@ inline ll sq(const ll& x) { return x * x; }
 #define OUTL 0
 #define HEAD 1
 #define TAIL 2
-
-const int N_LEN = 50005;
-const int K_LEN = 305;
 
 int N, K;
 struct Pos {
@@ -47,10 +47,9 @@ struct Pos {
 }; const Pos O = Pos(0, 0);
 typedef std::vector<Pos> Polygon;
 Polygon P, H[K_LEN], L[K_LEN], U[K_LEN];
+bool F[N_LEN];
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
 ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
@@ -61,9 +60,11 @@ ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
 	ld y = p.y + dy;
 	return std::abs(q.y - y);
 }
-Polygon monotone_chain(Polygon& C) {
-	Polygon H;
-	if (C.size() <= 2) { for (const Pos& pos : C) H.push_back(pos); }
+void monotone_chain(Polygon& C, Polygon& H) {
+	H.clear();
+	if (C.size() <= 2) {
+		for (const Pos& pos : C) H.push_back(pos);
+	}
 	else {
 		for (int i = 0; i < C.size(); i++) {
 			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
@@ -79,14 +80,13 @@ Polygon monotone_chain(Polygon& C) {
 		}
 		H.pop_back();
 	}
-	return H;
+	return;
 }
 struct Event {
 	ll x, y;
 	int i, j, t;
 	Event(Pos p = Pos(0, 0), int i_ = -1, int j_ = -1, int t_ = -1) : x(p.x), y(p.y), i(i_), j(j_), t(t_) {}
 	Pos v() const { return Pos(x, y); }
-	//bool operator < (const Event& o) const { return v() / o.v() < 0; }
 	bool operator < (const Event& o) const { return x * o.y - o.x * y < 0; }
 };
 typedef std::priority_queue<Event> PQ;
@@ -99,13 +99,13 @@ struct Jaw {
 	Pos ref;
 	Jaw(int t_ = BOT, int k_ = 0) : t(t_), K(k_) {
 		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
-		memset(outl, -1, sizeof outl);//outlier points' idx
-		memset(head, -1, sizeof head);//candidate points' idx (head)
-		memset(tail, -1, sizeof tail);//candidate points' idx (tail)
-		memset(jaw, -1, sizeof jaw);//rotating calipers' bot's idx
-		memset(cnt, 0, sizeof cnt);//outlier points' num of each hull
-		memset(ord, -1, sizeof ord);//points' order of each jaw
-		memset(sts, -1, sizeof sts);//state of each point
+		memset(outl, -1, sizeof outl);
+		memset(head, -1, sizeof head);
+		memset(tail, -1, sizeof tail);
+		memset(jaw, -1, sizeof jaw);
+		memset(cnt, 0, sizeof cnt);
+		memset(ord, -1, sizeof ord);
+		memset(sts, -1, sizeof sts);
 		h = 0; hp = 0; tp = 0;
 	}
 	bool valid(const Pos& cur, const Pos& vec, const bool& evt = 1) {
@@ -127,7 +127,6 @@ struct Jaw {
 		}
 		for (int k = 0; k < h; k++) jaw[k] = (t == BOT ? L[k][0].pi : U[k][0].pi);
 		Polygon hd, tl;
-		int tq = -1, fc = -1;
 		Pos vec;
 		const Pos& b = P[outl[K]];
 		for (int k = 0; k < h; k++) {
@@ -209,15 +208,18 @@ struct Jaw {
 			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
 		return;
 	}
-	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {//O(K)
+	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {
 		int i = 0;
 		int& c = (f == HEAD ? hp : tp);
 		if (o != -1) {
 			int x = idx[o];
-			if (sts[x] == f) { sts[x] = -1; }
-			else { sts[x] ^= f; }
+			if (sts[x] == f) sts[x] = -1;
+			else sts[x] ^= f;
 			ord[x][f] = -1;
-			for (i = o; i < c; i++) idx[i] = idx[i + 1], ord[idx[i]][f]--;
+			if (o < c - 1) {
+				memmove(idx + o, idx + o + 1, sizeof(int) * (c - 1 - o));
+				for (int k = o; k < c - 1; k++) ord[idx[k]][f]--;
+			}
 			c--;
 			if (0 < o && o < c) {
 				Pos vec = P[idx[o]] - P[idx[o - 1]];
@@ -230,7 +232,10 @@ struct Jaw {
 		for (i = 0; i < c; i++) {
 			if (valid(cur, P[idx[i]] - p, 0)) break;
 		}
-		for (int j = c - 1; j >= i; j--) idx[j + 1] = idx[j], ord[idx[j + 1]][f]++;
+		if (i < c) {
+			memmove(idx + i + 1, idx + i, sizeof(int) * (c - i));
+			for (int k = i + 1; k <= c; k++) ord[idx[k]][f]++;
+		}
 		c++;
 		idx[i] = p.pi, ord[p.pi][f] = i;
 		if (sts[p.pi] == -1) sts[p.pi] = f;
@@ -369,39 +374,55 @@ struct Jaw {
 			assert(sts[c.pi] != -1);
 			assert(sts[c.pi] != 0);
 			if (sts[c.pi] & HEAD) {
-				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
-					candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);//pop candi
-				}
-				else if (sts[nxt.pi] == OUTL) {
-					if (sts[pre.pi] != OUTL && (sts[pre.pi] == -1 || !(sts[pre.pi] & HEAD)))
-						candidate_update(pre, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-					else assert(0);
-				}
-				else if (sts[nxt.pi] != OUTL) {
-					if (sts[nxt.pi] == -1 || !(sts[nxt.pi] & HEAD)) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-					else assert(0);
-				}
-				else {
-					assert(0);
-				}
+				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size())
+					candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+				else if (sts[nxt.pi] == OUTL)
+					candidate_update(pre, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+				else if (sts[nxt.pi] != OUTL) 
+					candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
 			}
+			//if (sts[c.pi] & HEAD) {
+			//	if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
+			//		candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+			//	}
+			//	else if (sts[nxt.pi] == OUTL) {
+			//		if (sts[pre.pi] != OUTL && (sts[pre.pi] == -1 || !(sts[pre.pi] & HEAD)))
+			//			candidate_update(pre, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+			//		else assert(0);
+			//	}
+			//	else if (sts[nxt.pi] != OUTL) {
+			//		if (sts[nxt.pi] == -1 || !(sts[nxt.pi] & HEAD)) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+			//		else assert(0);
+			//	}
+			//	else {
+			//		assert(0);
+			//	}
+			//}
 			if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
-				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
-					candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);//pop candi
-				}
-				else if (sts[pre.pi] == OUTL) {
-					if (sts[nxt.pi] != OUTL && (sts[nxt.pi] == -1 || !(sts[nxt.pi] & TAIL)))
+				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) 
+					candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+				else if (sts[pre.pi] == OUTL) 
 						candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-					else assert(0);
-				}
-				else if (sts[pre.pi] != OUTL) {
-					if (sts[pre.pi] == -1 || !(sts[pre.pi] & TAIL)) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-					else assert(0);
-				}
-				else {
-					assert(0);
-				}
+				else if (sts[pre.pi] != OUTL) 
+					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 			}
+			//if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
+			//	if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
+			//		candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
+			//	}
+			//	else if (sts[pre.pi] == OUTL) {
+			//		if (sts[nxt.pi] != OUTL && (sts[nxt.pi] == -1 || !(sts[nxt.pi] & TAIL)))
+			//			candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+			//		else assert(0);
+			//	}
+			//	else if (sts[pre.pi] != OUTL) {
+			//		if (sts[pre.pi] == -1 || !(sts[pre.pi] & TAIL)) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+			//		else assert(0);
+			//	}
+			//	else {
+			//		assert(0);
+			//	}
+			//}
 			push(c);
 			vec = P[outl[K]] - P[outl[K - 1]];
 			if (valid(cur, vec)) {
@@ -456,17 +477,20 @@ struct Calipers {
 		std::sort(P.begin(), P.end());
 		for (int i = 0; i < N; i++) P[i].pi = i;
 		Polygon Q = P;
-		Vbool F(N, 0);
+		memset(F, 0, sizeof(bool) * N);
+		Polygon tmp;
+		tmp.reserve(N);
 		for (int k = 0; k <= K; k++) {
-			Polygon tmp;
+			tmp.clear();
 			for (const Pos& q : Q) if (!F[q.pi]) tmp.push_back(q);
 			if (tmp.empty()) break;
 			h++;
-			H[k] = monotone_chain(tmp);
+			monotone_chain(tmp, H[k]);
 			int sz = H[k].size();
 			for (int i = 0; i < sz; i++) H[k][i].hi = k, H[k][i].i = i;
 			int b = H[k][0].i;
 			for (int i = 0; i < sz; i++) if (H[k][b] < H[k][i]) b = i;
+			L[k].clear(); U[k].clear();
 			for (int i = 0; i <= b; i++) L[k].push_back(H[k][i]);
 			for (int i = b; i <= sz; i++) U[k].push_back(H[k][i % sz]);
 			for (const Pos& h : H[k]) F[h.pi] = 1;
@@ -492,6 +516,7 @@ struct Calipers {
 	}
 	bool jaw_rotate() {
 		Polygon V;
+		V.reserve(10);
 		get_events();
 		if (bot.OQ.size()) V.push_back(bot.OQ.top().v());
 		if (bot.JQ.size()) V.push_back(bot.JQ.top().v());
@@ -528,16 +553,13 @@ struct Calipers {
 } C;
 ld rotating_calipers(Polygon& P) {
 	std::sort(P.begin(), P.end());
-	Polygon H = monotone_chain(P);
+	Polygon H; monotone_chain(P, H);
 	int sz = H.size();
 	if (sz < 3) return 0;
 	ld ret = INF;
 	for (int i = 0, j = 1; i < sz; i++) {
-		while (ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0) {
-			j = (j + 1) % sz;
-		}
-		Pos v = H[(i + 1) % sz] - H[i];
-		ret = std::min(ret, vertical_dist(H[i], v, H[j]));
+		while (ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0) j = (j + 1) % sz;
+		ret = std::min(ret, vertical_dist(H[i], H[(i + 1) % sz] - H[i], H[j]));
 	}
 	return ret * .5;
 }
@@ -549,16 +571,12 @@ void solve() {
 	//freopen("../../tests/G_LinearRegression/data/secret/0TRV08.in", "r", stdin);
 	//freopen("../../tests/G_LinearRegression/data/secret/1CRF01.in", "r", stdin);
 	//freopen("../../tests/G_LinearRegression/data/secret/2RND10.in", "r", stdin);
-	//freopen("../../tests/26108/2.in", "r", stdin);
+	freopen("../../tests/G_LinearRegression/big_data/3.in", "r", stdin);
 	std::cin >> N >> K;
 	P.resize(N); for (Pos& p : P) std::cin >> p;
 	if (N == 1) { std::cout << "0.000000000\n"; return; }
 	if (N == 2 && K == 1) { std::cout << "0.000000000\n"; return; }
-	if (N == 2 && K == 0) {
-		if (P[0].x == P[1].x) std::cout << std::abs(P[0].y - P[1].y) * .5 << "\n";
-		else std::cout << "0.000000000\n";
-		return;
-	}
+	if (N == 2 && K == 0) { std::cout << ((P[0].x == P[1].x) ? std::abs(P[0].y - P[1].y) * .5 : 0) << "\n"; return; }
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
 	C.init(N, K, Pos(0, -1));
 	ld ret = INF;

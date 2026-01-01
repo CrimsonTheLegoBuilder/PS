@@ -402,7 +402,7 @@ struct Jaw {
 				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) 
 					candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
 				else if (sts[pre.pi] == OUTL) 
-						candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+					candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 				else if (sts[pre.pi] != OUTL) 
 					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
 			}

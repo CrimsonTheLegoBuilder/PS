@@ -563,6 +563,7 @@ ld rotating_calipers(Polygon& P) {
 	}
 	return ret * .5;
 }
+#include <chrono>
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -578,10 +579,18 @@ void solve() {
 	if (N == 2 && K == 1) { std::cout << "0.000000000\n"; return; }
 	if (N == 2 && K == 0) { std::cout << ((P[0].x == P[1].x) ? std::abs(P[0].y - P[1].y) * .5 : 0) << "\n"; return; }
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
+	auto t_start = std::chrono::high_resolution_clock::now();
 	C.init(N, K, Pos(0, -1));
+	auto t_mid = std::chrono::high_resolution_clock::now();
 	ld ret = INF;
 	while (C.rotate(ret)) {}
+	auto t_end = std::chrono::high_resolution_clock::now();
 	std::cout << std::max(.0, ret * .5) << "\n";
+	auto dur_init = std::chrono::duration_cast<std::chrono::microseconds>(t_mid - t_start).count();
+	auto dur_sweep = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_mid).count();
+	std::cerr << "Init time : " << dur_init << " us" << "\n";
+	std::cerr << "Sweep time: " << dur_sweep << " us" << "\n";
+	std::cerr << "Total time: " << dur_init + dur_sweep << " us" << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj26108

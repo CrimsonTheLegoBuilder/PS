@@ -92,7 +92,7 @@ struct Event {
 typedef std::priority_queue<Event> PQ;
 typedef std::vector<Event> Events;
 struct Jaw {
-	PQ OQ, HQ, TQ, JQ, SQ;
+	PQ EQ, JQ, SQ;
 	int t, K, h, hp, tp;
 	int outl[K_LEN], head[K_LEN], tail[K_LEN], jaw[K_LEN], cnt[K_LEN];
 	int ord[N_LEN][3], sts[N_LEN];
@@ -177,18 +177,15 @@ struct Jaw {
 		}
 		for (int i = 0, j = 1; i < K; i++, j++) {
 			vec = P[outl[j]] - P[outl[i]];
-			if (valid(cur, vec))
-				OQ.push(Event(vec, outl[i], outl[j]));
+			if (valid(cur, vec)) EQ.push(Event(vec, outl[i], outl[j], OUTL));
 		}
 		for (int i = 0, j = 1; i < hp - 1; i++, j++) {
 			vec = P[head[j]] - P[head[i]];
-			if (valid(cur, vec))
-				HQ.push(Event(vec, head[i], head[j]));
+			if (valid(cur, vec)) EQ.push(Event(vec, head[i], head[j], HEAD));
 		}
 		for (int i = 0, j = 1; i < tp - 1; i++, j++) {
 			vec = P[tail[j]] - P[tail[i]];
-			if (valid(cur, vec))
-				TQ.push(Event(vec, tail[i], tail[j]));
+			if (valid(cur, vec)) EQ.push(Event(vec, tail[i], tail[j], TAIL));
 		}
 		for (int i = 0; i < h; i++) {
 			const Pos& p = P[jaw[i]];
@@ -208,7 +205,7 @@ struct Jaw {
 			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
 		return;
 	}
-	bool candidate_update(const Pos& p, const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {
+	bool candidate_update(const Pos& p, const Pos& cur, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {
 		int i = 0;
 		int& c = (f == HEAD ? hp : tp);
 		if (o != -1) {
@@ -223,15 +220,12 @@ struct Jaw {
 			c--;
 			if (0 < o && o < c) {
 				Pos vec = P[idx[o]] - P[idx[o - 1]];
-				if (valid(cur, vec)) {
-					CQ.push(Event(vec, idx[o - 1], idx[o]));
-				}
+				if (valid(cur, vec)) EQ.push(Event(vec, idx[o - 1], idx[o], f));
 			}
 		}
 		if (pop_ || sts[p.pi] == OUTL) return 0;
-		for (i = 0; i < c; i++) {
+		for (i = 0; i < c; i++)
 			if (valid(cur, P[idx[i]] - p, 0)) break;
-		}
 		if (i < c) {
 			memmove(idx + i + 1, idx + i, sizeof(int) * (c - i));
 			for (int k = i + 1; k <= c; k++) ord[idx[k]][f]++;
@@ -240,12 +234,10 @@ struct Jaw {
 		idx[i] = p.pi, ord[p.pi][f] = i;
 		if (sts[p.pi] == -1) sts[p.pi] = f;
 		else sts[p.pi] |= f;
-		if (i > 0 && valid(cur, P[idx[i]] - P[idx[i - 1]])) {
-			CQ.push(Event(P[idx[i]] - P[idx[i - 1]], idx[i - 1], idx[i]));
-		}
-		if (i < c - 1 && valid(cur, P[idx[i + 1]] - P[idx[i]])) {
-			CQ.push(Event(P[idx[i + 1]] - P[idx[i]], idx[i], idx[i + 1]));
-		}
+		if (i > 0 && valid(cur, P[idx[i]] - P[idx[i - 1]]))
+			EQ.push(Event(P[idx[i]] - P[idx[i - 1]], idx[i - 1], idx[i], f));
+		if (i < c - 1 && valid(cur, P[idx[i + 1]] - P[idx[i]]))
+			EQ.push(Event(P[idx[i + 1]] - P[idx[i]], idx[i], idx[i + 1], f));
 		return 1;
 	}
 	void hull_jaw_rotate(const Pos& cur) {
@@ -258,12 +250,10 @@ struct Jaw {
 			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
 			if (sz < 2) continue;
 			const Pos& p1 = H[p.hi][i0];
-			if ((sts[p.pi] != -1 && (sts[p.pi] & HEAD)) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL)) {
-				candidate_update(p1, cur, HQ, head, HEAD, ord[p.pi][HEAD]);
-			}
-			if ((sts[p.pi] != -1 && (sts[p.pi] & TAIL)) && (sts[p1.pi] == -1 || sts[p1.pi] == HEAD)) {
-				candidate_update(p1, cur, TQ, tail, TAIL, ord[p.pi][TAIL]);
-			}
+			if ((sts[p.pi] != -1 && (sts[p.pi] & HEAD)) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL))
+				candidate_update(p1, cur, head, HEAD, ord[p.pi][HEAD]);
+			if ((sts[p.pi] != -1 && (sts[p.pi] & TAIL)) && (sts[p1.pi] == -1 || sts[p1.pi] == HEAD))
+				candidate_update(p1, cur, tail, TAIL, ord[p.pi][TAIL]);
 			jaw[p.hi] = p1.pi;
 			const Pos& p2 = H[p.hi][(i0 + 1) % sz];
 			Pos vec = p2 - p1;
@@ -277,56 +267,36 @@ struct Jaw {
 		ord[i][f] = v; ord[j][f] = u;
 		return;
 	}
-	void candidate_jaw_rotate(const Pos& cur, PQ& CQ, int idx[], const int& f = HEAD) {
+	void points_jaw_rotate(const Pos& cur, Events& EV) {
 		Pos vec;
-		while (CQ.size()) {
-			Event ev = CQ.top();
+		while (EQ.size()) {
+			Event ev = EQ.top();
 			if (cur / ev.v() > 0) break;
-			CQ.pop();
+			EQ.pop();
 			if (cur / ev.v() < 0) continue;
-			int i = ev.i, j = ev.j;
+			int i = ev.i, j = ev.j, typ = ev.t;
 			if (sts[i] == -1 || sts[j] == -1) continue;
-			if (!(sts[i] & f) || !(sts[j] & f)) continue;
-			int u = ord[i][f], v = ord[j][f];
+			if (typ == OUTL && (sts[i] != OUTL || sts[j] != OUTL)) continue;
+			if (typ != OUTL && (!(sts[i] & typ) || !(sts[j] & typ))) continue;
+			int u = ord[i][typ], v = ord[j][typ];
 			if (u + 1 != v) continue;
-			swap(i, j, idx, f);
-			u = ord[i][f], v = ord[j][f];
-			const int& c = (f == HEAD ? hp : tp);
+			if (typ == OUTL) EV.push_back(Event(cur, u, v, t));
+			int* idx = nullptr;
+			if (typ == OUTL) idx = outl;
+			if (typ == HEAD) idx = head;
+			if (typ == TAIL) idx = tail;
+			swap(i, j, idx, typ);
+			const int& c = (typ == OUTL ? K + 1 : typ == HEAD ? hp : tp);
+			u = ord[i][typ], v = ord[j][typ];
 			if (u < c - 1) {
 				vec = P[idx[u + 1]] - P[idx[u]];
-				if (valid(cur, vec)) CQ.push(Event(vec, idx[u], idx[u + 1]));
+				if (valid(cur, vec)) EQ.push(Event(vec, idx[u], idx[u + 1], typ));
 			}
 			if (0 < v) {
 				vec = P[idx[v]] - P[idx[v - 1]];
-				if (valid(cur, vec)) CQ.push(Event(vec, idx[v - 1], idx[v]));
+				if (valid(cur, vec)) EQ.push(Event(vec, idx[v - 1], idx[v], typ));
 			}
 		}
-		return;
-	}
-	void outlier_jaw_rotate(const Pos& cur, Events& EV) {
-		Pos vec;
-		while (OQ.size()) {
-			Event ev = OQ.top();
-			if (cur / ev.v() > 0) break;
-			OQ.pop();
-			if (cur / ev.v() < 0) continue;
-			int i = ev.i, j = ev.j;
-			if (sts[i] != OUTL || sts[j] != OUTL) continue;
-			int u = ord[i][OUTL], v = ord[j][OUTL];
-			if (u + 1 != v) continue;
-			EV.push_back(Event(cur, u, v, t));
-			swap(i, j, outl, OUTL);
-			u = ord[i][OUTL], v = ord[j][OUTL];
-			if (u < K) {
-				vec = P[outl[u + 1]] - P[outl[u]];
-				if (valid(cur, vec)) OQ.push(Event(vec, outl[u], outl[u + 1]));
-			}
-			if (0 < v) {
-				vec = P[outl[v]] - P[outl[v - 1]];
-				if (valid(cur, vec)) OQ.push(Event(vec, outl[v - 1], outl[v]));
-			}
-		}
-		return;
 	}
 	void pop(const Pos& p) {
 		if (sts[p.pi] == OUTL) sts[p.pi] = -1;
@@ -375,74 +345,34 @@ struct Jaw {
 			assert(sts[c.pi] != 0);
 			if (sts[c.pi] & HEAD) {
 				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size())
-					candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
+					candidate_update(c, cur, head, HEAD, ord[c.pi][HEAD], 1);
 				else if (sts[nxt.pi] == OUTL)
-					candidate_update(pre, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-				else if (sts[nxt.pi] != OUTL) 
-					candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
+					candidate_update(pre, cur, head, HEAD, ord[c.pi][HEAD]);
+				else if (sts[nxt.pi] != OUTL)
+					candidate_update(nxt, cur, head, HEAD, ord[c.pi][HEAD]);
 			}
-			//if (sts[c.pi] & HEAD) {
-			//	if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
-			//		candidate_update(c, cur, HQ, head, HEAD, ord[c.pi][HEAD], 1);
-			//	}
-			//	else if (sts[nxt.pi] == OUTL) {
-			//		if (sts[pre.pi] != OUTL && (sts[pre.pi] == -1 || !(sts[pre.pi] & HEAD)))
-			//			candidate_update(pre, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-			//		else assert(0);
-			//	}
-			//	else if (sts[nxt.pi] != OUTL) {
-			//		if (sts[nxt.pi] == -1 || !(sts[nxt.pi] & HEAD)) candidate_update(nxt, cur, HQ, head, HEAD, ord[c.pi][HEAD]);
-			//		else assert(0);
-			//	}
-			//	else {
-			//		assert(0);
-			//	}
-			//}
 			if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
-				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) 
-					candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
-				else if (sts[pre.pi] == OUTL) 
-					candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-				else if (sts[pre.pi] != OUTL) 
-					candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
+				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size())
+					candidate_update(c, cur, tail, TAIL, ord[c.pi][TAIL], 1);
+				else if (sts[pre.pi] == OUTL)
+					candidate_update(nxt, cur, tail, TAIL, ord[c.pi][TAIL]);
+				else if (sts[pre.pi] != OUTL)
+					candidate_update(pre, cur, tail, TAIL, ord[c.pi][TAIL]);
 			}
-			//if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
-			//	if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size()) {
-			//		candidate_update(c, cur, TQ, tail, TAIL, ord[c.pi][TAIL], 1);
-			//	}
-			//	else if (sts[pre.pi] == OUTL) {
-			//		if (sts[nxt.pi] != OUTL && (sts[nxt.pi] == -1 || !(sts[nxt.pi] & TAIL)))
-			//			candidate_update(nxt, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-			//		else assert(0);
-			//	}
-			//	else if (sts[pre.pi] != OUTL) {
-			//		if (sts[pre.pi] == -1 || !(sts[pre.pi] & TAIL)) candidate_update(pre, cur, TQ, tail, TAIL, ord[c.pi][TAIL]);
-			//		else assert(0);
-			//	}
-			//	else {
-			//		assert(0);
-			//	}
-			//}
 			push(c);
 			vec = P[outl[K]] - P[outl[K - 1]];
-			if (valid(cur, vec)) {
-				OQ.push(Event(vec, outl[K - 1], outl[K]));
-			}
+			if (valid(cur, vec)) EQ.push(Event(vec, outl[K - 1], outl[K], OUTL));
 			sz = H[x.hi].size();
 			pre = H[x.hi][(x.i - 1 + sz) % sz];
 			nxt = H[x.hi][(x.i + 1) % sz];
-			if ((sts[x.pi] == -1 || !(sts[x.pi] & TAIL)) && cnt[x.hi] + 1 == sz) {
-				candidate_update(x, cur, TQ, tail, TAIL, -1);
-			}
-			else if (sts[pre.pi] != -1 && (sts[pre.pi] & TAIL)) {
-				candidate_update(x, cur, TQ, tail, TAIL, ord[pre.pi][TAIL]);
-			}
-			if ((sts[x.pi] == -1 || !(sts[x.pi] & HEAD)) && cnt[x.hi] + 1 == sz) {
-				candidate_update(x, cur, HQ, head, HEAD, -1);
-			}
-			else if (sts[nxt.pi] != -1 && (sts[nxt.pi] & HEAD)) {
-				candidate_update(x, cur, HQ, head, HEAD, ord[nxt.pi][HEAD]);
-			}
+			if ((sts[x.pi] == -1 || !(sts[x.pi] & TAIL)) && cnt[x.hi] + 1 == sz)
+				candidate_update(x, cur, tail, TAIL, -1);
+			else if (sts[pre.pi] != -1 && (sts[pre.pi] & TAIL))
+				candidate_update(x, cur, tail, TAIL, ord[pre.pi][TAIL]);
+			if ((sts[x.pi] == -1 || !(sts[x.pi] & HEAD)) && cnt[x.hi] + 1 == sz)
+				candidate_update(x, cur, head, HEAD, -1);
+			else if (sts[nxt.pi] != -1 && (sts[nxt.pi] & HEAD))
+				candidate_update(x, cur, head, HEAD, ord[nxt.pi][HEAD]);
 		}
 		while (SQ.size()) SQ.pop();
 		return;
@@ -458,9 +388,7 @@ struct Jaw {
 		return;
 	}
 	bool jaw_rotate(Events& EV, const Pos& cur) {
-		candidate_jaw_rotate(cur, HQ, head, HEAD);
-		candidate_jaw_rotate(cur, TQ, tail, TAIL);
-		outlier_jaw_rotate(cur, EV);
+		points_jaw_rotate(cur, EV);
 		outlier_candidate_swap(cur, EV);
 		hull_jaw_rotate(cur);
 		return 1;
@@ -516,17 +444,13 @@ struct Calipers {
 	}
 	bool jaw_rotate() {
 		Polygon V;
-		V.reserve(10);
+		V.reserve(6);
 		get_events();
-		if (bot.OQ.size()) V.push_back(bot.OQ.top().v());
+		if (bot.EQ.size()) V.push_back(bot.EQ.top().v());
 		if (bot.JQ.size()) V.push_back(bot.JQ.top().v());
-		if (bot.HQ.size()) V.push_back(bot.HQ.top().v());
-		if (bot.TQ.size()) V.push_back(bot.TQ.top().v());
 		if (bot.SQ.size()) V.push_back(bot.SQ.top().v());
-		if (top.OQ.size()) V.push_back(-top.OQ.top().v());
+		if (top.EQ.size()) V.push_back(-top.EQ.top().v());
 		if (top.JQ.size()) V.push_back(-top.JQ.top().v());
-		if (top.HQ.size()) V.push_back(-top.HQ.top().v());
-		if (top.TQ.size()) V.push_back(-top.TQ.top().v());
 		if (top.SQ.size()) V.push_back(-top.SQ.top().v());
 		if (V.empty()) { cur = Pos(0, 1); return 0; }
 		cur = V[0];
@@ -563,34 +487,21 @@ ld rotating_calipers(Polygon& P) {
 	}
 	return ret * .5;
 }
-#include <chrono>
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-	//freopen("../../tests/G_LinearRegression/data/secret/0TRV08.in", "r", stdin);
-	//freopen("../../tests/G_LinearRegression/data/secret/1CRF01.in", "r", stdin);
-	//freopen("../../tests/G_LinearRegression/data/secret/2RND10.in", "r", stdin);
-	freopen("../../tests/G_LinearRegression/big_data/3.in", "r", stdin);
 	std::cin >> N >> K;
 	P.resize(N); for (Pos& p : P) std::cin >> p;
 	if (N == 1) { std::cout << "0.000000000\n"; return; }
 	if (N == 2 && K == 1) { std::cout << "0.000000000\n"; return; }
 	if (N == 2 && K == 0) { std::cout << ((P[0].x == P[1].x) ? std::abs(P[0].y - P[1].y) * .5 : 0) << "\n"; return; }
 	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
-	auto t_start = std::chrono::high_resolution_clock::now();
 	C.init(N, K, Pos(0, -1));
-	auto t_mid = std::chrono::high_resolution_clock::now();
 	ld ret = INF;
 	while (C.rotate(ret)) {}
-	auto t_end = std::chrono::high_resolution_clock::now();
 	std::cout << std::max(.0, ret * .5) << "\n";
-	auto dur_init = std::chrono::duration_cast<std::chrono::microseconds>(t_mid - t_start).count();
-	auto dur_sweep = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_mid).count();
-	std::cerr << "Init time : " << dur_init << " us" << "\n";
-	std::cerr << "Sweep time: " << dur_sweep << " us" << "\n";
-	std::cerr << "Total time: " << dur_init + dur_sweep << " us" << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj26108

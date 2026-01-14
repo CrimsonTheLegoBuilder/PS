@@ -1,11 +1,23 @@
+//import java.io.BufferedWriter;
+//import java.io.OutputStreamWriter;
+//import java.io.IOException;
+//import java.util.Arrays;
 import java.util.Scanner;
 
 public class boj_bronze {
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        int N = scan.nextInt();
+        Scanner sc = new Scanner(System.in);
+        int N = sc.nextInt();
+        String s = sc.next();
+        int sum = 0;
+        for (int i = 0; i < s.length(); i++) {
+            sum += s.charAt(i) - 64;
+        }
+        System.out.println(sum);
+    }
+}
 
-        for (int i = 0; i < N; i++) {
+/*
             String s = scan.next();
             int len = s.length();
             char l = s.charAt(len / 2 - 1);
@@ -16,6 +28,4 @@ public class boj_bronze {
             else {
                 //System.out.println("Do-it-Not");
             }
-        }
-    }
-}
+ */

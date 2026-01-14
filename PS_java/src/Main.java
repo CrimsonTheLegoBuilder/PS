@@ -14,7 +14,7 @@ public class Main {
                 System.out.println("Do-it");
             }
             else {
-                System.out.println("Do-it-Not");
+                //System.out.println("Do-it-Not");
             }
         }
     }

@@ -8,12 +8,16 @@ public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int N = sc.nextInt();
-        String s = sc.next();
-        int sum = 0;
-        for (int i = 0; i < s.length(); i++) {
-            sum += s.charAt(i) - 64;
+        for (int i = 0; i <= N; i++) {
+            if (i == 0) { System.out.println("int a;"); }
+            else if (i == 1) { System.out.println("int *ptr = &a;"); }
+            else {
+                System.out.print("int ");
+                for (int j = 0; j < i; j++) System.out.print("*");
+                if (i - 1 == 1) System.out.println("ptr" + i + " = &ptr;");
+                else System.out.println("ptr" + i + " = &ptr" + (i - 1) + ";");
+            }
         }
-        System.out.println(sum);
     }
 }
 

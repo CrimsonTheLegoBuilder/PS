@@ -7,17 +7,15 @@ import java.util.Scanner;
 public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        int N = sc.nextInt();
-        for (int i = 0; i <= N; i++) {
-            if (i == 0) { System.out.println("int a;"); }
-            else if (i == 1) { System.out.println("int *ptr = &a;"); }
-            else {
-                System.out.print("int ");
-                for (int j = 0; j < i; j++) System.out.print("*");
-                if (i - 1 == 1) System.out.println("ptr" + i + " = &ptr;");
-                else System.out.println("ptr" + i + " = &ptr" + (i - 1) + ";");
-            }
-        }
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+        int x = sc.nextInt();
+        int y = sc.nextInt();
+        int r1 = Math.abs(a - b);
+        int r2 = Math.abs(a - x) + Math.abs(b - y);
+        int r3 = Math.abs(a - y) + Math.abs(b - x);
+        int ans = Math.min(r1, Math.min(r2, r3));
+        System.out.println(ans);
     }
 }
 

@@ -7,39 +7,14 @@ import java.util.Scanner;
 public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        int aa = sc.nextInt();
-        int ah = sc.nextInt();
-        int ba = sc.nextInt();
-        int bh = sc.nextInt();
-        int ac = ah / ba;
-        int bc = bh / aa;
-        int c = Math.min(ac, bc);
-        ah -= c * ba;
-        bh -= c * aa;
-        if (ah <= 0 && bh <= 0) {
-            System.out.println("DRAW");
-            return;
-        }
-        if (ah <= 0) {
-            System.out.println("PLAYER B");
-            return;
-        }
-        if (bh <= 0) {
-            System.out.println("PLAYER A");
-            return;
-        }
-        ah -= ba; bh -= aa;
-        if (ah <= 0 && bh <= 0) {
-            System.out.println("DRAW");
-            return;
-        }
-        if (ah <= 0) {
-            System.out.println("PLAYER B");
-            return;
-        }
-        if (bh <= 0) {
-            System.out.println("PLAYER A");
-            return;
+        while (true) {
+            int l = sc.nextInt();
+            int w = sc.nextInt();
+            int a = sc.nextInt();
+            if (l == 0 && w == 0 && a == 0) break;
+            if (l == 0) System.out.println(a / w + " " + w + " " + a);
+            if (w == 0) System.out.println(l + " " + a / l + " " + a);
+            if (a == 0) System.out.println(l + " " + w + " " + l * w);
         }
     }
 }

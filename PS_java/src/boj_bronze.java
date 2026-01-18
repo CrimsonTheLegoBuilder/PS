@@ -9,14 +9,12 @@ public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int N = sc.nextInt();
-        for (int i = 1; i <= N; i++) {
-            int[] A = new int[3];
-            for (int j = 0; j < 3; j++) A[j] = sc.nextInt();
-            Arrays.sort(A);
-            int d = A[0] * A[0] + A[1] * A[1];
-            if (d == A[2] * A[2]) System.out.println("Case #" + i + ": YES");
-            else System.out.println("Case #" + i + ": NO");
+        int c = 0;
+        for (int i = 1; i <= 5; i++) {
+            int j = N - i;
+            if (j >= 0 && j <= i) c++;
         }
+        System.out.println(c);
     }
 }
 

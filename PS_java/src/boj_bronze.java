@@ -9,12 +9,15 @@ public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int N = sc.nextInt();
-        int c = 0;
-        for (int i = 1; i <= 5; i++) {
-            int j = N - i;
-            if (j >= 0 && j <= i) c++;
+        int A = 0;
+        int B = 0;
+        for (int i = 0; i < N; i++) {
+            int a = sc.nextInt();
+            int b = sc.nextInt();
+            A += a;
+            B += b;
+            System.out.println(A - B);
         }
-        System.out.println(c);
     }
 }
 

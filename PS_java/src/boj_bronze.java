@@ -8,16 +8,10 @@ import java.util.Arrays;
 public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        int N = sc.nextInt();
-        int A = 0;
-        int B = 0;
-        for (int i = 0; i < N; i++) {
-            int a = sc.nextInt();
-            int b = sc.nextInt();
-            A += a;
-            B += b;
-            System.out.println(A - B);
-        }
+        String c = sc.next();
+        char s = c.charAt(0);
+        int f = Math.abs(s - 'I');
+        System.out.println(f + 84);
     }
 }
 

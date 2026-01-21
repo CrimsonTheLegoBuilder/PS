@@ -8,10 +8,15 @@ import java.util.Arrays;
 public class boj_bronze {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        String c = sc.next();
-        char s = c.charAt(0);
-        int f = Math.abs(s - 'I');
-        System.out.println(f + 84);
+        while (true) {
+            int c = sc.nextInt();
+            int d = sc.nextInt();
+            if (c == 0 && d == 0) break;
+            int t1 = c * 30 + d * 40;
+            int t2 = c * 35 + d * 30;
+            int t3 = c * 40 + d * 20;
+            System.out.println(Math.min(t1, Math.min(t2, t3)));
+        }
     }
 }
 

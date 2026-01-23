@@ -26,20 +26,9 @@ public class boj_geometry {
     public static void DEBUG() { System.out.println("Geometry Fuck!!"); }
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        int N = scan.nextInt();
-        int x0 = (int)1e9 + 1;
-        int x1 = -(int)1e9 - 1;
-        int y0 = (int)1e9 + 1;
-        int y1 = -(int)1e9 - 1;
-        for (int i = 0; i < N; i++) {
-            int x = scan.nextInt();
-            int y = scan.nextInt();
-            x0 = Math.min(x0, x);
-            y0 = Math.min(y0, y);
-            x1 = Math.max(x1, x);
-            y1 = Math.max(y1, y);
-        }
-        int d = Math.max((x1 - x0), (y1 - y0));
-        System.out.println((long)d * d);
+        double N = scan.nextDouble();
+        N /= Math.PI;
+        //System.out.println(Math.sqrt(N) * 2);
+        System.out.printf("%.15f\n", Math.sqrt(N) * 2);
     }
 }

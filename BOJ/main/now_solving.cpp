@@ -1,508 +1,271 @@
-﻿#pragma GCC optimize("O3")
-#pragma GCC optimize("unroll-loops")
-#define _CRT_SECURE_NO_WARNINGS
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-#include <cstring>
-#include <cassert>
-#include <vector>
-#include <queue>
-typedef long long ll;
-typedef double ld;
-const ll INF = 1e17;
-const int LEN = 5e4 + 1;
-const int N_LEN = 50005;
-const int K_LEN = 305;
-inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
-inline bool zero(const ll& x) { return !x; }
-inline ll sq(const ll& x) { return x * x; }
-
-#define TOP 0
-#define BOT 1
-
-#define OUTL 0
-#define HEAD 1
-#define TAIL 2
-
-int N, K;
-struct Pos {
-	ll x, y;
-	int pi, hi, i;
-	Pos(ll x_ = 0, ll y_ = 0, int p_ = -1, int h_ = -1, int i_ = -1) : x(x_), y(y_), pi(p_), hi(h_), i(i_) {}
-	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
-	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
-	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
-	Pos operator * (const int& n) const { return { x * n, y * n }; }
-	Pos operator / (const int& n) const { return { x / n, y / n }; }
-	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
-	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
-	Pos operator - () const { return { -x, -y }; }
-	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	ld mag() const { return hypot(x, y); }
-	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
-	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
-typedef std::vector<Pos> Polygon;
-Polygon P, H[K_LEN], L[K_LEN], U[K_LEN];
-bool F[N_LEN];
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
-ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-ld vertical_dist(const Pos& p, const Pos& cur, const Pos& q) {
-	if (!cur.x) return INF;
-	if (ccw(p, p + cur, q) <= 0) return 0;
-	ld dx = q.x - p.x;
-	ld dy = dx / cur.x * cur.y;
-	ld y = p.y + dy;
-	return std::abs(q.y - y);
+﻿#include<iostream>
+#include<vector>
+#include<cmath>
+#include<iomanip>
+#include <tuple>
+using namespace std;
+#define pdd pair<long double, long double>
+#define pll pair<long long, long long>
+int n, m, q;
+vector<pll> convex[2];
+long long int area[2][100000];
+int change(long long int tmp) {
+	if (tmp > 0) return 1;
+	if (!tmp) return 0;
+	return -1;
 }
-void monotone_chain(Polygon& C, Polygon& H) {
-	H.clear();
-	if (C.size() <= 2) {
-		for (const Pos& pos : C) H.push_back(pos);
+long long int ccw(pll a, pll b) { return a.first * b.second - a.second * b.first; }
+long long int dist(pll a) { return a.first * a.first + a.second * a.second; }
+long double dccw(pdd a, pdd b) { return a.first * b.second - a.second * b.first; }
+pll tovec(pll a, pll b) { return { b.first - a.first, b.second - a.second }; }
+pdd dtovec(pdd a, pdd b) { return { b.first - a.first, b.second - a.second }; }
+int inconvex(int idx, pll point) {
+	int s = convex[idx].size();
+	pll vec_l = tovec(convex[idx][0], convex[idx][s - 1]);
+	pll vec_r = tovec(convex[idx][0], convex[idx][1]);
+	pll vec_p = tovec(convex[idx][0], point);
+
+	if (ccw(vec_l, vec_p) > 0 || ccw(vec_p, vec_r) > 0) return -1;
+	if (ccw(vec_l, vec_p) == 0) {
+		if (dist(tovec(convex[idx][0], convex[idx][s - 1])) >= dist(tovec(convex[idx][0], point))) return 0;
+		return -1;
+	}
+	if (ccw(vec_p, vec_r) == 0) {
+		if (dist(tovec(convex[idx][0], convex[idx][1])) >= dist(tovec(convex[idx][0], point))) return 0;
+		return -1;
+	}
+	int l = 1, r = s - 1;
+	while (r - l > 1) {
+		int mid = (l + r) / 2;
+		pll vec_m = tovec(convex[idx][0], convex[idx][mid]);
+		if (change(ccw(vec_m, vec_p)) == 1) l = mid;
+		else r = mid;
+	}
+
+	pll vec1 = tovec(convex[idx][l], point);
+	pll vec2 = tovec(point, convex[idx][(l + 1) % s]);
+	return -change(ccw(vec1, vec2));
+}
+int f(int idx, pll point) { return change(ccw(tovec(point, convex[1][idx]), tovec(point, convex[1][(idx + 1) % m]))); }
+int f2(int idx, pll a, pll b) { return change(ccw(tovec(a, b), tovec(a, convex[0][idx]))); }
+pll findrange(pll point) {
+	int lb = 0, rb = m - 1, lpoint, rpoint;
+	int p = f(0, point);
+	int q = f(m - 1, point);
+	if (!p) {
+		lb = 1;
+		p = f(1, point);
+	}
+	if (!q) {
+		rb = m - 2;
+		q = f(m - 2, point);
+	}
+	if (p != q) {
+		if (p == 1) {
+			rpoint = lb;
+			int l = lb, r = rb;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (f(mid, point) == 1) l = mid + 1;
+				else r = mid;
+			}
+			lpoint = r;
+		}
+		else {
+			if (f(m - 1, point)) lpoint = 0;
+			else lpoint = m - 1;
+			int l = lb, r = rb;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (f(mid, point) <= 0) l = mid + 1;
+				else r = mid;
+			}
+			rpoint = r;
+		}
 	}
 	else {
-		for (int i = 0; i < C.size(); i++) {
-			while (H.size() > 1 && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
+		if (p == 1) {
+			int l2 = lb, r2 = rb;
+			while (l2 < r2) {
+				int mid = (l2 + r2) / 2;
+				if (change(ccw(tovec(point, convex[1][0]), tovec(point, convex[1][mid]))) >= 0) l2 = mid + 1;
+				else r2 = mid;
+			}
+			int l = lb, r = r2 - 1;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (f(mid, point) == 1) l = mid + 1;
+				else r = mid;
+			}
+			lpoint = r;
+			l = r2 - 1, r = rb;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (f(mid, point) <= 0) l = mid + 1;
+				else r = mid;
+			}
+			rpoint = r;
 		}
-		H.pop_back();
-		int s = H.size() + 1;
-		for (int i = C.size() - 1; i >= 0; i--) {
-			while (H.size() > s && ccw(H[H.size() - 2], H[H.size() - 1], C[i]) <= 0)
-				H.pop_back();
-			H.push_back(C[i]);
+		else {
+			int l2 = lb, r2 = rb;
+			while (l2 < r2) {
+				int mid = (l2 + r2) / 2;
+				if (change(ccw(tovec(point, convex[1][0]), tovec(point, convex[1][mid]))) <= 0) l2 = mid + 1;
+				else r2 = mid;
+			}
+			int l = lb, r = r2 - 1;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (f(mid, point) <= 0) l = mid + 1;
+				else r = mid;
+			}
+			rpoint = r;
+			l = r2 - 1, r = rb;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (f(mid, point) == 1) l = mid + 1;
+				else r = mid;
+			}
+			lpoint = r;
 		}
-		H.pop_back();
 	}
-	return;
+	return { lpoint, rpoint };
 }
-struct Event {
-	ll x, y;
-	int i, j, t;
-	Event(Pos p = Pos(0, 0), int i_ = -1, int j_ = -1, int t_ = -1) : x(p.x), y(p.y), i(i_), j(j_), t(t_) {}
-	Pos v() const { return Pos(x, y); }
-	bool operator < (const Event& o) const { return x * o.y - o.x * y < 0; }
-};
-typedef std::priority_queue<Event> PQ;
-typedef std::vector<Event> Events;
-struct Jaw {
-	PQ EQ, JQ, SQ;
-	int t, K, h, hp, tp;
-	int outl[K_LEN], head[K_LEN], tail[K_LEN], jaw[K_LEN], cnt[K_LEN];
-	int ord[N_LEN][3], sts[N_LEN];
-	Pos ref;
-	Jaw(int t_ = BOT, int k_ = 0) : t(t_), K(k_) {
-		ref = (t == BOT ? Pos(0, -1) : Pos(0, 1));
-		memset(outl, -1, sizeof outl);
-		memset(head, -1, sizeof head);
-		memset(tail, -1, sizeof tail);
-		memset(jaw, -1, sizeof jaw);
-		memset(cnt, 0, sizeof cnt);
-		memset(ord, -1, sizeof ord);
-		memset(sts, -1, sizeof sts);
-		h = 0; hp = 0; tp = 0;
+int findidx(pll a, pll b, int k) {
+	int lb = 0, rb = n - 1;
+	int p = f2(0, a, b);
+	int q = f2(n - 1, a, b);
+	if (!p) {
+		lb = 1;
+		p = f2(1, a, b);
 	}
-	bool valid(const Pos& cur, const Pos& vec, const bool& evt = 1) {
-		ll tq = cur / vec, fc = cur * vec;
-		bool f1 = tq > 0 || (!tq && fc > 0);
-		tq = ref / vec, fc = ref * vec;
-		bool f2 = evt ? tq > 0 || (!tq && fc > 0) : 1;
-		return f1 && f2;
+	if (!q) {
+		rb = n - 2;
+		q = f2(n - 2, a, b);
 	}
-	void init(const Polygon& Q, const int& N, const int& K_, const int& h_, const Pos& cur = Pos(0, -1)) {
-		K = K_; h = h_;
-		int sz = Q.size(); assert(N > K);
-		for (int i = 0, q; i <= K; i++) {
-			q = (t == BOT ? i : sz - i - 1);
-			outl[i] = Q[q].pi;
-			ord[Q[q].pi][OUTL] = i;
-			sts[Q[q].pi] = OUTL;
-			cnt[Q[q].hi]++;
+	if (p != q) {
+		if (p == 1) {
+			if (k) return (lb - 1 + n) % n;
+			if (!f2(n - 1, a, b)) return n - 1;
+			return 0;
 		}
-		for (int k = 0; k < h; k++) jaw[k] = (t == BOT ? L[k][0].pi : U[k][0].pi);
-		Polygon hd, tl;
-		Pos vec;
-		const Pos& b = P[outl[K]];
-		for (int k = 0; k < h; k++) {
-			const Polygon& LH = (t == BOT ? L[k] : U[k]);
-			const Polygon& UH = (t == BOT ? U[k] : L[k]);
-			bool hf = 0, tf = 0;
-			sz = LH.size();
-			for (int i = 0; i < sz; i++) {
-				if (sts[LH[i].pi] != OUTL) {
-					hd.push_back(LH[i]);
-					hf = 1;
-					break;
+		else {
+			int l = lb, r = rb;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (k) {
+					if (f2(mid, a, b) <= 0) l = mid + 1;
+					else r = mid;
+				}
+				else {
+					if (f2(mid, a, b) < 0) l = mid + 1;
+					else r = mid;
 				}
 			}
-			sz = UH.size();
-			for (int i = sz - 1; i >= 0; i--) {
-				if (sts[UH[i].pi] != OUTL) {
-					tl.push_back(UH[i]);
-					tf = 1;
-					break;
+			if (k) return (r - 1 + n) % n;
+			return r;
+		}
+	}
+	else {
+		if (p == 1) {
+			int l2 = lb, r2 = rb;
+			while (l2 < r2) {
+				int mid = (l2 + r2) / 2;
+				if (change(ccw(tovec(convex[0][0], a), tovec(convex[0][0], convex[0][mid]))) < 0 || !mid) l2 = mid + 1;
+				else r2 = mid;
+			}
+			int l = r2, r = rb;
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (k) {
+					if (f2(mid, a, b) <= 0) l = mid + 1;
+					else r = mid;
+				}
+				else {
+					if (f2(mid, a, b) < 0) l = mid + 1;
+					else r = mid;
 				}
 			}
-			if (hf) hp++;
-			if (tf) tp++;
-			if (!hf) assert(!tf);
+			if (k) return (r - 1 + n) % n;
+			return r;
 		}
-		std::sort(hd.begin(), hd.end());
-		if (t == TOP) std::reverse(hd.begin(), hd.end());
-		sz = hd.size();
-		assert(sz == hp);
-		for (int i = 0; i < sz; i++) {
-			head[i] = hd[i].pi;
-			ord[hd[i].pi][HEAD] = i;
-			assert(sts[hd[i].pi]);
-			if (sts[hd[i].pi] == -1) sts[hd[i].pi] = HEAD;
-			else sts[hd[i].pi] |= HEAD;
-		}
-		std::sort(tl.begin(), tl.end());
-		if (t == TOP) std::reverse(tl.begin(), tl.end());
-		sz = tl.size();
-		assert(sz == tp);
-		for (int i = 0; i < sz; i++) {
-			tail[i] = tl[i].pi;
-			ord[tl[i].pi][TAIL] = i;
-			assert(sts[tl[i].pi]);
-			if (sts[tl[i].pi] == -1) sts[tl[i].pi] = TAIL;
-			else sts[tl[i].pi] |= TAIL;
-		}
-		for (int i = 0, j = 1; i < K; i++, j++) {
-			vec = P[outl[j]] - P[outl[i]];
-			if (valid(cur, vec)) EQ.push(Event(vec, outl[i], outl[j], OUTL));
-		}
-		for (int i = 0, j = 1; i < hp - 1; i++, j++) {
-			vec = P[head[j]] - P[head[i]];
-			if (valid(cur, vec)) EQ.push(Event(vec, head[i], head[j], HEAD));
-		}
-		for (int i = 0, j = 1; i < tp - 1; i++, j++) {
-			vec = P[tail[j]] - P[tail[i]];
-			if (valid(cur, vec)) EQ.push(Event(vec, tail[i], tail[j], TAIL));
-		}
-		for (int i = 0; i < h; i++) {
-			const Pos& p = P[jaw[i]];
-			int sz = H[p.hi].size();
-			if (sz < 2) continue;
-			vec = H[p.hi][(p.i + 1) % sz] - H[p.hi][p.i];
-			if (valid(cur, vec))
-				JQ.push(Event(vec, H[p.hi][p.i].pi, H[p.hi][(p.i + 1) % sz].pi));
-		}
-		const Pos& ch = P[head[0]];
-		const Pos& ct = P[tail[0]];
-		vec = ch - b;
-		if (valid(cur, vec))
-			SQ.push(Event(vec, b.pi, ch.pi, HEAD));
-		vec = ct - b;
-		if (valid(cur, vec))
-			SQ.push(Event(vec, b.pi, ct.pi, TAIL));
-		return;
-	}
-	bool candidate_update(const Pos& p, const Pos& cur, int idx[], const int& f = HEAD, int o = -1, const int& pop_ = 0) {
-		int i = 0;
-		int& c = (f == HEAD ? hp : tp);
-		if (o != -1) {
-			int x = idx[o];
-			if (sts[x] == f) sts[x] = -1;
-			else sts[x] ^= f;
-			ord[x][f] = -1;
-			if (o < c - 1) {
-				memmove(idx + o, idx + o + 1, sizeof(int) * (c - 1 - o));
-				for (int k = o; k < c - 1; k++) ord[idx[k]][f]--;
+		else {
+			int l2 = lb, r2 = rb;
+			while (l2 < r2) {
+				int mid = (l2 + r2) / 2;
+				if (change(ccw(tovec(convex[0][0], a), tovec(convex[0][0], convex[0][mid]))) <= 0) l2 = mid + 1;
+				else r2 = mid;
 			}
-			c--;
-			if (0 < o && o < c) {
-				Pos vec = P[idx[o]] - P[idx[o - 1]];
-				if (valid(cur, vec)) EQ.push(Event(vec, idx[o - 1], idx[o], f));
+			int l = lb, r = r2 - 1;
+			if (f2(r, a, b) == 0) return r;
+			if (f2(r, a, b) < 0) {
+				if (k) return r;
+				return (r + 1) % n;
 			}
-		}
-		if (pop_ || sts[p.pi] == OUTL) return 0;
-		for (i = 0; i < c; i++)
-			if (valid(cur, P[idx[i]] - p, 0)) break;
-		if (i < c) {
-			memmove(idx + i + 1, idx + i, sizeof(int) * (c - i));
-			for (int k = i + 1; k <= c; k++) ord[idx[k]][f]++;
-		}
-		c++;
-		idx[i] = p.pi, ord[p.pi][f] = i;
-		if (sts[p.pi] == -1) sts[p.pi] = f;
-		else sts[p.pi] |= f;
-		if (i > 0 && valid(cur, P[idx[i]] - P[idx[i - 1]]))
-			EQ.push(Event(P[idx[i]] - P[idx[i - 1]], idx[i - 1], idx[i], f));
-		if (i < c - 1 && valid(cur, P[idx[i + 1]] - P[idx[i]]))
-			EQ.push(Event(P[idx[i + 1]] - P[idx[i]], idx[i], idx[i + 1], f));
-		return 1;
-	}
-	void hull_jaw_rotate(const Pos& cur) {
-		while (JQ.size()) {
-			Event ev = JQ.top();
-			if (cur / ev.v() > 0) break;
-			JQ.pop();
-			if (cur / ev.v() < 0) continue;
-			const Pos& p = P[ev.i];
-			int sz = H[p.hi].size(), i0 = (p.i + 1) % sz;
-			if (sz < 2) continue;
-			const Pos& p1 = H[p.hi][i0];
-			if ((sts[p.pi] != -1 && (sts[p.pi] & HEAD)) && (sts[p1.pi] == -1 || sts[p1.pi] == TAIL))
-				candidate_update(p1, cur, head, HEAD, ord[p.pi][HEAD]);
-			if ((sts[p.pi] != -1 && (sts[p.pi] & TAIL)) && (sts[p1.pi] == -1 || sts[p1.pi] == HEAD))
-				candidate_update(p1, cur, tail, TAIL, ord[p.pi][TAIL]);
-			jaw[p.hi] = p1.pi;
-			const Pos& p2 = H[p.hi][(i0 + 1) % sz];
-			Pos vec = p2 - p1;
-			if (valid(ref, vec)) JQ.push(Event(vec, p1.pi, p2.pi));
-		}
-		return;
-	}
-	void swap(const int& i, const int& j, int idx[], const int& f) {
-		int u = ord[i][f], v = ord[j][f];
-		std::swap(idx[u], idx[v]);
-		ord[i][f] = v; ord[j][f] = u;
-		return;
-	}
-	void points_jaw_rotate(const Pos& cur, Events& EV) {
-		Pos vec;
-		while (EQ.size()) {
-			Event ev = EQ.top();
-			if (cur / ev.v() > 0) break;
-			EQ.pop();
-			if (cur / ev.v() < 0) continue;
-			int i = ev.i, j = ev.j, typ = ev.t;
-			if (sts[i] == -1 || sts[j] == -1) continue;
-			if (typ == OUTL && (sts[i] != OUTL || sts[j] != OUTL)) continue;
-			if (typ != OUTL && (!(sts[i] & typ) || !(sts[j] & typ))) continue;
-			int u = ord[i][typ], v = ord[j][typ];
-			if (u + 1 != v) continue;
-			if (typ == OUTL) EV.push_back(Event(cur, u, v, t));
-			int* idx = nullptr;
-			if (typ == OUTL) idx = outl;
-			if (typ == HEAD) idx = head;
-			if (typ == TAIL) idx = tail;
-			swap(i, j, idx, typ);
-			const int& c = (typ == OUTL ? K + 1 : typ == HEAD ? hp : tp);
-			u = ord[i][typ], v = ord[j][typ];
-			if (u < c - 1) {
-				vec = P[idx[u + 1]] - P[idx[u]];
-				if (valid(cur, vec)) EQ.push(Event(vec, idx[u], idx[u + 1], typ));
+			while (l < r) {
+				int mid = (l + r) / 2;
+				if (k) {
+					if (f2(mid, a, b) <= 0) l = mid + 1;
+					else r = mid;
+				}
+				else {
+					if (f2(mid, a, b) < 0) l = mid + 1;
+					else r = mid;
+				}
 			}
-			if (0 < v) {
-				vec = P[idx[v]] - P[idx[v - 1]];
-				if (valid(cur, vec)) EQ.push(Event(vec, idx[v - 1], idx[v], typ));
-			}
+			if (k) return (r - 1 + n) % n;
+			return r;
 		}
 	}
-	void pop(const Pos& p) {
-		if (sts[p.pi] == OUTL) sts[p.pi] = -1;
-		else return;
-		int o = ord[p.pi][OUTL];
-		assert(o == K);
-		ord[p.pi][OUTL] = -1;
-		outl[o] = -1;
-		cnt[p.hi]--;
-		return;
-	}
-	void push(const Pos& p) {
-		ord[p.pi][OUTL] = K;
-		outl[K] = p.pi;
-		sts[p.pi] = OUTL;
-		cnt[p.hi]++;
-		return;
-	}
-	void outlier_candidate_swap(const Pos& cur, Events& EV) {
-		Pos vec;
-		vec = P[head[0]] - P[outl[K]];
-		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], head[0], HEAD));
-		vec = P[tail[0]] - P[outl[K]];
-		if (valid(cur, vec)) SQ.push(Event(vec, outl[K], tail[0], TAIL));
-		while (SQ.size()) {
-			Event ev = SQ.top();
-			if (cur / ev.v() > 0) break;
-			SQ.pop();
-			if (cur / ev.v() < 0) continue;
-			int i = ev.i, j = ev.j, typ = ev.t;
-			Pos c, x = P[outl[K]];
-			if (typ == HEAD) {
-				if (outl[K] != i || head[0] != j) continue;
-				c = P[head[0]];
-			}
-			else if (typ == TAIL) {
-				if (outl[K] != i || tail[0] != j) continue;
-				c = P[tail[0]];
-			}
-			EV.push_back(Event(cur, ord[x.pi][OUTL], -1, t));
-			pop(x);
-			int sz = H[c.hi].size();
-			Pos pre = H[c.hi][(c.i - 1 + sz) % sz];
-			Pos nxt = H[c.hi][(c.i + 1) % sz];
-			assert(sts[c.pi] != -1);
-			assert(sts[c.pi] != 0);
-			if (sts[c.pi] & HEAD) {
-				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size())
-					candidate_update(c, cur, head, HEAD, ord[c.pi][HEAD], 1);
-				else if (sts[nxt.pi] == OUTL)
-					candidate_update(pre, cur, head, HEAD, ord[c.pi][HEAD]);
-				else if (sts[nxt.pi] != OUTL)
-					candidate_update(nxt, cur, head, HEAD, ord[c.pi][HEAD]);
-			}
-			if (sts[c.pi] != -1 && (sts[c.pi] & TAIL)) {
-				if (H[c.hi].size() == 1 || cnt[c.hi] + 1 == H[c.hi].size())
-					candidate_update(c, cur, tail, TAIL, ord[c.pi][TAIL], 1);
-				else if (sts[pre.pi] == OUTL)
-					candidate_update(nxt, cur, tail, TAIL, ord[c.pi][TAIL]);
-				else if (sts[pre.pi] != OUTL)
-					candidate_update(pre, cur, tail, TAIL, ord[c.pi][TAIL]);
-			}
-			push(c);
-			vec = P[outl[K]] - P[outl[K - 1]];
-			if (valid(cur, vec)) EQ.push(Event(vec, outl[K - 1], outl[K], OUTL));
-			sz = H[x.hi].size();
-			pre = H[x.hi][(x.i - 1 + sz) % sz];
-			nxt = H[x.hi][(x.i + 1) % sz];
-			if ((sts[x.pi] == -1 || !(sts[x.pi] & TAIL)) && cnt[x.hi] + 1 == sz)
-				candidate_update(x, cur, tail, TAIL, -1);
-			else if (sts[pre.pi] != -1 && (sts[pre.pi] & TAIL))
-				candidate_update(x, cur, tail, TAIL, ord[pre.pi][TAIL]);
-			if ((sts[x.pi] == -1 || !(sts[x.pi] & HEAD)) && cnt[x.hi] + 1 == sz)
-				candidate_update(x, cur, head, HEAD, -1);
-			else if (sts[nxt.pi] != -1 && (sts[nxt.pi] & HEAD))
-				candidate_update(x, cur, head, HEAD, ord[nxt.pi][HEAD]);
-		}
-		while (SQ.size()) SQ.pop();
-		return;
-	}
-	void get_events(Event& o_h, Event& o_t) {
-		Pos vec;
-		vec = P[head[0]] - P[outl[K]];
-		if (valid(ref, vec, 0)) o_h = Event(vec, outl[K], head[0], HEAD);
-		else o_h = Event(Pos(0, 0));
-		vec = P[tail[0]] - P[outl[K]];
-		if (valid(ref, vec, 0)) o_t = Event(vec, outl[K], tail[0], TAIL);
-		else o_t = Event(Pos(0, 0));
-		return;
-	}
-	bool jaw_rotate(Events& EV, const Pos& cur) {
-		points_jaw_rotate(cur, EV);
-		outlier_candidate_swap(cur, EV);
-		hull_jaw_rotate(cur);
-		return 1;
-	}
-};
-struct Calipers {
-	const Pos s = Pos(0, -1), e = Pos(0, 1);
-	int N, K, h;
-	Pos cur;
-	Jaw bot = Jaw(BOT), top = Jaw(TOP);
-	Calipers() { N = -1, K = -1, h = 0; }
-	void init(int n = -1, int k = -1, Pos c = Pos(0, -1)) {
-		N = n; K = k; cur = c;
-		std::sort(P.begin(), P.end());
-		for (int i = 0; i < N; i++) P[i].pi = i;
-		Polygon Q = P;
-		memset(F, 0, sizeof(bool) * N);
-		Polygon tmp;
-		tmp.reserve(N);
-		for (int k = 0; k <= K; k++) {
-			tmp.clear();
-			for (const Pos& q : Q) if (!F[q.pi]) tmp.push_back(q);
-			if (tmp.empty()) break;
-			h++;
-			monotone_chain(tmp, H[k]);
-			int sz = H[k].size();
-			for (int i = 0; i < sz; i++) H[k][i].hi = k, H[k][i].i = i;
-			int b = H[k][0].i;
-			for (int i = 0; i < sz; i++) if (H[k][b] < H[k][i]) b = i;
-			L[k].clear(); U[k].clear();
-			for (int i = 0; i <= b; i++) L[k].push_back(H[k][i]);
-			for (int i = b; i <= sz; i++) U[k].push_back(H[k][i % sz]);
-			for (const Pos& h : H[k]) F[h.pi] = 1;
-			Q.clear();
-			for (const Pos& t : tmp) if (!F[t.pi]) Q.push_back(t);
-		}
-		for (int k = 0; k < h; k++) {
-			for (const Pos& p : H[k]) P[p.pi].hi = p.hi, P[p.pi].i = p.i;
-		}
-		Q.clear(); for (const Pos& p : P) if (F[p.pi]) Q.push_back(p);
-		bot.init(Q, N, K, h, s); top.init(Q, N, K, h, e);
-		return;
-	}
-	void get_events() {
-		Event hev, tev;
-		bot.get_events(hev, tev);
-		if (hev.v() != Pos(0, 0)) bot.SQ.push(hev);
-		if (tev.v() != Pos(0, 0)) bot.SQ.push(tev);
-		top.get_events(hev, tev);
-		if (hev.v() != Pos(0, 0)) top.SQ.push(hev);
-		if (tev.v() != Pos(0, 0)) top.SQ.push(tev);
-		return;
-	}
-	bool jaw_rotate() {
-		Polygon V;
-		V.reserve(6);
-		get_events();
-		if (bot.EQ.size()) V.push_back(bot.EQ.top().v());
-		if (bot.JQ.size()) V.push_back(bot.JQ.top().v());
-		if (bot.SQ.size()) V.push_back(bot.SQ.top().v());
-		if (top.EQ.size()) V.push_back(-top.EQ.top().v());
-		if (top.JQ.size()) V.push_back(-top.JQ.top().v());
-		if (top.SQ.size()) V.push_back(-top.SQ.top().v());
-		if (V.empty()) { cur = Pos(0, 1); return 0; }
-		cur = V[0];
-		int sz = V.size();
-		for (int i = 1; i < sz; i++) if (cur / V[i] < 0) cur = V[i];
-		return 1;
-	}
-	ld dist(const int& b = -1, const int& t = -1) {
-		if (b < 0 || K < b || t < 0 || K < t) return INF;
-		return vertical_dist(P[bot.outl[b]], cur, P[top.outl[t]]);
-	}
-	bool rotate(ld& d) {
-		int tq = sign(e / cur);
-		if (tq > 0 || (!tq && (e * cur) > 0)) return 0;
-		Events EV;
-		bot.jaw_rotate(EV, cur);
-		top.jaw_rotate(EV, -cur);
-		for (const Event& ev : EV) {
-			if (ev.t == BOT) d = std::min(d, dist(ev.i, K - ev.i));
-			else d = std::min(d, dist(K - ev.i, ev.i));
-		}
-		return jaw_rotate();
-	}
-} C;
-ld rotating_calipers(Polygon& P) {
-	std::sort(P.begin(), P.end());
-	Polygon H; monotone_chain(P, H);
-	int sz = H.size();
-	if (sz < 3) return 0;
-	ld ret = INF;
-	for (int i = 0, j = 1; i < sz; i++) {
-		while (ccw(H[i], H[(i + 1) % sz], H[j], H[(j + 1) % sz]) >= 0) j = (j + 1) % sz;
-		ret = std::min(ret, vertical_dist(H[i], H[(i + 1) % sz] - H[i], H[j]));
-	}
-	return ret * .5;
 }
-void solve() {
-	std::cin.tie(0)->sync_with_stdio(0);
-	std::cout.tie(0);
-	std::cout << std::fixed;
-	std::cout.precision(15);
-	std::cin >> N >> K;
-	P.resize(N); for (Pos& p : P) std::cin >> p;
-	if (N == 1) { std::cout << "0.000000000\n"; return; }
-	if (N == 2 && K == 1) { std::cout << "0.000000000\n"; return; }
-	if (N == 2 && K == 0) { std::cout << ((P[0].x == P[1].x) ? std::abs(P[0].y - P[1].y) * .5 : 0) << "\n"; return; }
-	if (K == 0) { std::cout << rotating_calipers(P) << "\n"; return; }
-	C.init(N, K, Pos(0, -1));
-	ld ret = INF;
-	while (C.rotate(ret)) {}
-	std::cout << std::max(.0, ret * .5) << "\n";
-	return;
+pdd findcross(pll a, pll b, pll c, pll d) {
+	long double x1 = a.first, y1 = a.second, x2 = b.first, y2 = b.second, x3 = c.first, y3 = c.second, x4 = d.first, y4 = d.second;
+	if (x1 == x2) return { x1, (y4 - y3)* (x1 - x3) / (x4 - x3) + y3 };
+	if (x3 == x4) return { x3, (y2 - y1)* (x3 - x1) / (x2 - x1) + y1 };
+	long double resx = x1 * (x4 - x3) * (y2 - y1) - x3 * (y4 - y3) * (x2 - x1) + y3 * (x2 - x1) * (x4 - x3) - y1 * (x2 - x1) * (x4 - x3);
+	resx /= ((x4 - x3) * (y2 - y1) - (y4 - y3) * (x2 - x1));
+	long double resy = (y2 - y1) * (resx - x1) / (x2 - x1) + y1;
+	return { resx, resy };
 }
-int main() { solve(); return 0; }//boj26108
-//https://www.acmicpc.net/problem/26108 Linear Regression
+long double surface(int l, int r, int idx) {
+	if (l < r) return (long double)(area[idx][r] - area[idx][l] - ccw(tovec(convex[idx][0], convex[idx][l]), tovec(convex[idx][0], convex[idx][r])));
+	if (!idx) return (long double)(area[idx][n - 1] + area[idx][r] - area[idx][l] + ccw(tovec(convex[idx][0], convex[idx][r]), tovec(convex[idx][0], convex[idx][l])));
+	return (long double)(area[idx][m - 1] + area[idx][r] - area[idx][l] + ccw(tovec(convex[idx][0], convex[idx][r]), tovec(convex[idx][0], convex[idx][l])));
+}
+int main(void) {
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+	cin >> n >> m >> q;
+	long long int x, y;
+	for (int i = 0; i < n; i++) {
+		cin >> x >> y;
+		convex[0].push_back({ x, y });
+		if (i >= 2) area[0][i] = area[0][i - 1] + ccw(tovec(convex[0][0], convex[0][i - 1]), tovec(convex[0][0], convex[0][i]));
+	}
+	for (int i = 0; i < m; i++) {
+		cin >> x >> y;
+		convex[1].push_back({ x, y });
+		if (i >= 2) area[1][i] = area[1][i - 1] + ccw(tovec(convex[1][0], convex[1][i - 1]), tovec(convex[1][0], convex[1][i]));
+	}
+	for (int i = 0; i < q; i++) {
+		cin >> x >> y;
+		if (inconvex(0, { x, y }) <= 0) {
+			cout << "OUT\n";
+			continue;
+		}
+		if (inconvex(1, { x, y }) >= 0) {
+			cout << "IN\n";
+			continue;
+		}
+		pll range = findrange({ x, y });
+		int crossright = findidx({ x, y }, convex[1][range.second], 1);
+		int crossleft = findidx({ x, y }, convex[1][range.first], 0);
+		pdd lcross = findcross({ x, y }, convex[1][range.first], convex[0][crossleft], convex[0][(crossleft - 1 + n) % n]);
+		pdd rcross = findcross({ x, y }, convex[1][range.second], convex[0][crossright], convex[0][(crossright + 1) % n]);
+		long double res = surface(crossleft, crossright, 0) + dccw(dtovec(convex[0][crossleft], convex[0][crossright]), dtovec(convex[0][crossleft], rcross)) + dccw(dtovec(convex[0][crossleft], rcross), dtovec(convex[0][crossleft], lcross));
+		res -= surface(range.first, range.second, 1) + dccw(dtovec(convex[1][range.first], convex[1][range.second]), dtovec(convex[1][range.first], rcross)) + dccw(dtovec(convex[1][range.first], rcross), dtovec(convex[1][range.first], lcross));
+		cout << fixed << setprecision(7);
+		cout << (area[0][n - 1] - res - area[1][m - 1]) / 2 << '\n';
+	}
+}

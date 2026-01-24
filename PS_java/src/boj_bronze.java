@@ -6,17 +6,15 @@ import java.util.Scanner;
 import java.util.Arrays;
 
 public class boj_bronze {
+//public class Main {
+    public static double dist(int x0, int y0, int x1, int y1) {
+        return Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
+    }
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        while (true) {
-            int c = sc.nextInt();
-            int d = sc.nextInt();
-            if (c == 0 && d == 0) break;
-            int t1 = c * 30 + d * 40;
-            int t2 = c * 35 + d * 30;
-            int t3 = c * 40 + d * 20;
-            System.out.println(Math.min(t1, Math.min(t2, t3)));
-        }
+        double r = sc.nextDouble();
+        System.out.printf("%.7f", r - 1);
+        //System.out.printf("%.15f\n", Math.max(d1, d2));
     }
 }
 

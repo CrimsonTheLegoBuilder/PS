@@ -40,18 +40,31 @@ struct Pos {
 	bool operator == (const Pos& p) const { return zero(x - p.x) && zero(y - p.y); }
 	bool operator != (const Pos& p) const { return !zero(x - p.x) || !zero(y - p.y); }
 	bool operator < (const Pos& p) const { return zero(x - p.x) ? y < p.y : x < p.x; }
+	bool operator <= (const Pos& p) const { return *this < p || *this == p; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
 	Pos operator * (const ld& n) const { return { x * n, y * n }; }
 	Pos operator / (const ld& n) const { return { x / n, y / n }; }
-	ld operator * (const Pos& p) const { return { x * p.x + y * p.y }; }
-	ld operator / (const Pos& p) const { return { x * p.y - y * p.x }; }
+	ld operator * (const Pos& p) const { return x * p.x + y * p.y; }
+	ld operator / (const Pos& p) const { return x * p.y - y * p.x; }
+	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
 	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
 	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
-	Pos rot(const ld& t) { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
+	Pos& operator *= (const ld& n) { x *= n; y *= n; return *this; }
+	Pos& operator /= (const ld& n) { x /= n; y /= n; return *this; }
+	Pos operator - () const { return { -x, -y }; }
+	Pos operator ~ () const { return { -y, x }; }
+	Pos operator ! () const { return { y, x }; }
+	ld xy() const { return x * y; }
+	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrt(Euc()); }
+	Pos unit() const { return *this / mag(); }
 	ld rad() const { return atan2(y, x); }
+	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
+	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
+	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
@@ -135,6 +148,15 @@ struct Sphere {
 	ld surf() const { return PI * 4 * r * r; }
 	ld surf(const ld& h) const { return PI * 2 * r * h; }
 } S[3], SP[LEN * 3];
+bool collinear() {
+	ll x1 = S[1].x - S[0].x;
+	ll y1 = S[1].y - S[0].y;
+	ll z1 = S[1].z - S[0].z;
+	ll x2 = S[2].x - S[1].x;
+	ll y2 = S[2].y - S[1].y;
+	ll z2 = S[2].z - S[1].z;
+	return (y1 * z2 - z1 * y2) == 0 && (z1 * x2 - x1 * z2) == 0 && (x1 * y2 - y1 * x2) == 0;
+}
 ll Euc(const Sphere& p, const Sphere& q) { return sq(p.x - q.x) + sq(p.y - q.y) + sq(p.z - q.z); }
 ld mag(const Sphere& p, const Sphere& q) { return sqrtl(Euc(p, q)); }
 ld rad(const Sphere& a, const Sphere& b, const Sphere& c) {
@@ -174,28 +196,41 @@ ld area(const ld& a, const ld& b, const ld& c, const ll& r, const ld& t) {
 	spherical_triangle_angles(a, b, c, A_, B_, C_);
 	return r * r * (A_ + B_ + C_ - PI);
 }
-void query(const int& q) {
-	for (int i = 0; i < 3; i++) {
-		std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r, F[i] = 0;
-		SP[q * 3 + i] = S[i];
-	}
-	std::sort(S, S + 3);
-	assert(S[0].r >= S[1].r && S[1].r >= S[2].r);
-	return;
+bool inner_check(const Circle& c, const Pos& p1, const Pos& p2, const Pos q1, const Pos& q2) {
+
 }
-//#define READ_FILE
-//#define AUTO_CHECK
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(15);
-#ifdef READ_FILE
-	freopen("../../../input_data/e/e000.in", "r", stdin);
-	freopen("../../../input_data/e/ret.txt", "w", stdout);
-#endif
-	std::cin >> T; Q.resize(T); sts.resize(T);
-	for (int q = 0; q < T; q++) query(q);
+	for (int i = 0; i < 3; i++) std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r;
+	std::sort(S, S + 3);
+	assert(S[0].r >= S[1].r && S[1].r >= S[2].r);
+	if (collinear()) {
+
+		return;
+	}
+	for (int i = 0, j, k; i < 3; i++) {
+		j = (i + 1) % 3;
+		k = (j + 1) % 3;
+		ld dab = mag(S[i], S[j]);
+		ld dac = mag(S[i], S[k]);
+		Pos ca = Pos(0, 0);
+		Pos cb = Pos(dab, 0);
+		ld t = rad(S[i], S[j], S[k]);
+		Pos cc = Pos(dac, 0).rot(t);
+		C[0] = Circle(ca, S[i].r);
+		C[1] = Circle(cb, S[j].r);
+		C[2] = Circle(cc, S[k].r);
+		ld dif = S[j].r - S[i].r;
+		bool f = 0;
+		if (sign(dif) < 0) f = 1, dif *= -1;
+		ld tt = acos(f / dab);
+		if (f) tt = PI - tt;
+		Pos p1 = Pos(S[i].r, 0).rot(tt);
+		Pos p2 = cb + p1.unit() * S[j].r;
+	}
 	return;
 }
 int main() { solve(); return 0; }//boj23590

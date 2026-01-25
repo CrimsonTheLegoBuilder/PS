@@ -140,7 +140,8 @@ Vld intersections(const Circle& a, const Circle& b) {
 struct Sphere {
 	ll x, y, z, r;
 	Sphere(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
-	bool operator < (const Sphere& q) const { return r > q.r; }
+	//bool operator < (const Sphere& q) const { return r > q.r; }
+	bool operator < (const Sphere& q) const { return x == q.x ? y == q.y ? z < q.z : y < q.y : x < q.x; }
 	Sphere operator - (const Sphere& q) const { return { x - q.x, y - q.y, z - q.z, 0 }; }
 	ll operator * (const Sphere& q) const { return x * q.x + y * q.y + z * q.z; }
 	ld vol() const { return (4. / 3) * PI * r * r * r; }
@@ -206,7 +207,6 @@ void solve() {
 	std::cout.precision(15);
 	for (int i = 0; i < 3; i++) std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r;
 	std::sort(S, S + 3);
-	assert(S[0].r >= S[1].r && S[1].r >= S[2].r);
 	if (collinear()) {
 
 		return;

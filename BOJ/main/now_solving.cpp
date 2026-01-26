@@ -29,11 +29,25 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 #define WEAK 1
 #define LO x
 #define HI y
+#define LINE 1
+#define CIRCLE 2
 
-int T, N, M;
-bool F[3];
-Vld Q;
-Vint sts;
+ld heron(const ld& a, const ld& b, const ld& c) {
+	ld s = (a + b + c) / 2;
+	ld ret = sqrt(s * (s - a) * (s - b) * (s - c));
+	return ret;
+}
+ld rad(const ld& r, const ld& d) {
+	if (zero(r - d)) return PI;
+	ld dif = r - d;
+	bool f = 0;
+	if (dif < 0) f = 1, dif *= -1;
+	ld h = sqrt(r * r - dif * dif);
+	ld t = atan2(h, dif);
+	if (f) t = PI - t;
+	return t * 2;
+}
+ld vol(const ll& r) { return (4. / 3) * PI * r * r * r; }
 struct Pos {
 	ld x, y;
 	Pos(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
@@ -55,16 +69,12 @@ struct Pos {
 	Pos operator - () const { return { -x, -y }; }
 	Pos operator ~ () const { return { -y, x }; }
 	Pos operator ! () const { return { y, x }; }
-	ld xy() const { return x * y; }
 	Pos rot(const ld& t) const { return { x * cos(t) - y * sin(t), x * sin(t) + y * cos(t) }; }
 	ld Euc() const { return x * x + y * y; }
 	ld mag() const { return sqrt(Euc()); }
 	Pos unit() const { return *this / mag(); }
 	ld rad() const { return atan2(y, x); }
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
-	int quad() const { return sign(y) == 1 || (sign(y) == 0 && sign(x) >= 0); }
-	friend bool cmpq(const Pos& a, const Pos& b) { return (a.quad() != b.quad()) ? a.quad() < b.quad() : a / b > 0; }
-	bool close(const Pos& p) const { return zero((*this - p).Euc()); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
@@ -81,31 +91,10 @@ bool inner_check(const Polygon& H, const Pos& p) {
 	return 1;
 }
 ld area(const Polygon& H) {
-	ld A = 0;
+	ld a = 0;
 	int sz = H.size();
-	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
-	return A * .5;
-}
-struct Seg {
-	Pos s, e;
-	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
-	Pos p(const ld& rt) const { return s + (e - s) * rt; }
-	ld green(const ld& lo = 0, const ld& hi = 1) const {
-		ld d = hi - lo;
-		ld ratio = (lo + hi) * .5;
-		Pos m = p(ratio);
-		return m.y * d * (s.x - e.x);
-	}
-};
-ld intersection(const Seg& s1, const Seg& s2, const bool& f = STRONG) {
-	const Pos& p1 = s1.s, p2 = s1.e, q1 = s2.s, q2 = s2.e;
-	ld det = (q2 - q1) / (p2 - p1);
-	if (zero(det)) return -1;
-	ld a1 = ((q2 - q1) / (q1 - p1)) / det;
-	ld a2 = ((p2 - p1) / (p1 - q1)) / -det;
-	if (f == WEAK) return fit(a1, 0, 1);
-	if (0 < a1 && a1 < 1 && -TOL < a2 && a2 < 1 + TOL) return a1;
-	return -1;
+	for (int i = 0; i < sz; i++) a += H[i] / H[(i + 1) % sz];
+	return a * .5;
 }
 struct Circle {
 	Pos c;
@@ -124,29 +113,36 @@ struct Circle {
 	}
 	friend std::istream& operator >> (std::istream& is, Circle& p) { is >> p.c.x >> p.c.y >> p.r; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Circle& p) { os << p.c.x << " " << p.c.y << " " << p.r; return os; }
-} C[3];
-Vld intersections(const Circle& a, const Circle& b) {
-	Pos ca = a.c, cb = b.c;
-	Pos vec = cb - ca;
-	ld ra = a.r, rb = b.r;
-	ld distance = vec.mag();
-	ld rd = vec.rad();
-	if (vec.Euc() > sq(ra + rb) + TOL) return {};
-	if (vec.Euc() < sq(ra - rb) - TOL) return {};
-	ld X = (ra * ra - rb * rb + vec.Euc()) / (2 * distance * ra);
-	if (X < -1) X = -1;
-	if (X > 1) X = 1;
-	ld h = acos(X);
-	Vld ret = {};
-	ret.push_back(norm(rd - h));
-	if (zero(h)) return ret;
-	ret.push_back(norm(rd + h));
+};
+Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const int& f = LINE) {
+	//https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+	Pos vec = e - s;
+	Pos OM = s - q.c;
+	ld a = vec.Euc();
+	ld b = vec * OM;
+	ld c = OM.Euc() - q.r * q.r;
+	ld J = b * b - a * c;
+	if (J < -TOL) return {};
+	ld det = sqrt(std::max((ld)0, J));
+	ld lo = (-b - det) / a;
+	ld hi = (-b + det) / a;
+	Vld ret;
+	if (f == LINE) {
+		if (0 < hi && hi < 1) ret.push_back(hi);
+		if (zero(det)) return ret;
+		if (0 < lo && lo < 1) ret.push_back(lo);
+	}
+	else {
+		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
+		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
+		if (zero(det)) return ret;
+		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
+	}
 	return ret;
 }
 struct Sphere {
 	ll x, y, z, r;
 	Sphere(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll r_ = 0) : x(x_), y(y_), z(z_), r(r_) {}
-	//bool operator < (const Sphere& q) const { return r > q.r; }
 	bool operator < (const Sphere& q) const { return x == q.x ? y == q.y ? z < q.z : y < q.y : x < q.x; }
 	Sphere operator - (const Sphere& q) const { return { x - q.x, y - q.y, z - q.z, 0 }; }
 	ll operator * (const Sphere& q) const { return x * q.x + y * q.y + z * q.z; }
@@ -174,35 +170,6 @@ ld rad(const Sphere& a, const Sphere& b, const Sphere& c) {
 	ld ret = fit(proj / dac, -1, 1);
 	return acos(ret);
 }
-int meet(const Sphere& p, const Sphere& q) {
-	ll dist = Euc(p, q);
-	ll rout = sq(p.r + q.r);
-	if (dist >= rout) return OUTSIDE;
-	ll rin = sq(p.r - q.r);
-	if (dist <= rin) return INSIDE;
-	return MEET;
-}
-ld cos_2nd(const ld& a, const ld& b, const ld& c) {
-	ld num = sq(a) + sq(b) - sq(c);
-	ld den = 2 * a * b;
-	ld t = num / den;
-	return std::abs(acosl(std::min(std::max(t, -(ld)1.0), (ld)1.0)));
-}
-void spherical_triangle_angles(const ld& a, const ld& b, const ld& c, ld& A_, ld& B_, ld& C_) {
-	A_ = acos(fit((cos(a) - cos(b) * cos(c)) / (sin(b) * sin(c)), -1, 1));
-	B_ = acos(fit((cos(b) - cos(a) * cos(c)) / (sin(a) * sin(c)), -1, 1));
-	C_ = acos(fit((cos(c) - cos(a) * cos(b)) / (sin(a) * sin(b)), -1, 1));
-	return;
-}
-ld area(const ld& a, const ld& b, const ld& c, const ll& r, const ld& t) {
-	ld A_, B_, C_;
-	if (a >= PI) {
-		spherical_triangle_angles(a * .5, t, c, A_, B_, C_);
-		return r * r * (A_ + B_ + C_ - PI) * 2;
-	}
-	spherical_triangle_angles(a, b, c, A_, B_, C_);
-	return r * r * (A_ + B_ + C_ - PI);
-}
 Pos centroid(const Polygon& H) {
 	Pos cen = Pos(0, 0);
 	ld a = 0;
@@ -217,35 +184,56 @@ Pos centroid(const Polygon& H) {
 	if (!zero(a)) cen /= a;
 	return cen;
 }
-bool inner_check(const Circle& c, Pos p1, Pos p2, Pos q1, Pos q2) {
-	if (cross(p1, p2, q1) > 0) std::swap(p1, q1), std::swap(p2, q2);
-	if (ccw(p1, p2, c.c) > 0 || ccw(q1, q2, c.c) < 0) return 0;
-	if (ccw(q2, p2, c.c) < 0) return 0;
-	ld d = cross(q2, p2, c.c) / (q2 - p2).mag();
-	return sign(c.r - d) <= 0;
+ld rot_vol(const Polygon& H, const Pos& s1, const Pos& s2, const ld& t = PI * 2) {
+	Pos cen = centroid(H);
+	ld d = std::abs(cross(s1, s2, cen) / (s1 - s2).mag());
+	ld a = area(H);
+	return a * d * t;
 }
-ld vol(const ll& r) { return (4. / 3) * PI * r * r * r; }
+bool inner_check(const Circle& c, Pos ca, Pos p1, Pos cb, Pos q1) {
+	if (ccw(ca, p1, c.c) >= 0 || ccw(cb, q1, c.c) <= 0) return 0;
+	if (ccw(q1, p1, c.c) <= 0) return 0;
+	ld d = cross(q1, p1, c.c) / (q1 - p1).mag();
+	return sign(d - c.r) >= 0;
+}
+void get_tangent(const Circle& c1, const Circle& c2, Pos& p1, Pos& p2, Pos& q1, Pos& q2) {
+	Pos vec = c2.c - c1.c;
+	ll w = c1.r - c2.r;
+	if (!w) {
+		Pos v = ~vec.unit() * c1.r;
+		p1 = c1.c + v;
+		p2 = c1.c - v;
+		q1 = c2.c + v;
+		q2 = c2.c - v;
+		return;
+	}
+	bool f = w > 0;
+	ld d = vec.mag();
+	ld h = sqrt(d * d - w * w);
+	ld t = atan2(h, w);
+	Pos v;
+	v = vec.unit() * c1.r;
+	p1 = c1.c + v.rot(t);
+	p2 = c1.c + v.rot(-t);
+	v = vec.unit() * c2.r;
+	q1 = c2.c + v.rot(t);
+	q2 = c2.c + v.rot(-t);
+	return;
+}
 ld two_convex_hull(Circle c1, Circle c2) {
-	Pos v = c1.c;
-	c1.c -= v;
-	c2.c -= v;
-	ld l = (c1.c - c2.c).mag();
-	if (eq(c1.r, c2.r)) return vol(c1.r) + c1.r * c1.r * PI * l;
-	ld dif = c1.r - c2.r;
-	bool f = dif > 0;
-	ld w = sqrt(l * l - dif * dif);
-	ld t = atan2(w, dif);
-	if (f) t = PI - t;
-	v = Pos(c1.r, 0).rot(t);
-	Pos p2 = c1.c + v;
-	Pos q2 = c2.c + v.unit() * c2.r;
-	Polygon H = { p2, c1.c, c2.c,  q2 };
-	ld r = std::abs(cross(c1.c, c2.c, centroid(H)));
-	ld V = vol(c1.r) + vol(c2.r) + 2 * PI * r * area(H);
-	ld h;
-	h = c1.r - v.x;
+	if (eq(c1.r, c2.r)) return vol(c1.r) + c1.r * c1.r * PI * (c1.c - c2.c).mag();
+	Pos p1, p2, q1, q2;
+	get_tangent(c1, c2, p1, p2, q1, q2);
+	Pos m1 = (p1 + p2) * .5;
+	Pos m2 = (q1 + q2) * .5;
+	Polygon H = { p1, m1, m2, q1 };
+	ld V = rot_vol(H, m1, m2) + vol(c1.r) + vol(c2.r);
+	ld h, d;
+	d = cross(p2, p1, c1.c) / (p1 - p2).mag();
+	h = c1.r - d;
 	V -= Sphere(0, 0, 0, c1.r).vol(h);
-	h = c2.r + v.unit().x * c2.r;
+	d = cross(q1, q2, c2.c) / (q2 - q1).mag();
+	h = c2.r - d;
 	V -= Sphere(0, 0, 0, c2.r).vol(h);
 	return V;
 }
@@ -257,33 +245,22 @@ void solve() {
 	for (int i = 0; i < 3; i++) std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r;
 	std::sort(S, S + 3);
 	if (collinear()) {
-		ld dab = mag(S[0], S[1]);
-		ld dac = mag(S[0], S[2]);
+		ld dab = mag(S[0], S[2]);
+		ld dac = mag(S[0], S[1]);
 		Pos ca = Pos(0, 0);
 		Pos cb = Pos(dab, 0);
 		Pos cc = Pos(dac, 0);
-		C[0] = Circle(ca, S[0].r);
-		C[1] = Circle(cb, S[1].r);
-		C[2] = Circle(cc, S[2].r);
-		ld dif = S[2].r - S[0].r;
-		ld w = sqrt(dac * dac - dif * dif);
-		bool f = 0;
-		if (sign(dif) < 0) f = 1, dif *= -1;
-		ld tt = atan2(w, dif);
-		if (f) tt = PI - tt;
-		Pos p2 = Pos(S[0].r, 0).rot(tt);
-		Pos v = p2.unit() * S[2].r;
-		Pos q2 = cb + v;
+		Circle c1 = Circle(ca, S[0].r);
+		Circle c2 = Circle(cb, S[2].r);
+		Circle c3 = Circle(cc, S[1].r);
+		Pos p1, p2, q1, q2;
+		get_tangent(c1, c2, p1, p2, q1, q2);
 		ld V = 0;
-		if (inner_check(cb, ca, p2, cc, q2)) V = two_convex_hull(ca, cc);
-		else V = two_convex_hull(ca, cb) + two_convex_hull(cb, cc) - vol(C[1].r);
+		if (inner_check(c3, ca, p1, cb, q1)) V = two_convex_hull(c1, c2);
+		else V = two_convex_hull(c1, c3) + two_convex_hull(c2, c3) - vol(c3.r);
 		std::cout << V << "\n";
 		return;
 	}
-	//접평면 검사 방법이 필요함
-	//그냥 고깔 2개 이어붙인 듯한 모양으로도 만들어질 수 있는 거라서
-	//접선 2개를 구한 후 사이에 낀 원이 두 선분에 모두 걸치면 해당 원을 가운데에 둔 두 고깔 형태의 볼록 껍질임\
-	//한 원이 먹혀있는지 검사
 	for (int i = 0, j, k; i < 3; i++) {
 		j = (i + 1) % 3;
 		k = (j + 1) % 3;
@@ -293,30 +270,77 @@ void solve() {
 		Pos cb = Pos(dab, 0);
 		ld t = rad(S[i], S[j], S[k]);
 		Pos cc = Pos(dac, 0).rot(t);
-		C[0] = Circle(ca, S[i].r);
-		C[1] = Circle(cb, S[j].r);
-		C[2] = Circle(cc, S[k].r);
-		ld dif = S[j].r - S[i].r;
-		bool f = 0;
-		if (sign(dif) < 0) f = 1, dif *= -1;
-		ld tt = acos(f / dab);
-		if (f) tt = PI - tt;
-		Pos p1 = Pos(S[i].r, 0).rot(tt);
-		Pos p2 = cb + p1.unit() * S[j].r;
+		Circle c1 = Circle(ca, S[i].r);
+		Circle c2 = Circle(cb, S[j].r);
+		Circle c3 = Circle(cc, S[k].r);
+		Pos p1, p2, q1, q2;
+		get_tangent(c1, c2, p1, p2, q1, q2);
+		if (inner_check(c3, ca, p1, cb, q1)) {
+			std::cout << two_convex_hull(c1, c2) << "\n";
+			return;
+		}
+		Vld t1 = circle_line_intersections(c3, p1, q1);
+		Vld t2 = circle_line_intersections(c3, p2, q2);
+		if (t1.size() > 1 && t2.size() > 1) {
+			ld V = two_convex_hull(c1, c3) + two_convex_hull(c2, c3) - vol(c3.r);
+			std::cout << V << "\n";
+			return;
+		}
 	}
-	//반례를 모두 처리했으므로 계산 시작
-	//일단 가운데 잘린 삼각기둥은 변의 길이를 모두 구할 수 있으므로 공식이 따로 존재함
-	//한 원을 잡고 다른 원 2개를 그려줌
-	//접선 2개씩을 그려서 접점 2개를 이어 직선을 그린다
-	//두 직선의 교점 == 법선 벡터가 구에 사영된 점
-	//잘린 구는 표면의 구면 직사각형의 넓이를 구해서 구해준다
-	//구면직사각형을 바로 구하는 건 아니고,
-	//원뿔대에 의해 가려진 부분의 부피는 상대적으로 구하기 쉬우므로
-	//360도 전체의 가려진 부분을 구하고 나서
-	//안쪽은 원뿔을 파주고
-	//각도 비례식 세워서 잘려야 하는 부분을 날려줌
-	//근데 결국 3개의 원뿔대의 회전 각도는 잘 구하긴 해야함. 위 방법으로 구하면 되겠지 뭐
-	//잘린 회전체의 부피는 회전 각도와 회전 단면의 무게 중심을 구할 수 있으므로 바로 구해짐
+	ld V = 0;
+	ld h = (S[0].r + S[1].r + S[2].r) / 3.;
+	ld d1 = sqrt(Euc(S[0], S[1]) - sq(S[0].r - S[1].r));
+	ld d2 = sqrt(Euc(S[1], S[2]) - sq(S[1].r - S[2].r));
+	ld d3 = sqrt(Euc(S[2], S[0]) - sq(S[2].r - S[0].r));
+	V += heron(d1, d2, d3) * h * 2;
+	for (int i = 0, j, k; i < 3; i++) {
+		j = (i + 1) % 3;
+		k = (j + 1) % 3;
+		ld dab = mag(S[i], S[j]);
+		ld dac = mag(S[i], S[k]);
+		Pos ca = Pos(0, 0);
+		Pos cb = Pos(dab, 0);
+		ld t = rad(S[i], S[j], S[k]);
+		Pos cc = Pos(dac, 0).rot(t);
+		Circle c1 = Circle(ca, S[i].r);
+		Circle c2 = Circle(cb, S[j].r);
+		Circle c3 = Circle(cc, S[k].r);
+		Pos p1, p2, q1, q2;
+		get_tangent(c1, c2, p1, p2, q1, q2);
+		Pos u1, u2, w1, w2;
+		get_tangent(c1, c3, u1, u2, w1, w2);
+		Pos inx = intersection(p1, p2, u1, u2);
+
+		ld tmp1, tmp2, r, l, con;
+		
+		l = (p1 - p2).mag();
+		r = l * .5;
+		h = cross(p1, p2, ca) / l;
+		con = r * r * PI * h / 3.;
+		h = S[i].r - h;
+		tmp1 = S[i].vol(h);
+		tmp1 -= con;
+		t = rad(r, (inx - p2).mag());
+		tmp1 *= (t / (PI * 2));
+
+		Polygon H = { ca, p2, q2, cb };
+		V += rot_vol(H, ca, cb, t);
+
+		l = (u1 - u2).mag();
+		r = l * .5;
+		h = cross(u1, u2, ca) / l;
+		con = r * r * PI * h / 3.;
+		h = S[i].r - h;
+		tmp2 = S[i].vol(h);
+		tmp2 -= con;
+		t = rad(r, (inx - u1).mag());
+		tmp2 *= (t / (PI * 2));
+
+		V += S[i].vol();
+		V -= tmp1;
+		V -= tmp2;
+	}
+	std::cout << V << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj23590

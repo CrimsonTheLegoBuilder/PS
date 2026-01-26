@@ -7,13 +7,20 @@ import java.util.Arrays;
 
 public class boj_bronze {
 //public class Main {
-    public static double dist(int x0, int y0, int x1, int y1) {
-        return Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
-    }
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        double r = sc.nextDouble();
-        System.out.printf("%.7f", r - 1);
+        long a = sc.nextLong();
+        long b = sc.nextLong();
+        long c = sc.nextLong();
+        for (long x = 1; x <= 100; x++) {
+            long l = a * a * a;
+            long r = a * (b * b + c * c + x * x) + 2 * b * c * x;
+            if (l == r) {
+                System.out.println(x);
+                return;
+            }
+        }
+        System.out.println(-1);
         //System.out.printf("%.15f\n", Math.max(d1, d2));
     }
 }

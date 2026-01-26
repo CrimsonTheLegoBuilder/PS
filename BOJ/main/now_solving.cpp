@@ -80,6 +80,12 @@ bool inner_check(const Polygon& H, const Pos& p) {
 	for (int i = 0; i < sz; i++) if (ccw(H[i], H[(i + 1) % sz], p) < 0) return 0;
 	return 1;
 }
+ld area(const Polygon& H) {
+	ld A = 0;
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) A += H[i] / H[(i + 1) % sz];
+	return A * .5;
+}
 struct Seg {
 	Pos s, e;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) {}
@@ -197,8 +203,51 @@ ld area(const ld& a, const ld& b, const ld& c, const ll& r, const ld& t) {
 	spherical_triangle_angles(a, b, c, A_, B_, C_);
 	return r * r * (A_ + B_ + C_ - PI);
 }
-bool inner_check(const Circle& c, const Pos& p1, const Pos& p2, const Pos q1, const Pos& q2) {
-
+Pos centroid(const Polygon& H) {
+	Pos cen = Pos(0, 0);
+	ld a = 0;
+	int sz = H.size();
+	for (int i = 0; i < sz; i++) {
+		ld tq = H[i] / H[(i + 1) % sz];
+		cen += (H[i] + H[(i + 1) % sz]) * tq;
+		a += tq;
+	}
+	a *= .5;
+	cen /= 6;
+	if (!zero(a)) cen /= a;
+	return cen;
+}
+bool inner_check(const Circle& c, Pos p1, Pos p2, Pos q1, Pos q2) {
+	if (cross(p1, p2, q1) > 0) std::swap(p1, q1), std::swap(p2, q2);
+	if (ccw(p1, p2, c.c) > 0 || ccw(q1, q2, c.c) < 0) return 0;
+	if (ccw(q2, p2, c.c) < 0) return 0;
+	ld d = cross(q2, p2, c.c) / (q2 - p2).mag();
+	return sign(c.r - d) <= 0;
+}
+ld vol(const ll& r) { return (4. / 3) * PI * r * r * r; }
+ld two_convex_hull(Circle c1, Circle c2) {
+	Pos v = c1.c;
+	c1.c -= v;
+	c2.c -= v;
+	ld l = (c1.c - c2.c).mag();
+	if (eq(c1.r, c2.r)) return vol(c1.r) + c1.r * c1.r * PI * l;
+	ld dif = c1.r - c2.r;
+	bool f = dif > 0;
+	ld w = sqrt(l * l - dif * dif);
+	ld t = atan2(w, dif);
+	if (f) t = PI - t;
+	v = Pos(c1.r, 0).rot(t);
+	Pos p2 = c1.c + v;
+	Pos q2 = c2.c + v.unit() * c2.r;
+	Polygon H = { p2, c1.c, c2.c,  q2 };
+	ld r = std::abs(cross(c1.c, c2.c, centroid(H)));
+	ld V = vol(c1.r) + vol(c2.r) + 2 * PI * r * area(H);
+	ld h;
+	h = c1.r - v.x;
+	V -= Sphere(0, 0, 0, c1.r).vol(h);
+	h = c2.r + v.unit().x * c2.r;
+	V -= Sphere(0, 0, 0, c2.r).vol(h);
+	return V;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -208,8 +257,27 @@ void solve() {
 	for (int i = 0; i < 3; i++) std::cin >> S[i].x >> S[i].y >> S[i].z >> S[i].r;
 	std::sort(S, S + 3);
 	if (collinear()) {
-		//평행한 경우 따로 처리
-		//한 원이 먹혀있거나 두 고깔 모양
+		ld dab = mag(S[0], S[1]);
+		ld dac = mag(S[0], S[2]);
+		Pos ca = Pos(0, 0);
+		Pos cb = Pos(dab, 0);
+		Pos cc = Pos(dac, 0);
+		C[0] = Circle(ca, S[0].r);
+		C[1] = Circle(cb, S[1].r);
+		C[2] = Circle(cc, S[2].r);
+		ld dif = S[2].r - S[0].r;
+		ld w = sqrt(dac * dac - dif * dif);
+		bool f = 0;
+		if (sign(dif) < 0) f = 1, dif *= -1;
+		ld tt = atan2(w, dif);
+		if (f) tt = PI - tt;
+		Pos p2 = Pos(S[0].r, 0).rot(tt);
+		Pos v = p2.unit() * S[2].r;
+		Pos q2 = cb + v;
+		ld V = 0;
+		if (inner_check(cb, ca, p2, cc, q2)) V = two_convex_hull(ca, cc);
+		else V = two_convex_hull(ca, cb) + two_convex_hull(cb, cc) - vol(C[1].r);
+		std::cout << V << "\n";
 		return;
 	}
 	//접평면 검사 방법이 필요함

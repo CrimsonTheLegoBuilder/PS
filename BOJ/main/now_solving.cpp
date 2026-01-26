@@ -150,7 +150,7 @@ struct Sphere {
 	ld vol(const ld& h) const { return PI * h * h * (3 * r - h) / 3; }
 	ld surf() const { return PI * 4 * r * r; }
 	ld surf(const ld& h) const { return PI * 2 * r * h; }
-} S[3], SP[LEN * 3];
+} S[3];
 bool collinear() {
 	ll x1 = S[1].x - S[0].x;
 	ll y1 = S[1].y - S[0].y;

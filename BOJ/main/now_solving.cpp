@@ -207,10 +207,12 @@ void get_tangent(const Circle& c1, const Circle& c2, Pos& p1, Pos& p2, Pos& q1, 
 		q2 = c2.c - v;
 		return;
 	}
-	bool f = w > 0;
+	bool f = w < 0;
+	if (f) w *= -1;
 	ld d = vec.mag();
 	ld h = sqrt(d * d - w * w);
 	ld t = atan2(h, w);
+	if (f) t = PI - t;
 	Pos v;
 	v = vec.unit() * c1.r;
 	p1 = c1.c + v.rot(t);

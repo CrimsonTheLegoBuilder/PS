@@ -9,19 +9,19 @@ public class boj_bronze {
 //public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        long a = sc.nextLong();
-        long b = sc.nextLong();
-        long c = sc.nextLong();
-        for (long x = 1; x <= 100; x++) {
-            long l = a * a * a;
-            long r = a * (b * b + c * c + x * x) + 2 * b * c * x;
-            if (l == r) {
-                System.out.println(x);
-                return;
-            }
-        }
-        System.out.println(-1);
-        //System.out.printf("%.15f\n", Math.max(d1, d2));
+        long x = sc.nextLong();
+        long y = sc.nextLong();
+        long x1 = sc.nextLong();
+        long y1 = sc.nextLong();
+        long x2 = sc.nextLong();
+        long y2 = sc.nextLong();
+        long dx = 0;
+        long dy = 0;
+        if (x < x1) dx = x1 - x;
+        else if (x2 < x) dx = x - x2;
+        if (y < y1) dy = y1 - y;
+        else if (y2 < y) dy = y - y2;
+        System.out.printf("%.4f\n", Math.sqrt(dx * dx + dy * dy));
     }
 }
 

@@ -222,7 +222,7 @@ void get_tangent(const Circle& c1, const Circle& c2, Pos& p1, Pos& p2, Pos& q1, 
 	q2 = c2.c + v.rot(-t);
 	return;
 }
-ld two_convex_hull(Circle c1, Circle c2) {
+ld two_convex_hull(const Circle& c1, const Circle& c2) {
 	if (eq(c1.r, c2.r)) return vol(c1.r) + c1.r * c1.r * PI * (c1.c - c2.c).mag();
 	Pos p1, p2, q1, q2;
 	get_tangent(c1, c2, p1, p2, q1, q2);

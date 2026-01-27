@@ -34,7 +34,9 @@ inline ld norm(ld th) { while (th < 0) th += 2 * PI; while (sign(th - 2 * PI) >=
 
 ld heron(const ld& a, const ld& b, const ld& c) {
 	ld s = (a + b + c) / 2;
-	ld ret = sqrt(s * (s - a) * (s - b) * (s - c));
+	ld v = s * (s - a) * (s - b) * (s - c);
+	v = std::max(v, (ld)0);
+	ld ret = sqrt(v);
 	return ret;
 }
 ld rad(const ld& r, const ld& d) {
@@ -317,11 +319,11 @@ void solve() {
 		
 		l = (p1 - p2).mag();
 		r = l * .5;
-		h = cross(p1, p2, ca) / l;
+		h = cross(p2, p1, ca) / l;
 		con = r * r * PI * h / 3.;
 		h = S[i].r - h;
 		tmp1 = S[i].vol(h);
-		tmp1 -= con;
+		tmp1 += con;
 		t = rad(r, (inx - p2).mag());
 		tmp1 *= (t / (PI * 2));
 
@@ -330,11 +332,11 @@ void solve() {
 
 		l = (u1 - u2).mag();
 		r = l * .5;
-		h = cross(u1, u2, ca) / l;
+		h = cross(u2, u1, ca) / l;
 		con = r * r * PI * h / 3.;
 		h = S[i].r - h;
 		tmp2 = S[i].vol(h);
-		tmp2 -= con;
+		tmp2 += con;
 		t = rad(r, (inx - u1).mag());
 		tmp2 *= (t / (PI * 2));
 

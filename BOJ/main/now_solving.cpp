@@ -42,8 +42,8 @@ ld heron(const ld& a, const ld& b, const ld& c) {
 ld rad(const ld& r, const ld& d) {
 	if (zero(r - d)) return PI;
 	ld dif = r - d;
-	bool f = 0;
-	if (dif < 0) f = 1, dif *= -1;
+	bool f = dif < 0;
+	if (f) dif *= -1;
 	ld h = sqrt(r * r - dif * dif);
 	ld t = atan2(h, dif);
 	if (f) t = PI - t;
@@ -241,6 +241,34 @@ ld two_convex_hull(const Circle& c1, const Circle& c2) {
 	V -= Sphere(0, 0, 0, c2.r).vol(h);
 	return V;
 }
+void spherical_triangle_angles(const ld& a, const ld& b, const ld& c, ld& A_, ld& B_, ld& C_) {
+	A_ = acos(fit((cos(a) - cos(b) * cos(c)) / (sin(b) * sin(c)), -1, 1));
+	B_ = acos(fit((cos(b) - cos(a) * cos(c)) / (sin(a) * sin(c)), -1, 1));
+	C_ = acos(fit((cos(c) - cos(a) * cos(b)) / (sin(a) * sin(b)), -1, 1));
+	return;
+}
+//ld area(const ld& a, const ld& b, const ld& c, const ll& r, const ld& t = 0) {
+ld area(const ld& a, const ld& b, const ld& c, const ll& r) {
+	ld A_, B_, C_;
+	//if (a >= PI) {
+	//	spherical_triangle_angles(a * .5, t, c, A_, B_, C_);
+	//	return r * r * (A_ + B_ + C_ - PI) * 2;
+	//}
+	spherical_triangle_angles(a, b, c, A_, B_, C_);
+	return r * r * (A_ + B_ + C_ - PI);
+}
+ld corner_vol(const ll& r, const ld& h1, const ld& h2, const ld& t1, const ld& t2, const ld& r1, const ld& r2, const ld& r3) {
+	Sphere s = Sphere(0, 0, 0, r);
+	ld suf = s.surf();
+	ld s1 = s.surf(h1) * (t1 / (2 * PI));
+	ld s2 = s.surf(h2) * (t2 / (2 * PI));
+	ld s3 = area(r1, r2, r3, r);
+	suf -= s1;
+	suf -= s2;
+	suf -= s3;
+	ld rat = suf / s.surf();
+	return s.vol() * rat;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -315,34 +343,27 @@ void solve() {
 		get_tangent(c1, c3, u1, u2, w1, w2);
 		Pos inx = intersection(p1, p2, u1, u2);
 
-		ld tmp1, tmp2, r, l, con;
+		ld r, l, h1, h2, t1, t2, r1, r2, r3;
+		r3 = t;
 		
 		l = (p1 - p2).mag();
 		r = l * .5;
 		h = cross(p2, p1, ca) / l;
-		con = r * r * PI * h / 3.;
-		h = S[i].r - h;
-		tmp1 = S[i].vol(h);
-		tmp1 += con;
-		t = rad(r, (inx - p2).mag());
-		tmp1 *= (t / (PI * 2));
+		h1 = S[i].r - h;
+		t1 = rad(r, (inx - p2).mag());
+		r1 = rad(cb - ca, p1 - ca);
 
 		Polygon H = { ca, p2, q2, cb };
-		V += rot_vol(H, ca, cb, t);
+		V += rot_vol(H, ca, cb, t1);
 
 		l = (u1 - u2).mag();
 		r = l * .5;
 		h = cross(u2, u1, ca) / l;
-		con = r * r * PI * h / 3.;
-		h = S[i].r - h;
-		tmp2 = S[i].vol(h);
-		tmp2 += con;
-		t = rad(r, (inx - u1).mag());
-		tmp2 *= (t / (PI * 2));
+		h2 = S[i].r - h;
+		t2 = rad(r, (inx - u1).mag());
+		r2 = rad(cc - ca, u1 - ca);
 
-		V += S[i].vol();
-		V -= tmp1;
-		V -= tmp2;
+		V += corner_vol(r, h1, h2, t1, t2, r1, r2, r3);
 	}
 	std::cout << V << "\n";
 	return;

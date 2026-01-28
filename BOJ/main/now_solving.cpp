@@ -167,7 +167,7 @@ ld mag(const Sphere& p, const Sphere& q) { return sqrtl(Euc(p, q)); }
 ld rad(const Sphere& a, const Sphere& b, const Sphere& c) {
 	ld dab = mag(a, b);
 	ld dac = mag(a, c);
-	ll det = (b - a) * (c - a);
+	ld det = (b - a) * (c - a);
 	ld proj = det / dab;
 	ld ret = fit(proj / dac, -1, 1);
 	return acos(ret);
@@ -225,6 +225,7 @@ void get_tangent(const Circle& c1, const Circle& c2, Pos& p1, Pos& p2, Pos& q1, 
 	return;
 }
 ld two_convex_hull(const Circle& c1, const Circle& c2) {
+	//std::cout << "FUCK::\n";
 	if (eq(c1.r, c2.r)) return vol(c1.r) + c1.r * c1.r * PI * (c1.c - c2.c).mag();
 	Pos p1, p2, q1, q2;
 	get_tangent(c1, c2, p1, p2, q1, q2);
@@ -262,8 +263,8 @@ ld corner_vol(const ll& r, const ld& h1, const ld& h2, const ld& t1, const ld& t
 	ld suf = s.surf();
 	ld s1 = s.surf(h1) * (t1 / (2 * PI));
 	ld s2 = s.surf(h2) * (t2 / (2 * PI));
-	ld s3 = area(r1, r2, r3, r);
-	std::cout << "DEBUG::\n r:: " << r << " suf:: " << suf << " s1:: " << s1 << " s2:: " << s2 << " s3 " << s3 << " s.surf():: " << s.surf() << "\n";
+	ld s3 = area(r1, r2, r3, r) * 2;
+	//std::cout << "DEBUG::\n r:: " << r << " suf:: " << suf << " s1:: " << s1 << " s2:: " << s2 << " s3 " << s3 << " s.surf():: " << s.surf() << "\n";
 	suf -= s1;
 	suf -= s2;
 	suf -= s3;
@@ -326,8 +327,8 @@ void solve() {
 	ld d2 = sqrt(Euc(S[1], S[2]) - sq(S[1].r - S[2].r));
 	ld d3 = sqrt(Euc(S[2], S[0]) - sq(S[2].r - S[0].r));
 	V += heron(d1, d2, d3) * h * 2;
-	std::cout << "DEBUG:: " << h << "\n";
-	std::cout << "DEBUG:: " << V << "\n";
+	//std::cout << "DEBUG:: " << h << "\n";
+	//std::cout << "DEBUG:: " << V << "\n";
 	for (int i = 0, j, k; i < 3; i++) {
 		j = (i + 1) % 3;
 		k = (j + 1) % 3;
@@ -354,11 +355,18 @@ void solve() {
 		h = cross(p2, p1, ca) / l;
 		h1 = S[i].r - h;
 		t1 = rad(r, (inx - p2).mag());
+
+		Pos a1, a2, b1, b2;
+		get_tangent(c2, c3, a1, a2, b1, b2);
+		Pos xx = intersection(a1, a2, q1, q2);
+		l = (q1 - q2).mag();
+		r = l * .5;
+		//std::cout << "DEBUG:: t1:: " << t1 << " t11:: " << rad(r, (xx - q2).mag()) <<"\n";
 		r1 = rad(cb - ca, p1 - ca);
 
 		Polygon H = { ca, p2, q2, cb };
 		V += rot_vol(H, ca, cb, t1);
-		std::cout << "DEBUG:: " << V << "\n";
+		//std::cout << "DEBUG:: " << V << "\n";
 
 		l = (u1 - u2).mag();
 		r = l * .5;
@@ -368,7 +376,7 @@ void solve() {
 		r2 = rad(cc - ca, u1 - ca);
 
 		V += corner_vol(c1.r, h1, h2, t1, t2, r1, r2, r3);
-		std::cout << "DEBUG:: " << V << "\n";
+		//std::cout << "DEBUG:: " << V << "\n";
 	}
 	std::cout << V << "\n";
 	return;

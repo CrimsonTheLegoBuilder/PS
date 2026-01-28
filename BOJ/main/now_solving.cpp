@@ -263,6 +263,7 @@ ld corner_vol(const ll& r, const ld& h1, const ld& h2, const ld& t1, const ld& t
 	ld s1 = s.surf(h1) * (t1 / (2 * PI));
 	ld s2 = s.surf(h2) * (t2 / (2 * PI));
 	ld s3 = area(r1, r2, r3, r);
+	std::cout << "DEBUG::\n r:: " << r << " suf:: " << suf << " s1:: " << s1 << " s2:: " << s2 << " s3 " << s3 << " s.surf():: " << s.surf() << "\n";
 	suf -= s1;
 	suf -= s2;
 	suf -= s3;
@@ -325,6 +326,8 @@ void solve() {
 	ld d2 = sqrt(Euc(S[1], S[2]) - sq(S[1].r - S[2].r));
 	ld d3 = sqrt(Euc(S[2], S[0]) - sq(S[2].r - S[0].r));
 	V += heron(d1, d2, d3) * h * 2;
+	std::cout << "DEBUG:: " << h << "\n";
+	std::cout << "DEBUG:: " << V << "\n";
 	for (int i = 0, j, k; i < 3; i++) {
 		j = (i + 1) % 3;
 		k = (j + 1) % 3;
@@ -355,6 +358,7 @@ void solve() {
 
 		Polygon H = { ca, p2, q2, cb };
 		V += rot_vol(H, ca, cb, t1);
+		std::cout << "DEBUG:: " << V << "\n";
 
 		l = (u1 - u2).mag();
 		r = l * .5;
@@ -363,7 +367,8 @@ void solve() {
 		t2 = rad(r, (inx - u1).mag());
 		r2 = rad(cc - ca, u1 - ca);
 
-		V += corner_vol(r, h1, h2, t1, t2, r1, r2, r3);
+		V += corner_vol(c1.r, h1, h2, t1, t2, r1, r2, r3);
+		std::cout << "DEBUG:: " << V << "\n";
 	}
 	std::cout << V << "\n";
 	return;

@@ -11,7 +11,7 @@ typedef long double ld;
 typedef std::vector<int> Vint;
 typedef std::vector<ld> Vld;
 const ld INF = 1e17;
-const ld TOL = 1e-10;
+const ld TOL = 1e-6;
 const ld PI = acos(-1);
 const int LEN = 10005;
 inline int sign(const ld& x) { return x <= -TOL ? -1 : x >= TOL; }
@@ -124,6 +124,8 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 	ld b = vec * OM;
 	ld c = OM.Euc() - q.r * q.r;
 	ld J = b * b - a * c;
+	//std::cout << "J:::: " << J << "\n";
+	if (zero(J)) return { .5 };
 	if (J < -TOL) return {};
 	ld det = sqrt(std::max((ld)0, J));
 	ld lo = (-b - det) / a;
@@ -313,9 +315,16 @@ void solve() {
 			std::cout << two_convex_hull(c1, c2) << "\n";
 			return;
 		}
+		//std::cout << "c1:: " << c1 << "\n";
+		//std::cout << "c2:: " << c2 << "\n";
+		//std::cout << "c3:: " << c3 << "\n";
+		//std::cout << "p1:: " << p1  << " p2:: " << p2 << "\n";
+		//std::cout << "q1:: " << q1  << " q2:: " << q2 << "\n";
 		Vld t1 = circle_line_intersections(c3, p1, q1);
 		Vld t2 = circle_line_intersections(c3, p2, q2);
-		if (t1.size() > 1 && t2.size() > 1) {
+		//std::cout << "t1.size():: " << t1.size() << "\n";
+		//std::cout << "t2.size():: " << t2.size() << "\n";
+		if (t1.size() && t2.size()) {;
 			ld V = two_convex_hull(c1, c3) + two_convex_hull(c2, c3) - vol(c3.r);
 			std::cout << V << "\n";
 			return;
@@ -382,3 +391,15 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23590
+
+/*
+
+0 1 0 1
+30 10 0 10
+60 2 0 2
+
+-100 -99 -100 1
+0 0 0 100
+100 -98 100 2
+
+*/

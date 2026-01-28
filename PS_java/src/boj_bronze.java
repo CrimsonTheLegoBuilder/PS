@@ -9,19 +9,24 @@ public class boj_bronze {
 //public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        long x = sc.nextLong();
-        long y = sc.nextLong();
-        long x1 = sc.nextLong();
-        long y1 = sc.nextLong();
-        long x2 = sc.nextLong();
-        long y2 = sc.nextLong();
-        long dx = 0;
-        long dy = 0;
-        if (x < x1) dx = x1 - x;
-        else if (x2 < x) dx = x - x2;
-        if (y < y1) dy = y1 - y;
-        else if (y2 < y) dy = y - y2;
-        System.out.printf("%.4f\n", Math.sqrt(dx * dx + dy * dy));
+        int T = sc.nextInt();
+        for (int t = 1; t <= T; t++) {
+            int r = sc.nextInt();
+            int a = sc.nextInt();
+            int b = sc.nextInt();
+            double total = r * r * Math.PI;
+            int cur = r;
+            long cnt = 0;
+            while (cur > 0) {
+                if (cnt % 2 != 1) cur *= a;
+                else cur /= b;
+                //System.out.println("DEBUG[" + t + "]:: cur:: " + cur);
+                cnt++;
+                total += cur * cur * Math.PI;
+            }
+            System.out.print("Case #" + t + ": ");
+            System.out.printf("%.6f\n", total);
+        }
     }
 }
 

@@ -10,37 +10,27 @@ public class boj_bronze {
         StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        StringTokenizer st= new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int M = Integer.parseInt(st.nextToken());
-
-        long[][] P = new long[N][2];
-        long[][] Q = new long[M][2];
-
-        for (int i = 0; i < N; i++) {
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int T = Integer.parseInt(st.nextToken());
+        long s = 0;
+        for (int t = 0; t < T; t++) {
             st = new StringTokenizer(br.readLine());
-            P[i][0] = Long.parseLong(st.nextToken());
-            P[i][1] = Long.parseLong(st.nextToken());
+            long x = Long.parseLong(st.nextToken());
+            long y = Long.parseLong(st.nextToken());
+            long d = x * x + y * y;
+            if (d <= (10 * 10)) s += 10;
+            else if (d <= (30 * 30)) s += 9;
+            else if (d <= (50 * 50)) s += 8;
+            else if (d <= (70 * 70)) s += 7;
+            else if (d <= (90 * 90)) s += 6;
+            else if (d <= (110 * 110)) s += 5;
+            else if (d <= (130 * 130)) s += 4;
+            else if (d <= (150 * 150)) s += 3;
+            else if (d <= (170 * 170)) s += 2;
+            else if (d <= (190 * 190)) s += 1;
         }
-
-        for (int j = 0; j < M; j++) {
-            st = new StringTokenizer(br.readLine());
-            Q[j][0] = Long.parseLong(st.nextToken());
-            Q[j][1] = Long.parseLong(st.nextToken());
-        }
-
-        long ans = -1;
-
-        for (int j = 0; j < M; j++) {
-            for (int i = 0; i < N; i++) {
-                long x = Q[j][0] - P[i][0];
-                long y = Q[j][1] - P[i][1];
-                ans = Math.max(ans, x * x + y * y);
-            }
-        }
-
-        //String ret = String.format("%.7f", d);
-        String ret = String.valueOf(ans);
+        //String ret = String.format("%.9f", ans);
+        String ret = String.valueOf(s);
         bw.write(ret);
         bw.newLine();
         bw.flush();
@@ -78,3 +68,18 @@ public class boj_bronze {
                 //System.out.println("Do-it-Not");
             }
  */
+
+        /*
+        for (int i = 0; i < 2; i++) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < 3; j++) {
+                l[i][j] = Long.parseLong(st.nextToken());
+            }
+        }
+        Arrays.sort(l[0]);
+        Arrays.sort(l[1]);
+        long ans = 1;
+        if (l[0][2] * l[0][2] != l[0][1] * l[0][1] + l[0][0] * l[0][0]) ans = 0;
+        if (l[1][2] * l[1][2] != l[1][1] * l[1][1] + l[1][0] * l[1][0]) ans = 0;
+        if (l[0][2] != l[1][2] || l[0][1] != l[1][1] || l[0][0] != l[1][0]) ans = 0;
+        */

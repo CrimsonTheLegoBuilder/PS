@@ -12,28 +12,63 @@ public class boj_bronze {
 
         StringTokenizer st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        N++;
-        long[] H = new long[N];
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < N; i++) {
-            H[i] = Long.parseLong(st.nextToken());
+        for (int i = 1; i <= N; i++) {
+            int i2 = i * i;
+            if (i2 > N) break;
+            int j2 = N - i2;
+            double j = Math.sqrt(j2);
+            int j0 = (int)j;
+            int j1 = j0 + 1;
+
+            String s;/* = String.valueOf(i);
+            bw.write(s);
+            bw.write(" ");
+            s = String.valueOf(j0);
+            bw.write(s);
+            bw.newLine();
+            */
+            if (i2 + j0 * j0 == N) {
+                int x = 0, y = 0;
+                int dx = i, dy = j0;
+                for (int k = 0; k < 4; k++) {
+                    s = String.valueOf(x);
+                    bw.write(s);
+                    bw.write(" ");
+                    s = String.valueOf(y);
+                    bw.write(s);
+                    bw.newLine();
+                    x += dx;
+                    y += dy;
+                    int tmp = dx;
+                    dx = -dy;
+                    dy = tmp;
+                }
+                bw.flush();
+                return;
+            }
+            else if (i2 + j1 * j1 == N) {
+                int x = 0, y = 0;
+                int dx = i, dy = j1;
+                for (int k = 0; k < 4; k++) {
+                    s = String.valueOf(x);
+                    bw.write(s);
+                    bw.write(" ");
+                    s = String.valueOf(y);
+                    bw.write(s);
+                    bw.newLine();
+                    x += dx;
+                    y += dy;
+                    int tmp = dx;
+                    dx = -dy;
+                    dy = tmp;
+                }
+                bw.flush();
+                return;
+            }
         }
-        long[] W = new long[N];
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < N - 1; i++) {
-            W[i] = Long.parseLong(st.nextToken());
-        }
-        double T = 0.;
-        long S = 0;
-        for (int i = 0; i < N - 1; i++) {
-            long h1 = H[i], h2 = H[i + 1];
-            long w = W[i];
-            S += (h1 + h2) * w;
-        }
-        T = S * .5;
-        String ret = String.format("%.9f", T);
+        //String ret = String.format("%.1f", r * 2 * Math.PI + .05);
         //String ret = String.valueOf(T);
-        bw.write(ret);
+        bw.write("Impossible");
         bw.newLine();
         bw.flush();
         bw.close();

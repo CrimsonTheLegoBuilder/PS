@@ -11,26 +11,28 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int T = Integer.parseInt(st.nextToken());
-        long s = 0;
-        for (int t = 0; t < T; t++) {
-            st = new StringTokenizer(br.readLine());
-            long x = Long.parseLong(st.nextToken());
-            long y = Long.parseLong(st.nextToken());
-            long d = x * x + y * y;
-            if (d <= (10 * 10)) s += 10;
-            else if (d <= (30 * 30)) s += 9;
-            else if (d <= (50 * 50)) s += 8;
-            else if (d <= (70 * 70)) s += 7;
-            else if (d <= (90 * 90)) s += 6;
-            else if (d <= (110 * 110)) s += 5;
-            else if (d <= (130 * 130)) s += 4;
-            else if (d <= (150 * 150)) s += 3;
-            else if (d <= (170 * 170)) s += 2;
-            else if (d <= (190 * 190)) s += 1;
+        int N = Integer.parseInt(st.nextToken());
+        N++;
+        long[] H = new long[N];
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) {
+            H[i] = Long.parseLong(st.nextToken());
         }
-        //String ret = String.format("%.9f", ans);
-        String ret = String.valueOf(s);
+        long[] W = new long[N];
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N - 1; i++) {
+            W[i] = Long.parseLong(st.nextToken());
+        }
+        double T = 0.;
+        long S = 0;
+        for (int i = 0; i < N - 1; i++) {
+            long h1 = H[i], h2 = H[i + 1];
+            long w = W[i];
+            S += (h1 + h2) * w;
+        }
+        T = S * .5;
+        String ret = String.format("%.9f", T);
+        //String ret = String.valueOf(T);
         bw.write(ret);
         bw.newLine();
         bw.flush();

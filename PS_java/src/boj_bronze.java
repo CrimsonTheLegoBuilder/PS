@@ -11,64 +11,15 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        for (int i = 1; i <= N; i++) {
-            int i2 = i * i;
-            if (i2 > N) break;
-            int j2 = N - i2;
-            double j = Math.sqrt(j2);
-            int j0 = (int)j;
-            int j1 = j0 + 1;
+        int w = Integer.parseInt(st.nextToken());
+        int h = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        int r = Integer.parseInt(st.nextToken());
+        double ans = 1. * w * h - r * r * Math.PI * .25;
 
-            String s;/* = String.valueOf(i);
-            bw.write(s);
-            bw.write(" ");
-            s = String.valueOf(j0);
-            bw.write(s);
-            bw.newLine();
-            */
-            if (i2 + j0 * j0 == N) {
-                int x = 0, y = 0;
-                int dx = i, dy = j0;
-                for (int k = 0; k < 4; k++) {
-                    s = String.valueOf(x);
-                    bw.write(s);
-                    bw.write(" ");
-                    s = String.valueOf(y);
-                    bw.write(s);
-                    bw.newLine();
-                    x += dx;
-                    y += dy;
-                    int tmp = dx;
-                    dx = -dy;
-                    dy = tmp;
-                }
-                bw.flush();
-                return;
-            }
-            else if (i2 + j1 * j1 == N) {
-                int x = 0, y = 0;
-                int dx = i, dy = j1;
-                for (int k = 0; k < 4; k++) {
-                    s = String.valueOf(x);
-                    bw.write(s);
-                    bw.write(" ");
-                    s = String.valueOf(y);
-                    bw.write(s);
-                    bw.newLine();
-                    x += dx;
-                    y += dy;
-                    int tmp = dx;
-                    dx = -dy;
-                    dy = tmp;
-                }
-                bw.flush();
-                return;
-            }
-        }
-        //String ret = String.format("%.1f", r * 2 * Math.PI + .05);
+        String ret = String.format("%.6f", ans);
         //String ret = String.valueOf(T);
-        bw.write("Impossible");
+        bw.write(ret);
         bw.newLine();
         bw.flush();
         bw.close();

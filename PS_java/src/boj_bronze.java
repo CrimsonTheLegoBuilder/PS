@@ -10,17 +10,21 @@ public class boj_bronze {
         StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int w = Integer.parseInt(st.nextToken());
-        int h = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        int r = Integer.parseInt(st.nextToken());
-        double ans = 1. * w * h - r * r * Math.PI * .25;
-
-        String ret = String.format("%.6f", ans);
+        StringTokenizer st;
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty()) continue;
+            st = new StringTokenizer(line);
+            long a = Long.parseLong(st.nextToken());
+            long b = Long.parseLong(st.nextToken());
+            long c = Long.parseLong(st.nextToken());
+            String ret = "N\n";
+            if (a * a + b * b <= c * c) ret = "S\n";
+            bw.write(ret);
+        }
+        //String ret = String.format("%.6f", ans);
         //String ret = String.valueOf(T);
-        bw.write(ret);
-        bw.newLine();
+        //bw.newLine();
         bw.flush();
         bw.close();
     }

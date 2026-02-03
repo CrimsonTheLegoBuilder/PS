@@ -19,7 +19,7 @@ public class boj_bronze {
             long b = Long.parseLong(st.nextToken());
             long c = Long.parseLong(st.nextToken());
             String ret = "N\n";
-            if (a * a + b * b <= c * c) ret = "S\n";
+            if ((a * a + 12 * 12) * b * b <= 12 * 12 * c * c) ret = "S\n";
             bw.write(ret);
         }
         //String ret = String.format("%.6f", ans);

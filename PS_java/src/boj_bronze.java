@@ -11,11 +11,14 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        long a = Long.parseLong(st.nextToken());
-        long b = Long.parseLong(st.nextToken());
+        long x = Long.parseLong(st.nextToken());
+        long y = Long.parseLong(st.nextToken());
         st = new StringTokenizer(br.readLine());
-        long c = Long.parseLong(st.nextToken());
-        long ans = (c + 20) << 1;
+        long r = Long.parseLong(st.nextToken());
+        long ans = 0;
+        for (long i = 1; i < r; i++) {//boj23375
+
+        }
         //String ret = String.format("%.6f", ans);
         String ret = String.valueOf(ans);
         bw.write(ret);

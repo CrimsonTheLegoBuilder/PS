@@ -15,13 +15,37 @@ public class boj_bronze {
         long y = Long.parseLong(st.nextToken());
         st = new StringTokenizer(br.readLine());
         long r = Long.parseLong(st.nextToken());
-        long ans = 0;
-        for (long i = 1; i < r; i++) {//boj23375
 
-        }
+        String x_ = String.valueOf(x - r);
+        bw.write(x_);
+        bw.write(" ");
+        String y_ = String.valueOf(y - r);
+        bw.write(y_);
+        bw.newLine();
+
+        x_ = String.valueOf(x + r);
+        bw.write(x_);
+        bw.write(" ");
+        y_ = String.valueOf(y - r);
+        bw.write(y_);
+        bw.newLine();
+
+        x_ = String.valueOf(x + r);
+        bw.write(x_);
+        bw.write(" ");
+        y_ = String.valueOf(y + r);
+        bw.write(y_);
+        bw.newLine();
+
+        x_ = String.valueOf(x - r);
+        bw.write(x_);
+        bw.write(" ");
+        y_ = String.valueOf(y + r);
+        bw.write(y_);
+
         //String ret = String.format("%.6f", ans);
-        String ret = String.valueOf(ans);
-        bw.write(ret);
+        //String ret = String.valueOf(ans);
+        //bw.write(ret);
         bw.newLine();
         bw.flush();
         bw.close();

@@ -201,5 +201,8 @@
     <ClCompile Include="..\main\boj26108_linear_v3.cpp">
       <Filter>소스 파일\_now_solving</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\boj35239_ing.cpp">
+      <Filter>소스 파일\_now_solving</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

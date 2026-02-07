@@ -11,41 +11,30 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        long x = Long.parseLong(st.nextToken());
-        long y = Long.parseLong(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        long r = Long.parseLong(st.nextToken());
+        int N = Integer.parseInt(st.nextToken());
+        int E = Integer.parseInt(st.nextToken());
+        long x = 0, y = 0;
+        if (N > 1) {
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < N - 1; i++) {
+                long d = Long.parseLong(st.nextToken());
+                x += d;
+            }
+        }
+        if (E > 1) {
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < E - 1; i++) {
+                long d = Long.parseLong(st.nextToken());
+                y += d;
+            }
+        }
+        double D = Math.sqrt(x * x + y * y);
+        long ans = (long)Math.ceil(D);
 
-        String x_ = String.valueOf(x - r);
-        bw.write(x_);
-        bw.write(" ");
-        String y_ = String.valueOf(y - r);
-        bw.write(y_);
-        bw.newLine();
-
-        x_ = String.valueOf(x + r);
-        bw.write(x_);
-        bw.write(" ");
-        y_ = String.valueOf(y - r);
-        bw.write(y_);
-        bw.newLine();
-
-        x_ = String.valueOf(x + r);
-        bw.write(x_);
-        bw.write(" ");
-        y_ = String.valueOf(y + r);
-        bw.write(y_);
-        bw.newLine();
-
-        x_ = String.valueOf(x - r);
-        bw.write(x_);
-        bw.write(" ");
-        y_ = String.valueOf(y + r);
-        bw.write(y_);
-
+        String ret = String.valueOf(ans);
         //String ret = String.format("%.6f", ans);
         //String ret = String.valueOf(ans);
-        //bw.write(ret);
+        bw.write(ret);
         bw.newLine();
         bw.flush();
         bw.close();

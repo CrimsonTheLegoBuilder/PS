@@ -10,32 +10,32 @@ public class boj_bronze {
         StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int E = Integer.parseInt(st.nextToken());
-        long x = 0, y = 0;
-        if (N > 1) {
+        StringTokenizer st;// = new StringTokenizer(br.readLine());
+        while (true) {
             st = new StringTokenizer(br.readLine());
-            for (int i = 0; i < N - 1; i++) {
-                long d = Long.parseLong(st.nextToken());
-                x += d;
+            long N = Long.parseLong(st.nextToken());
+            long W = Long.parseLong(st.nextToken());
+            long L = Long.parseLong(st.nextToken());
+            long H = Long.parseLong(st.nextToken());
+            long A = Long.parseLong(st.nextToken());
+            long M = Long.parseLong(st.nextToken());
+            if (N == 0 && W == 0 && L == 0 && H == 0 && A == 0 && M == 0) break;
+            long T = N * (W * L + 2 * (W * H + L * H));
+            for (int i = 0; i < M; i++) {
+                st = new StringTokenizer(br.readLine());
+                long w = Long.parseLong(st.nextToken());
+                long h = Long.parseLong(st.nextToken());
+                T -= N * w * h;
             }
+            long ans = T / A + (T % A != 0 ? 1 : 0);
+            String ret = String.valueOf(ans);
+            bw.write(ret);
+            bw.newLine();
         }
-        if (E > 1) {
-            st = new StringTokenizer(br.readLine());
-            for (int i = 0; i < E - 1; i++) {
-                long d = Long.parseLong(st.nextToken());
-                y += d;
-            }
-        }
-        double D = Math.sqrt(x * x + y * y);
-        long ans = (long)Math.ceil(D);
-
-        String ret = String.valueOf(ans);
         //String ret = String.format("%.6f", ans);
         //String ret = String.valueOf(ans);
-        bw.write(ret);
-        bw.newLine();
+        //bw.write(ret);
+        //bw.newLine();
         bw.flush();
         bw.close();
     }

@@ -10,7 +10,7 @@ typedef std::vector<ld> vld;
 const ld INF = 1e17;
 const ld TOL = 1e-13;
 const ld PI = acosl(-1);
-const int LEN = 205;
+const int LEN = 505;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
 inline bool zero(const ld& x) { return !sign(x); }
 inline bool eq(const ld& x, const ld& y) { return zero(x - y); }
@@ -21,7 +21,7 @@ inline ld fit(const ld& x, const ld& lo = 0, const ld& hi = 1) { return std::min
 #define STRONG 0
 #define WEAK 1
 
-int N;
+int N, V;
 ld A[LEN][LEN];
 struct Pos {
 	ld x, y;
@@ -176,7 +176,7 @@ vld circle_line_intersections(const Pos& s, const Pos& e, const Circle& q, const
 vld intersection(const Circle& a, const Circle& b) {
 	Pos ca = a.c, cb = b.c;
 	Pos vec = cb - ca;
-	ll ra = a.r, rb = b.r;
+	ld ra = a.r, rb = b.r;
 	ld distance = vec.mag();
 	ld rd = vec.rad();
 	if (vec.Euc() > sq(ra + rb) + TOL) return {};
@@ -191,13 +191,87 @@ vld intersection(const Circle& a, const Circle& b) {
 	ret.push_back(norm(rd - h));
 	return ret;
 }
+struct Arc {
+	ld lo, hi;
+	bool operator < (const Arc& o) const { zero(lo - o.lo) ? hi < o.hi : lo < o.lo; }
+} arc[LEN];
+Circle C[LEN];
+Polygon B[LEN];
+Seg S[LEN];
+int shadow(const Circle& c0, const Circle& c1, Arc& a1, Arc& a2) {
+
+	return 0;
+}
+int shadow(const Circle& c, const Polygon& b, Arc& a1, Arc& a2) {
+
+	return 0;
+}
+int shadow(const Polygon& b, const Circle& c, Pos& p) {
+
+	return 0;
+}
+int shadow(const Polygon& b0, const Polygon& b1, Pos& p) {
+
+	return 0;
+}
+bool remain(const Polygon& P, const ld& m, Pos& ret) {
+	auto box = [&](const int& i, const int& j) -> Polygon {
+		Pos v = (P[j] - P[i]).unit() * m;
+		return { P[j] + v, P[i] + v, P[i] - v, P[j] - v };
+	};
+	int sz = P.size();
+	for (int i = 0, j; i < sz; i++) {
+		j = (i + 1) % sz;
+		C[i] = Circle(P[i], m);
+		B[i] = box(i, j);
+		S[i] = Seg(P[j], P[i]);
+	}
+	for (int i = 0; i < sz; i++) {
+		for (int j = 0; j < sz; j++) {
+			if (i != j) {
+
+			}
+		}
+	}
+	return 0;
+}
+ld bi_search(const Polygon& P, Pos& ret) {
+	int sz = P.size();
+	ld s = TOL, e = -1;
+	for (int i = 0; i < sz; i++) {
+		for (int j = i + 1; j < N; j++) {
+			ld d = (P[i] - P[j]).mag();
+			e = std::max(e, d);
+		}
+	}
+	e *= .5; e += TOL;
+	int c = 50; while (c--) {
+		ld m = (s + e) * .5;
+		if (remain(P, m, ret)) s = m;
+		else e = m;
+	}
+	return (s + e) * .5;
+}
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
 	std::cout.precision(18);
-	std::cin >> N;
-
+	std::cin >> N >> V;
+	Polygon P(N); for (Pos& p : P) std::cin >> p;
+	for (int i = 0, i0, i1, i2; i < N; i++) {
+		i0 = (i - 1 + N) % N;
+		i1 = i;
+		i2 = (i + 1) % N;
+		Pos v;
+		v = P[i0] - P[i1];
+		arc[i].lo = v.rad();
+		v = P[i2] - P[i1];
+		arc[i].hi = v.rad();
+	}
+	Pos ret;
+	std::cout << bi_search(P, ret) << "\n";
+	std::cout << ret << "\n";
 	return;
 }
 int main() { solve(); return 0; }//boj35239

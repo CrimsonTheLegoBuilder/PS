@@ -10,31 +10,12 @@ public class boj_bronze {
         StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        StringTokenizer st;// = new StringTokenizer(br.readLine());
-        while (true) {
-            st = new StringTokenizer(br.readLine());
-            long N = Long.parseLong(st.nextToken());
-            long W = Long.parseLong(st.nextToken());
-            long L = Long.parseLong(st.nextToken());
-            long H = Long.parseLong(st.nextToken());
-            long A = Long.parseLong(st.nextToken());
-            long M = Long.parseLong(st.nextToken());
-            if (N == 0 && W == 0 && L == 0 && H == 0 && A == 0 && M == 0) break;
-            long T = N * (W * L + 2 * (W * H + L * H));
-            for (int i = 0; i < M; i++) {
-                st = new StringTokenizer(br.readLine());
-                long w = Long.parseLong(st.nextToken());
-                long h = Long.parseLong(st.nextToken());
-                T -= N * w * h;
-            }
-            long ans = T / A + (T % A != 0 ? 1 : 0);
-            String ret = String.valueOf(ans);
-            bw.write(ret);
-            bw.newLine();
-        }
-        //String ret = String.format("%.6f", ans);
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        long N = Long.parseLong(st.nextToken());
+        double D = N * .5 * Math.PI;
+        String ret = String.format("%.15f", D - N);
         //String ret = String.valueOf(ans);
-        //bw.write(ret);
+        bw.write(ret);
         //bw.newLine();
         bw.flush();
         bw.close();

@@ -100,6 +100,13 @@ void norm(Polygon& H, const int& d = 1) {
 	else if (d == -1 && A > 0) std::reverse(H.begin(), H.end());
 	return;
 }
+bool inner_check(const Polygon& H, const Pos& p) {
+	int sz = H.size();
+	for (int i = 0; i < sz; i++)
+		if (ccw(H[i], H[(i + 1) % sz], p) <= 0)
+			return 0;
+	return 1;
+}
 struct Seg {
 	Pos s, e, dir;
 	Seg(Pos s_ = Pos(), Pos e_ = Pos()) : s(s_), e(e_) { dir = e - s; }
@@ -213,7 +220,7 @@ Vld circle_line_intersections(const Circle& q, const Pos& s, const Pos& e, const
 		ret.push_back(hi); ret.push_back(lo);
 	}
 	else {
-		auto the = [&](ld rt) { return norm(q.rad(s + (e - s) * rt)); };
+		auto the = [&](const ld& rt) { return norm(q.rad(s + (e - s) * rt)); };
 		if (-TOL < hi && hi < 1 + TOL) ret.push_back(the(hi));
 		if (zero(det)) return ret;
 		if (-TOL < lo && lo < 1 + TOL) ret.push_back(the(lo));
@@ -244,7 +251,7 @@ struct Arc {
 	bool operator < (const Arc& a) const { return zero(lo - a.lo) ? hi < a.hi : lo < a.lo; }
 	inline friend std::istream& operator >> (std::istream& is, Arc& a) { is >> a.lo >> a.hi; return is; }
 	inline friend std::ostream& operator << (std::ostream& os, const Arc& a) { os << a.lo << " " << a.hi; return os; }
-} arc[LEN];
+} arc[LEN]; bool F[LEN];
 typedef std::vector<Arc> Arcs;
 Circle C[LEN];
 Polygon B[LEN];
@@ -258,8 +265,35 @@ int shadow(const Circle& c0, const Circle& c1, Arc& a1, Arc& a2) {
 	a2 = Arc(0, hi);
 	return 2;
 }
-int shadow(const Circle& c, const Polygon& b, Arc& a1, Arc& a2) {
-	ld lo = -1, hi = -1;
+//int shadow(const Circle& c, const Polygon& b, Arc& a1, Arc& a2) {
+//	ld lo = -1, hi = -1;
+//	assert(b.size() == 4);
+//	int f = 0;
+//	for (int i = 0, j; i < 4; i++) {
+//		j = (i + 1) % 4;
+//		const Pos& p0 = b[i], & p1 = b[j];
+//		if (sign(cross(p0, p1, c.c) / (p0 - p1).mag() - c.r) >= 0) f++;
+//	}
+//	if (f >= 4) { a1 = Arc(0, 2 * PI); return 1; }
+//	bool f0 = 0, f1 = 0;
+//	for (int i = 0, j; i < 4; i++) {
+//		j = (i + 1) % 4;
+//		const Pos& p0 = b[j], & p1 = b[i];
+//		Vld inxs = circle_line_intersections(c, p0, p1, CIRCLE);
+//		int sz = inxs.size();
+//		if (sz == 0) continue;
+//		if (sz == 2) { f0 = f1 = 1; lo = inxs[0]; hi = inxs[1]; break; }
+//		if (c >= p0) f0 = 1, hi = inxs[0];
+//		else if (c >= p1) f1 = 1, lo = inxs[1];
+//	}
+//	if (!f0 || !f1) return 0;
+//	assert(-TOL < lo && lo < 2 * PI + TOL);
+//	assert(-TOL < hi && hi < 2 * PI + TOL);
+//	if (lo < hi) { a1 = Arc(lo, hi); return 1; }
+//	a1 = Arc(lo, 2 * PI); a2 = Arc(0, hi);
+//	return 2;
+//}
+int shadow(const Circle& c, const Polygon& b, Arcs& va) {
 	assert(b.size() == 4);
 	int f = 0;
 	for (int i = 0, j; i < 4; i++) {
@@ -267,34 +301,32 @@ int shadow(const Circle& c, const Polygon& b, Arc& a1, Arc& a2) {
 		const Pos& p0 = b[i], & p1 = b[j];
 		if (sign(cross(p0, p1, c.c) / (p0 - p1).mag() - c.r) >= 0) f++;
 	}
-	if (f >= 4) { a1 = Arc(0, 2 * PI); return 1; }
-	bool f0 = 0, f1 = 0;
+	if (f >= 4) { va = { Arc(0, 2 * PI) }; return 1; }
+	Vld vx = { 0, 2 * PI };
 	for (int i = 0, j; i < 4; i++) {
 		j = (i + 1) % 4;
 		const Pos& p0 = b[j], & p1 = b[i];
 		Vld inxs = circle_line_intersections(c, p0, p1, CIRCLE);
-		int sz = inxs.size();
-		if (sz == 0) continue;
-		if (sz == 2) { f0 = f1 = 1; lo = inxs[0]; hi = inxs[1]; break; }
-		if (c >= p0) f0 = 1, hi = inxs[0];
-		else if (c >= p1) f1 = 1, lo = inxs[1];
+		for (const ld& x : inxs) vx.push_back(x);
 	}
-	if (!f0 || !f1) return 0;
-	assert(-TOL < lo && lo < 2 * PI + TOL);
-	assert(-TOL < hi && hi < 2 * PI + TOL);
-	if (lo < hi) { a1 = Arc(lo, hi); return 1; }
-	a1 = Arc(lo, 2 * PI); a2 = Arc(0, hi);
-	return 2;
+	std::sort(vx.begin(), vx.end());
+	vx.erase(unique(vx.begin(), vx.end()), vx.end());
+	int sz = vx.size();
+	for (int i = 0, j; i < sz; i++) {
+		j = (i + 1) % sz;
+		ld lo = vx[i], hi = vx[j];
+		ld x = (vx[i] + vx[j]) * .5;
+		Pos mid = c.p(x);
+		if (inner_check(b, mid)) va.push_back(Arc(lo, hi));
+	}
+	return 1;
 }
 int shadow(const Seg& s, const Circle& c, Pos& p) {
 	Vld inxs = circle_line_intersections(c, s.s, s.e, LINE);
 	int sz = inxs.size();
 	if (sz < 2) return 0;
-	ld lo = inxs[0];
-	ld hi = inxs[1];
-	if (zero(lo - hi)) return 0;
-	lo = fit(lo);
-	hi = fit(hi);
+	ld lo = inxs[0], hi = inxs[1];
+	lo = fit(lo); hi = fit(hi);
 	if (zero(lo - hi)) return 0;
 	p = Pos(lo, hi);
 	return 1;
@@ -304,9 +336,7 @@ int shadow(const Seg& s, const Polygon& b, Pos& p) {
 	assert(sz == 4);
 	ld lo = -1, hi = -1;
 	int f = 0;
-	for (int i = 0; i < 4; i++) {
-		if (ccw(s.s, s.e, b[i]) >= 0) f++;
-	}
+	for (int i = 0; i < sz; i++) if (ccw(s.s, s.e, b[i]) >= 0) f++;
 	if (f >= sz) return 0;
 	bool f0 = 0, f1 = 0;
 	for (int i = 0, j; i < sz; i++) {
@@ -320,16 +350,14 @@ int shadow(const Seg& s, const Polygon& b, Pos& p) {
 		}
 	}
 	if (!f0 || !f1) return 0;
-	if (zero(lo - hi)) return 0;
-	lo = fit(lo);
-	hi = fit(hi);
+	lo = fit(lo); hi = fit(hi);
 	if (zero(lo - hi)) return 0;
 	p = Pos(lo, hi);
 	return 1;
 }
 bool remain(const Polygon& P, const ld& m, Pos& ret) {
 	auto box = [&](const int& i, const int& j) -> Polygon {
-		Pos v = (P[j] - P[i]).unit() * m;
+		Pos v = ~(P[j] - P[i]).unit() * m;
 		return { P[j] + v, P[i] + v, P[i] - v, P[j] - v };
 	};
 	int sz = P.size();
@@ -340,22 +368,28 @@ bool remain(const Polygon& P, const ld& m, Pos& ret) {
 		S[i] = Seg(B[i][0], B[i][1]);
 	}
 	for (int i = 0; i < sz; i++) {
+		if (!F[i]) continue;
 		Arcs VA;
 		Arc a = arc[i];
 		if (a.lo < a.hi) VA = { a };
-		else VA = { Arc(a.hi, 2 * PI), Arc(0, a.lo) };
+		else VA = { Arc(a.lo, 2 * PI), Arc(0, a.hi) };
 		for (int j = 0; j < sz; j++) {
+			if (i == j) continue;
 			Arc a1, a2;
 			int f;
-			f = shadow(C[i], B[j], a1, a2);
-			if (f) VA.push_back(a1);
-			if (f == 2) VA.push_back(a2);
-			if (i == j) continue;
 			f = shadow(C[i], C[j], a1, a2);
 			if (f) VA.push_back(a1);
 			if (f == 2) VA.push_back(a2);
+			if (i == (j + 1) % sz) continue;
+			Arcs va;
+			f = shadow(C[i], B[j], va);
+			for (const Arc& a : va) VA.push_back(a);
+			//f = shadow(C[i], B[j], a1, a2);
+			//if (f) VA.push_back(a1);
+			//if (f == 2) VA.push_back(a2);
 		}
 		std::sort(VA.begin(), VA.end());
+		VA.push_back(Arc(2 * PI, 2 * PI));
 		ld hi = 0;
 		for (const Arc& a : VA) {
 			if (hi < a.lo) { ret = C[i].p(hi); return 1; }
@@ -365,15 +399,17 @@ bool remain(const Polygon& P, const ld& m, Pos& ret) {
 	for (int i = 0; i < sz; i++) {
 		Polygon VP;
 		for (int j = 0; j < sz; j++) {
+			if (i == j) continue;
 			Pos p;
 			int f;
-			f = shadow(S[i], C[j], p);
-			if (f) VP.push_back(p);
-			if (i == j) continue;
 			f = shadow(S[i], B[j], p);
+			if (f) VP.push_back(p);
+			if ((i + 1) % sz == j) continue;
+			f = shadow(S[i], C[j], p);
 			if (f) VP.push_back(p);
 		}
 		std::sort(VP.begin(), VP.end());
+		VP.push_back(Pos(1, 1));
 		ld hi = 0;
 		for (const Pos& p : VP) {
 			if (hi < p.LO) { ret = S[i].p(hi); return 1; }
@@ -397,7 +433,7 @@ ld bi_search(const Polygon& P, Pos& ret) {
 		if (remain(P, m, ret)) s = m;
 		else e = m;
 	}
-	return (s + e) * .5;
+	return (s + e) * .5 / V;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -410,16 +446,13 @@ void solve() {
 		i0 = (i - 1 + N) % N;
 		i1 = i;
 		i2 = (i + 1) % N;
-		if (ccw(P[i0], P[i1], P[i2]) >= 0) {
-			arc[i].lo = 0;
-			arc[i].hi = PI * 2;
-			continue;
-		}
+		if (ccw(P[i0], P[i1], P[i2]) >= 0) { F[i] = 0; continue; }
 		Pos v;
 		v = ~(P[i1] - P[i0]);
 		arc[i].lo = v.rad();
 		v = ~(P[i2] - P[i1]);
 		arc[i].hi = v.rad();
+		F[i] = 1;
 	}
 	Pos ret;
 	std::cout << bi_search(P, ret) << "\n";

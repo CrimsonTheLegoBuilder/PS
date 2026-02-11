@@ -11,11 +11,35 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        long N = Long.parseLong(st.nextToken());
-        double D = N * .5 * Math.PI;
-        String ret = String.format("%.15f", D - N);
+        int T = Integer.parseInt(st.nextToken());
+        for (int t = 1; t <= T; t++) {
+            st = new StringTokenizer(br.readLine());
+            int N = Integer.parseInt(st.nextToken());
+            double xr = -1000000000.0;
+            double xl = 1000000000.0;
+            double yu = -1000000000.0;
+            double yl = 1000000000.0;
+            for (int i = 0; i < N; i++) {
+                st = new StringTokenizer(br.readLine());
+                double x = Double.parseDouble(st.nextToken());
+                double y = Double.parseDouble(st.nextToken());
+                xr = Math.max(xr, x);
+                xl = Math.min(xl, x);
+                yu = Math.max(yu, y);
+                yl = Math.min(yl, y);
+            }
+            double w = xr - xl;
+            double h = yu - yl;
+            String n = String.valueOf(t);
+            double a = w * h;
+            double p = w + w + h + h;
+            String area = String.format("%.9f", a);
+            String peri = String.format("%.9f", p);
+            bw.write("Case " + n + ": Area " + area + ", Perimeter " + peri + "\n");
+        }
+        //String ret = String.format("%.15f", D - N);
         //String ret = String.valueOf(ans);
-        bw.write(ret);
+        //bw.write(ret);
         //bw.newLine();
         bw.flush();
         bw.close();

@@ -8,7 +8,7 @@ typedef long long ll;
 typedef long double ld;
 typedef std::vector<ld> Vld;
 const ld INF = 1e17;
-const ld TOL = 1e-13;
+const ld TOL = 1e-9;
 const ld PI = acosl(-1);
 const int LEN = 505;
 inline int sign(const ld& x) { return x < -TOL ? -1 : x > TOL; }
@@ -428,6 +428,9 @@ ld bi_search(const Polygon& P, Pos& ret) {
 		}
 	}
 	e *= .5; e += TOL;
+	std::cout << "DEBUG::\n";
+	std::cout << "	s:: " << s << " e:: " << e << "\n";
+	std::cout << "DEBUG::\n";
 	int c = 50; while (c--) {
 		ld m = (s + e) * .5;
 		if (remain(P, m, ret)) s = m;
@@ -439,8 +442,8 @@ void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(18);
-	std::cin >> N >> V;
+	std::cout.precision(9);
+	std::cin >> V >> N;
 	Polygon P(N); for (Pos& p : P) std::cin >> p; norm(P);
 	for (int i = 0, i0, i1, i2; i < N; i++) {
 		i0 = (i - 1 + N) % N;

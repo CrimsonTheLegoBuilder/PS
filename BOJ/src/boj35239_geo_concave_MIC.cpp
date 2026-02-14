@@ -347,7 +347,6 @@ bool remain(const Polygon& P, const ld& m, Pos& ret) {
 			int f;
 			f = shadow(S[i], B[j], p);
 			if (f) VP.push_back(p);
-			//if ((i + 1) % sz == j) continue;
 			f = shadow(S[i], C[j], p);
 			if (f) VP.push_back(p);
 		}

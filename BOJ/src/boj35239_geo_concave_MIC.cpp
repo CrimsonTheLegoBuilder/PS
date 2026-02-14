@@ -326,7 +326,6 @@ bool remain(const Polygon& P, const ld& m, Pos& ret) {
 			f = shadow(C[i], C[j], a1, a2);
 			if (f) VA.push_back(a1);
 			if (f == 2) VA.push_back(a2);
-			//if (i == (j + 1) % sz) continue;
 			Arcs va;
 			f = shadow(C[i], B[j], va);
 			for (const Arc& a : va) VA.push_back(a);

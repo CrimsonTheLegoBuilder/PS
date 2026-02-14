@@ -24,7 +24,7 @@ inline ld norm(ld th) {
 	return th;
 }
 
-//#define DEBUG
+#define DEBUG
 
 struct Pos {
 	ld x, y;
@@ -247,7 +247,7 @@ inline Disks inclose_circle(const Line& I, const Line& J, const Pos& p) {
 		Pos vec = ~(p1 - p2);
 		ld r = vec.mag() * .5;
 		ld h = (p - m).mag();
-		ld w = sqrt(r * r - h * h);
+		ld w = sqrt(std::max(0., r * r - h * h));
 		Pos cen1 = m + vec.unit() * w;
 		Pos cen2 = m - vec.unit() * w;
 		return { Circle(cen1, r), Circle(cen2, r) };
@@ -284,12 +284,15 @@ inline Disks inclose_circle(const Line& I, const Line& J, const Pos& p) {
 	}
 	return {};//INVAL
 }
-inline Disks inclose_circle(const Line& I, const Pos& p, const Pos& q) {
+inline Disks inclose_circle(const Line& I, Pos p, Pos q) {
 	ld AP = I.above(p), AQ = I.above(q);
+	//std::cout << "DEBUG::   AP:: " << AP << "\n";
+	//std::cout << "DEBUG::   AQ:: " << AQ << "\n";
 	if (AP > 0 || AQ > 0) return {};//INVAL
 	if (zero(AP) && zero(AQ)) return {};//INVAL
 	if (sign(AP) <= 0 && sign(AQ) <= 0) {
 		if (zero(L(p, q) * I)) {
+			//std::cout << "FUCK::1::\n";
 			/*
 				  * q
 
@@ -299,14 +302,25 @@ inline Disks inclose_circle(const Line& I, const Pos& p, const Pos& q) {
 			Pos m = (p + q) * .5;
 			ld r = std::abs(I.dist(m));
 			ld h = (p - m).mag();
-			ld w = sqrt(r * r - h * h);
+			if (r < h) std::swap(p, q);
+			r = std::abs(I.dist(m));
+			h = (p - m).mag();
+			ld w = sqrt(std::max(0., r * r - h * h));
 			Pos vec = ~(p - q).unit();
 			Pos cen1 = m + vec * w;
 			Pos cen2 = m - vec * w;
+			//std::cout << "DEBUG::    m:: " << m << "\n";
+			//std::cout << "DEBUG::    w:: " << w << "\n";
+			//std::cout << "DEBUG::    r:: " << r << "\n";
+			//std::cout << "DEBUG::    h:: " << h << "\n";
+			//std::cout << "DEBUG::  vec:: " << vec << "\n";
+			//std::cout << "DEBUG:: cen1:: " << cen1 << "\n";
+			//std::cout << "DEBUG:: cen2:: " << cen2 << "\n";
 			return { Circle(cen1, r), Circle(cen2, r) };
 		}
 		Circle en = enclose_circle(p, q);
 		if (sign(std::abs(I.dist(en.c)) - en.r) > 0) {
+			//std::cout << "FUCK::2::\n";
 			if (zero(AP - AQ)) {
 				/*
 					* q   * p
@@ -403,7 +417,7 @@ inline ld query(const Polygon& H) {
 				//___________________________________________________//
 				ins = inclose_circle(L(q0, q1), L(r0, r1), p0);
 #ifdef DEBUG
-				std::cout << "ins.size() : " << ins.size() << "\n";
+				std::cout << "ins1.size() : " << ins.size() << "\n";
 				for (Circle& c : ins) std::cout << "ins : " << c << "\n";
 #endif
 				for (const Circle& c : ins)
@@ -415,7 +429,7 @@ inline ld query(const Polygon& H) {
 				//___________________________________________________//
 				ins = inclose_circle(L(r0, r1), p0, q0);
 #ifdef DEBUG
-				std::cout << "ins.size() : " << ins.size() << "\n";
+				std::cout << "ins2.size() : " << ins.size() << "\n";
 				for (Circle& c : ins) std::cout << "ins : " << c << "\n";
 #endif
 				for (const Circle& c : ins)

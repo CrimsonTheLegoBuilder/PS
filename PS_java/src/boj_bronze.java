@@ -1,46 +1,56 @@
 import java.io.*;
-import java.util.Scanner;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class boj_bronze {
-//public class Main {
+    //public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int T = Integer.parseInt(st.nextToken());
-        for (int t = 1; t <= T; t++) {
-            st = new StringTokenizer(br.readLine());
-            int N = Integer.parseInt(st.nextToken());
-            double xr = -1000000000.0;
-            double xl = 1000000000.0;
-            double yu = -1000000000.0;
-            double yl = 1000000000.0;
-            for (int i = 0; i < N; i++) {
-                st = new StringTokenizer(br.readLine());
-                double x = Double.parseDouble(st.nextToken());
-                double y = Double.parseDouble(st.nextToken());
-                xr = Math.max(xr, x);
-                xl = Math.min(xl, x);
-                yu = Math.max(yu, y);
-                yl = Math.min(yl, y);
-            }
-            double w = xr - xl;
-            double h = yu - yl;
-            String n = String.valueOf(t);
-            double a = w * h;
-            double p = w + w + h + h;
-            String area = String.format("%.9f", a);
-            String peri = String.format("%.9f", p);
-            bw.write("Case " + n + ": Area " + area + ", Perimeter " + peri + "\n");
+        int N = Integer.parseInt(st.nextToken());
+        int K = Integer.parseInt(st.nextToken());
+        int[] C = new int[N];
+        int[] A = new int[K];
+        int c = 0;
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0 ; i < K; i++) {
+            A[i] = Integer.parseInt(st.nextToken());
         }
+        List<Integer> M = new ArrayList<>();
+        int ans = 0;
+        for (int i = 0; i < K; i++) {
+            int cur = A[i];
+            if (M.contains(cur)) continue;
+            if (M.size() < N) {
+                M.add(cur);
+                continue;
+            }
+            int t = -1;
+            int far = -1;
+            for (int j = 0; j < M.size(); j++) {
+                int tmp = M.get(j);
+                int dist = 100000;
+                for (int k = 0; k < K; k++) {
+                    if (A[k] == tmp) {
+                        dist = k;
+                    }
+                }
+                if (dist > far) {
+                    far = dist;
+                    t = j;
+                }
+            }
+            M.remove(t);
+            M.add(cur);
+            ans++;
+        }
+
         //String ret = String.format("%.15f", D - N);
-        //String ret = String.valueOf(ans);
-        //bw.write(ret);
-        //bw.newLine();
+        String ret = String.valueOf(ans);
+        bw.write(ret);
+        bw.newLine();
         bw.flush();
         bw.close();
     }

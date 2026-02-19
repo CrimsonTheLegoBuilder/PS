@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class boj_bronze {
-    //public class Main {
+//public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
@@ -10,41 +10,15 @@ public class boj_bronze {
 
         StringTokenizer st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        int K = Integer.parseInt(st.nextToken());
-        int[] C = new int[N];
-        int[] A = new int[K];
-        int c = 0;
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0 ; i < K; i++) {
-            A[i] = Integer.parseInt(st.nextToken());
-        }
-        List<Integer> M = new ArrayList<>();
         int ans = 0;
-        for (int i = 0; i < K; i++) {
-            int cur = A[i];
-            if (M.contains(cur)) continue;
-            if (M.size() < N) {
-                M.add(cur);
-                continue;
+        int nxt = 0;
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0 ; i < N; i++) {
+            int cur = Integer.parseInt(st.nextToken());
+            if (cur == nxt) {
+                ans++;
+                nxt = (nxt + 1) % 3;
             }
-            int t = -1;
-            int far = -1;
-            for (int j = 0; j < M.size(); j++) {
-                int tmp = M.get(j);
-                int dist = 100000;
-                for (int k = 0; k < K; k++) {
-                    if (A[k] == tmp) {
-                        dist = k;
-                    }
-                }
-                if (dist > far) {
-                    far = dist;
-                    t = j;
-                }
-            }
-            M.remove(t);
-            M.add(cur);
-            ans++;
         }
 
         //String ret = String.format("%.15f", D - N);
@@ -55,6 +29,7 @@ public class boj_bronze {
         bw.close();
     }
 }
+
 
 /*
 

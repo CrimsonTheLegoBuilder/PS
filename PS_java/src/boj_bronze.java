@@ -9,19 +9,41 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
+        int R = Integer.parseInt(st.nextToken());
+        int C = Integer.parseInt(st.nextToken());
+
+        char[][] M = new char[R][C];
+        boolean[][] V = new boolean[R][C];
+
+        for (int i = 0; i < R; i++) {
+            M[i] = br.readLine().toCharArray();
+        }
+
         int ans = 0;
-        int nxt = 0;
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0 ; i < N; i++) {
-            int cur = Integer.parseInt(st.nextToken());
-            if (cur == nxt) {
-                ans++;
-                nxt = (nxt + 1) % 3;
+        int[] dr = { -1, 1, 0, 0 };
+        int[] dc = { 0, 0, -1, 1 };
+
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                if (M[r][c] == '#' && !V[r][c]) {
+                    ans++;
+                    V[r][c] = true;
+
+                    for (int d = 0; d < 4; d++) {
+                        int nr = r + dr[d];
+                        int nc = c + dc[d];
+                        if (0 <= nr && nr < R && 0 <= nc && nc < C) {
+                            if (M[nr][nc] == '#') {
+                                V[nr][nc] = true;
+                            }
+                        }
+                    }
+                }
             }
         }
 
         //String ret = String.format("%.15f", D - N);
+        //String ret = String.valueOf(F[N + 1]);
         String ret = String.valueOf(ans);
         bw.write(ret);
         bw.newLine();

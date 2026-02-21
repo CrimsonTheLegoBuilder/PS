@@ -647,6 +647,7 @@ struct Line {//ax + by = c
 	Line& operator += (const ld& n) { c += hypot(s.vy, s.vx) * n; return *this; }
 	Line& operator -= (const ld& n) { c -= hypot(s.vy, s.vx) * n; return *this; }
 	Line& operator *= (const ld& n) { s *= n, c *= n; return *this; }
+	Line operator - () const { return Line({ -s.vy, -s.vx }, c); }
 	ld dist(const Pos& p) const { return s.vy * p.x + s.vx * p.y; }
 	ld above(const Pos& p) const { return s.vy * p.x + s.vx * p.y - c; }
 	ld mag() const { return s.mag(); }

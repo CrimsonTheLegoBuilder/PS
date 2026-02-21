@@ -3,141 +3,100 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <cassert>
 #include <vector>
-#include <random>
-#include <array>
-#include <set>
 typedef long long ll;
-//typedef long double ld;
 typedef double ld;
-typedef std::pair<int, int> pi;
-typedef std::vector<int> Vint;
-typedef std::vector<ld> Vld;
 const ll INF = 1e17;
-const int LEN = 1e5 + 1;
-const ld TOL = 1e-7;
-inline int sign(const int& x) { return x < 0 ? -1 : !!x; }
-inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
-inline bool zero(const ll& x) { return !x; }
-inline ll sq(const ll& x) { return x * x; }
-ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 
-#define LO x
-#define HI y
-
-#define LINE 1
-#define CIRCLE 2
-
-#define STRONG 0
-#define WEAK 1
-
-int N, M, T, Q;
+int N;
 struct Pos {
-	ll x, y, i;
-	Pos(ll x_ = 0, ll y_ = 0, ll i_ = 0) : x(x_), y(y_), i(i_) {}
-	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
+	int x, y;
+	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	bool operator <= (const Pos& p) const { return x == p.x ? y <= p.y : x <= p.x; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
-	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y, i }; }
-	Pos operator * (const int& n) const { return { x * n, y * n }; }
-	Pos operator / (const int& n) const { return { x / n, y / n }; }
-	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
-	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
-	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
-	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
-	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
-	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
-	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
-	Pos operator - () const { return { -x, -y }; }
+	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
+	ll operator * (const Pos& p) const { return { (ll)x * p.x + (ll)y * p.y }; }
+	ll operator / (const Pos& p) const { return { (ll)x * p.y - (ll)y * p.x }; }
 	Pos operator ~ () const { return { -y, x }; }
-	Pos operator ! () const { return { y, x }; }
-	ll xy() const { return (ll)x * y; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	int Man() const { return std::abs(x) + std::abs(y); }
 	ld mag() const { return hypot(x, y); }
-	ld rad() const { return atan2(y, x); }
-	Pos unit() const {
-		ll g = gcd(std::abs(x), std::abs(y));
-		return { x / g, y / g, i };
-	}
-	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
-	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
-}; const Pos O = Pos(0, 0);
-const Pos INVAL = Pos(-1, -1);
-typedef std::vector<Pos> Polygon;
-bool cmpx(const Pos& p, const Pos& q) { return p.x == q.x ? p.y < q.y : p.x < q.x; }
-bool cmpy(const Pos& p, const Pos& q) { return p.y == q.y ? p.x < q.x : p.y < q.y; }
-bool cmpt(const Pos& p, const Pos& q) {
-	bool f0 = O < p;
-	bool f1 = O < q;
-	if (f0 != f1) return f0;
-	ll tq = p / q;
-	return !tq ? p.Euc() < q.Euc() : tq > 0;
-}
+} H[100000];
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) / (d3 - d2); }
 ll cross(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) / (d4 - d3); }
-ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d2); }
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
-int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
-bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
-bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
-bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
-bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
-	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
-	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
-	if (f == WEAK) return f1 && f2;
-	bool f3 = on_seg_strong(s1, s2, d1) ||
-		on_seg_strong(s1, s2, d2) ||
-		on_seg_strong(d1, d2, s1) ||
-		on_seg_strong(d1, d2, s2);
-	return (f1 && f2) || f3;
-}
-void solve() {
+void init() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
 	std::cout << std::fixed;
-	std::cout.precision(15);
+	std::cout.precision(6);
 	std::cin >> N;
-	Polygon P(N); for (Pos& p : P) std::cin >> p;
-	ll ans = 0;
-	for (int i = 0; i < N; i++) {
-		Polygon C;
-		for (int j = 0; j < N; j++) {
-			if (i == j) continue;
-			C.push_back((P[j] - P[i]).unit());
-		}
-		std::sort(C.begin(), C.end(), cmpt);
-		int sz = C.size();
-		Polygon Q;
-		std::set<Pos> S;
-		for (int j = 0, k; j < sz; j++) {
-			k = j;
-			while (k < sz && C[j] == C[k]) k++;
-			Pos v = C[j];
-			v.i = k - j;
-			if (v.i == 0) v.i = 1;
-			Q.push_back(v);
-			S.insert(v);
-			j = k - 1;
-		}
-		for (const Pos& q : Q) {
-			Pos v = ~q;
-			auto it = S.find(v);
-			if (it != S.end()) {
-				ans += q.i * it->i;
-			}
-		}
-	}
-	std::cout << ans << "\n";
+	for (int i = 0; i < N; i++) std::cin >> H[i].x >> H[i].y;
 	return;
 }
-int main() { solve(); return 0; }//boj3008
-
+struct Pdd {
+	ld x, y;
+	Pdd(ld x_ = 0, ld y_ = 0) : x(x_), y(y_) {}
+	Pdd operator + (const Pdd& p) const { return { x + p.x, y + p.y }; }
+	Pdd operator - (const Pdd& p) const { return { x - p.x, y - p.y }; }
+	Pdd operator * (const ld& n) const { return { x * n, y * n }; }
+	Pdd operator / (const ld& n) const { return { x / n, y / n }; }
+	ld operator * (const Pdd& p) const { return x * p.x + y * p.y; }
+	ld operator / (const Pdd& p) const { return x * p.y - y * p.x; }
+	friend std::ostream& operator << (std::ostream& os, const Pdd& p) { os << p.x << " " << p.y; return os; }
+};
+ld cross(const Pdd& d1, const Pdd& d2, const Pdd& d3) { return (d2 - d1) / (d3 - d2); }
+Pdd intersection(const Pdd& p1, const Pdd& p2, const Pdd& q1, const Pdd& q2) { ld a1 = cross(q1, q2, p1), a2 = -cross(q1, q2, p2); return (p1 * a2 + p2 * a1) / (a1 + a2); }
+Pdd b0, b1, b2, b3;
+Pdd pp(const Pos& p) { return Pdd(p.x, p.y); }
+void get_points(const Pos& p0, const Pos& p1, const Pos& l, const Pos& r, const Pos& u) {
+	Pos v0 = p1 - p0;
+	Pos vr = ~v0;
+	Pos vu = ~vr;
+	Pos vl = ~vu;
+	b0 = intersection(pp(p0), pp(p1), pp(r), pp(r + vr));
+	b1 = intersection(pp(r), pp(r + vr), pp(u), pp(u + vu));
+	b2 = intersection(pp(u), pp(u + vu), pp(l), pp(l + vl));
+	b3 = intersection(pp(l), pp(l + vl), pp(p0), pp(p1));
+	return;
+}
+void rotating_calipers() {
+	init();
+	std::swap(H[0], *std::min_element(H, H + N));
+	std::sort(H + 1, H + N, [&](const Pos& p, const Pos& q) {
+		ll ret = cross(H[0], p, q);
+		return ret == 0 ? (H[0] - p).Euc() < (H[0] - q).Euc() : ret > 0;
+		});
+	int S = -1;
+	for (int i = 0; i < N; i++) {
+		while (S >= 1 && cross(H[S - 1], H[S], H[i]) <= 0) S--;
+		H[++S] = H[i];
+	}
+	N = S + 1;
+	if (N == 2) { std::cout << "0\n"; return; }
+	int R{ 0 }, U{ 0 }, L{ 0 };
+	for (int j = 0; j < N; j++) if (dot(H[0], H[1], H[j], H[(j + 1) % N]) <= 0) { R = j; break; }
+	for (int k = R; k < N; k++) if (cross(H[0], H[1], H[k], H[(k + 1) % N]) <= 0) { U = k; break; }
+	for (int l = U; l <= N; l++) if (dot(H[0], H[1], H[l % N], H[(l + 1) % N]) >= 0) { L = l; break; }
+	ld MIN = INF;
+	//std::cout << H[R % N] << " " << H[U % N] << " " << H[L % N] << "\n";
+	for (int i = 0, j; i < N; i++) {
+		j = (i + 1) % N;
+		while (dot(H[i], H[j], H[R % N], H[(R + 1) % N]) > 0) R++;
+		while (cross(H[i], H[j], H[U % N], H[(U + 1) % N]) > 0) U++;
+		while (dot(H[i], H[j], H[L % N], H[(L + 1) % N]) < 0) L++;
+		ld h = cross(H[i], H[j], H[U % N]) / (H[i] - H[j]).mag();
+		ld w = dot(H[i], H[j], H[L % N], H[R % N]) / (H[i] - H[j]).mag();
+		//std::cout << "area:: " << h * w << "\n";
+		if (MIN > h * w) {
+			MIN = h * w;
+			//std::cout << "I:: " << H[i] << " J:: " << H[j] << "\n";
+			get_points(H[i], H[j], H[L % N], H[R % N], H[U % N]);
+		}
+		//MIN = std::min(MIN, h * w);
+	}
+	//std::cout << MIN << "\n";
+	std::cout << b0 << "\n" << b1 << "\n" << b2 << "\n" << b3 << "\n";
+	return;
+}
+int main() { rotating_calipers(); return 0; }//boj31360

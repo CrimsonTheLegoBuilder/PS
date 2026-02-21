@@ -3,52 +3,55 @@ import java.util.*;
 
 public class boj_bronze {
 //public class Main {
+    static int N, M;
+    static char[][] G;
+    static boolean[][] V;
+    static int[] dr = { -1, 1, 0, 0, 1, -1, -1, 1 };
+    static int[] dc = { 0, 0, -1, 1, 1, 1, -1, -1 };
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
+        //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int R = Integer.parseInt(st.nextToken());
-        int C = Integer.parseInt(st.nextToken());
-
-        char[][] M = new char[R][C];
-        boolean[][] V = new boolean[R][C];
-
-        for (int i = 0; i < R; i++) {
-            M[i] = br.readLine().toCharArray();
+        N = Integer.parseInt(st.nextToken());
+        for (int i = 1; i <= N; i++) {
+            String l = br.readLine();
+            String[] W = l.split(" ");
+            Stack<String> S = new Stack<>();
+            for (String w : W) {
+                S.push(w);
+            }
+            bw.write("Case #" + i + ": ");
+            while (!S.isEmpty()) {
+                bw.write(S.pop());
+                if (!S.isEmpty()) bw.write(" ");
+            }
+            bw.newLine();
         }
 
-        int ans = 0;
-        int[] dr = { -1, 1, 0, 0 };
-        int[] dc = { 0, 0, -1, 1 };
-
-        for (int r = 0; r < R; r++) {
-            for (int c = 0; c < C; c++) {
-                if (M[r][c] == '#' && !V[r][c]) {
-                    ans++;
-                    V[r][c] = true;
-
-                    for (int d = 0; d < 4; d++) {
-                        int nr = r + dr[d];
-                        int nc = c + dc[d];
-                        if (0 <= nr && nr < R && 0 <= nc && nc < C) {
-                            if (M[nr][nc] == '#') {
-                                V[nr][nc] = true;
-                            }
-                        }
+        //String ret = String.valueOf(sp + 1);
+        //bw.write(ret);
+        //bw.newLine();
+        bw.flush();
+        bw.close();
+    }
+    static void bfs(int r, int c) {
+        Queue<int[]> q = new LinkedList<>();
+        q.offer(new int[]{ r, c });
+        V[r][c] = true;
+        while (!q.isEmpty()) {
+            int[] cur = q.poll();
+            for (int i = 0; i < 4; i++) {
+                int nr = cur[0] + dr[i];
+                int nc = cur[1] + dc[i];
+                if (0 <= nr && nr < N && 0 <= nc && nc < M) {
+                    if (G[nr][nc] == '#' && !V[nr][nc]) {
+                        V[nr][nc] = true;
+                        q.offer(new int[]{ nr, nc });
                     }
                 }
             }
         }
-
-        //String ret = String.format("%.15f", D - N);
-        //String ret = String.valueOf(F[N + 1]);
-        String ret = String.valueOf(ans);
-        bw.write(ret);
-        bw.newLine();
-        bw.flush();
-        bw.close();
     }
 }
 

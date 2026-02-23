@@ -13,49 +13,21 @@ public class boj_bronze {
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        int[][] map = new int[N + 1][N + 1];
-        int rs = 0, cs = 0, rp = 0, cp = 0;
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        int d = Integer.parseInt(st.nextToken());
+        int r = x * 100 + y;
+        r -= d * 2;
+        r /= 4;
+        x = (r + d) / 100; y = (r + d) % 100;
+        bw.write(x + " " + y + "\n");
+        x = r / 100; y = r % 100;
+        bw.write(x + " " + y + "\n");
+        //int ans = 0;
+        //String ret = String.valueOf(ans);
 
-        for (int i = 1; i <= N; i++) {
-            st = new StringTokenizer(br.readLine());
-            for (int j = 1; j <= N; j++) {
-                map[i][j] = Integer.parseInt(st.nextToken());
-                if (map[i][j] == 2) { rs = i; cs = j; }
-                if (map[i][j] == 5) { rp = i; cp = j; }
-            }
-        }
-
-        int d = (rs - rp) * (rs - rp) + (cs - cp) * (cs - cp);
-        if (d < 25) {
-            System.out.println(0);
-            return;
-        }
-
-        int cnt = 0;
-        int ys = Math.min(rs, rp);
-        int ye = Math.max(rs, rp);
-        int xs = Math.min(cs, cp);
-        int xe = Math.max(cs, cp);
-
-        for (int i = ys; i <= ye; i++) {
-            for (int j = xs; j <= xe; j++) {
-                if (map[i][j] == 1) {
-                    cnt++;
-                }
-            }
-        }
-
-        if (cnt >= 3) {
-            System.out.println(1);
-        }
-        else {
-            System.out.println(0);
-        }
-
-        //String ret = String.valueOf(sp + 1);
-        //bw.write(ret);
-        //bw.newLine();
+        bw.newLine();
         bw.flush();
         bw.close();
     }

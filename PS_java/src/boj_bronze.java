@@ -13,19 +13,30 @@ public class boj_bronze {
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int x = Integer.parseInt(st.nextToken());
-        int y = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        int d = Integer.parseInt(st.nextToken());
-        int r = x * 100 + y;
-        r -= d * 2;
-        r /= 4;
-        x = (r + d) / 100; y = (r + d) % 100;
-        bw.write(x + " " + y + "\n");
-        x = r / 100; y = r % 100;
-        bw.write(x + " " + y + "\n");
-        //int ans = 0;
+        int N = Integer.parseInt(st.nextToken());
+        int[] X = new int[N + 1];
+        int[] Y = new int[N + 1];
+        for (int i = 1; i <= N; i++) {
+            st = new StringTokenizer(br.readLine());
+            X[i]= Integer.parseInt(st.nextToken());
+            Y[i] = Integer.parseInt(st.nextToken());
+        }
+        int d = -1;
+        int a = -1;
+        int b = -1;
+        for (int i = 1; i <= N; i++) {
+            for (int j = i + 1; j <= N; j++) {
+                int l = (X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j]);
+                if (d < l) {
+                    d = l;
+                    a = i;
+                    b = j;
+                }
+            }
+        }
+
         //String ret = String.valueOf(ans);
+        bw.write(a + " " + b + "\n");
 
         bw.newLine();
         bw.flush();

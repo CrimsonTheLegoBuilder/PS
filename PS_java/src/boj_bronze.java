@@ -12,33 +12,39 @@ public class boj_bronze {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int[] X = new int[N + 1];
-        int[] Y = new int[N + 1];
-        for (int i = 1; i <= N; i++) {
+        //StringTokenizer st = new StringTokenizer(br.readLine());
+        StringTokenizer st;
+        st = new StringTokenizer(br.readLine());
+        int T = Integer.parseInt(st.nextToken());
+        for (int t = 1; t <= T; t++) {
+            bw.write("Data Set " + t + ":\n");
             st = new StringTokenizer(br.readLine());
-            X[i]= Integer.parseInt(st.nextToken());
-            Y[i] = Integer.parseInt(st.nextToken());
-        }
-        int d = -1;
-        int a = -1;
-        int b = -1;
-        for (int i = 1; i <= N; i++) {
-            for (int j = i + 1; j <= N; j++) {
-                int l = (X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j]);
-                if (d < l) {
-                    d = l;
-                    a = i;
-                    b = j;
-                }
+            int n = Integer.parseInt(st.nextToken());
+            int s = Integer.parseInt(st.nextToken());
+            int p = Integer.parseInt(st.nextToken());
+            st = new StringTokenizer(br.readLine());
+            int x = Integer.parseInt(st.nextToken());
+            int y = Integer.parseInt(st.nextToken());
+            double d = 0;
+            for (int i = 0; i < n; i++) {
+                st = new StringTokenizer(br.readLine());
+                int x1 = Integer.parseInt(st.nextToken());
+                int y1 = Integer.parseInt(st.nextToken());
+                d += Math.hypot(x - x1, y - y1);
+                x = x1;
+                y = y1;
             }
+            double ans = d * s / p;
+            int ret = (int)Math.ceil(ans);
+            //String ret = String.format("%.10f", ans);
+            bw.write(ret + "\n\n");
         }
 
-        //String ret = String.valueOf(ans);
-        bw.write(a + " " + b + "\n");
 
-        bw.newLine();
+        //String ret = String.format("%.10f", d);
+        //String ret = String.valueOf(ans);
+        //bw.write(a + " " + b + "\n");
+        //bw.newLine();
         bw.flush();
         bw.close();
     }

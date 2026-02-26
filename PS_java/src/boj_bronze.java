@@ -15,36 +15,30 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int T = Integer.parseInt(st.nextToken());
-        for (int t = 1; t <= T; t++) {
-            bw.write("Data Set " + t + ":\n");
+        int N = Integer.parseInt(st.nextToken());
+        long[] X = new long[N];
+        long[] Y = new long[N];
+        int a = -1, b = -1;
+        long D = 10000000000000000L;
+        for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine());
-            int n = Integer.parseInt(st.nextToken());
-            int s = Integer.parseInt(st.nextToken());
-            int p = Integer.parseInt(st.nextToken());
-            st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int y = Integer.parseInt(st.nextToken());
-            double d = 0;
-            for (int i = 0; i < n; i++) {
-                st = new StringTokenizer(br.readLine());
-                int x1 = Integer.parseInt(st.nextToken());
-                int y1 = Integer.parseInt(st.nextToken());
-                d += Math.hypot(x - x1, y - y1);
-                x = x1;
-                y = y1;
-            }
-            double ans = d * s / p;
-            int ret = (int)Math.ceil(ans);
-            //String ret = String.format("%.10f", ans);
-            bw.write(ret + "\n\n");
+            X[i] = Long.parseLong(st.nextToken());
+            Y[i] = Long.parseLong(st.nextToken());
         }
-
-
+        for (int i = 0; i < N; i++) {
+            for (int j = i + 1; j < N; j++) {
+                long d = (X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j]);
+                if (D > d) {
+                    D = d;
+                    a = i + 1;
+                    b = j + 1;
+                }
+            }
+        }
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
-        //bw.write(a + " " + b + "\n");
-        //bw.newLine();
+        bw.write(a + " " + b + "\n");
+        bw.newLine();
         bw.flush();
         bw.close();
     }

@@ -15,30 +15,37 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        long[] X = new long[N];
-        long[] Y = new long[N];
-        int a = -1, b = -1;
-        long D = 10000000000000000L;
-        for (int i = 0; i < N; i++) {
+        int T = Integer.parseInt(st.nextToken());
+        for (int t = 0; t < T; t++) {
             st = new StringTokenizer(br.readLine());
-            X[i] = Long.parseLong(st.nextToken());
-            Y[i] = Long.parseLong(st.nextToken());
-        }
-        for (int i = 0; i < N; i++) {
-            for (int j = i + 1; j < N; j++) {
-                long d = (X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j]);
-                if (D > d) {
-                    D = d;
-                    a = i + 1;
-                    b = j + 1;
+            int N = Integer.parseInt(st.nextToken());
+            long[] X = new long[N];
+            long[] Y = new long[N];
+            int a = -1, b = -1;
+            int c = -1, d = -1;
+            long D = 10000000000000000L;
+            for (int i = 0; i < N; i++) {
+                st = new StringTokenizer(br.readLine());
+                X[i] = Long.parseLong(st.nextToken());
+                Y[i] = Long.parseLong(st.nextToken());
+            }
+            for (int i = 0; i < N; i++) {
+                for (int j = i + 1; j < N; j++) {
+                    long l = (X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j]);
+                    if (D > l) {
+                        D = l;
+                        a = (int)X[i];
+                        b = (int)Y[i];
+                        c = (int)X[j];
+                        d = (int)Y[j];
+                    }
                 }
             }
+            //String ret = String.format("%.10f", d);
+            //String ret = String.valueOf(ans);
+            bw.write(a + " " + b + "\n" + c + " " + d + "\n");
+            //bw.newLine();
         }
-        //String ret = String.format("%.10f", d);
-        //String ret = String.valueOf(ans);
-        bw.write(a + " " + b + "\n");
-        bw.newLine();
         bw.flush();
         bw.close();
     }

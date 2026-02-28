@@ -19,33 +19,23 @@ public class boj_bronze {
         for (int t = 0; t < T; t++) {
             st = new StringTokenizer(br.readLine());
             int N = Integer.parseInt(st.nextToken());
-            long[] X = new long[N];
-            long[] Y = new long[N];
-            int a = -1, b = -1;
-            int c = -1, d = -1;
-            long D = 10000000000000000L;
-            for (int i = 0; i < N; i++) {
-                st = new StringTokenizer(br.readLine());
-                X[i] = Long.parseLong(st.nextToken());
-                Y[i] = Long.parseLong(st.nextToken());
-            }
-            for (int i = 0; i < N; i++) {
-                for (int j = i + 1; j < N; j++) {
-                    long l = (X[i] - X[j]) * (X[i] - X[j]) + (Y[i] - Y[j]) * (Y[i] - Y[j]);
-                    if (D > l) {
-                        D = l;
-                        a = (int)X[i];
-                        b = (int)Y[i];
-                        c = (int)X[j];
-                        d = (int)Y[j];
-                    }
-                }
-            }
-            //String ret = String.format("%.10f", d);
-            //String ret = String.valueOf(ans);
-            bw.write(a + " " + b + "\n" + c + " " + d + "\n");
-            //bw.newLine();
+            int[] W = new int[N];
+            int[] H = new int[N];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < N; i++) W[i] = Integer.parseInt(st.nextToken());
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < N; i++) H[i] = Integer.parseInt(st.nextToken());
+            int ans = 0;
+            for (int i = 0; i < N; i++) ans += W[i] * 2;
+            for (int i = 0; i < N - 1; i++) ans += Math.abs(H[i] - H[i + 1]);
+            ans += H[0];
+            ans += H[N - 1];
+            bw.write(ans + "\n");
         }
+        //String ret = String.format("%.10f", d);
+        //String ret = String.valueOf(ans);
+        bw.write("\n");
+        //bw.newLine();
         bw.flush();
         bw.close();
     }

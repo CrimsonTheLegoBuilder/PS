@@ -40,34 +40,21 @@ public class boj_geometry {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int T = Integer.parseInt(st.nextToken());
-        for (int t = 0; t < T; t++) {
+        int N = Integer.parseInt(st.nextToken());
+        Pos[] P = new Pos[N];
+        for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine());
-            int N = Integer.parseInt(st.nextToken());
-            Pos[] P = new Pos[N];
-            Pos a = new Pos(0, 0);
-            Pos b = new Pos(0, 0);
-            long D = 10000000000000000L;
-            for (int i = 0; i < N; i++) {
-                st = new StringTokenizer(br.readLine());
-                P[i] = new Pos(Long.parseLong(st.nextToken()), Long.parseLong(st.nextToken()));
-            }
-            Arrays.sort(P);
-            for (int i = 0; i < N; i++) {
-                for (int j = i + 1; j < N; j++) {
-                    long l = (Pos.sub(P[i], P[j])).Euc();
-                    if (D > l) {
-                        D = l;
-                        a = P[i];
-                        b = P[j];
-                    }
-                }
-            }
-            //String ret = String.format("%.10f", d);
-            //String ret = String.valueOf(ans);
-            bw.write(a.x + " " + a.y + " " + b.x + " " + b.y + "\n");
-            //bw.newLine();
+            P[i] = new Pos(Long.parseLong(st.nextToken()), Long.parseLong(st.nextToken()));
         }
+        double d = 0;
+        double l = 0;
+        for (int i = 0; i < N; i++) {
+            d += Pos.sub(P[i], P[(i + 1) % N]).mag();
+            l = Math.max(l, Pos.sub(P[i], P[(i + 1) % N]).mag());
+        }
+        String ret = String.format("%.10f", d - l);
+        bw.write(ret + "\n");
+        //bw.newLine();
         bw.flush();
         bw.close();
     }

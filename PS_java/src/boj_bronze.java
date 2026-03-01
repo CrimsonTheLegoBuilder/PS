@@ -15,26 +15,32 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
+        int N = Integer.parseInt(st.nextToken());
+        long[] X = new long[N];
+        long[] Y = new long[N];
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            X[i] = Long.parseLong(st.nextToken());
+            Y[i] = Long.parseLong(st.nextToken());
+        }
+        st = new StringTokenizer(br.readLine());
         int T = Integer.parseInt(st.nextToken());
         for (int t = 0; t < T; t++) {
             st = new StringTokenizer(br.readLine());
-            int N = Integer.parseInt(st.nextToken());
-            int[] W = new int[N];
-            int[] H = new int[N];
-            st = new StringTokenizer(br.readLine());
-            for (int i = 0; i < N; i++) W[i] = Integer.parseInt(st.nextToken());
-            st = new StringTokenizer(br.readLine());
-            for (int i = 0; i < N; i++) H[i] = Integer.parseInt(st.nextToken());
-            int ans = 0;
-            for (int i = 0; i < N; i++) ans += W[i] * 2;
-            for (int i = 0; i < N - 1; i++) ans += Math.abs(H[i] - H[i + 1]);
-            ans += H[0];
-            ans += H[N - 1];
+            int p = Integer.parseInt(st.nextToken());
+            p--;
+            long d = Long.parseLong(st.nextToken());
+            d = d * d;
+            int ans = -1;
+            for (int i = 0; i < N; i++) {
+                long l = (X[i] - X[p]) * (X[i] - X[p]) + (Y[i] - Y[p]) * (Y[i] - Y[p]);
+                if (l <= d) ans++;
+            }
             bw.write(ans + "\n");
         }
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
-        bw.write("\n");
+        //bw.write("\n");
         //bw.newLine();
         bw.flush();
         bw.close();

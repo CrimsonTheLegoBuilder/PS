@@ -14,29 +14,16 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
-        st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        long[] X = new long[N];
-        long[] Y = new long[N];
-        for (int i = 0; i < N; i++) {
+        while (true) {
             st = new StringTokenizer(br.readLine());
-            X[i] = Long.parseLong(st.nextToken());
-            Y[i] = Long.parseLong(st.nextToken());
-        }
-        st = new StringTokenizer(br.readLine());
-        int T = Integer.parseInt(st.nextToken());
-        for (int t = 0; t < T; t++) {
-            st = new StringTokenizer(br.readLine());
-            int p = Integer.parseInt(st.nextToken());
-            p--;
-            long d = Long.parseLong(st.nextToken());
-            d = d * d;
-            int ans = -1;
-            for (int i = 0; i < N; i++) {
-                long l = (X[i] - X[p]) * (X[i] - X[p]) + (Y[i] - Y[p]) * (Y[i] - Y[p]);
-                if (l <= d) ans++;
-            }
-            bw.write(ans + "\n");
+            double x = Double.parseDouble(st.nextToken());
+            double y = Double.parseDouble(st.nextToken());
+            if (Math.abs(x) < 0.00000001 && y < 0.00000001) break;
+            double rr = x * x + y * y;
+            double a = rr * Math.PI * .5;
+            double t = a / 50;
+            int ans = (int)Math.ceil(t);
+            bw.write("The property will be flooded in hour " + ans + ".\n");
         }
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);

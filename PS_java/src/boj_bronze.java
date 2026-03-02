@@ -15,15 +15,24 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
-        st = new StringTokenizer(br.readLine());
-        double pab = Double.parseDouble(st.nextToken());
-        double pbc = Double.parseDouble(st.nextToken());
-        double pcd = Double.parseDouble(st.nextToken());
-        double ans = (pab * pcd) / pbc;
-        String ret = String.format("%.12f", ans);
-        bw.write(ret + "\n");
+        while (true) {
+            int[] D = new int[12];
+            int f = 0;
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < 12; i++) {
+                D[i] = Integer.parseInt(st.nextToken());
+                if (D[i] == 0) f++;
+            }
+            if (f == 12) break;
+            Arrays.sort(D);
+            f = 0;
+            if (D[0] == D[3]) f++;
+            if (D[4] == D[7]) f++;
+            if (D[8] == D[11]) f++;
+            if (f == 3) bw.write("yes\n");
+            else bw.write("no\n");
+        }
 
-        //String ret = String.format("%.3f", a);
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
         //bw.write("\n");

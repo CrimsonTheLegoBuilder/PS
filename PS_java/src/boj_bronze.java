@@ -16,22 +16,10 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int xs = Integer.parseInt(st.nextToken());
-        int ys = Integer.parseInt(st.nextToken());
-        int xe = Integer.parseInt(st.nextToken());
-        int ye = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        double ans = 1000000000000000.;
-        for (int i = 0; i < N; i++) {
-            st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int y = Integer.parseInt(st.nextToken());
-            int t = Integer.parseInt(st.nextToken());
-            double l = Math.hypot(xs - x, ys - y) + Math.hypot(xe - x, ye - y);
-            double tt = l + t;
-            ans = Math.min(ans, tt);
-        }
+        double pab = Double.parseDouble(st.nextToken());
+        double pbc = Double.parseDouble(st.nextToken());
+        double pcd = Double.parseDouble(st.nextToken());
+        double ans = (pab * pcd) / pbc;
         String ret = String.format("%.12f", ans);
         bw.write(ret + "\n");
 

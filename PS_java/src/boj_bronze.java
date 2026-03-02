@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.math.BigInteger;
 
 public class boj_bronze {
 //public class Main {
@@ -14,17 +15,51 @@ public class boj_bronze {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
-        while (true) {
-            st = new StringTokenizer(br.readLine());
-            double x = Double.parseDouble(st.nextToken());
-            double y = Double.parseDouble(st.nextToken());
-            if (Math.abs(x) < 0.00000001 && y < 0.00000001) break;
-            double rr = x * x + y * y;
-            double a = rr * Math.PI * .5;
-            double t = a / 50;
-            int ans = (int)Math.ceil(t);
-            bw.write("The property will be flooded in hour " + ans + ".\n");
+        st = new StringTokenizer(br.readLine());
+        long ax = Long.parseLong(st.nextToken());
+        long ay = Long.parseLong(st.nextToken());
+        long bx = Long.parseLong(st.nextToken());
+        long by = Long.parseLong(st.nextToken());
+        long cx = Long.parseLong(st.nextToken());
+        long cy = Long.parseLong(st.nextToken());
+        long[] D1 = new long[3];
+        D1[0] = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
+        D1[1] = (bx - cx) * (bx - cx) + (by - cy) * (by - cy);
+        D1[2] = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay);
+        Arrays.sort(D1);
+
+        st = new StringTokenizer(br.readLine());
+        ax = Long.parseLong(st.nextToken());
+        ay = Long.parseLong(st.nextToken());
+        bx = Long.parseLong(st.nextToken());
+        by = Long.parseLong(st.nextToken());
+        cx = Long.parseLong(st.nextToken());
+        cy = Long.parseLong(st.nextToken());
+        long[] D2 = new long[3];
+        D2[0] = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
+        D2[1] = (bx - cx) * (bx - cx) + (by - cy) * (by - cy);
+        D2[2] = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay);
+        Arrays.sort(D2);
+
+        BigInteger b10 = BigInteger.valueOf(D1[0]);
+        BigInteger b11 = BigInteger.valueOf(D1[1]);
+        BigInteger b12 = BigInteger.valueOf(D1[2]);
+
+        BigInteger b20 = BigInteger.valueOf(D2[0]);
+        BigInteger b21 = BigInteger.valueOf(D2[1]);
+        BigInteger b22 = BigInteger.valueOf(D2[2]);
+
+        boolean f1 = b10.multiply(b21).equals(b11.multiply(b20));
+        boolean f2 = b11.multiply(b22).equals(b12.multiply(b21));
+
+        if (f1 && f2) {
+            double k = Math.sqrt((double)D1[0] / D2[0]);
+            String ret = String.format("%.6f", k);
+            bw.write(ret + "\n");
         }
+        else bw.write("-1\n");
+
+        //String ret = String.format("%.3f", a);
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
         //bw.write("\n");

@@ -16,48 +16,24 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        long ax = Long.parseLong(st.nextToken());
-        long ay = Long.parseLong(st.nextToken());
-        long bx = Long.parseLong(st.nextToken());
-        long by = Long.parseLong(st.nextToken());
-        long cx = Long.parseLong(st.nextToken());
-        long cy = Long.parseLong(st.nextToken());
-        long[] D1 = new long[3];
-        D1[0] = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
-        D1[1] = (bx - cx) * (bx - cx) + (by - cy) * (by - cy);
-        D1[2] = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay);
-        Arrays.sort(D1);
-
+        int xs = Integer.parseInt(st.nextToken());
+        int ys = Integer.parseInt(st.nextToken());
+        int xe = Integer.parseInt(st.nextToken());
+        int ye = Integer.parseInt(st.nextToken());
         st = new StringTokenizer(br.readLine());
-        ax = Long.parseLong(st.nextToken());
-        ay = Long.parseLong(st.nextToken());
-        bx = Long.parseLong(st.nextToken());
-        by = Long.parseLong(st.nextToken());
-        cx = Long.parseLong(st.nextToken());
-        cy = Long.parseLong(st.nextToken());
-        long[] D2 = new long[3];
-        D2[0] = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
-        D2[1] = (bx - cx) * (bx - cx) + (by - cy) * (by - cy);
-        D2[2] = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay);
-        Arrays.sort(D2);
-
-        BigInteger b10 = BigInteger.valueOf(D1[0]);
-        BigInteger b11 = BigInteger.valueOf(D1[1]);
-        BigInteger b12 = BigInteger.valueOf(D1[2]);
-
-        BigInteger b20 = BigInteger.valueOf(D2[0]);
-        BigInteger b21 = BigInteger.valueOf(D2[1]);
-        BigInteger b22 = BigInteger.valueOf(D2[2]);
-
-        boolean f1 = b10.multiply(b21).equals(b11.multiply(b20));
-        boolean f2 = b11.multiply(b22).equals(b12.multiply(b21));
-
-        if (f1 && f2) {
-            double k = Math.sqrt((double)D1[0] / D2[0]);
-            String ret = String.format("%.6f", k);
-            bw.write(ret + "\n");
+        int N = Integer.parseInt(st.nextToken());
+        double ans = 1000000000000000.;
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            int x = Integer.parseInt(st.nextToken());
+            int y = Integer.parseInt(st.nextToken());
+            int t = Integer.parseInt(st.nextToken());
+            double l = Math.hypot(xs - x, ys - y) + Math.hypot(xe - x, ye - y);
+            double tt = l + t;
+            ans = Math.min(ans, tt);
         }
-        else bw.write("-1\n");
+        String ret = String.format("%.12f", ans);
+        bw.write(ret + "\n");
 
         //String ret = String.format("%.3f", a);
         //String ret = String.format("%.10f", d);

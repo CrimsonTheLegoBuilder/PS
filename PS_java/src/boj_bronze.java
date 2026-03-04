@@ -16,13 +16,13 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
+        int W = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        double ans = 6 * Math.sqrt(2. * N / 3 / Math.sqrt(3));
-        String ret = String.format("%.10f", ans);
-        bw.write(ret + "\n");
+        int ans = (W * 5280) / N;
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
-        //bw.write("\n");
+        bw.write(ans + "\n");
         //bw.newLine();
         bw.flush();
         bw.close();

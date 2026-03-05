@@ -16,13 +16,24 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int W = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        int ans = (W * 5280) / N;
+        int K = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < K; i++) {
+            int x = Integer.parseInt((st.nextToken()));
+            int d1 = x - 1;
+            int dn = N - x;
+            if (dn < d1) {
+                bw.write(N + " ");
+            }
+            else {
+                bw.write("1 ");
+            }
+        }
+        //bw.write("NO\n");
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
-        bw.write(ans + "\n");
+        //bw.write(ans + "\n");
         //bw.newLine();
         bw.flush();
         bw.close();

@@ -17,19 +17,19 @@ public class boj_bronze {
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        int K = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < K; i++) {
-            int x = Integer.parseInt((st.nextToken()));
-            int d1 = x - 1;
-            int dn = N - x;
-            if (dn < d1) {
-                bw.write(N + " ");
+        for (int i = 0; i < N; i++) {
+            String line = br.readLine();
+            int v = 0;
+            int c = 0;
+            for (int j = 0; j < line.length(); j++) {
+                char cc = line.charAt(j);
+                if (cc == ' ') continue;
+                if (isVowel(cc)) v++;
+                else c++;
             }
-            else {
-                bw.write("1 ");
-            }
+            bw.write(c + " " + v + "\n");
         }
+
         //bw.write("NO\n");
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
@@ -37,6 +37,10 @@ public class boj_bronze {
         //bw.newLine();
         bw.flush();
         bw.close();
+    }
+    static boolean isVowel(char c) {
+        c = Character.toLowerCase(c);
+        return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
     }
     static void bfs(int r, int c) {
         Queue<int[]> q = new LinkedList<>();

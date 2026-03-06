@@ -17,19 +17,32 @@ public class boj_bronze {
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
+        int a = Integer.parseInt(st.nextToken());
+        int b = Integer.parseInt(st.nextToken());
+        int[][] X = new int[N + 1][N + 1];
         for (int i = 0; i < N; i++) {
-            String line = br.readLine();
-            int v = 0;
-            int c = 0;
-            for (int j = 0; j < line.length(); j++) {
-                char cc = line.charAt(j);
-                if (cc == ' ') continue;
-                if (isVowel(cc)) v++;
-                else c++;
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < N; j++) {
+                X[i][j] = Integer.parseInt(st.nextToken());
             }
-            bw.write(c + " " + v + "\n");
         }
-
+        a--; b--;
+        int J = X[a][b];
+        boolean f = false;
+        for (int i = 0; i < N; i++) {
+            if (X[i][b] > J) {
+                f = true;
+                break;
+            }
+        }
+        for (int j = 0; j < N; j++) {
+            if (X[a][j] > J) {
+                f = true;
+                break;
+            }
+        }
+        if (f) bw.write("ANGRY\n");
+        else bw.write("HAPPY\n");
         //bw.write("NO\n");
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);

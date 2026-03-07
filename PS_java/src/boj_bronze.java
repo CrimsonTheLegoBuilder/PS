@@ -17,33 +17,9 @@ public class boj_bronze {
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        int a = Integer.parseInt(st.nextToken());
-        int b = Integer.parseInt(st.nextToken());
-        int[][] X = new int[N + 1][N + 1];
-        for (int i = 0; i < N; i++) {
-            st = new StringTokenizer(br.readLine());
-            for (int j = 0; j < N; j++) {
-                X[i][j] = Integer.parseInt(st.nextToken());
-            }
-        }
-        a--; b--;
-        int J = X[a][b];
-        boolean f = false;
-        for (int i = 0; i < N; i++) {
-            if (X[i][b] > J) {
-                f = true;
-                break;
-            }
-        }
-        for (int j = 0; j < N; j++) {
-            if (X[a][j] > J) {
-                f = true;
-                break;
-            }
-        }
-        if (f) bw.write("ANGRY\n");
-        else bw.write("HAPPY\n");
-        //bw.write("NO\n");
+        int K = Integer.parseInt(st.nextToken());
+        long R = 1L << (N - 1);
+        bw.write((K / R) + "\n");
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
         //bw.write(ans + "\n");

@@ -4,34 +4,45 @@ import java.math.BigInteger;
 
 public class boj_bronze {
 //public class Main {
-    static int N, M;
-    static char[][] G;
-    static boolean[][] V;
     static int[] dr = { -1, 1, 0, 0, 1, -1, -1, 1 };
     static int[] dc = { 0, 0, -1, 1, 1, 1, -1, -1 };
-    static int s = 1;
-    static int l = 4;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         //StringTokenizer st = new StringTokenizer(br.readLine());
-        //StringTokenizer st;
-        //st = new StringTokenizer(br.readLine());
-        //int N = Integer.parseInt(st.nextToken());
-        String cmd = br.readLine();
-        for (int i = 0; i < cmd.length(); i++) {
-            char c = cmd.charAt(i);
-            process(c);
+        //int N = Integer.parseInt(br.readLine());
+        StringTokenizer st;
+        st = new StringTokenizer(br.readLine());
+        int N = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        int M = Integer.parseInt(st.nextToken());
+        int cur = M;
+        int mx = M;
+        boolean f = true;
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            int in = Integer.parseInt(st.nextToken());
+            int out = Integer.parseInt(st.nextToken());
+            cur = cur + in - out;
+            if (cur < 0) f = false;
+            if (cur > mx) mx = cur;
         }
-        bw.write(s + "\n" + l + "\n");
+        if (!f) bw.write("0\n");
+        else bw.write(mx + "\n");
+        bw.flush();
+        bw.close();
+    }
+}
+/*
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
         //bw.write(ans + "\n");
         //bw.newLine();
-        bw.flush();
-        bw.close();
-    }
+*/
+
+
+/*
     static void process(char c) {
         int c1 = 0, c2 = 0;
         switch (c) {
@@ -69,11 +80,6 @@ public class boj_bronze {
             }
         }
     }
-}
-
-
-/*
-
     public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
         int T = sc.nextInt();

@@ -14,24 +14,26 @@ public class boj_bronze {
         //int N = Integer.parseInt(br.readLine());
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        int M = Integer.parseInt(st.nextToken());
-        int cur = M;
-        int mx = M;
-        boolean f = true;
-        for (int i = 0; i < N; i++) {
-            st = new StringTokenizer(br.readLine());
-            int in = Integer.parseInt(st.nextToken());
-            int out = Integer.parseInt(st.nextToken());
-            cur = cur + in - out;
-            if (cur < 0) f = false;
-            if (cur > mx) mx = cur;
+        int a = Integer.parseInt(st.nextToken());
+        int b = Integer.parseInt(st.nextToken());
+
+        int g = gcd(a, b);
+
+        for (int i = 1; i <= g; i++) {
+            if (g % i == 0) {
+                int ap = a / i;
+                int bp = b / i;
+
+                bw.write(i + " " + ap + " " + bp + "\n");
+            }
         }
-        if (!f) bw.write("0\n");
-        else bw.write(mx + "\n");
+
         bw.flush();
         bw.close();
+    }
+    static int gcd(int p, int q) {
+        if (q == 0) return p;
+        return gcd(q, p % q);
     }
 }
 /*

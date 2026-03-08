@@ -9,30 +9,43 @@ public class boj_bronze {
     static boolean[][] V;
     static int[] dr = { -1, 1, 0, 0, 1, -1, -1, 1 };
     static int[] dc = { 0, 0, -1, 1, 1, 1, -1, -1 };
+    static int s = 1;
+    static int l = 4;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         //StringTokenizer st = new StringTokenizer(br.readLine());
-        StringTokenizer st;
-        st = new StringTokenizer(br.readLine());
-        int P = Integer.parseInt(st.nextToken());
-        for (int i = 1; i <= P; i++) {
-            st = new StringTokenizer(br.readLine());
-            int K = Integer.parseInt(st.nextToken());
-            int N = Integer.parseInt(st.nextToken());
-            int s1 = N * (N + 1) / 2;
-            int s2 = N * N;
-            int s3 = N * (N + 1);
-            bw.write(i + " " + s1 + " " + s2 + " " + s3 + "\n");
+        //StringTokenizer st;
+        //st = new StringTokenizer(br.readLine());
+        //int N = Integer.parseInt(st.nextToken());
+        String cmd = br.readLine();
+        for (int i = 0; i < cmd.length(); i++) {
+            char c = cmd.charAt(i);
+            process(c);
         }
-
+        bw.write(s + "\n" + l + "\n");
         //String ret = String.format("%.10f", d);
         //String ret = String.valueOf(ans);
         //bw.write(ans + "\n");
         //bw.newLine();
         bw.flush();
         bw.close();
+    }
+    static void process(char c) {
+        int c1 = 0, c2 = 0;
+        switch (c) {
+            case 'A': c1 = 1; c2 = 2; break;
+            case 'B': c1 = 1; c2 = 3; break;
+            case 'C': c1 = 1; c2 = 4; break;
+            case 'D': c1 = 2; c2 = 3; break;
+            case 'E': c1 = 2; c2 = 4; break;
+            case 'F': c1 = 3; c2 = 4; break;
+        }
+        if (s == c1) s = c2;
+        else if (s == c2) s = c1;
+        if (l == c1) l = c2;
+        else if (l == c2) l = c1;
     }
     static boolean isVowel(char c) {
         c = Character.toLowerCase(c);

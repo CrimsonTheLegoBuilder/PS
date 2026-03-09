@@ -10,24 +10,26 @@ public class boj_bronze {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        //StringTokenizer st = new StringTokenizer(br.readLine());
         //int N = Integer.parseInt(br.readLine());
+        //StringTokenizer st = new StringTokenizer(br.readLine());
         StringTokenizer st;
-        st = new StringTokenizer(br.readLine());
-        int a = Integer.parseInt(st.nextToken());
-        int b = Integer.parseInt(st.nextToken());
-
-        int g = gcd(a, b);
-
-        for (int i = 1; i <= g; i++) {
-            if (g % i == 0) {
-                int ap = a / i;
-                int bp = b / i;
-
-                bw.write(i + " " + ap + " " + bp + "\n");
+        //st = new StringTokenizer(br.readLine());
+        //int N = Integer.parseInt(st.nextToken());
+        while (true) {
+            st = new StringTokenizer(br.readLine());
+            long a = Long.parseLong(st.nextToken());
+            long d = Long.parseLong(st.nextToken());
+            long v = Long.parseLong(st.nextToken());
+            if (a == 0 && d == 0 && v == 0) break;
+            if ((v - a) % d == 0) {
+                long n = (v - a) / d + 1;
+                if (n >= 1) bw.write(n + "\n");
+                else bw.write("X\n");
             }
+            else bw.write("X\n");
         }
-
+        //int M = Integer.parseInt(st.nextToken());
+        //bw.write("\n");
         bw.flush();
         bw.close();
     }

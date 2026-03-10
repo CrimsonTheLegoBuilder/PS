@@ -10,24 +10,26 @@ public class boj_bronze {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         //StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        //int N = Integer.parseInt(br.readLine());
         //StringTokenizer st = new StringTokenizer(br.readLine());
-        StringTokenizer st;
         //st = new StringTokenizer(br.readLine());
-        //int N = Integer.parseInt(st.nextToken());
-        while (true) {
-            st = new StringTokenizer(br.readLine());
-            long a = Long.parseLong(st.nextToken());
-            long d = Long.parseLong(st.nextToken());
-            long v = Long.parseLong(st.nextToken());
-            if (a == 0 && d == 0 && v == 0) break;
-            if ((v - a) % d == 0) {
-                long n = (v - a) / d + 1;
-                if (n >= 1) bw.write(n + "\n");
-                else bw.write("X\n");
-            }
-            else bw.write("X\n");
+        //long a = Long.parseLong(st.nextToken());
+        StringTokenizer st;
+        st = new StringTokenizer(br.readLine());
+        int N = Integer.parseInt(st.nextToken());
+        int p = 0;
+        int n = 0;
+        int b = 0;
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) {
+            int v = Integer.parseInt(st.nextToken());
+            if (v == 1) p++;
+            else if (v == -1) n++;
+            else b++;
         }
+        if (b * 2 >= N) bw.write("INVALID\n");
+        else if (p > n) bw.write("APPROVED\n");
+        else bw.write("REJECTED\n");
+
         //int M = Integer.parseInt(st.nextToken());
         //bw.write("\n");
         bw.flush();

@@ -13,25 +13,35 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         //st = new StringTokenizer(br.readLine());
         //long a = Long.parseLong(st.nextToken());
+        //String A = br.readLine();
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        int p = 0;
-        int n = 0;
-        int b = 0;
-        st = new StringTokenizer(br.readLine());
+        int[] M = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
         for (int i = 0; i < N; i++) {
-            int v = Integer.parseInt(st.nextToken());
-            if (v == 1) p++;
-            else if (v == -1) n++;
-            else b++;
+            st = new StringTokenizer(br.readLine());
+            int y = Integer.parseInt(st.nextToken());
+            int m = Integer.parseInt(st.nextToken());
+            int ry = y;
+            int rm = m - 1;
+            int rd;
+            if (m == 1) {
+                ry = y - 1;
+                rm = 12;
+                rd = M[rm];
+            }
+            else {
+                if (rm == 2) {
+                    if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) {
+                        rd = 29;
+                    }
+                    else rd = M[rm];
+                }
+                else rd = M[rm];
+            }
+            bw.write(ry + " " + rm + " " + rd + "\n");
         }
-        if (b * 2 >= N) bw.write("INVALID\n");
-        else if (p > n) bw.write("APPROVED\n");
-        else bw.write("REJECTED\n");
 
-        //int M = Integer.parseInt(st.nextToken());
-        //bw.write("\n");
         bw.flush();
         bw.close();
     }

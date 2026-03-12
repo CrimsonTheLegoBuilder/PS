@@ -16,32 +16,23 @@ public class boj_bronze {
         //String A = br.readLine();
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int[] M = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-        for (int i = 0; i < N; i++) {
+        int T = Integer.parseInt(st.nextToken());
+        long F = 0;
+        int L = 0;
+        int R = 0;
+        for (int t = 1; t <= T; t++) {
             st = new StringTokenizer(br.readLine());
-            int y = Integer.parseInt(st.nextToken());
-            int m = Integer.parseInt(st.nextToken());
-            int ry = y;
-            int rm = m - 1;
-            int rd;
-            if (m == 1) {
-                ry = y - 1;
-                rm = 12;
-                rd = M[rm];
+            int l = Integer.parseInt(st.nextToken());
+            int r = Integer.parseInt(st.nextToken());
+            if (t >= 2) {
+                if (l != 0 && l == L) F++;
+                if (r != 0 && r == R) F++;
             }
-            else {
-                if (rm == 2) {
-                    if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) {
-                        rd = 29;
-                    }
-                    else rd = M[rm];
-                }
-                else rd = M[rm];
-            }
-            bw.write(ry + " " + rm + " " + rd + "\n");
+            if (l != 0 && r != 0 && l == r) F++;
+            L = l;
+            R = r;
         }
-
+        bw.write(F + "\n");
         bw.flush();
         bw.close();
     }

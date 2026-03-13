@@ -16,23 +16,9 @@ public class boj_bronze {
         //String A = br.readLine();
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int T = Integer.parseInt(st.nextToken());
-        long F = 0;
-        int L = 0;
-        int R = 0;
-        for (int t = 1; t <= T; t++) {
-            st = new StringTokenizer(br.readLine());
-            int l = Integer.parseInt(st.nextToken());
-            int r = Integer.parseInt(st.nextToken());
-            if (t >= 2) {
-                if (l != 0 && l == L) F++;
-                if (r != 0 && r == R) F++;
-            }
-            if (l != 0 && r != 0 && l == r) F++;
-            L = l;
-            R = r;
-        }
-        bw.write(F + "\n");
+        int N = Integer.parseInt(st.nextToken());
+        if (N == 2) bw.write("3\n");
+        else bw.write(N + "\n");
         bw.flush();
         bw.close();
     }

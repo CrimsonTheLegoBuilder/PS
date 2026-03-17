@@ -14,11 +14,21 @@ public class boj_bronze {
         //st = new StringTokenizer(br.readLine());
         //long a = Long.parseLong(st.nextToken());
         //String A = br.readLine();
+        String[] N = {"", "Yakk", "Doh", "Seh", "Ghar", "Bang", "Sheesh"};
+        String[] NN = {"", "Habb Yakk", "Dobara", "Dousa", "Dorgy", "Dabash", "Dosh"};
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        if (N == 2) bw.write("3\n");
-        else bw.write(N + "\n");
+        int n = Integer.parseInt(st.nextToken());
+        for (int i = 1; i <= n; i++) {
+            st = new StringTokenizer(br.readLine());
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            String ret = "";
+            if (a == b) ret = NN[a];
+            else if (a * b == 30) ret = "Sheesh Beesh";
+            else ret = N[Math.max(a, b)] + " " + N[Math.min(a, b)];
+            bw.write("Case " + i + ": " +ret + "\n");
+        }
         bw.flush();
         bw.close();
     }

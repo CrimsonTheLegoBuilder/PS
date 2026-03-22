@@ -16,16 +16,11 @@ public class boj_bronze {
         //String A = br.readLine();
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int M = -1;
-        int T = 0;
+        //int N = Integer.parseInt(st.nextToken());
+        String A = st.nextToken();
         st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < N; i++) {
-            int n = Integer.parseInt(st.nextToken());
-            T += n;
-            M = Math.max(M, n);
-        }
-        bw.write((T - M) + "\n");
+        String P = st.nextToken();
+        bw.write(P + "\n");
         bw.flush();
         bw.close();
     }

@@ -13,14 +13,25 @@ public class boj_bronze {
         //StringTokenizer st = new StringTokenizer(br.readLine());
         //st = new StringTokenizer(br.readLine());
         //long a = Long.parseLong(st.nextToken());
-        //String A = br.readLine();
-        StringTokenizer st;
-        st = new StringTokenizer(br.readLine());
+        String A = br.readLine();
+        String B = br.readLine();
+        String C = br.readLine();
+
+        for (int i = 0; i < 10000; i++) {
+            bw.write("-1\n");
+        }
+
+        //StringTokenizer st;
+        //st = new StringTokenizer(br.readLine());
         //int N = Integer.parseInt(st.nextToken());
-        String A = st.nextToken();
-        st = new StringTokenizer(br.readLine());
-        String P = st.nextToken();
-        bw.write(P + "\n");
+        //String A = st.nextToken();
+        //st = new StringTokenizer(br.readLine());
+        //String P = st.nextToken();
+
+        //String S = br.readLine().trim();
+
+
+        //bw.write("\n");
         bw.flush();
         bw.close();
     }

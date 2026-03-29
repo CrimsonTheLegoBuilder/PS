@@ -15,15 +15,27 @@ public class boj_bronze {
         //long a = Long.parseLong(st.nextToken());
         //String A = br.readLine();
 
-
-
         StringTokenizer st;
         st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        bw.write("AKARAKA");
-        for (int i = 0; i < N - 1; i++) {
-            bw.write("RAKA");
+        st = new StringTokenizer(br.readLine());
+        int M = Integer.parseInt(st.nextToken());
+        String[] A = new String[N];
+        String[] B = new String[N];
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            A[i] = st.nextToken();
         }
+        for (int j = 0; j < M; j++) {
+            st = new StringTokenizer(br.readLine());
+            B[j] = st.nextToken();
+        }
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                bw.write(A[i] + " as " + B[j] + "\n");
+            }
+        }
+        bw.write("\n");
         //String A = st.nextToken();
         //st = new StringTokenizer(br.readLine());
         //String P = st.nextToken();

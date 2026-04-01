@@ -6,17 +6,15 @@ const lines = input.split(/\s+/);//입력 줄을 공백 등 기준으로 다 잘
 let cur = 0;
 
 const N = parseInt(lines[0] || "0");
-let num: number[] = [];
-let ret = new Array(N + 1).fill(0);
-
+let _0 = 0;
+let _1 = 0;
 for (let i = 1; i <= N; i++) {
-    const n = parseInt(lines[i]);
-    ret[n] = 1;
-}
-
-for (let i = 1; i <= N; i++) {
-    if (ret[i] === 0) {
-        console.log(i);
+    const num = parseInt(lines[i] || "0");
+    if (num === 0) {
+        _0++;
+    } else {
+        _1++;
     }
-
 }
+
+console.log(Math.min(_0, _1));

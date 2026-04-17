@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <vector>
+#include <cassert>
 typedef long long ll;
 typedef double ld;
 const ll INF = 1e17;
@@ -71,6 +72,12 @@ struct Seg {
 	bool operator < (const Seg& S) const { return s == S.s ? e < S.e : s < S.s; }
 	friend std::ostream& operator << (std::ostream& os, const Seg& S) { os << S.s << " " << S.e; return os; }
 };
+bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b) {
+	return 0;
+}
+bool block_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& e) {
+	
+}
 struct Pos3D {
 	ll x, y, z, t;
 	Pos3D(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll t_ = 0) : x(x_), y(y_), z(z_), t(t_) {}
@@ -122,21 +129,31 @@ struct Robot {
 		p += n;
 		return;
 	}
-	bool box(const Cube& c, Seg& s) const {
+	void get_start_pos(Pos& s, Pos& u, Pos& d) const {
 		Pos3D tq = n / v;
-		if (tq.x && )  {}
+		if (tq.x) { s = Pos(p.y, p.z); u = Pos(v.y, v.z); d = Pos(v.y, v.z); }
+		if (tq.y) { s = Pos(p.z, p.x); u = Pos(v.z, v.x); d = Pos(v.z, v.x); }
+		if (tq.z) { s = Pos(p.x, p.y); u = Pos(v.x, v.y); d = Pos(v.x, v.y); }
+	}
+	bool box(const Cube& c, Seg& b) const {
+		Pos3D tq = n / v;
+		if (tq.x && c.a.x <= p.x && p.x <= c.b.x) { b.s = Pos(c.a.y, c.a.z), b.e = Pos(c.b.y, c.b.z); return 1; }
+		if (tq.y && c.a.y <= p.y && p.y <= c.b.y) { b.s = Pos(c.a.z, c.a.x), b.e = Pos(c.b.z, c.b.x); return 1; }
+		if (tq.z && c.a.z <= p.z && p.z <= c.b.z) { b.s = Pos(c.a.x, c.a.y), b.e = Pos(c.b.x, c.b.y); return 1; }
+		return 0;
 	}
 } R[LEN];
 void get_path(const int& k) {
-	std::vector<Seg> B;
 	const Robot& r0 = R[k];
-	bool x = r0.n.x || r0.v.x;
-	bool y = r0.n.y || r0.v.y;
-	bool z = r0.n.z || r0.v.z;
-	int ref = !x ? r0.p.x : !y ? r0.p.y : r0.p.z;
-	
-	for (int i = 0; i < N; i++) {
-		if (!x && (C[i].a.x <= ref && ref <= C[i].b.x)) { B.push_back(Seg()); }
+	Pos s, u, d; r0.get_start_pos(s, u, d);
+	std::vector<Seg> B; Seg b;
+	for (int i = 0; i < N; i++) if (r0.box(C[i], b)) B.push_back(b);
+	assert(B.size());
+	int cnt = 0;
+	while (!cnt) {
+		for (int i = 0; i < N; i++) {
+
+		}
 	}
 }
 ll collision_time(const int& k, const int& l) {

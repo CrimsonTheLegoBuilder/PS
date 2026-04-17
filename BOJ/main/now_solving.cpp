@@ -77,6 +77,14 @@ struct Pos3D {
 	bool operator == (const Pos3D& p) const { return x == p.x && y == p.y && z == p.z; }
 	Pos3D operator + (const Pos3D& p) const { return { x + p.x, y + p.y, z + p.z }; }
 	Pos3D operator - (const Pos3D& p) const { return { x - p.x, y - p.y, z - p.z }; }
+	ll operator * (const Pos3D& p) const { return x * p.x + y * p.y + z * p.z; }
+	Pos3D operator / (const Pos3D& p) const {
+		Pos3D ret;
+		ret.x = y * p.z - z * p.y;
+		ret.y = z * p.x - x * p.z;
+		ret.z = x * p.y - y * p.x;
+		return ret;
+	}
 	Pos3D operator * (const ll& n) const { return { x * n, y * n, z * n }; }
 	Pos3D operator / (const ll& n) const { return { x / n, y / n, z / n }; }
 	Pos3D& operator += (const Pos3D& p) { x += p.x; y += p.y; z += p.z; return *this; }
@@ -114,6 +122,10 @@ struct Robot {
 		p += n;
 		return;
 	}
+	bool box(const Cube& c, Seg& s) const {
+		Pos3D tq = n / v;
+		if (tq.x && )  {}
+	}
 } R[LEN];
 void get_path(const int& k) {
 	std::vector<Seg> B;
@@ -124,7 +136,7 @@ void get_path(const int& k) {
 	int ref = !x ? r0.p.x : !y ? r0.p.y : r0.p.z;
 	
 	for (int i = 0; i < N; i++) {
-
+		if (!x && (C[i].a.x <= ref && ref <= C[i].b.x)) { B.push_back(Seg()); }
 	}
 }
 ll collision_time(const int& k, const int& l) {

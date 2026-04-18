@@ -82,15 +82,23 @@ bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
 int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
 bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
-bool intersect(const Pos& s1, const Pos& s2, const Pos& d1, const Pos& d2, const int& f = STRONG) {
-	bool f1 = ccw(s1, s2, d1) * ccw(s2, s1, d2) > 0;
-	bool f2 = ccw(d1, d2, s1) * ccw(d2, d1, s2) > 0;
+bool intersect(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const int& f = STRONG) {
+	bool f1 = ccw(p1, p2, q1) * ccw(p2, p1, q2) > 0;
+	bool f2 = ccw(q1, q2, p1) * ccw(q2, q1, p2) > 0;
 	if (f == WEAK) return f1 && f2;
-	bool f3 = on_seg_strong(s1, s2, d1) ||
-		on_seg_strong(s1, s2, d2) ||
-		on_seg_strong(d1, d2, s1) ||
-		on_seg_strong(d1, d2, s2);
+	bool f3 = on_seg_strong(p1, p2, q1) ||
+		on_seg_strong(p1, p2, q2) ||
+		on_seg_strong(q1, q2, p1) ||
+		on_seg_strong(q1, q2, p2);
 	return (f1 && f2) || f3;
+}
+bool intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Pos& t) {
+	if (!ccw(p1, p2, q1, q2)) return 0;
+	if (p1.x == p2.x) t.x = p1.x;
+	else t.x = p2.x;
+	if (p1.y == p2.y) t.y = p1.y;
+	else t.y = p2.y;
+	return 1;
 }
 struct Seg {
 	Pos s, e;
@@ -124,8 +132,13 @@ bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1
 	}
 	return 1;
 }
-bool block_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& e) {
-	
+bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const Seg& b, Pos& e) {
+	int up = ccw(p, d, u);
+	int c1 = ccw(p, d, b.s);
+	int c2 = ccw(p, d, b.e);
+	if (c1 * c2 > 1) return 0;
+	if (up * c1 <= 0 && up * c2 <= 0) return 0;
+
 }
 struct Pos3D {
 	ll x, y, z, t;

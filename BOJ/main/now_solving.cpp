@@ -100,12 +100,29 @@ struct Seg {
 	bool operator < (const Seg& S) const { return s == S.s ? e < S.e : s < S.s; }
 	friend std::ostream& operator << (std::ostream& os, const Seg& S) { os << S.s << " " << S.e; return os; }
 };
+Polygon box(const Seg& s) {
+	int x1 = std::min(s.s.x, s.e.x);
+	int x2 = std::max(s.s.x, s.e.x);
+	int y1 = std::min(s.s.y, s.e.y);
+	int y2 = std::max(s.s.y, s.e.y);
+	return { Pos(x1, y1), Pos(x2, y1), Pos(x2, y2), Pos(x1, y2) };
+}
 bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1, Pos& f2) {
 	int up = ccw(p, d, u);
 	int c1 = ccw(p, d, b.s);
 	int c2 = ccw(p, d, b.e);
 	if (c1 && c2) return 0;
-
+	if (up == c1 || up == c2) return 0;
+	assert(!c1 || !c2);
+	Polygon B = box(b);
+	for (int i = 0, j; i < 4; i++) {
+		j = (i + 1) % 4;
+		if (!ccw(p, d, B[i]) && !ccw(p, d, B[j])) {
+			f1 = B[i], f2 = B[j];
+			if (dot(p, d, f1, f2) > 0) std::swap(f1, f2);
+		}
+	}
+	return 1;
 }
 bool block_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& e) {
 	

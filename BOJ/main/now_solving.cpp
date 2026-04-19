@@ -6,6 +6,7 @@
 #include <vector>
 #include <cassert>
 #include <unordered_map>
+typedef unsigned long long ull;
 typedef long long ll;
 typedef double ld;
 const ll INF = 1e17;
@@ -94,14 +95,14 @@ bool intersect(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const
 		on_seg_strong(q1, q2, p2);
 	return (f1 && f2) || f3;
 }
-bool intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Pos& t) {
+bool get_intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Pos& t, const int& F = STRONG) {
 	if (!ccw(p1, p2, q1, q2)) return 0;
 	if (p1.x == p2.x) t.x = p1.x;
 	else t.x = p2.x;
 	if (p1.y == p2.y) t.y = p1.y;
 	else t.y = p2.y;
-	return on_seg_strong(p1, p2, t) && on_seg_strong(q1, q2, t);
-	//return intersect(p1, p2, q1, q2, STRONG);
+	if (F == STRONG) return on_seg_strong(p1, p2, t) && on_seg_strong(q1, q2, t);
+	return on_seg_strong(q1, q2, t);
 }
 struct Seg {
 	Pos s, e;
@@ -173,7 +174,7 @@ bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const S
 	bool f = 0;
 	for (int i = 0, j; i < 4; i++) {
 		j = (i + 1) % 4;
-		if (intersection(p, t, B[i], B[j], x)) {
+		if (get_intersection(p, t, B[i], B[j], x)) {
 			if (!f || dot(p, t, x) < dot(p, t, e)) {
 				f = 1; e = x;
 			}
@@ -223,7 +224,14 @@ typedef std::vector<Pos3D> Polyhedron;
 Polyhedron P[LEN];//path
 Pos3D P0[LEN];//p0
 Pos3D NM[LEN];//norm
-Pos3D len[LEN];
+ll period[LEN];
+ull hash(const Pos3D& q) {
+	ull h = 0;
+	h |= ull(q.x & 0x1FFFFF);
+	h |= ull(q.y & 0x1FFFFF) << 21;
+	h |= ull(q.z & 0x1FFFFF) << 42;
+	return h;
+}
 Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) / (d3 - d2); }
 Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
@@ -231,6 +239,7 @@ ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { ret
 int ccw(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& norm) { return sign(cross(d1, d2, d3) * norm); }
 bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return !zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) > 0; }
+ll dist(const Pos3D& p, const Pos3D& q) { return std::max({ std::abs(p.x - q.x), std::abs(p.y - q.y), std::abs(p.z - q.z) }); }
 struct Cube {
 	Pos3D a, b;
 	Cube(Pos3D a_ = Pos3D(), Pos3D b_ = Pos3D()) : a(a_), b(b_) {}
@@ -245,8 +254,7 @@ struct Robot {
 	void init() {
 		std::cin >> p; p = p * 2 + _1;
 		for (Pos3D* q : { &n, &v }) {
-			std::string s;
-			std::cin >> s;
+			std::string s; std::cin >> s;
 			if (s == "x+") *q = Pos3D(1);
 			else if (s == "x-") *q = Pos3D(-1);
 			else if (s == "y+") *q = Pos3D(0, 1);
@@ -263,7 +271,7 @@ struct Robot {
 		if (tq.y) { s = Pos(p.z, p.x); u = Pos(v.z, v.x); d = Pos(v.z, v.x); }
 		if (tq.z) { s = Pos(p.x, p.y); u = Pos(v.x, v.y); d = Pos(v.x, v.y); }
 	}
-	bool box(const Cube& c, Seg& b) const {
+	bool slice(const Cube& c, Seg& b) const {
 		Pos3D tq = n / v;
 		if (tq.x && c.a.x <= p.x && p.x <= c.b.x) { b.s = Pos(c.a.y, c.a.z), b.e = Pos(c.b.y, c.b.z); return 1; }
 		if (tq.y && c.a.y <= p.y && p.y <= c.b.y) { b.s = Pos(c.a.z, c.a.x), b.e = Pos(c.b.z, c.b.x); return 1; }
@@ -271,19 +279,33 @@ struct Robot {
 		return 0;
 	}
 } R[LEN];
+void pos_push_back(const Pos3D& r, const Pos3D& n, const int& k, const Pos& p) {
+	if (n.x) P[k].push_back(Pos3D(r.x, p.x, p.y, p.t));
+	if (n.y) P[k].push_back(Pos3D(p.y, r.y, p.x, p.t));
+	if (n.z) P[k].push_back(Pos3D(p.x, p.y, r.z, p.t));
+	return;
+}
 void get_path(const int& k) {
+	Pos s, u, d;
 	const Robot& r0 = R[k];
-	Pos s, u, d; r0.get_start_pos(s, u, d);
+	r0.get_start_pos(s, u, d);
+	Pos3D n = R[k].n / R[k].v;
 	Segs B; Seg b;
-	for (int i = 0; i < N; i++) if (r0.box(C[i], b)) B.push_back(b);
+	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
 	assert(B.size());
 	Pos cur = s;
+	pos_push_back(r0.p, n, k, cur);
 	while (1) {
 		Seg fr = get_floor(B, cur, u, d);
 		Pos prev = cur;
 		bool fin = move(B, fr, cur, u, d, s);
 		if (fin) break;
+		pos_push_back(r0.p, n, k, cur);
 	}
+	P0[k] = r0.p;
+	NM[k] = r0.n / r0.v;
+	assert(!(cur.t % 2));
+	period[k] = cur.t >> 1;
 	return;
 }
 ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
@@ -296,8 +318,10 @@ ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 		for (int k = 0, l; k < sz; k++) {
 			l = (k + 1) % sz;
 			if (on_seg_strong(P[i][k], P[i][l], R[j].p)) {
-				//same orbit;
-				return -2;
+				if (NM[i] == NM[j]) return -1;
+				ll dst = dist(P[i][k], R[j].p);
+				ll t = P[i][k].t + dst;
+				return -t;
 			}
 		}
 		return 0;
@@ -306,39 +330,82 @@ ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	const Pos3D va = NM[i] / v, vb = NM[j] / v;
 	Pos a1, a2, b1, b2, x;
 	if (v.x) {
-		a1 = Pos(a.y, a.z);
-		a2 = a1 + Pos(va.y, va.z);
-		b1 = Pos(b.y, b.z);
-		b2 = b1 + Pos(vb.y, vb.z);
+		a1 = Pos(a.y, a.z); a2 = a1 + Pos(va.y, va.z);
+		b1 = Pos(b.y, b.z); b2 = b1 + Pos(vb.y, vb.z);
 	}
 	else if (v.y) {
-		a1 = Pos(a.z, a.x);
-		a2 = a1 + Pos(va.z, va.x);
-		b1 = Pos(b.z, b.x);
-		b2 = b1 + Pos(vb.z, vb.x);
+		a1 = Pos(a.z, a.x); a2 = a1 + Pos(va.z, va.x);
+		b1 = Pos(b.z, b.x); b2 = b1 + Pos(vb.z, vb.x);
 	}
 	else if (v.z) {
-		a1 = Pos(a.x, a.y);
-		a2 = a1 + Pos(va.x, va.y);
-		b1 = Pos(b.x, b.y);
-		b2 = b1 + Pos(vb.x, vb.y);
+		a1 = Pos(a.x, a.y); a2 = a1 + Pos(va.x, va.y);
+		b1 = Pos(b.x, b.y); b2 = b1 + Pos(vb.x, vb.y);
 	}
-	if (!intersection(a1, a2, b1, b2, x)) return 0;
+	get_intersection(a1, a2, b1, b2, x);
 	if (v.x) p0 = Pos3D(0, x.x, x.y);
 	else if (v.y) p0 = Pos3D(x.y, 0, x.x);
 	else if (v.z) p0 = Pos3D(x.x, x.y, 0);
 	return 1;
 }
+int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D& q2, const Pos3D& n, Pos3D& q) {
+	Pos a1, a2, b1, b2, x;
+	if (n.x) { a1 = Pos(p1.y, p1.z); a2 = Pos(p2.y, p2.z); b1 = Pos(q1.y, q1.z); b2 = Pos(q2.y, q2.z); }
+	if (n.y) { a1 = Pos(p1.z, p1.x); a2 = Pos(p2.z, p2.x); b1 = Pos(q1.z, q1.x); b2 = Pos(q2.z, q2.x); }
+	if (n.z) { a1 = Pos(p1.x, p1.y); a2 = Pos(p2.x, p2.y); b1 = Pos(q1.x, q1.y); b2 = Pos(q2.x, q2.y); }
+	if (!get_intersection(a1, a2, b1, b2, x, WEAK)) return -1;
+	int t = std::max(std::abs(q1.x - x.x), std::abs(q1.y - x.y));
+	if (n.x) q = Pos3D(q1.x, x.x, x.y);
+	if (n.y) q = Pos3D(x.y, q1.y, x.x);
+	if (n.z) q = Pos3D(x.x, x.y, q1.z);
+	t += q1.t;
+	assert(!(t % 2));
+	return t >> 1;
+}
 ll collision_time(const int& k, const int& l) {
 	Pos3D p0, v;
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
-	if (f1 < 0) {//same orbit
-		return -f1;
+	if (f1 < 0) return (-f1 + 1) >> 1;
+	std::unordered_map<ull, int> MK, ML;
+	std::vector<ull> H;
+	Pos3D q;
+	int szk = P[k].size();
+	for (int i = 0, j; i < szk; i++) {
+		j = (i + 1) % szk;
+		int t = intersection(p0, v, P[k][i], P[k][i], NM[k], q);
+		if (t < 0) continue;
+		ull h = hash(q);
+		MK[h] = t;
+		H.push_back(h);
 	}
-	std::unordered_map<Pos3D, int> T1, T2;
-	
-	return -1;
+	int szl = P[l].size();
+	for (int i = 0, j; i < szl; i++) {
+		j = (i + 1) % szl;
+		int t = intersection(p0, v, P[l][i], P[l][i], NM[l], q);
+		if (t < 0) continue;
+		ull h = hash(q);
+		ML[h] = t;
+		H.push_back(h);
+	}
+	std::sort(H.begin(), H.end());
+	H.erase(unique(H.begin(), H.end()), H.end());
+	ll ans = INF;
+	for (const ull& h : H) {
+		if (MK.count(h) && ML.count(h)) {
+			ll tk = MK[h], pk = period[k];
+			ll tl = ML[h], pl = period[l];
+			ExtGcd ret = ext_gcd(pk, pl);
+			ll diff = tl - tk;
+			if (diff % ret.g == 0) {
+				ll mod = pl / ret.g;
+				ll n = (ret.x % mod) * ((diff / ret.g) % mod) % mod;
+				if (n < 0) n += mod;
+				ll t_col = tk + n * pk;
+				ans = std::min(ans, t_col);
+			}
+		}
+	}
+	return ans >= INF ? -1 : ans;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

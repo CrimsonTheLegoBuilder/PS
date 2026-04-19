@@ -38,9 +38,9 @@ ExtGcd ext_gcd(ll a, ll b) {
 ll ans;
 int N, K;
 struct Pos {
-	int x, y;
+	int x, y, t;
 	//ll x, y;
-	Pos(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+	Pos(int x_ = 0, int y_ = 0, int t_ = 0) : x(x_), y(y_), t(t_) {}
 	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
@@ -179,6 +179,20 @@ bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const S
 	}
 	return f;
 }
+bool move(const Segs& B, const Seg& fr, Pos& p, Pos& u, Pos& d, const Pos& s) {
+	bool blk = 0, fin = 0;
+	Pos t = fr.e, e;
+	for (const Seg& b : B) if (block_check(p, u, d, t, b, e)) { blk = 1; t = e; }
+	int l = std::max(std::abs(p.x - t.x), std::abs(p.y - t.y));
+	if (on_seg_weak(fr.s, fr.e, s)) { t = s; fin = 1; }
+	t.t = p.t;
+	p = t;
+	p.t += l;
+	u *= -1;
+	std::swap(u, d);
+	if (blk) u *= -1, d *= -1;
+	return fin;
+}
 struct Pos3D {
 	ll x, y, z, t;
 	Pos3D(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll t_ = 0) : x(x_), y(y_), z(z_), t(t_) {}
@@ -204,6 +218,13 @@ struct Pos3D {
 }; const Pos3D _1 = Pos3D(1, 1, 1);
 typedef std::vector<Pos3D> Polyhedron;
 Polyhedron P[LEN];//path
+Pos3D P0[LEN];//p0
+Pos3D NM[LEN];//norm
+Pos3D len[LEN];
+void intersection_line(const int& i, const int& j) {
+	Pos3D v = NM[i] / NM[j];
+
+}
 struct Cube {
 	Pos3D a, b;
 	Cube(Pos3D a_ = Pos3D(), Pos3D b_ = Pos3D()) : a(a_), b(b_) {}
@@ -250,11 +271,12 @@ void get_path(const int& k) {
 	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.box(C[i], b)) B.push_back(b);
 	assert(B.size());
-	int cnt = 0;
-	while (!cnt) {
-		for (int i = 0; i < N; i++) {
-
-		}
+	Pos cur = s;
+	while (1) {
+		Seg fr = get_floor(B, cur, u, d);
+		Pos prev = cur;
+		bool fin = move(B, fr, cur, u, d, s);
+		if (fin) break;
 	}
 }
 ll collision_time(const int& k, const int& l) {

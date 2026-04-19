@@ -142,7 +142,7 @@ bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1
 }
 Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
 	int sz = B.size();
-	Pos f1, f2, q1, q2;
+	Pos f1, f2;
 	Segs V;
 	//for (int i = 0; i < sz; i++) {
 	for (const Seg& b : B) {
@@ -150,11 +150,14 @@ Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
 	}
 	std::sort(V.begin(), V.end());
 	Pos e;
+	bool f = 0;
 	for (const Seg& v : V) {
 		if (dot(v.s, v.e, p) >= 0) continue;
-
+		if (!f) { e = v.e; f = 1; continue; }
+		if (dot(p, e, v.s) > 0) { e = v.e; break; }
+		if ((p - e).Euc() < (p - v.e).Euc()) e = v.e;
 	}
-	return Seg(q1, q2);
+	return Seg(p, e);
 }
 bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const Seg& b, Pos& e) {
 	int up = ccw(p, d, u);

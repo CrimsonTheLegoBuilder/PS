@@ -186,8 +186,8 @@ bool move(const Segs& B, const Seg& fr, Pos& p, Pos& u, Pos& d, const Pos& s) {
 	bool blk = 0, fin = 0;
 	Pos t = fr.e, e;
 	for (const Seg& b : B) if (block_check(p, u, d, t, b, e)) { blk = 1; t = e; }
+	if (on_seg_weak(fr.s, t, s)) { t = s; fin = 1; }
 	int l = std::max(std::abs(p.x - t.x), std::abs(p.y - t.y));
-	if (on_seg_weak(fr.s, fr.e, s)) { t = s; fin = 1; }
 	t.t = p.t;
 	p = t;
 	p.t += l;

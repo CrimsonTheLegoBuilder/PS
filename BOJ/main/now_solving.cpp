@@ -398,8 +398,9 @@ ll collision_time(const int& k, const int& l) {
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {
 				ll mod = pl / ret.g;
-				ll n = (ret.x % mod) * ((diff / ret.g) % mod) % mod;
+				ll n = (ret.x % mod);
 				if (n < 0) n += mod;
+				n = (n * ((diff / ret.g) % mod + mod) % mod) % mod;
 				ll t_col = tk + n * pk;
 				ans = std::min(ans, t_col);
 			}

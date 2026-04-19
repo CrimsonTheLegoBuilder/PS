@@ -144,9 +144,9 @@ bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1
 	return 1;
 }
 Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
-	int sz = B.size();
 	Pos f1, f2;
 	Segs V;
+	//int sz = B.size();
 	//for (int i = 0; i < sz; i++) {
 	for (const Seg& b : B) {
 		if (floor_check(p, u, d, b, f1, f2)) V.emplace_back(f1, f2);

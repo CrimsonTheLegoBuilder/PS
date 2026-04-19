@@ -5,11 +5,13 @@
 #include <cstring>
 #include <vector>
 #include <cassert>
+#include <unordered_map>
 typedef long long ll;
 typedef double ld;
 const ll INF = 1e17;
 const int LEN = 105;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
+inline bool zero(const ll& x) { return !sign(x); }
 //ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
@@ -213,6 +215,7 @@ struct Pos3D {
 	Pos3D& operator -= (const Pos3D& p) { x -= p.x; y -= p.y; z -= p.z; return *this; }
 	Pos3D& operator *= (const ll& n) { x *= n; y *= n; z *= n; return *this; }
 	Pos3D& operator /= (const ll& n) { x /= n; y /= n; z /= n; return *this; }
+	ll Euc() const { return x * x + y * y + z * z; }
 	friend std::istream& operator >> (std::istream& is, Pos3D& p) { is >> p.x >> p.y >> p.z; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos3D& p) { os << p.x << " " << p.y << " " << p.z; return os; }
 }; const Pos3D _1 = Pos3D(1, 1, 1);
@@ -221,10 +224,13 @@ Polyhedron P[LEN];//path
 Pos3D P0[LEN];//p0
 Pos3D NM[LEN];//norm
 Pos3D len[LEN];
-void intersection_line(const int& i, const int& j) {
-	Pos3D v = NM[i] / NM[j];
-
-}
+Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) / (d3 - d2); }
+Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) / (d4 - d3); }
+ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
+ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) * (d4 - d3); }
+int ccw(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& norm) { return sign(cross(d1, d2, d3) * norm); }
+bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return !zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) >= 0; }
+bool on_seg_weak(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) > 0; }
 struct Cube {
 	Pos3D a, b;
 	Cube(Pos3D a_ = Pos3D(), Pos3D b_ = Pos3D()) : a(a_), b(b_) {}
@@ -278,9 +284,27 @@ void get_path(const int& k) {
 		bool fin = move(B, fr, cur, u, d, s);
 		if (fin) break;
 	}
+	return;
+}
+int get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
+	v = NM[i] / NM[j];
+	if (v.Euc() == 0) {
+		Pos3D q = P0[i] + NM[i];
+		ll fc = dot(q, P0[i], P0[j]);
+		if (fc) return 0;
+		int sz = P[i].size();
+		for (int k = 0, l; k < sz; k++) {
+			l = (k + 1) % sz;
+			if (on_seg_strong(P[i][k], P[i][l], R[j].p)) return 2;
+		}
+		return 0;
+	}
+	Pos a1, a2, b1, b2, x;
+
+	return 1;
 }
 ll collision_time(const int& k, const int& l) {
-	//
+	std::unordered_map<Pos3D, int> T1, T2;
 	return -1;
 }
 void solve() {

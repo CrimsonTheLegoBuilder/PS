@@ -372,7 +372,7 @@ ll collision_time(const int& k, const int& l) {
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
-		int t = intersection(p0, v, P[k][i], P[k][j], NM[k], q);
+		int t = intersection(p0, p0 + v, P[k][i], P[k][j], NM[k], q);
 		if (t < 0) continue;
 		ull h = hash(q);
 		MK[h] = t;
@@ -381,7 +381,7 @@ ll collision_time(const int& k, const int& l) {
 	int szl = P[l].size();
 	for (int i = 0, j; i < szl; i++) {
 		j = (i + 1) % szl;
-		int t = intersection(p0, v, P[l][i], P[l][j], NM[l], q);
+		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
 		if (t < 0) continue;
 		ull h = hash(q);
 		ML[h] = t;
@@ -416,9 +416,14 @@ void solve() {
 	for (int i = 0; i < N; i++) C[i].init();
 	for (int k = 0; k < K; k++) R[k].init();
 	for (int k = 0; k < K; k++) get_path(k);
-	for (int k = 0; k < K; k++) 
-		for (int l = k + 1; l < K; l++) 
-			ans = std::max(ans, collision_time(k, l));
+	for (int k = 0; k < K; k++) {
+		for (int l = k + 1; l < K; l++) {
+			ll t = collision_time(k, l);
+			if (t >= 0) {
+				if (ans == -1 || t < ans) ans = t;
+			}
+		}
+	}
 	if (ans < 0) std::cout << "ok\n";
 	else std::cout << ans << "\n";
 	return;

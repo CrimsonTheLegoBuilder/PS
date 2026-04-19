@@ -286,7 +286,7 @@ void get_path(const int& k) {
 	}
 	return;
 }
-int get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
+ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	v = NM[i] / NM[j];
 	if (v.Euc() == 0) {
 		Pos3D q = P0[i] + NM[i];
@@ -295,16 +295,49 @@ int get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 		int sz = P[i].size();
 		for (int k = 0, l; k < sz; k++) {
 			l = (k + 1) % sz;
-			if (on_seg_strong(P[i][k], P[i][l], R[j].p)) return 2;
+			if (on_seg_strong(P[i][k], P[i][l], R[j].p)) {
+				//same orbit;
+				return -2;
+			}
 		}
 		return 0;
 	}
+	const Pos3D& a = P0[i], & b = P0[j];
+	const Pos3D va = NM[i] / v, vb = NM[j] / v;
 	Pos a1, a2, b1, b2, x;
-
+	if (v.x) {
+		a1 = Pos(a.y, a.z);
+		a2 = a1 + Pos(va.y, va.z);
+		b1 = Pos(b.y, b.z);
+		b2 = b1 + Pos(vb.y, vb.z);
+	}
+	else if (v.y) {
+		a1 = Pos(a.z, a.x);
+		a2 = a1 + Pos(va.z, va.x);
+		b1 = Pos(b.z, b.x);
+		b2 = b1 + Pos(vb.z, vb.x);
+	}
+	else if (v.z) {
+		a1 = Pos(a.x, a.y);
+		a2 = a1 + Pos(va.x, va.y);
+		b1 = Pos(b.x, b.y);
+		b2 = b1 + Pos(vb.x, vb.y);
+	}
+	if (!intersection(a1, a2, b1, b2, x)) return 0;
+	if (v.x) p0 = Pos3D(0, x.x, x.y);
+	else if (v.y) p0 = Pos3D(x.y, 0, x.x);
+	else if (v.z) p0 = Pos3D(x.x, x.y, 0);
 	return 1;
 }
 ll collision_time(const int& k, const int& l) {
+	Pos3D p0, v;
+	ll f1 = get_intersection_line(k, l, p0, v);
+	if (!f1) return -1;
+	if (f1 < 0) {//same orbit
+		return -f1;
+	}
 	std::unordered_map<Pos3D, int> T1, T2;
+	
 	return -1;
 }
 void solve() {

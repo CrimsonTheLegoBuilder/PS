@@ -353,7 +353,7 @@ int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D&
 	if (n.y) { a1 = Pos(p1.z, p1.x); a2 = Pos(p2.z, p2.x); b1 = Pos(q1.z, q1.x); b2 = Pos(q2.z, q2.x); }
 	if (n.z) { a1 = Pos(p1.x, p1.y); a2 = Pos(p2.x, p2.y); b1 = Pos(q1.x, q1.y); b2 = Pos(q2.x, q2.y); }
 	if (!get_intersection(a1, a2, b1, b2, x, WEAK)) return -1;
-	int t = std::max(std::abs(q1.x - x.x), std::abs(q1.y - x.y));
+	int t = std::max(std::abs(b1.x - x.x), std::abs(b1.y - x.y));
 	if (n.x) q = Pos3D(q1.x, x.x, x.y);
 	if (n.y) q = Pos3D(x.y, q1.y, x.x);
 	if (n.z) q = Pos3D(x.x, x.y, q1.z);

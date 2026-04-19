@@ -372,7 +372,7 @@ ll collision_time(const int& k, const int& l) {
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
-		int t = intersection(p0, v, P[k][i], P[k][i], NM[k], q);
+		int t = intersection(p0, v, P[k][i], P[k][j], NM[k], q);
 		if (t < 0) continue;
 		ull h = hash(q);
 		MK[h] = t;
@@ -381,7 +381,7 @@ ll collision_time(const int& k, const int& l) {
 	int szl = P[l].size();
 	for (int i = 0, j; i < szl; i++) {
 		j = (i + 1) % szl;
-		int t = intersection(p0, v, P[l][i], P[l][i], NM[l], q);
+		int t = intersection(p0, v, P[l][i], P[l][j], NM[l], q);
 		if (t < 0) continue;
 		ull h = hash(q);
 		ML[h] = t;

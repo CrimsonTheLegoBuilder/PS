@@ -98,16 +98,24 @@ bool intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Po
 	else t.x = p2.x;
 	if (p1.y == p2.y) t.y = p1.y;
 	else t.y = p2.y;
-	return 1;
+	return on_seg_strong(p1, p2, t) && on_seg_strong(q1, q2, t);
+	//return intersect(p1, p2, q1, q2, STRONG);
 }
 struct Seg {
 	Pos s, e;
 	Seg(Pos s_ = Pos(0, 0), Pos e_ = Pos(0, 0)) : s(s_), e(e_) {}
 	bool operator == (const Seg& S) const { return s == S.s && e == S.e; }
 	bool operator != (const Seg& S) const { return !(*this == S); }
-	bool operator < (const Seg& S) const { return s == S.s ? e < S.e : s < S.s; }
+	//bool operator < (const Seg& S) const { return s == S.s ? e < S.e : s < S.s; }
+	bool operator < (const Seg& S) const {
+		if (dot(s, e, S.s) >= 0) return 1;
+		if (dot(S.s, S.e, s) >= 0) return 0;
+		if (s == S.s) return (s - e).Euc() < (s - S.e).Euc();
+		return (s - e).Euc() >= (S.s - e).Euc();
+	}
 	friend std::ostream& operator << (std::ostream& os, const Seg& S) { os << S.s << " " << S.e; return os; }
 };
+typedef std::vector<Seg> Segs;
 Polygon box(const Seg& s) {
 	int x1 = std::min(s.s.x, s.e.x);
 	int x2 = std::max(s.s.x, s.e.x);
@@ -132,13 +140,41 @@ bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1
 	}
 	return 1;
 }
+Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
+	int sz = B.size();
+	Pos f1, f2, q1, q2;
+	Segs V;
+	//for (int i = 0; i < sz; i++) {
+	for (const Seg& b : B) {
+		if (floor_check(p, u, d, b, f1, f2)) V.emplace_back(f1, f2);
+	}
+	std::sort(V.begin(), V.end());
+	Pos e;
+	for (const Seg& v : V) {
+		if (dot(v.s, v.e, p) >= 0) continue;
+
+	}
+	return Seg(q1, q2);
+}
 bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const Seg& b, Pos& e) {
 	int up = ccw(p, d, u);
 	int c1 = ccw(p, d, b.s);
 	int c2 = ccw(p, d, b.e);
-	if (c1 * c2 > 1) return 0;
+	if (c1 * c2 > 0) return 0;
 	if (up * c1 <= 0 && up * c2 <= 0) return 0;
-
+	if (dot(p, d, b.s) < 0 || dot(p, d, b.e) < 0) return 0;
+	Polygon B = box(b);
+	Pos x;
+	bool f = 0;
+	for (int i = 0, j; i < 4; i++) {
+		j = (i + 1) % 4;
+		if (intersection(p, t, B[i], B[j], x)) {
+			if (!f || dot(p, t, x) < dot(p, t, e)) {
+				f = 1; e = x;
+			}
+		}
+	}
+	return f;
 }
 struct Pos3D {
 	ll x, y, z, t;
@@ -208,7 +244,7 @@ struct Robot {
 void get_path(const int& k) {
 	const Robot& r0 = R[k];
 	Pos s, u, d; r0.get_start_pos(s, u, d);
-	std::vector<Seg> B; Seg b;
+	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.box(C[i], b)) B.push_back(b);
 	assert(B.size());
 	int cnt = 0;

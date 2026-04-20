@@ -241,7 +241,7 @@ void get_path(const int& k) {
 }
 ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	v = NM[i] / NM[j];
-	if (v.Euc() == 0) {
+	if (!(v.x || v.y || v.z)) {
 		Pos3D q = P0[i] + NM[i];
 		ll fc = dot(q, P0[i], P0[j]);
 		if (fc) return 0;

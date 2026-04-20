@@ -187,7 +187,7 @@ struct Cube {
 	friend std::ostream& operator << (std::ostream& os, const Cube& c) { os << c.a << " " << c.b; return os; }
 } C[LEN];
 struct Robot {
-	Pos3D p, n, v;
+	Pos3D p, n, v, tq;
 	Robot(Pos3D p_ = Pos3D(), Pos3D n_ = Pos3D(), Pos3D v_ = Pos3D()) : p(p_), n(n_), v(v_) {}
 	void init() {
 		std::cin >> p; p = p * 2 + _1;
@@ -198,16 +198,15 @@ struct Robot {
             else *q = Pos3D(0, 0, dir[1] == '+' ? 1 : -1);
 		}
 		p += n;
+		tq = n / v;
 		return;
 	}
 	void get_start_pos(Pos& s, Pos& u, Pos& d) const {
-		Pos3D tq = n / v;
 		if (tq.x) { s = Pos(p.y, p.z); u = Pos(n.y, n.z); d = Pos(v.y, v.z); }
 		if (tq.y) { s = Pos(p.z, p.x); u = Pos(n.z, n.x); d = Pos(v.z, v.x); }
 		if (tq.z) { s = Pos(p.x, p.y); u = Pos(n.x, n.y); d = Pos(v.x, v.y); }
 	}
 	bool slice(const Cube& c, Seg& b) const {
-		Pos3D tq = n / v;
 		if (tq.x && c.a.x <= p.x && p.x <= c.b.x) { b.s = Pos(c.a.y, c.a.z), b.e = Pos(c.b.y, c.b.z); return 1; }
 		if (tq.y && c.a.y <= p.y && p.y <= c.b.y) { b.s = Pos(c.a.z, c.a.x), b.e = Pos(c.b.z, c.b.x); return 1; }
 		if (tq.z && c.a.z <= p.z && p.z <= c.b.z) { b.s = Pos(c.a.x, c.a.y), b.e = Pos(c.b.x, c.b.y); return 1; }

@@ -383,6 +383,7 @@ ll collision_time(const int& k, const int& l) {
 			ull h = VK[ptk].first;
 			ll tk = VK[ptk].second, pk = period[k];
 			ll tl = VL[ptl].second, pl = period[l];
+			//if (tk > ans) { ptk++; ptl++; continue; }
 			ExtGcd ret = ext_gcd(pk, pl);
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {

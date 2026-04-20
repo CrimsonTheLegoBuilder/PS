@@ -125,9 +125,15 @@ Polygon box(const Seg& s) {
 	return { Pos(x1, y1), Pos(x2, y1), Pos(x2, y2), Pos(x1, y2) };
 }
 bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1, Pos& f2) {
-	int up = ccw(p, p + d, u);
+	//std::cout << "  P:: " << p << "\n";
+	//std::cout << "  U:: " << u << "\n";
+	//std::cout << "  D:: " << d << "\n";
+	int up = ccw(p, p + d, p + u);
 	int c1 = ccw(p, p + d, b.s);
 	int c2 = ccw(p, p + d, b.e);
+	//std::cout << "  UP:: " << up << "\n";
+	//std::cout << "  C1:: " << c1 << "\n";
+	//std::cout << "  C2:: " << c2 << "\n";
 	if (c1 && c2) return 0;
 	if (up == c1 || up == c2) return 0;
 	assert(!c1 || !c2);
@@ -146,10 +152,13 @@ Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
 	Segs V;
 	//int sz = B.size();
 	//for (int i = 0; i < sz; i++) {
+	//std::cout << "GET_FLOOR::\n";
+	//std::cout << "  B.SZ:: " << B.size() << "\n";
 	for (const Seg& b : B) {
 		if (floor_check(p, u, d, b, f1, f2)) V.emplace_back(f1, f2);
 	}
 	std::sort(V.begin(), V.end());
+	//std::cout << "  V.SZ:: " << V.size() << "\n";
 	Pos e;
 	bool f = 0;
 	for (const Seg& v : V) {
@@ -161,7 +170,7 @@ Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
 	return Seg(p, e);
 }
 bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const Seg& b, Pos& e) {
-	int up = ccw(p, p + d, u);
+	int up = ccw(p, p + d, p + u);
 	int c1 = ccw(p, p + d, b.s);
 	int c2 = ccw(p, p + d, b.e);
 	if (c1 * c2 > 0) return 0;
@@ -189,6 +198,9 @@ bool move(const Segs& B, const Seg& fr, Pos& p, Pos& u, Pos& d, const Pos& s) {
 	t.t = p.t;
 	p = t;
 	p.t += l;
+	//std::cout << "  fr:: s:: " << fr.s << " e:: " << fr.e << "\n";
+	//std::cout << "  t:: " << t << "\n";
+	//std::cout << "  p:: " << p << "\n";
 	u *= -1;
 	std::swap(u, d);
 	if (blk) u *= -1, d *= -1;
@@ -235,7 +247,7 @@ Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) 
 ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
 ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& norm) { return sign(cross(d1, d2, d3) * norm); }
-bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return !zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) >= 0; }
+bool on_seg_strong(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return zero(cross(d1, d2, d3).Euc()) && dot(d1, d3, d2) > 0; }
 ll dist(const Pos3D& p, const Pos3D& q) { return std::max({ std::abs(p.x - q.x), std::abs(p.y - q.y), std::abs(p.z - q.z) }); }
 struct Cube {
@@ -265,9 +277,9 @@ struct Robot {
 	}
 	void get_start_pos(Pos& s, Pos& u, Pos& d) const {
 		Pos3D tq = n / v;
-		if (tq.x) { s = Pos(p.y, p.z); u = Pos(v.y, v.z); d = Pos(v.y, v.z); }
-		if (tq.y) { s = Pos(p.z, p.x); u = Pos(v.z, v.x); d = Pos(v.z, v.x); }
-		if (tq.z) { s = Pos(p.x, p.y); u = Pos(v.x, v.y); d = Pos(v.x, v.y); }
+		if (tq.x) { s = Pos(p.y, p.z); u = Pos(n.y, n.z); d = Pos(v.y, v.z); }
+		if (tq.y) { s = Pos(p.z, p.x); u = Pos(n.z, n.x); d = Pos(v.z, v.x); }
+		if (tq.z) { s = Pos(p.x, p.y); u = Pos(n.x, n.y); d = Pos(v.x, v.y); }
 	}
 	bool slice(const Cube& c, Seg& b) const {
 		Pos3D tq = n / v;
@@ -287,6 +299,11 @@ void get_path(const int& k) {
 	Pos s, u, d;
 	const Robot& r0 = R[k];
 	r0.get_start_pos(s, u, d);
+	//std::cout << "DEBUG:: GET_PATH\n";
+	//std::cout << " s:: " << s << "\n";
+	//std::cout << " u:: " << u << "\n";
+	//std::cout << " d:: " << d << "\n";
+	//std::cout << "DEBUG:: GET_PATH\n";
 	Pos3D n = R[k].n / R[k].v;
 	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
@@ -295,8 +312,10 @@ void get_path(const int& k) {
 	pos_push_back(r0.p, n, k, cur);
 	while (1) {
 		Seg fr = get_floor(B, cur, u, d);
+		//std::cout << "  FR:: s:: " << fr.s << " e:: " << fr.e << "\n";
 		Pos prev = cur;
 		bool fin = move(B, fr, cur, u, d, s);
+		//std::cout << "  GET_PATH:: PREV:: " << prev << " | CUR:: " << cur << "\n";
 		if (fin) break;
 		pos_push_back(r0.p, n, k, cur);
 	}
@@ -308,17 +327,25 @@ void get_path(const int& k) {
 }
 ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	v = NM[i] / NM[j];
+	//std::cout << "v.norm:: " << v.Euc() << "\n";
 	if (v.Euc() == 0) {
 		Pos3D q = P0[i] + NM[i];
 		ll fc = dot(q, P0[i], P0[j]);
+		//std::cout << "FC:: " << fc << "\n";
 		if (fc) return 0;
 		int sz = P[i].size();
 		for (int k = 0, l; k < sz; k++) {
 			l = (k + 1) % sz;
+			//std::cout << "  P[i][" << k << "]:: " << P[i][k] << "\n";
+			//std::cout << "  P[i][" << l << "]:: " << P[i][l] << "\n";
+			//std::cout << "  R[j].p:: " << R[j].p << "\n";
 			if (on_seg_strong(P[i][k], P[i][l], R[j].p)) {
-				if (NM[i] == NM[j]) return -1;
+				//std::cout << "FUCK??::\n";
+				if (NM[i] == NM[j]) return 0;
 				ll dst = dist(P[i][k], R[j].p);
 				ll t = P[i][k].t + dst;
+				assert(!(t % 2));
+				t >>= 1;
 				return -t;
 			}
 		}
@@ -362,8 +389,9 @@ int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D&
 ll collision_time(const int& k, const int& l) {
 	Pos3D p0, v;
 	ll f1 = get_intersection_line(k, l, p0, v);
+	//std::cout << "F1:: " << f1 << "\n";
 	if (!f1) return -1;
-	if (f1 < 0) return (-f1 + 1) >> 1;
+	if (f1 < 0) return (-f1) >> 1;
 	std::unordered_map<ull, int> MK, ML;
 	std::vector<ull> H;
 	Pos3D q;
@@ -414,7 +442,26 @@ void solve() {
 	std::cin >> N >> K; ans = -1;
 	for (int i = 0; i < N; i++) C[i].init();
 	for (int k = 0; k < K; k++) R[k].init();
+	
+	//std::cout << "DEBUG::\n";
+	//std::cout << "DEBUG::\n  CUBE::\n";
+	for (int i = 0; i < N; i++) std::cout << C[i].a << " " << C[i].b << "\n";
+	//std::cout << "DEBUG::\n  ROBOT::\n";
+	for (int k = 0; k < K; k++) std::cout << R[k].p << " " << R[k].n << " " << R[k].v << "\n";
+	//std::cout << "DEBUG::\n";
+	
+	//std::cout << "DEBUG::\n  PATH START::\n";
 	for (int k = 0; k < K; k++) get_path(k);
+	//std::cout << "DEBUG::\n  PATH END::\n";
+
+	std::cout << "DEBUG::\n  PATH PRINT::\n";
+	for (int k = 0; k < K; k++) {
+		std::cout << " PATH[" << k << "]::\n";
+		for (const Pos3D& p : P[k]) std::cout << "  " << p << " t:: " << p.t << "\n";
+	}
+	std::cout << "  PATH PRINT::\nDEBUG::\n";
+	return;
+
 	for (int k = 0; k < K; k++) {
 		for (int l = k + 1; l < K; l++) {
 			ll t = collision_time(k, l);
@@ -423,6 +470,7 @@ void solve() {
 			}
 		}
 	}
+	std::cout << "ans:: " << ans << "\n";
 	if (ans < 0) std::cout << "ok\n";
 	else std::cout << ans << "\n";
 	return;

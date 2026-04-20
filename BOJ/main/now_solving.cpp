@@ -5,7 +5,6 @@
 #include <cstring>
 #include <vector>
 #include <cassert>
-#include <unordered_map>
 typedef unsigned long long ull;
 typedef long long ll;
 typedef double ld;
@@ -361,34 +360,29 @@ ll collision_time(const int& k, const int& l) {
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
-	std::unordered_map<ull, int> MK, ML;
-	std::vector<ull> H;
+	std::vector<std::pair<ull, int>> VK, VL;
 	Pos3D q;
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
 		int t = intersection(p0, p0 + v, P[k][i], P[k][j], NM[k], q);
-		if (t < 0) continue;
-		ull h = hash(q);
-		MK[h] = t;
-		H.push_back(h);
+		if (t >= 0) VK.push_back({ hash(q), t });
 	}
 	int szl = P[l].size();
 	for (int i = 0, j; i < szl; i++) {
 		j = (i + 1) % szl;
 		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
-		if (t < 0) continue;
-		ull h = hash(q);
-		ML[h] = t;
-		H.push_back(h);
+		if (t >= 0) VL.push_back({ hash(q), t });
 	}
-	std::sort(H.begin(), H.end());
-	H.erase(unique(H.begin(), H.end()), H.end());
+	std::sort(VK.begin(), VK.end());
+	std::sort(VL.begin(), VL.end());
 	ll ans = INF;
-	for (const ull& h : H) {
-		if (MK.count(h) && ML.count(h)) {
-			ll tk = MK[h], pk = period[k];
-			ll tl = ML[h], pl = period[l];
+	int ptk = 0, ptl = 0;
+	while (ptk < VK.size() && ptl < VL.size()) {
+		if (VK[ptk].first == VL[ptl].first) {
+			ull h = VK[ptk].first;
+			ll tk = VK[ptk].second, pk = period[k];
+			ll tl = VL[ptl].second, pl = period[l];
 			ExtGcd ret = ext_gcd(pk, pl);
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {
@@ -399,7 +393,10 @@ ll collision_time(const int& k, const int& l) {
 				ll t_col = tk + n * pk;
 				ans = std::min(ans, t_col);
 			}
+			ptk++; ptl++;
 		}
+		else if (VK[ptk].first < VL[ptl].first) ptk++;
+		else ptl++;
 	}
 	return ans >= INF ? -1 : ans;
 }

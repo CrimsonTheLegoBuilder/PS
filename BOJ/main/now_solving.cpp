@@ -98,9 +98,9 @@ bool intersect(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const
 bool get_intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Pos& t, const int& F = STRONG) {
 	if (!ccw(p1, p2, q1, q2)) return 0;
 	if (p1.x == p2.x) t.x = p1.x;
-	else t.x = p2.x;
+	else t.x = q1.x;
 	if (p1.y == p2.y) t.y = p1.y;
-	else t.y = p2.y;
+	else t.y = q1.y;
 	if (F == STRONG) return on_seg_strong(p1, p2, t) && on_seg_strong(q1, q2, t);
 	return on_seg_strong(q1, q2, t);
 }
@@ -138,7 +138,7 @@ bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1
 		j = (i + 1) % 4;
 		if (!ccw(p, d, B[i]) && !ccw(p, d, B[j])) {
 			f1 = B[i], f2 = B[j];
-			if (dot(p, d, f1, f2) > 0) std::swap(f1, f2);
+			if (dot(p, d, f1, f2) < 0) { std::swap(f1, f2); break; }
 		}
 	}
 	return 1;

@@ -62,6 +62,7 @@ struct Pos {
 	ll xy() const { return (ll)x * y; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	int Man() const { return std::abs(x) + std::abs(y); }
+	int Che() const { return std::max(std::abs(x), std::abs(y)); }
 	ld mag() const { return hypot(x, y); }
 	ld rad() const { return atan2(y, x); }
 	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
@@ -187,6 +188,61 @@ bool move(const Segs& B, const Seg& fr, Pos& p, Pos& u, Pos& d, const Pos& s) {
 	if (blk) u *= -1, d *= -1;
 	return fin;
 }
+int check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& q) {
+	int up = ccw(p, p + d, p + u);
+	int tq1 = ccw(p, p + d, b.s);
+	int tq2 = ccw(p, p + d, b.e);
+	int f = tq1 * tq2;
+	if (f > 0) return -1;
+	Pos x1, x2;
+	get_intersection(p, p + d, b.s, b.s + u, x1);
+	get_intersection(p, p + d, b.e, b.e + u, x2);
+	if (dot(p, p + d, x1, x2) < 0) std::swap(x1, x2);
+	ll fc1 = dot(p - d, p, x1);
+	ll fc2 = dot(p - d, p, x2);
+	if (f < 0 || (f == 0 && (tq1 == up || tq2 == up))) {//block
+		if (fc2 <= 0) return -1;
+		q = x1;
+		return 1;
+	}
+	q = Pos(fc1, fc2);
+	return 0;
+}
+bool move(const Segs& B, Pos& p, Pos& u, Pos& d, const Pos& s) {
+	static Polygon V, W;
+	V.clear(); W.clear();
+	Pos q;
+	for (const Seg& b : B) {
+		int chk = check(p, u, d, b, q);
+		if (chk == -1) continue;
+		else if (chk == 0) V.push_back(q);
+		else W.push_back(q);
+	}
+	int t = 0;
+	bool f = 0;
+	std::sort(V.begin(), V.end());
+	for (const Pos& v : V) {
+		if (v.y <= 0) continue;
+		if (!f) { t = v.y; f = 1; continue; }
+		if (t < v.x) break;
+		t = std::max(t, v.y);
+	}
+	std::cout << "t:: " << t << "\n";
+	Pos e = p + d * t;
+	bool blk = 0;
+	for (const Pos& w : W) {
+		if (on_seg_strong(p, e, w)) { e = w; blk = 1; }
+	}
+	f = 0;
+	if (on_seg_strong(p, e, s)) { f = 1; e = s; }
+	int l = (p - e).Che();
+	e.t = p.t + l;
+	p = e;
+	u *= -1;
+	std::swap(u, d);
+	if (blk) u *= -1, d *= -1;
+	return f;
+}
 struct Pos3D {
 	ll x, y, z, t;
 	Pos3D(ll x_ = 0, ll y_ = 0, ll z_ = 0, ll t_ = 0) : x(x_), y(y_), z(z_), t(t_) {}
@@ -286,11 +342,15 @@ void get_path(const int& k) {
 	assert(B.size());
 	Pos cur = s;
 	pos_push_back(r0.p, n, k, cur);
+	//while (1) {
+	//	Seg fr = get_floor(B, cur, u, d);
+	//	Pos prev = cur;
+	//	bool fin = move(B, fr, cur, u, d, s);
+	//	if (fin) break;
+	//	pos_push_back(r0.p, n, k, cur);
+	//}
 	while (1) {
-		Seg fr = get_floor(B, cur, u, d);
-		Pos prev = cur;
-		bool fin = move(B, fr, cur, u, d, s);
-		if (fin) break;
+		if (move(B, cur, u, d, s)) break;
 		pos_push_back(r0.p, n, k, cur);
 	}
 	P0[k] = r0.p;

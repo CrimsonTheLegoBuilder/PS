@@ -1,4 +1,4 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -31,6 +31,7 @@ ExtGcd ext_gcd(ll a, ll b) {
 }
 ll ans;
 int N, K;
+char dir[5];
 struct Pos {
 	int x, y, t;
 	Pos(int x_ = 0, int y_ = 0, int t_ = 0) : x(x_), y(y_), t(t_) {}
@@ -47,9 +48,6 @@ struct Pos {
 	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
 	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
 	Pos operator - () const { return { -x, -y }; }
-	Pos operator ~ () const { return { -y, x }; }
-	Pos operator ! () const { return { y, x }; }
-	ll xy() const { return (ll)x * y; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
 	int Che() const { return std::max(std::abs(x), std::abs(y)); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
@@ -194,13 +192,10 @@ struct Robot {
 	void init() {
 		std::cin >> p; p = p * 2 + _1;
 		for (Pos3D* q : { &n, &v }) {
-			std::string s; std::cin >> s;
-			if (s == "x+") *q = Pos3D(1);
-			else if (s == "x-") *q = Pos3D(-1);
-			else if (s == "y+") *q = Pos3D(0, 1);
-			else if (s == "y-") *q = Pos3D(0, -1);
-			else if (s == "z+") *q = Pos3D(0, 0, 1);
-			else if (s == "z-") *q = Pos3D(0, 0, -1);
+			std::cin >> dir;
+			if (dir[0] == 'x') *q = Pos3D(dir[1] == '+' ? 1 : -1);
+            else if (dir[0] == 'y') *q = Pos3D(0, dir[1] == '+' ? 1 : -1);
+            else *q = Pos3D(0, 0, dir[1] == '+' ? 1 : -1);
 		}
 		p += n;
 		return;
@@ -306,7 +301,7 @@ ll collision_time(const int& k, const int& l) {
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
-	std::vector<std::pair<ull, int>> VK, VL;
+	static std::vector<std::pair<ull, int>> VK, VL; VK.clear(); VL.clear();
 	Pos3D q;
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {

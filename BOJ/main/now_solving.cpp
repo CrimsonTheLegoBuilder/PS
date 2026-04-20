@@ -125,18 +125,18 @@ Polygon box(const Seg& s) {
 	return { Pos(x1, y1), Pos(x2, y1), Pos(x2, y2), Pos(x1, y2) };
 }
 bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1, Pos& f2) {
-	int up = ccw(p, d, u);
-	int c1 = ccw(p, d, b.s);
-	int c2 = ccw(p, d, b.e);
+	int up = ccw(p, p + d, u);
+	int c1 = ccw(p, p + d, b.s);
+	int c2 = ccw(p, p + d, b.e);
 	if (c1 && c2) return 0;
 	if (up == c1 || up == c2) return 0;
 	assert(!c1 || !c2);
 	Polygon B = box(b);
 	for (int i = 0, j; i < 4; i++) {
 		j = (i + 1) % 4;
-		if (!ccw(p, d, B[i]) && !ccw(p, d, B[j])) {
+		if (!ccw(p, p + d, B[i]) && !ccw(p, p + d, B[j])) {
 			f1 = B[i], f2 = B[j];
-			if (dot(p, d, f1, f2) < 0) { std::swap(f1, f2); break; }
+			if (dot(p, p + d, f1, f2) < 0) { std::swap(f1, f2); break; }
 		}
 	}
 	return 1;
@@ -161,12 +161,12 @@ Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
 	return Seg(p, e);
 }
 bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const Seg& b, Pos& e) {
-	int up = ccw(p, d, u);
-	int c1 = ccw(p, d, b.s);
-	int c2 = ccw(p, d, b.e);
+	int up = ccw(p, p + d, u);
+	int c1 = ccw(p, p + d, b.s);
+	int c2 = ccw(p, p + d, b.e);
 	if (c1 * c2 > 0) return 0;
 	if (up * c1 <= 0 && up * c2 <= 0) return 0;
-	if (dot(p, d, b.s) < 0 || dot(p, d, b.e) < 0) return 0;
+	if (dot(p, p + d, b.s) < 0 || dot(p, p + d, b.e) < 0) return 0;
 	Polygon B = box(b);
 	Pos x;
 	bool f = 0;

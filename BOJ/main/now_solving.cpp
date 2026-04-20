@@ -97,10 +97,8 @@ bool intersect(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const
 }
 bool get_intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Pos& t, const int& F = STRONG) {
 	if (!ccw(p1, p2, q1, q2)) return 0;
-	if (p1.x == p2.x) t.x = p1.x;
-	else t.x = q1.x;
-	if (p1.y == p2.y) t.y = p1.y;
-	else t.y = q1.y;
+	if (p1.x == p2.x) { t.x = p1.x; t.y = q1.y; }
+	else { t.x = q1.x; t.y = p1.y; }
 	if (F == STRONG) return on_seg_strong(p1, p2, t) && on_seg_strong(q1, q2, t);
 	return on_seg_strong(q1, q2, t);
 }

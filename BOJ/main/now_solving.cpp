@@ -347,7 +347,6 @@ ll collision_time(const int& k, const int& l) {
 		else ptl++;
 	}
 	return ans >= INF ? -1 : ans;
-	return ans >= INF ? -1 : ans;
 }
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);

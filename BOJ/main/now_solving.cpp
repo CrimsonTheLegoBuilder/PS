@@ -324,13 +324,14 @@ ll collision_time(const int& k, const int& l) {
 	std::sort(VL.begin(), VL.end());
 	ll ans = INF;
 	int ptk = 0, ptl = 0;
+    ll pk = period[k], pl = period[l];
+    ExtGcd ret = ext_gcd(pk, pl);
 	while (ptk < VK.size() && ptl < VL.size()) {
 		if (VK[ptk].first == VL[ptl].first) {
 			ull h = VK[ptk].first;
-			ll tk = VK[ptk].second, pk = period[k];
-			ll tl = VL[ptl].second, pl = period[l];
-			//if (tk > ans) { ptk++; ptl++; continue; }
-			ExtGcd ret = ext_gcd(pk, pl);
+			ll tk = VK[ptk].second;
+			ll tl = VL[ptl].second;
+			if (tk > ans) { ptk++; ptl++; continue; }
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {
 				ll mod = pl / ret.g;
@@ -345,6 +346,7 @@ ll collision_time(const int& k, const int& l) {
 		else if (VK[ptk].first < VL[ptl].first) ptk++;
 		else ptl++;
 	}
+	return ans >= INF ? -1 : ans;
 	return ans >= INF ? -1 : ans;
 }
 void solve() {

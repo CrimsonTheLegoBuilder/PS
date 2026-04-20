@@ -13,7 +13,6 @@ const ll INF = 1e17;
 const int LEN = 105;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !sign(x); }
-//ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
 ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
 
 #define LO x
@@ -42,9 +41,7 @@ ll ans;
 int N, K;
 struct Pos {
 	int x, y, t;
-	//ll x, y;
 	Pos(int x_ = 0, int y_ = 0, int t_ = 0) : x(x_), y(y_), t(t_) {}
-	//Pos(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
@@ -107,7 +104,6 @@ struct Seg {
 	Seg(Pos s_ = Pos(0, 0), Pos e_ = Pos(0, 0)) : s(s_), e(e_) {}
 	bool operator == (const Seg& S) const { return s == S.s && e == S.e; }
 	bool operator != (const Seg& S) const { return !(*this == S); }
-	//bool operator < (const Seg& S) const { return s == S.s ? e < S.e : s < S.s; }
 	bool operator < (const Seg& S) const {
 		if (dot(s, e, S.s) >= 0) return 1;
 		if (dot(S.s, S.e, s) >= 0) return 0;
@@ -125,15 +121,9 @@ Polygon box(const Seg& s) {
 	return { Pos(x1, y1), Pos(x2, y1), Pos(x2, y2), Pos(x1, y2) };
 }
 bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1, Pos& f2) {
-	//std::cout << "  P:: " << p << "\n";
-	//std::cout << "  U:: " << u << "\n";
-	//std::cout << "  D:: " << d << "\n";
 	int up = ccw(p, p + d, p + u);
 	int c1 = ccw(p, p + d, b.s);
 	int c2 = ccw(p, p + d, b.e);
-	//std::cout << "  UP:: " << up << "\n";
-	//std::cout << "  C1:: " << c1 << "\n";
-	//std::cout << "  C2:: " << c2 << "\n";
 	if (c1 && c2) return 0;
 	if (up == c1 || up == c2) return 0;
 	assert(!c1 || !c2);
@@ -150,21 +140,16 @@ bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1
 Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
 	Pos f1, f2;
 	Segs V;
-	//int sz = B.size();
-	//for (int i = 0; i < sz; i++) {
-	//std::cout << "GET_FLOOR::\n";
-	//std::cout << "  B.SZ:: " << B.size() << "\n";
 	for (const Seg& b : B) {
 		if (floor_check(p, u, d, b, f1, f2)) V.emplace_back(f1, f2);
 	}
 	std::sort(V.begin(), V.end());
-	//std::cout << "  V.SZ:: " << V.size() << "\n";
 	Pos e;
 	bool f = 0;
 	for (const Seg& v : V) {
 		if (dot(v.s, v.e, p) >= 0) continue;
 		if (!f) { e = v.e; f = 1; continue; }
-		if (dot(p, e, v.s) > 0) { e = v.e; break; }
+		if (dot(p, e, v.s) > 0) break;
 		if ((p - e).Euc() < (p - v.e).Euc()) e = v.e;
 	}
 	return Seg(p, e);
@@ -198,9 +183,6 @@ bool move(const Segs& B, const Seg& fr, Pos& p, Pos& u, Pos& d, const Pos& s) {
 	t.t = p.t;
 	p = t;
 	p.t += l;
-	//std::cout << "  fr:: s:: " << fr.s << " e:: " << fr.e << "\n";
-	//std::cout << "  t:: " << t << "\n";
-	//std::cout << "  p:: " << p << "\n";
 	u *= -1;
 	std::swap(u, d);
 	if (blk) u *= -1, d *= -1;
@@ -299,11 +281,6 @@ void get_path(const int& k) {
 	Pos s, u, d;
 	const Robot& r0 = R[k];
 	r0.get_start_pos(s, u, d);
-	//std::cout << "DEBUG:: GET_PATH\n";
-	//std::cout << " s:: " << s << "\n";
-	//std::cout << " u:: " << u << "\n";
-	//std::cout << " d:: " << d << "\n";
-	//std::cout << "DEBUG:: GET_PATH\n";
 	Pos3D n = R[k].n / R[k].v;
 	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
@@ -312,10 +289,8 @@ void get_path(const int& k) {
 	pos_push_back(r0.p, n, k, cur);
 	while (1) {
 		Seg fr = get_floor(B, cur, u, d);
-		//std::cout << "  FR:: s:: " << fr.s << " e:: " << fr.e << "\n";
 		Pos prev = cur;
 		bool fin = move(B, fr, cur, u, d, s);
-		//std::cout << "  GET_PATH:: PREV:: " << prev << " | CUR:: " << cur << "\n";
 		if (fin) break;
 		pos_push_back(r0.p, n, k, cur);
 	}
@@ -327,20 +302,14 @@ void get_path(const int& k) {
 }
 ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	v = NM[i] / NM[j];
-	//std::cout << "v.norm:: " << v.Euc() << "\n";
 	if (v.Euc() == 0) {
 		Pos3D q = P0[i] + NM[i];
 		ll fc = dot(q, P0[i], P0[j]);
-		//std::cout << "FC:: " << fc << "\n";
 		if (fc) return 0;
 		int sz = P[i].size();
 		for (int k = 0, l; k < sz; k++) {
 			l = (k + 1) % sz;
-			//std::cout << "  P[i][" << k << "]:: " << P[i][k] << "\n";
-			//std::cout << "  P[i][" << l << "]:: " << P[i][l] << "\n";
-			//std::cout << "  R[j].p:: " << R[j].p << "\n";
 			if (on_seg_strong(P[i][k], P[i][l], R[j].p)) {
-				//std::cout << "FUCK??::\n";
 				if (NM[i] == NM[j]) return 0;
 				ll dst = dist(P[i][k], R[j].p);
 				ll t = P[i][k].t + dst;
@@ -387,9 +356,9 @@ int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D&
 	return t >> 1;
 }
 ll collision_time(const int& k, const int& l) {
+	if (R[k].p == R[l].p) return 0;
 	Pos3D p0, v;
 	ll f1 = get_intersection_line(k, l, p0, v);
-	//std::cout << "F1:: " << f1 << "\n";
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
 	std::unordered_map<ull, int> MK, ML;
@@ -442,26 +411,7 @@ void solve() {
 	std::cin >> N >> K; ans = -1;
 	for (int i = 0; i < N; i++) C[i].init();
 	for (int k = 0; k < K; k++) R[k].init();
-	
-	//std::cout << "DEBUG::\n";
-	//std::cout << "DEBUG::\n  CUBE::\n";
-	for (int i = 0; i < N; i++) std::cout << C[i].a << " " << C[i].b << "\n";
-	//std::cout << "DEBUG::\n  ROBOT::\n";
-	for (int k = 0; k < K; k++) std::cout << R[k].p << " " << R[k].n << " " << R[k].v << "\n";
-	//std::cout << "DEBUG::\n";
-	
-	//std::cout << "DEBUG::\n  PATH START::\n";
 	for (int k = 0; k < K; k++) get_path(k);
-	//std::cout << "DEBUG::\n  PATH END::\n";
-
-	std::cout << "DEBUG::\n  PATH PRINT::\n";
-	for (int k = 0; k < K; k++) {
-		std::cout << " PATH[" << k << "]::\n";
-		for (const Pos3D& p : P[k]) std::cout << "  " << p << " t:: " << p.t << "\n";
-	}
-	std::cout << "  PATH PRINT::\nDEBUG::\n";
-	return;
-
 	for (int k = 0; k < K; k++) {
 		for (int l = k + 1; l < K; l++) {
 			ll t = collision_time(k, l);
@@ -470,7 +420,6 @@ void solve() {
 			}
 		}
 	}
-	std::cout << "ans:: " << ans << "\n";
 	if (ans < 0) std::cout << "ok\n";
 	else std::cout << ans << "\n";
 	return;

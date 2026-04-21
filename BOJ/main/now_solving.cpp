@@ -163,13 +163,6 @@ typedef std::vector<Pos3D> Polyhedron;
 Polyhedron P[LEN];
 Pos3D P0[LEN], NM[LEN];
 ll period[LEN];
-ull hash(const Pos3D& q) {
-	ull h = 0;
-	h |= ull(q.x & 0x1FFFFF);
-	h |= ull(q.y & 0x1FFFFF) << 21;
-	h |= ull(q.z & 0x1FFFFF) << 42;
-	return h;
-}
 Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) / (d3 - d2); }
 Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
@@ -300,19 +293,20 @@ ll collision_time(const int& k, const int& l) {
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
-	static std::vector<std::pair<ull, int>> VK, VL; VK.clear(); VL.clear();
+	auto h = [&](const Pos3D& p) -> ll { return std::abs(v * p); };
+	static Polygon VK, VL; VK.clear(); VL.clear();
 	Pos3D q;
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
 		int t = intersection(p0, p0 + v, P[k][i], P[k][j], NM[k], q);
-		if (t >= 0) VK.push_back({ hash(q), t });
+		if (t >= 0) VK.push_back(Pos(h(q), t));
 	}
 	int szl = P[l].size();
 	for (int i = 0, j; i < szl; i++) {
 		j = (i + 1) % szl;
 		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
-		if (t >= 0) VL.push_back({ hash(q), t });
+		if (t >= 0) VL.push_back(Pos(h(q), t));
 	}
 	std::sort(VK.begin(), VK.end());
 	std::sort(VL.begin(), VL.end());
@@ -321,10 +315,10 @@ ll collision_time(const int& k, const int& l) {
     ll pk = period[k], pl = period[l];
     ExtGcd ret = ext_gcd(pk, pl);
 	while (ptk < VK.size() && ptl < VL.size()) {
-		if (VK[ptk].first == VL[ptl].first) {
-			ull h = VK[ptk].first;
-			ll tk = VK[ptk].second;
-			ll tl = VL[ptl].second;
+		if (VK[ptk].x == VL[ptl].x) {
+			ull h = VK[ptk].x;
+			ll tk = VK[ptk].y;
+			ll tl = VL[ptl].y;
 			if (tk > ans) { ptk++; ptl++; continue; }
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {
@@ -337,7 +331,7 @@ ll collision_time(const int& k, const int& l) {
 			}
 			ptk++; ptl++;
 		}
-		else if (VK[ptk].first < VL[ptl].first) ptk++;
+		else if (VK[ptk].x < VL[ptl].x) ptk++;
 		else ptl++;
 	}
 	return ans >= INF ? -1 : ans;

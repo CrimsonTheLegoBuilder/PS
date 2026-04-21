@@ -293,20 +293,19 @@ ll collision_time(const int& k, const int& l) {
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
-	auto h = [&](const Pos3D& p) -> ll { return std::abs(v * p); };
 	static Polygon VK, VL; VK.clear(); VL.clear();
 	Pos3D q;
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
 		int t = intersection(p0, p0 + v, P[k][i], P[k][j], NM[k], q);
-		if (t >= 0) VK.push_back(Pos(h(q), t));
+		if (t >= 0) VK.push_back(Pos(v * q, t));
 	}
 	int szl = P[l].size();
 	for (int i = 0, j; i < szl; i++) {
 		j = (i + 1) % szl;
 		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
-		if (t >= 0) VL.push_back(Pos(h(q), t));
+		if (t >= 0) VL.push_back(Pos(v * q, t));
 	}
 	std::sort(VK.begin(), VK.end());
 	std::sort(VL.begin(), VL.end());
@@ -316,9 +315,8 @@ ll collision_time(const int& k, const int& l) {
     ExtGcd ret = ext_gcd(pk, pl);
 	while (ptk < VK.size() && ptl < VL.size()) {
 		if (VK[ptk].x == VL[ptl].x) {
-			ull h = VK[ptk].x;
-			ll tk = VK[ptk].y;
-			ll tl = VL[ptl].y;
+			int h = VK[ptk].x;
+			ll tk = VK[ptk].y, tl = VL[ptl].y;
 			if (tk > ans) { ptk++; ptl++; continue; }
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {
@@ -345,14 +343,10 @@ void solve() {
 	for (int i = 0; i < N; i++) C[i].init();
 	for (int k = 0; k < K; k++) R[k].init();
 	for (int k = 0; k < K; k++) get_path(k);
-	for (int k = 0; k < K; k++) {
-		for (int l = k + 1; l < K; l++) {
-			ll t = collision_time(k, l);
-			if (t >= 0) {
+	for (int k = 0; k < K; k++)
+		for (int l = k + 1; l < K; l++)
+			if (ll t = collision_time(k, l); t >= 0)
 				if (ans == -1 || t < ans) ans = t;
-			}
-		}
-	}
 	if (ans < 0) std::cout << "ok\n";
 	else std::cout << ans << "\n";
 	return;

@@ -5,7 +5,6 @@
 #include <cstring>
 #include <vector>
 #include <cassert>
-#include <unordered_map>
 typedef unsigned long long ull;
 typedef long long ll;
 typedef double ld;
@@ -13,13 +12,6 @@ const ll INF = 1e17;
 const int LEN = 105;
 inline int sign(const ll& x) { return x < 0 ? -1 : !!x; }
 inline bool zero(const ll& x) { return !sign(x); }
-ll gcd(ll a, ll b) { while (b) { ll tmp = a % b; a = b; b = tmp; } return a; }
-
-#define LO x
-#define HI y
-
-#define LINE 1
-#define CIRCLE 2
 
 #define STRONG 0
 #define WEAK 1
@@ -39,33 +31,25 @@ ExtGcd ext_gcd(ll a, ll b) {
 }
 ll ans;
 int N, K;
+char dir[5];
 struct Pos {
 	int x, y, t;
 	Pos(int x_ = 0, int y_ = 0, int t_ = 0) : x(x_), y(y_), t(t_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
-	bool operator != (const Pos& p) const { return x != p.x || y != p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
-	bool operator <= (const Pos& p) const { return x == p.x ? y <= p.y : x <= p.x; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
 	Pos operator - (const Pos& p) const { return { x - p.x, y - p.y }; }
 	Pos operator * (const int& n) const { return { x * n, y * n }; }
 	Pos operator / (const int& n) const { return { x / n, y / n }; }
 	ll operator * (const Pos& p) const { return (ll)x * p.x + (ll)y * p.y; }
 	ll operator / (const Pos& p) const { return (ll)x * p.y - (ll)y * p.x; }
-	Pos operator ^ (const Pos& p) const { return { x * p.x, y * p.y }; }
 	Pos& operator += (const Pos& p) { x += p.x; y += p.y; return *this; }
 	Pos& operator -= (const Pos& p) { x -= p.x; y -= p.y; return *this; }
 	Pos& operator *= (const int& n) { x *= n; y *= n; return *this; }
 	Pos& operator /= (const int& n) { x /= n; y /= n; return *this; }
 	Pos operator - () const { return { -x, -y }; }
-	Pos operator ~ () const { return { -y, x }; }
-	Pos operator ! () const { return { y, x }; }
-	ll xy() const { return (ll)x * y; }
 	ll Euc() const { return (ll)x * x + (ll)y * y; }
-	int Man() const { return std::abs(x) + std::abs(y); }
-	ld mag() const { return hypot(x, y); }
-	ld rad() const { return atan2(y, x); }
-	friend ld rad(const Pos& p1, const Pos& p2) { return atan2l(p1 / p2, p1 * p2); }
+	int Che() const { return std::max(std::abs(x), std::abs(y)); }
 	friend std::istream& operator >> (std::istream& is, Pos& p) { is >> p.x >> p.y; return is; }
 	friend std::ostream& operator << (std::ostream& os, const Pos& p) { os << p.x << " " << p.y; return os; }
 }; const Pos O = Pos(0, 0);
@@ -76,22 +60,8 @@ ll dot(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d
 ll dot(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3) { return sign(cross(d1, d2, d3)); }
 int ccw(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return sign(cross(d1, d2, d3, d4)); }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3) { return (d2 - d1) * (d3 - d1) / (d2 - d1).mag(); }
-ld projection(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return (d2 - d1) * (d4 - d3) / (d2 - d1).mag(); }
 bool on_seg_strong(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) >= 0; }
 bool on_seg_weak(const Pos& d1, const Pos& d2, const Pos& d3) { return !ccw(d1, d2, d3) && dot(d1, d3, d2) > 0; }
-int collinear(const Pos& d1, const Pos& d2, const Pos& d3, const Pos& d4) { return !ccw(d1, d2, d3) && !ccw(d1, d2, d4); }
-bool between(const Pos& d0, const Pos& d1, const Pos& q) { return sign(dot(d0, d1, q)) < 0 && sign(dot(d1, d0, q)) < 0; }
-bool intersect(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, const int& f = STRONG) {
-	bool f1 = ccw(p1, p2, q1) * ccw(p2, p1, q2) > 0;
-	bool f2 = ccw(q1, q2, p1) * ccw(q2, q1, p2) > 0;
-	if (f == WEAK) return f1 && f2;
-	bool f3 = on_seg_strong(p1, p2, q1) ||
-		on_seg_strong(p1, p2, q2) ||
-		on_seg_strong(q1, q2, p1) ||
-		on_seg_strong(q1, q2, p2);
-	return (f1 && f2) || f3;
-}
 bool get_intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2, Pos& t, const int& F = STRONG) {
 	if (!ccw(p1, p2, q1, q2)) return 0;
 	if (p1.x == p2.x) { t.x = p1.x; t.y = q1.y; }
@@ -102,8 +72,6 @@ bool get_intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2
 struct Seg {
 	Pos s, e;
 	Seg(Pos s_ = Pos(0, 0), Pos e_ = Pos(0, 0)) : s(s_), e(e_) {}
-	bool operator == (const Seg& S) const { return s == S.s && e == S.e; }
-	bool operator != (const Seg& S) const { return !(*this == S); }
 	bool operator < (const Seg& S) const {
 		if (dot(s, e, S.s) >= 0) return 1;
 		if (dot(S.s, S.e, s) >= 0) return 0;
@@ -113,80 +81,59 @@ struct Seg {
 	friend std::ostream& operator << (std::ostream& os, const Seg& S) { os << S.s << " " << S.e; return os; }
 };
 typedef std::vector<Seg> Segs;
-Polygon box(const Seg& s) {
-	int x1 = std::min(s.s.x, s.e.x);
-	int x2 = std::max(s.s.x, s.e.x);
-	int y1 = std::min(s.s.y, s.e.y);
-	int y2 = std::max(s.s.y, s.e.y);
-	return { Pos(x1, y1), Pos(x2, y1), Pos(x2, y2), Pos(x1, y2) };
-}
-bool floor_check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& f1, Pos& f2) {
+int check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& q) {
 	int up = ccw(p, p + d, p + u);
-	int c1 = ccw(p, p + d, b.s);
-	int c2 = ccw(p, p + d, b.e);
-	if (c1 && c2) return 0;
-	if (up == c1 || up == c2) return 0;
-	assert(!c1 || !c2);
-	Polygon B = box(b);
-	for (int i = 0, j; i < 4; i++) {
-		j = (i + 1) % 4;
-		if (!ccw(p, p + d, B[i]) && !ccw(p, p + d, B[j])) {
-			f1 = B[i], f2 = B[j];
-			if (dot(p, p + d, f1, f2) < 0) { std::swap(f1, f2); break; }
-		}
+	int tq1 = ccw(p, p + d, b.s);
+	int tq2 = ccw(p, p + d, b.e);
+	int f = tq1 * tq2;
+	if (f > 0) return -1;
+	Pos x1, x2;
+	get_intersection(p, p + d, b.s, b.s + u, x1);
+	get_intersection(p, p + d, b.e, b.e + u, x2);
+	if (dot(p, p + d, x1, x2) < 0) std::swap(x1, x2);
+	ll fc1 = dot(p - d, p, x1);
+	ll fc2 = dot(p - d, p, x2);
+	if (f < 0 || (f == 0 && (tq1 == up || tq2 == up))) {//block
+		if (fc2 <= 0) return -1;
+		q = x1;
+		return 1;
 	}
-	return 1;
+	q = Pos(fc1, fc2);
+	return 0;
 }
-Seg get_floor(const Segs& B, const Pos& p, const Pos& u, const Pos& d) {
-	Pos f1, f2;
-	Segs V;
+bool move(const Segs& B, Pos& p, Pos& u, Pos& d, const Pos& s) {
+	static Polygon V, W;
+	V.clear(); W.clear();
+	Pos q;
 	for (const Seg& b : B) {
-		if (floor_check(p, u, d, b, f1, f2)) V.emplace_back(f1, f2);
+		int chk = check(p, u, d, b, q);
+		if (chk == -1) continue;
+		else if (chk == 0) V.push_back(q);
+		else W.push_back(q);
 	}
+	int t = 0;
+	bool f = 0;
 	std::sort(V.begin(), V.end());
-	Pos e;
-	bool f = 0;
-	for (const Seg& v : V) {
-		if (dot(v.s, v.e, p) >= 0) continue;
-		if (!f) { e = v.e; f = 1; continue; }
-		if (dot(p, e, v.s) > 0) break;
-		if ((p - e).Euc() < (p - v.e).Euc()) e = v.e;
+	for (const Pos& v : V) {
+		if (v.y <= 0) continue;
+		if (!f) { t = v.y; f = 1; continue; }
+		if (t < v.x) break;
+		t = std::max(t, v.y);
 	}
-	return Seg(p, e);
-}
-bool block_check(const Pos& p, const Pos& u, const Pos& d, const Pos& t, const Seg& b, Pos& e) {
-	int up = ccw(p, p + d, p + u);
-	int c1 = ccw(p, p + d, b.s);
-	int c2 = ccw(p, p + d, b.e);
-	if (c1 * c2 > 0) return 0;
-	if (up * c1 <= 0 && up * c2 <= 0) return 0;
-	if (dot(p, p + d, b.s) < 0 || dot(p, p + d, b.e) < 0) return 0;
-	Polygon B = box(b);
-	Pos x;
-	bool f = 0;
-	for (int i = 0, j; i < 4; i++) {
-		j = (i + 1) % 4;
-		if (get_intersection(p, t, B[i], B[j], x)) {
-			if (!f || dot(p, t, x) < dot(p, t, e)) {
-				f = 1; e = x;
-			}
-		}
+	Pos e = p + d * t;
+	bool blk = 0;
+	for (const Pos& w : W) {
+		if (on_seg_strong(p, e, w)) { e = w; blk = 1; }
 	}
-	return f;
-}
-bool move(const Segs& B, const Seg& fr, Pos& p, Pos& u, Pos& d, const Pos& s) {
-	bool blk = 0, fin = 0;
-	Pos t = fr.e, e;
-	for (const Seg& b : B) if (block_check(p, u, d, t, b, e)) { blk = 1; t = e; }
-	if (on_seg_weak(fr.s, t, s)) { t = s; fin = 1; }
-	int l = std::max(std::abs(p.x - t.x), std::abs(p.y - t.y));
-	t.t = p.t;
-	p = t;
-	p.t += l;
+	f = 0;
+	if (on_seg_weak(p, e, s)) { f = 1; e = s; }
+	int l = (p - e).Che();
+	e.t = p.t + l;
+	p = e;
 	u *= -1;
 	std::swap(u, d);
 	if (blk) u *= -1, d *= -1;
-	return fin;
+	return f;
 }
 struct Pos3D {
 	ll x, y, z, t;
@@ -213,17 +160,9 @@ struct Pos3D {
 	friend std::ostream& operator << (std::ostream& os, const Pos3D& p) { os << p.x << " " << p.y << " " << p.z; return os; }
 }; const Pos3D _1 = Pos3D(1, 1, 1);
 typedef std::vector<Pos3D> Polyhedron;
-Polyhedron P[LEN];//path
-Pos3D P0[LEN];//p0
-Pos3D NM[LEN];//norm
+Polyhedron P[LEN];
+Pos3D P0[LEN], NM[LEN];
 ll period[LEN];
-ull hash(const Pos3D& q) {
-	ull h = 0;
-	h |= ull(q.x & 0x1FFFFF);
-	h |= ull(q.y & 0x1FFFFF) << 21;
-	h |= ull(q.z & 0x1FFFFF) << 42;
-	return h;
-}
 Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) / (d3 - d2); }
 Pos3D cross(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3, const Pos3D& d4) { return (d2 - d1) / (d4 - d3); }
 ll dot(const Pos3D& d1, const Pos3D& d2, const Pos3D& d3) { return (d2 - d1) * (d3 - d2); }
@@ -241,30 +180,26 @@ struct Cube {
 	friend std::ostream& operator << (std::ostream& os, const Cube& c) { os << c.a << " " << c.b; return os; }
 } C[LEN];
 struct Robot {
-	Pos3D p, n, v;
+	Pos3D p, n, v, tq;
 	Robot(Pos3D p_ = Pos3D(), Pos3D n_ = Pos3D(), Pos3D v_ = Pos3D()) : p(p_), n(n_), v(v_) {}
 	void init() {
 		std::cin >> p; p = p * 2 + _1;
 		for (Pos3D* q : { &n, &v }) {
-			std::string s; std::cin >> s;
-			if (s == "x+") *q = Pos3D(1);
-			else if (s == "x-") *q = Pos3D(-1);
-			else if (s == "y+") *q = Pos3D(0, 1);
-			else if (s == "y-") *q = Pos3D(0, -1);
-			else if (s == "z+") *q = Pos3D(0, 0, 1);
-			else if (s == "z-") *q = Pos3D(0, 0, -1);
+			std::cin >> dir;
+			if (dir[0] == 'x') *q = Pos3D(dir[1] == '+' ? 1 : -1);
+            else if (dir[0] == 'y') *q = Pos3D(0, dir[1] == '+' ? 1 : -1);
+            else *q = Pos3D(0, 0, dir[1] == '+' ? 1 : -1);
 		}
 		p += n;
+		tq = n / v;
 		return;
 	}
 	void get_start_pos(Pos& s, Pos& u, Pos& d) const {
-		Pos3D tq = n / v;
 		if (tq.x) { s = Pos(p.y, p.z); u = Pos(n.y, n.z); d = Pos(v.y, v.z); }
 		if (tq.y) { s = Pos(p.z, p.x); u = Pos(n.z, n.x); d = Pos(v.z, v.x); }
 		if (tq.z) { s = Pos(p.x, p.y); u = Pos(n.x, n.y); d = Pos(v.x, v.y); }
 	}
 	bool slice(const Cube& c, Seg& b) const {
-		Pos3D tq = n / v;
 		if (tq.x && c.a.x <= p.x && p.x <= c.b.x) { b.s = Pos(c.a.y, c.a.z), b.e = Pos(c.b.y, c.b.z); return 1; }
 		if (tq.y && c.a.y <= p.y && p.y <= c.b.y) { b.s = Pos(c.a.z, c.a.x), b.e = Pos(c.b.z, c.b.x); return 1; }
 		if (tq.z && c.a.z <= p.z && p.z <= c.b.z) { b.s = Pos(c.a.x, c.a.y), b.e = Pos(c.b.x, c.b.y); return 1; }
@@ -288,10 +223,7 @@ void get_path(const int& k) {
 	Pos cur = s;
 	pos_push_back(r0.p, n, k, cur);
 	while (1) {
-		Seg fr = get_floor(B, cur, u, d);
-		Pos prev = cur;
-		bool fin = move(B, fr, cur, u, d, s);
-		if (fin) break;
+		if (move(B, cur, u, d, s)) break;
 		pos_push_back(r0.p, n, k, cur);
 	}
 	P0[k] = r0.p;
@@ -302,7 +234,7 @@ void get_path(const int& k) {
 }
 ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	v = NM[i] / NM[j];
-	if (v.Euc() == 0) {
+	if (!(v.x || v.y || v.z)) {
 		Pos3D q = P0[i] + NM[i];
 		ll fc = dot(q, P0[i], P0[j]);
 		if (fc) return 0;
@@ -361,35 +293,31 @@ ll collision_time(const int& k, const int& l) {
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
-	std::unordered_map<ull, int> MK, ML;
-	std::vector<ull> H;
+	static Polygon VK, VL; VK.clear(); VL.clear();
 	Pos3D q;
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
 		int t = intersection(p0, p0 + v, P[k][i], P[k][j], NM[k], q);
-		if (t < 0) continue;
-		ull h = hash(q);
-		MK[h] = t;
-		H.push_back(h);
+		if (t >= 0) VK.push_back(Pos(v * q, t));
 	}
 	int szl = P[l].size();
 	for (int i = 0, j; i < szl; i++) {
 		j = (i + 1) % szl;
 		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
-		if (t < 0) continue;
-		ull h = hash(q);
-		ML[h] = t;
-		H.push_back(h);
+		if (t >= 0) VL.push_back(Pos(v * q, t));
 	}
-	std::sort(H.begin(), H.end());
-	H.erase(unique(H.begin(), H.end()), H.end());
+	std::sort(VK.begin(), VK.end());
+	std::sort(VL.begin(), VL.end());
 	ll ans = INF;
-	for (const ull& h : H) {
-		if (MK.count(h) && ML.count(h)) {
-			ll tk = MK[h], pk = period[k];
-			ll tl = ML[h], pl = period[l];
-			ExtGcd ret = ext_gcd(pk, pl);
+	int ptk = 0, ptl = 0;
+    ll pk = period[k], pl = period[l];
+    ExtGcd ret = ext_gcd(pk, pl);
+	while (ptk < VK.size() && ptl < VL.size()) {
+		if (VK[ptk].x == VL[ptl].x) {
+			int h = VK[ptk].x;
+			ll tk = VK[ptk].y, tl = VL[ptl].y;
+			if (tk > ans) { ptk++; ptl++; continue; }
 			ll diff = tl - tk;
 			if (diff % ret.g == 0) {
 				ll mod = pl / ret.g;
@@ -399,7 +327,10 @@ ll collision_time(const int& k, const int& l) {
 				ll t_col = tk + n * pk;
 				ans = std::min(ans, t_col);
 			}
+			ptk++; ptl++;
 		}
+		else if (VK[ptk].x < VL[ptl].x) ptk++;
+		else ptl++;
 	}
 	return ans >= INF ? -1 : ans;
 }
@@ -412,14 +343,10 @@ void solve() {
 	for (int i = 0; i < N; i++) C[i].init();
 	for (int k = 0; k < K; k++) R[k].init();
 	for (int k = 0; k < K; k++) get_path(k);
-	for (int k = 0; k < K; k++) {
-		for (int l = k + 1; l < K; l++) {
-			ll t = collision_time(k, l);
-			if (t >= 0) {
+	for (int k = 0; k < K; k++)
+		for (int l = k + 1; l < K; l++)
+			if (ll t = collision_time(k, l); t >= 0)
 				if (ans == -1 || t < ans) ans = t;
-			}
-		}
-	}
 	if (ans < 0) std::cout << "ok\n";
 	else std::cout << ans << "\n";
 	return;

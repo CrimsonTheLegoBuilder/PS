@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <cassert>
+#include <chrono>
 typedef unsigned long long ull;
 typedef long long ll;
 typedef double ld;
@@ -342,13 +343,38 @@ void solve() {
 	std::cin >> N >> K; ans = -1;
 	for (int i = 0; i < N; i++) C[i].init();
 	for (int k = 0; k < K; k++) R[k].init();
+
+	// --- 1. 궤적 생성 (get_path) 시간 측정 시작 ---
+	auto start_path = std::chrono::high_resolution_clock::now();
+
 	for (int k = 0; k < K; k++) get_path(k);
+
+	auto end_path = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> path_ms = end_path - start_path;
+
+	// ---------------------------------------------
+	// --- 2. 충돌 판정 (collision_time) 시간 측정 시작 ---
+	auto start_collision = std::chrono::high_resolution_clock::now();
+
 	for (int k = 0; k < K; k++)
 		for (int l = k + 1; l < K; l++)
 			if (ll t = collision_time(k, l); t >= 0)
 				if (ans == -1 || t < ans) ans = t;
+
+	auto end_collision = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> collision_ms = end_collision - start_collision;
+	// --------------------------------------------------
+	// 정답 출력 (기존 로직 유지, std::cout 사용)
+
 	if (ans < 0) std::cout << "ok\n";
 	else std::cout << ans << "\n";
+
+	// 로그 출력 (정답 채점에 영향을 주지 않도록 std::cerr 사용)
+	std::cerr << "\n========================================\n";
+	std::cerr << "[실행 시간 측정 결과]\n";
+	std::cerr << "- 궤적 생성 (get_path) 총 소요 시간: " << path_ms.count() << " ms\n";
+	std::cerr << "- 충돌 판정 (collision) 총 소요 시간: " << collision_ms.count() << " ms\n";
+	std::cerr << "========================================\n";
 	return;
 }
 int main() { solve(); return 0; }//boj23202

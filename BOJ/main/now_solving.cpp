@@ -73,12 +73,7 @@ bool get_intersection(const Pos& p1, const Pos& p2, const Pos& q1, const Pos& q2
 struct Seg {
 	Pos s, e;
 	Seg(Pos s_ = Pos(0, 0), Pos e_ = Pos(0, 0)) : s(s_), e(e_) {}
-	bool operator < (const Seg& S) const {
-		if (dot(s, e, S.s) >= 0) return 1;
-		if (dot(S.s, S.e, s) >= 0) return 0;
-		if (s == S.s) return (s - e).Euc() < (s - S.e).Euc();
-		return (s - e).Euc() >= (S.s - e).Euc();
-	}
+	bool operator < (const Seg& q) const { return s == q.s ? e < q.e : s < q.s; }
 	friend std::ostream& operator << (std::ostream& os, const Seg& S) { os << S.s << " " << S.e; return os; }
 };
 typedef std::vector<Seg> Segs;
@@ -207,10 +202,16 @@ struct Robot {
 		return 0;
 	}
 } R[LEN];
-void pos_push_back(const Pos3D& r, const Pos3D& n, const int& k, const Pos& p) {
-	if (n.x) P[k].push_back(Pos3D(r.x, p.x, p.y, p.t));
-	if (n.y) P[k].push_back(Pos3D(p.y, r.y, p.x, p.t));
-	if (n.z) P[k].push_back(Pos3D(p.x, p.y, r.z, p.t));
+Pos3D convert_3D(const Pos3D& r, const Pos3D& n, const Pos& p) {
+	if (n.x) return Pos3D(r.x, p.x, p.y, p.t);
+	if (n.y) return Pos3D(p.y, r.y, p.x, p.t);
+	return Pos3D(p.x, p.y, r.z, p.t);
+}
+void pos_push_back(const Pos3D& r, const Pos3D& n, const Pos& p, const int& k) {
+	//if (n.x) P[k].push_back(Pos3D(r.x, p.x, p.y, p.t));
+	//if (n.y) P[k].push_back(Pos3D(p.y, r.y, p.x, p.t));
+	//if (n.z) P[k].push_back(Pos3D(p.x, p.y, r.z, p.t));
+	P[k].push_back(convert_3D(r, n, p));
 	return;
 }
 void get_path(const int& k) {
@@ -222,10 +223,20 @@ void get_path(const int& k) {
 	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
 	assert(B.size());
 	Pos cur = s;
-	pos_push_back(r0.p, n, k, cur);
+	Polygon L = { cur };
+	//pos_push_back(r0.p, n, cur, k);
 	while (1) {
 		if (move(B, cur, u, d, s)) break;
-		pos_push_back(r0.p, n, k, cur);
+		L.push_back(cur);
+		//pos_push_back(r0.p, n, cur, k);
+	}
+	int sz = L.size();
+	for (int i = 0, j; i < sz; i++) {
+		j = (i + 1) % sz;
+		Pos3D p = convert_3D(r0.p, n, L[i]);
+		Pos3D q = convert_3D(r0.p, n, L[j]);
+		P[k].push_back(p);
+		bool v = L[i].x == L[j].x;
 	}
 	P0[k] = r0.p;
 	NM[k] = r0.n / r0.v;

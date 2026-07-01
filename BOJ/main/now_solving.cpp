@@ -222,6 +222,7 @@ void get_path(const int& k) {
 	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
 	assert(B.size());
+	Segs SV, SH;
 	Pos cur = s;
 	Polygon L = { cur };
 	//pos_push_back(r0.p, n, cur, k);

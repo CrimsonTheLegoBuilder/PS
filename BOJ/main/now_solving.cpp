@@ -233,7 +233,7 @@ void get_path(const int& k) {
 	}
 	int sz = L.size();
 	for (int i = 0, j; i < sz; i++) {
-		j = (i + 1) % sz;
+		j = (i + 1) % sz; 
 		Pos3D p = convert_3D(r0.p, n, L[i]);
 		Pos3D q = convert_3D(r0.p, n, L[j]);
 		P[k].push_back(p);
@@ -320,6 +320,12 @@ ll collision_time(const int& k, const int& l) {
 		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
 		if (t >= 0) VL.push_back(Pos(v * q, t));
 	}
+	/*
+	애초에 궤적을 2D로 관리한 다음에, 3차원에서 구한 교선을 각 궤적평면 용으로 사영한다.
+	2D 교점들을 순서대로 구한다. 어차피 정렬은 되어있음.
+	다시 교점들을 3차원으로 옮긴 다음에 비교하면 각 N^2 루프 안에 다시 무거운 정렬을 돌릴 필요가 없어진다.
+	궤적 간 비교의 시간복잡도를 1/10까지 줄일 수 있다.
+	*/
 	std::sort(VK.begin(), VK.end());
 	std::sort(VL.begin(), VL.end());
 	ll ans = INF;

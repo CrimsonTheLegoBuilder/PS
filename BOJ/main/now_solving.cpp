@@ -233,11 +233,14 @@ void get_path(const int& k) {
 	}
 	int sz = L.size();
 	for (int i = 0, j; i < sz; i++) {
-		j = (i + 1) % sz; 
+		j = (i + 1) % sz;
 		Pos3D p = convert_3D(r0.p, n, L[i]);
 		Pos3D q = convert_3D(r0.p, n, L[j]);
 		P[k].push_back(p);
 		bool v = L[i].x == L[j].x;
+		Seg s = Seg(L[i], L[j]);
+		if (v) SV.push_back(s);
+		else SH.push_back(s);
 	}
 	P0[k] = r0.p;
 	NM[k] = r0.n / r0.v;

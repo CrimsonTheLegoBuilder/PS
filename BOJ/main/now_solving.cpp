@@ -77,6 +77,7 @@ struct Seg {
 	friend std::ostream& operator << (std::ostream& os, const Seg& S) { os << S.s << " " << S.e; return os; }
 };
 typedef std::vector<Seg> Segs;
+Segs SV[LEN], SH[LEN];
 int check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& q) {
 	int up = ccw(p, p + d, p + u);
 	int tq1 = ccw(p, p + d, b.s);
@@ -222,7 +223,6 @@ void get_path(const int& k) {
 	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
 	assert(B.size());
-	Segs SV, SH;
 	Pos cur = s;
 	Polygon L = { cur };
 	//pos_push_back(r0.p, n, cur, k);
@@ -239,9 +239,11 @@ void get_path(const int& k) {
 		P[k].push_back(p);
 		bool v = L[i].x == L[j].x;
 		Seg s = Seg(L[i], L[j]);
-		if (v) SV.push_back(s);
-		else SH.push_back(s);
+		if (v) SV[k].push_back(s);
+		else SH[k].push_back(s);
 	}
+	std::sort(SV[k].begin(), SV[k].end());
+	std::sort(SH[k].begin(), SH[k].end());
 	P0[k] = r0.p;
 	NM[k] = r0.n / r0.v;
 	assert(!(cur.t % 2));
@@ -289,6 +291,11 @@ ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 	else if (v.z) p0 = Pos3D(x.x, x.y, 0);
 	return 1;
 }
+Seg projection(const Pos3D& p, const Pos3D& q, const Pos3D& n) {
+	if (n.x) return Seg(Pos(p.y, p.z), Pos(q.y, q.z));
+	if (n.y) return Seg(Pos(p.z, p.x), Pos(q.z, q.x));
+	return Seg(Pos(p.x, p.y), Pos(q.x, q.y));
+}
 int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D& q2, const Pos3D& n, Pos3D& q) {
 	Pos a1, a2, b1, b2, x;
 	if (n.x) { a1 = Pos(p1.y, p1.z); a2 = Pos(p2.y, p2.z); b1 = Pos(q1.y, q1.z); b2 = Pos(q2.y, q2.z); }
@@ -303,6 +310,17 @@ int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D&
 	assert(!(t % 2));
 	return t >> 1;
 }
+int intersection(const Seg& ln, const Seg& sg, const Pos3D& d, const Pos3D& n, Pos3D& q) {
+	Pos x;
+	if (!get_intersection(ln.s, ln.e, sg.s, sg.e, x, WEAK)) return -1;
+	int t = std::max(std::abs(sg.s.x - x.x), std::abs(sg.e.y - x.y));
+	if (n.x) q = Pos3D(d.x, x.x, x.y);
+	if (n.y) q = Pos3D(x.y, d.y, x.x);
+	if (n.z) q = Pos3D(x.x, x.y, d.z);
+	t += d.t;
+	assert(!(t % 2));
+	return t >> 1;
+}
 ll collision_time(const int& k, const int& l) {
 	if (R[k].p == R[l].p) return 0;
 	Pos3D p0, v;
@@ -310,7 +328,9 @@ ll collision_time(const int& k, const int& l) {
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
 	static Polygon VK, VL; VK.clear(); VL.clear();
-	Pos3D q;
+	Pos3D d, q;
+
+	/*
 	int szk = P[k].size();
 	for (int i = 0, j; i < szk; i++) {
 		j = (i + 1) % szk;
@@ -323,15 +343,30 @@ ll collision_time(const int& k, const int& l) {
 		int t = intersection(p0, p0 + v, P[l][i], P[l][j], NM[l], q);
 		if (t >= 0) VL.push_back(Pos(v * q, t));
 	}
-	/*
-	애초에 궤적을 2D로 관리한 다음에, 3차원에서 구한 교선을 각 궤적평면 용으로 사영한다.
-	2D 교점들을 순서대로 구한다. 어차피 정렬은 되어있음.
-	다시 교점들을 3차원으로 옮긴 다음에 비교하면 각 N^2 루프 안에 다시 무거운 정렬을 돌릴 필요가 없어진다.
-	동일 직선에 대한 2D 사영 점군의 정렬이기 때문에 양쪽에서 구한 교점은 2D에서 정렬하지만 3D로 옮겼을 때 방향성이 같다.
-	전처리를 해두면 궤적 간 비교의 시간복잡도를 1/10까지 줄일 수 있다.
-	*/
 	std::sort(VK.begin(), VK.end());
 	std::sort(VL.begin(), VL.end());
+	*/
+
+	Seg ln, sg;
+	ln = projection(p0, p0 + v, NM[k]);
+	const Segs& SK = ln.s.x - ln.e.x ? SH[k] : SV[k];
+	d = P[k][0];
+	int szk = SK.size();
+	for (int i = 0; i < szk; i++) {
+		sg = SK[i];
+		int t = intersection(ln, sg, d, NM[k], q);
+		if (t >= 0) VK.push_back(Pos(v * q, t));
+	}
+	ln = projection(p0, p0 + v, NM[l]);
+	const Segs& SL = ln.s.x - ln.e.x ? SH[l] : SV[l];
+	d = P[l][0];
+	int szl = SL.size();
+	for (int i = 0; i < szl; i++) {
+		sg = SL[i];
+		int t = intersection(ln, sg, d, NM[l], q);
+		if (t >= 0) VL.push_back(Pos(v * q, t));
+	}
+
 	ll ans = INF;
 	int ptk = 0, ptl = 0;
     ll pk = period[k], pl = period[l];

@@ -237,7 +237,7 @@ void get_path(const int& k) {
 	Segs BB[4];
 	for (int i = 0; i < N; i++) {
 		if (r0.slice(C[i], b)) B.push_back(b);
-		for (int j = 0; j < 4; j++) if (r0.slice(SC[get_dir(NM[k], j)], b)) B.push_back(b);
+		for (int j = 0; j < 4; j++) if (r0.slice(SC[get_dir(NM[k], j)][i], b)) B.push_back(b);
 	}
 	//assert(B.size());
 	Pos cur = s;

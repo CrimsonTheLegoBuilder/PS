@@ -220,9 +220,9 @@ int get_dir(const Pos3D& nm, const int& dir) {
 }
 int get_dir(const Pos& d) { return d.x > 0 ? 0 : d.x < 0 ? 1 : d.y > 0 ? 2 : 3; }
 void get_path(const int& k) {
-	//P[k].reserve(40000);
-	//SV[k].reserve(20000);
-	//SH[k].reserve(20000);
+	P[k].reserve(10000);
+	SV[k].reserve(5000);
+	SH[k].reserve(5000);
 	const Robot& r0 = R[k];
 	P0[k] = r0.p;
 	NM[k] = r0.n / r0.v;
@@ -239,7 +239,6 @@ void get_path(const int& k) {
 	Polygon L = { cur };
 	while (1) {
 		int dir = get_dir(d);
-		const Segs& tmp = BB[dir];
 		if (move(BB[dir], cur, u, d, s)) break;
 		L.push_back(cur);
 	}

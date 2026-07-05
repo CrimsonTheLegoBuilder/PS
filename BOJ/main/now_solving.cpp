@@ -34,8 +34,9 @@ ll ans;
 int N, K;
 char dir[5];
 struct Pos {
-	int x, y, t;
-	Pos(int x_ = 0, int y_ = 0, int t_ = 0) : x(x_), y(y_), t(t_) {}
+	int x, y;
+	ll t;
+	Pos(int x_ = 0, int y_ = 0, ll t_ = 0) : x(x_), y(y_), t(t_) {}
 	bool operator == (const Pos& p) const { return x == p.x && y == p.y; }
 	bool operator < (const Pos& p) const { return x == p.x ? y < p.y : x < p.x; }
 	Pos operator + (const Pos& p) const { return { x + p.x, y + p.y }; }
@@ -208,6 +209,13 @@ Pos3D convert_3D(const Pos3D& r, const Pos3D& n, const Pos& p) {
 	if (n.y) return Pos3D(p.y, r.y, p.x, p.t);
 	return Pos3D(p.x, p.y, r.z, p.t);
 }
+/*
+Pos3D convert_3D(const Pos3D& n, const Pos& p) {
+	if (n.x) return Pos3D(n.x, p.x, p.y, p.t);
+	if (n.y) return Pos3D(p.y, n.y, p.x, p.t);
+	return Pos3D(p.x, p.y, n.z, p.t);
+}
+*/
 void pos_push_back(const Pos3D& r, const Pos3D& n, const Pos& p, const int& k) {
 	//if (n.x) P[k].push_back(Pos3D(r.x, p.x, p.y, p.t));
 	//if (n.y) P[k].push_back(Pos3D(p.y, r.y, p.x, p.t));
@@ -216,10 +224,15 @@ void pos_push_back(const Pos3D& r, const Pos3D& n, const Pos& p, const int& k) {
 	return;
 }
 void get_path(const int& k) {
-	Pos s, u, d;
 	const Robot& r0 = R[k];
+	P0[k] = r0.p;
+	NM[k] = r0.n / r0.v;
+	//if (NM[k].x) NM[k].x = P0[k].x;
+	//else if (NM[k].y) NM[k].y = P0[k].y;
+	//else if (NM[k].z) NM[k].z = P0[k].z;
+	Pos3D n = NM[k];
+	Pos s, u, d;
 	r0.get_start_pos(s, u, d);
-	Pos3D n = R[k].n / R[k].v;
 	Segs B; Seg b;
 	for (int i = 0; i < N; i++) if (r0.slice(C[i], b)) B.push_back(b);
 	assert(B.size());
@@ -235,22 +248,14 @@ void get_path(const int& k) {
 	for (int i = 0, j; i < sz; i++) {
 		j = (i + 1) % sz;
 		Pos3D p = convert_3D(r0.p, n, L[i]);
-		Pos3D q = convert_3D(r0.p, n, L[j]);
 		P[k].push_back(p);
-		bool v = L[i].x == L[j].x;
 		Seg s = Seg(L[i], L[j]);
+		bool v = L[i].x == L[j].x;
 		if (v) SV[k].push_back(s);
 		else SH[k].push_back(s);
 	}
 	std::sort(SV[k].begin(), SV[k].end());
 	std::sort(SH[k].begin(), SH[k].end());
-	P0[k] = r0.p;
-	NM[k] = r0.n / r0.v;
-
-	if (NM[k].x) NM[k].x = P0[k].x;
-	else if (NM[k].y) NM[k].y = P0[k].y;
-	else if (NM[k].z) NM[k].z = P0[k].z;
-
 	assert(!(cur.t % 2));
 	period[k] = cur.t >> 1;
 	return;
@@ -315,18 +320,18 @@ int intersection(const Pos3D& p1, const Pos3D& p2, const Pos3D& q1, const Pos3D&
 	assert(!(t % 2));
 	return t >> 1;
 }
-//int intersection(const Seg& ln, const Seg& sg, const Pos3D& p0, const Pos3D& n, Pos3D& q) {
-int intersection(const Seg& ln, const Seg& sg, const Pos3D& n, Pos3D& q) {
+int intersection(const Seg& ln, const Seg& sg, const Pos3D& p0, const Pos3D& n, Pos3D& q) {
+//int intersection(const Seg& ln, const Seg& sg, const Pos3D& n, Pos3D& q) {
 	Pos x;
 	if (!get_intersection(ln.s, ln.e, sg.s, sg.e, x, WEAK)) return -1;
 	int t = std::max(std::abs(sg.s.x - x.x), std::abs(sg.s.y - x.y));
-	//if (n.x) q = Pos3D(p0.x, x.x, x.y);
-	//if (n.y) q = Pos3D(x.y, p0.y, x.x);
-	//if (n.z) q = Pos3D(x.x, x.y, p0.z);
+	if (n.x) q = Pos3D(p0.x, x.x, x.y);
+	if (n.y) q = Pos3D(x.y, p0.y, x.x);
+	if (n.z) q = Pos3D(x.x, x.y, p0.z);
 
-	if (n.x) q = Pos3D(n.x, x.x, x.y);
-	if (n.y) q = Pos3D(x.y, n.y, x.x);
-	if (n.z) q = Pos3D(x.x, x.y, n.z);
+	//if (n.x) q = Pos3D(n.x, x.x, x.y);
+	//if (n.y) q = Pos3D(x.y, n.y, x.x);
+	//if (n.z) q = Pos3D(x.x, x.y, n.z);
 
 	t += sg.s.t;
 	assert(!(t % 2));
@@ -357,15 +362,15 @@ ll collision_time(const int& k, const int& l) {
 	std::sort(VK.begin(), VK.end());
 	std::sort(VL.begin(), VL.end());
 	*/
-
+	
 	Seg ln, sg;
 	ln = projection(p0, p0 + v, NM[k]);
 	const Segs& SK = ln.s.x - ln.e.x ? SV[k] : SH[k];
 	int szk = SK.size();
 	for (int i = 0; i < szk; i++) {
 		sg = SK[i];
-		//int t = intersection(ln, sg, d, NM[k], q);
-		int t = intersection(ln, sg, NM[k], q);
+		int t = intersection(ln, sg, p0, NM[k], q);
+		//int t = intersection(ln, sg, NM[k], q);
 		if (t >= 0) VK.push_back(Pos(v * q, t));
 	}
 	ln = projection(p0, p0 + v, NM[l]);
@@ -373,9 +378,9 @@ ll collision_time(const int& k, const int& l) {
 	int szl = SL.size();
 	for (int i = 0; i < szl; i++) {
 		sg = SL[i];
-		//int t = intersection(ln, sg, d, NM[l], q);
-		int t = intersection(ln, sg, NM[l], q);
-		if (t >= 0) VL.push_back(Pos(v * q, t));
+		int t = intersection(ln, sg, p0, NM[l], q);
+		//int t = intersection(ln, sg, NM[l], q);
+		if (t >= 0) VL.push_back(Pos(v * q, t));	
 	}
 
 	ll ans = INF;
@@ -446,3 +451,24 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23202
+
+/*
+void solve() {
+	std::cin.tie(0)->sync_with_stdio(0);
+	std::cout.tie(0);
+	std::cout << std::fixed;
+	std::cout.precision(6);
+	std::cin >> N >> K; ans = -1;
+	for (int i = 0; i < N; i++) C[i].init();
+	for (int k = 0; k < K; k++) R[k].init();
+	for (int k = 0; k < K; k++) get_path(k);
+	for (int k = 0; k < K; k++)
+		for (int l = k + 1; l < K; l++)
+			if (ll t = collision_time(k, l); t >= 0)
+				if (ans == -1 || t < ans) ans = t;
+	if (ans < 0) std::cout << "ok\n";
+	else std::cout << ans << "\n";
+	return;
+}
+int main() { solve(); return 0; }//boj23202
+*/

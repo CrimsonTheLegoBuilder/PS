@@ -197,25 +197,26 @@ struct Robot {
 	}
 	void get_start_pos(Pos& s, Pos& u, Pos& d) const {
 		if (tq.x) { s = Pos(p.y, p.z); u = Pos(n.y, n.z); d = Pos(v.y, v.z); }
-		if (tq.y) { s = Pos(p.z, p.x); u = Pos(n.z, n.x); d = Pos(v.z, v.x); }
-		if (tq.z) { s = Pos(p.x, p.y); u = Pos(n.x, n.y); d = Pos(v.x, v.y); }
+		else if (tq.y) { s = Pos(p.z, p.x); u = Pos(n.z, n.x); d = Pos(v.z, v.x); }
+		else if (tq.z) { s = Pos(p.x, p.y); u = Pos(n.x, n.y); d = Pos(v.x, v.y); }
+		return;
 	}
 	bool slice(const Cube& c, Seg& b) const {
 		if (tq.x && c.a.x <= p.x && p.x <= c.b.x) { b.s = Pos(c.a.y, c.a.z), b.e = Pos(c.b.y, c.b.z); return 1; }
-		if (tq.y && c.a.y <= p.y && p.y <= c.b.y) { b.s = Pos(c.a.z, c.a.x), b.e = Pos(c.b.z, c.b.x); return 1; }
-		if (tq.z && c.a.z <= p.z && p.z <= c.b.z) { b.s = Pos(c.a.x, c.a.y), b.e = Pos(c.b.x, c.b.y); return 1; }
-		return 0;
+		else if (tq.y && c.a.y <= p.y && p.y <= c.b.y) { b.s = Pos(c.a.z, c.a.x), b.e = Pos(c.b.z, c.b.x); return 1; }
+		else if (tq.z && c.a.z <= p.z && p.z <= c.b.z) { b.s = Pos(c.a.x, c.a.y), b.e = Pos(c.b.x, c.b.y); return 1; }
+		else return 0;
 	}
 } R[LEN];
 Pos3D convert_3D(const Pos3D& r, const Pos3D& n, const Pos& p) {
 	if (n.x) return Pos3D(r.x, p.x, p.y, p.t);
-	if (n.y) return Pos3D(p.y, r.y, p.x, p.t);
-	return Pos3D(p.x, p.y, r.z, p.t);
+	else if (n.y) return Pos3D(p.y, r.y, p.x, p.t);
+	else return Pos3D(p.x, p.y, r.z, p.t);
 }
 int get_dir(const Pos3D& nm, const int& dir) {
 	if (nm.x) return dir == 0 ? 2 : dir == 1 ? 3 : dir == 2 ? 4 : 5;
-	if (nm.y) return dir == 0 ? 4 : dir == 1 ? 5 : dir == 2 ? 0 : 1;
-	return dir;
+	else if (nm.y) return dir == 0 ? 4 : dir == 1 ? 5 : dir == 2 ? 0 : 1;
+	else return dir;
 }
 int get_dir(const Pos& d) { return d.x > 0 ? 0 : d.x < 0 ? 1 : d.y > 0 ? 2 : 3; }
 void get_path(const int& k) {
@@ -298,8 +299,8 @@ ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 }
 Seg projection(const Pos3D& p, const Pos3D& q, const Pos3D& n) {
 	if (n.x) return Seg(Pos(p.y, p.z), Pos(q.y, q.z));
-	if (n.y) return Seg(Pos(p.z, p.x), Pos(q.z, q.x));
-	return Seg(Pos(p.x, p.y), Pos(q.x, q.y));
+	else if (n.y) return Seg(Pos(p.z, p.x), Pos(q.z, q.x));
+	else return Seg(Pos(p.x, p.y), Pos(q.x, q.y));
 }
 int intersection(const Seg& ln, const Seg& sg, const Pos3D& p0, const Pos3D& n, Pos3D& q) {
 	Pos x;

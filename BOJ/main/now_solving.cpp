@@ -109,7 +109,6 @@ bool move(const Segs& B, Pos& p, Pos& u, Pos& d, const Pos& s) {
 	}
 	int t = 0;
 	bool f = 0;
-	std::sort(V.begin(), V.end());
 	for (const Pos& v : V) {
 		if (v.y <= 0) continue;
 		if (!f) { t = v.y; f = 1; continue; }
@@ -221,31 +220,26 @@ int get_dir(const Pos3D& nm, const int& dir) {
 }
 int get_dir(const Pos& d) { return d.x > 0 ? 0 : d.x < 0 ? 1 : d.y > 0 ? 2 : 3; }
 void get_path(const int& k) {
-	P[k].reserve(10000);
-	SV[k].reserve(5000);
-	SH[k].reserve(5000);
+	//P[k].reserve(40000);
+	//SV[k].reserve(20000);
+	//SH[k].reserve(20000);
 	const Robot& r0 = R[k];
 	P0[k] = r0.p;
 	NM[k] = r0.n / r0.v;
-	//if (NM[k].x) NM[k].x = P0[k].x;
-	//else if (NM[k].y) NM[k].y = P0[k].y;
-	//else if (NM[k].z) NM[k].z = P0[k].z;
 	Pos3D n = NM[k];
 	Pos s, u, d;
 	r0.get_start_pos(s, u, d);
-	Segs B; Seg b;
+	Seg b;
 	Segs BB[4];
-	for (int i = 0; i < N; i++) {
-		if (r0.slice(C[i], b)) B.push_back(b);
-		for (int j = 0; j < 4; j++) if (r0.slice(SC[get_dir(NM[k], j)][i], b)) BB[j].push_back(b);
-	}
-	//assert(B.size());
+	for (int i = 0; i < N; i++)
+		for (int j = 0; j < 4; j++) 
+			if (r0.slice(SC[get_dir(NM[k], j)][i], b))
+				BB[j].push_back(b);
 	Pos cur = s;
 	Polygon L = { cur };
 	while (1) {
 		int dir = get_dir(d);
 		const Segs& tmp = BB[dir];
-		//if (move(B, cur, u, d, s)) break;
 		if (move(BB[dir], cur, u, d, s)) break;
 		L.push_back(cur);
 	}
@@ -261,7 +255,6 @@ void get_path(const int& k) {
 	}
 	std::sort(SV[k].begin(), SV[k].end());
 	std::sort(SH[k].begin(), SH[k].end());
-	//assert(!(cur.t % 2));
 	period[k] = cur.t >> 1;
 	return;
 }
@@ -278,7 +271,6 @@ ll get_intersection_line(const int& i, const int& j, Pos3D& p0, Pos3D& v) {
 				if (NM[i] == NM[j]) return 0;
 				ll dst = dist(P[i][k], R[j].p);
 				ll t = P[i][k].t + dst;
-				//assert(!(t % 2));
 				t >>= 1;
 				return -t;
 			}
@@ -319,7 +311,6 @@ int intersection(const Seg& ln, const Seg& sg, const Pos3D& p0, const Pos3D& n, 
 	if (n.y) q = Pos3D(x.y, p0.y, x.x);
 	if (n.z) q = Pos3D(x.x, x.y, p0.z);
 	t += sg.s.t;
-	//assert(!(t % 2));
 	return t >> 1;
 }
 ll collision_time(const int& k, const int& l) {
@@ -401,6 +392,7 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23202
+
 
 /*
 #include <chrono>

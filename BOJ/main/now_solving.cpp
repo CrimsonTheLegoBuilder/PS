@@ -98,8 +98,7 @@ int check(const Pos& p, const Pos& u, const Pos& d, const Seg& b, Pos& q) {
 	return 0;
 }
 bool move(const Segs& B, Pos& p, Pos& u, Pos& d, const Pos& s) {
-	static Polygon V, W;
-	V.clear(); W.clear();
+	Polygon V, W;
 	Pos q;
 	for (const Seg& b : B) {
 		int chk = check(p, u, d, b, q);
@@ -189,8 +188,8 @@ struct Robot {
 		for (Pos3D* q : { &n, &v }) {
 			std::cin >> dir;
 			if (dir[0] == 'x') *q = Pos3D(dir[1] == '+' ? 1 : -1);
-            else if (dir[0] == 'y') *q = Pos3D(0, dir[1] == '+' ? 1 : -1);
-            else *q = Pos3D(0, 0, dir[1] == '+' ? 1 : -1);
+			else if (dir[0] == 'y') *q = Pos3D(0, dir[1] == '+' ? 1 : -1);
+			else *q = Pos3D(0, 0, dir[1] == '+' ? 1 : -1);
 		}
 		p += n;
 		tq = n / v;
@@ -232,7 +231,7 @@ void get_path(const int& k) {
 	Seg b;
 	Segs BB[4];
 	for (int i = 0; i < N; i++)
-		for (int j = 0; j < 4; j++) 
+		for (int j = 0; j < 4; j++)
 			if (r0.slice(SC[get_dir(NM[k], j)][i], b))
 				BB[j].push_back(b);
 	Pos cur = s;
@@ -318,8 +317,7 @@ ll collision_time(const int& k, const int& l) {
 	ll f1 = get_intersection_line(k, l, p0, v);
 	if (!f1) return -1;
 	if (f1 < 0) return (-f1) >> 1;
-	static Polygon VK, VL;
-	VK.clear(); VL.clear();
+	Polygon VK, VL;
 	Pos3D q;
 	Seg ln, sg;
 	ln = projection(p0, p0 + v, NM[k]);
@@ -336,12 +334,12 @@ ll collision_time(const int& k, const int& l) {
 	for (int i = 0; i < szl; i++) {
 		sg = SL[i];
 		int t = intersection(ln, sg, p0, NM[l], q);
-		if (t >= 0) VL.push_back(Pos(v * q, t));	
+		if (t >= 0) VL.push_back(Pos(v * q, t));
 	}
 	ll ans = INF;
 	int ptk = 0, ptl = 0;
-    ll pk = period[k], pl = period[l];
-    ExtGcd ret = ext_gcd(pk, pl);
+	ll pk = period[k], pl = period[l];
+	ExtGcd ret = ext_gcd(pk, pl);
 	while (ptk < VK.size() && ptl < VL.size()) {
 		if (VK[ptk].x == VL[ptl].x) {
 			int h = VK[ptk].x;

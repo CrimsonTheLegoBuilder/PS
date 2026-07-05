@@ -372,6 +372,7 @@ void cube_init() {
 	std::sort(C, C + N, cmp_z_r); for (int i = 0; i < N; i++) SC[5][i] = C[i];
 	return;
 };
+/*
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -391,9 +392,9 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23202
+*/
 
 
-/*
 #include <chrono>
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -401,12 +402,13 @@ void solve() {
 	std::cout << std::fixed;
 	std::cout.precision(6);
 	std::cin >> N >> K; ans = -1;
-	for (int i = 0; i < N; i++) C[i].init();
-	for (int k = 0; k < K; k++) R[k].init();
 
 	// --- 1. 궤적 생성 (get_path) 시간 측정 시작 ---
 	auto start_path = std::chrono::high_resolution_clock::now();
 
+	for (int i = 0; i < N; i++) C[i].init();
+	for (int k = 0; k < K; k++) R[k].init();
+	cube_init();
 	for (int k = 0; k < K; k++) get_path(k);
 
 	auto end_path = std::chrono::high_resolution_clock::now();
@@ -438,4 +440,3 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23202
-*/

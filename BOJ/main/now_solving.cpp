@@ -226,7 +226,6 @@ void get_path(const int& k) {
 	const Robot& r0 = R[k];
 	P0[k] = r0.p;
 	NM[k] = r0.n / r0.v;
-	Pos3D n = NM[k];
 	Pos s, u, d;
 	r0.get_start_pos(s, u, d);
 	Seg b;
@@ -245,7 +244,7 @@ void get_path(const int& k) {
 	int sz = L.size();
 	for (int i = 0, j; i < sz; i++) {
 		j = (i + 1) % sz;
-		Pos3D p = convert_3D(r0.p, n, L[i]);
+		Pos3D p = convert_3D(r0.p, NM[k], L[i]);
 		P[k].push_back(p);
 		Seg s = Seg(L[i], L[j]);
 		bool v = L[i].x == L[j].x;
@@ -371,7 +370,6 @@ void cube_init() {
 	std::sort(C, C + N, cmp_z_r); for (int i = 0; i < N; i++) SC[5][i] = C[i];
 	return;
 };
-/*
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
 	std::cout.tie(0);
@@ -391,9 +389,8 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23202
-*/
 
-
+/*
 #include <chrono>
 void solve() {
 	std::cin.tie(0)->sync_with_stdio(0);
@@ -439,3 +436,4 @@ void solve() {
 	return;
 }
 int main() { solve(); return 0; }//boj23202
+*/
